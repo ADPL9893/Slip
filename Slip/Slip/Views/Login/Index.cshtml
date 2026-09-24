@@ -1,0 +1,944 @@
+@{
+    ViewBag.Title = "Login - ADPL";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       ADPL - Modern SaaS Login Portal (Self-Contained & Ultra-Reliable)
+       ========================================================================== */
+    @@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+
+    html, body.adpl-login-page-body, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: 100vh !important;
+        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+        box-sizing: border-box !important;
+    }
+
+    *, *::before, *::after {
+        box-sizing: border-box !important;
+    }
+
+    /* Modern Luxury Deep Midnight Gradient Background */
+    body.adpl-login-page-body, body {
+        background: radial-gradient(circle at 12% 18%, rgba(2, 132, 199, 0.35) 0%, transparent 42%),
+                    radial-gradient(circle at 88% 82%, rgba(99, 102, 241, 0.28) 0%, transparent 45%),
+                    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 60%),
+                    linear-gradient(135deg, #070e1b 0%, #0b192e 38%, #0f2b48 72%, #081628 100%) !important;
+        background-color: #0b192e !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 20px !important;
+        position: relative !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Ambient Floating Decorative Glow Orbs */
+    .ambient-glow-orb {
+        position: fixed !important;
+        border-radius: 50% !important;
+        filter: blur(95px) !important;
+        pointer-events: none !important;
+        z-index: 0 !important;
+        animation: orbFloat 14s ease-in-out infinite alternate !important;
+    }
+    .orb-left {
+        width: 440px !important;
+        height: 440px !important;
+        background: rgba(56, 189, 248, 0.28) !important;
+        top: -80px !important;
+        left: -80px !important;
+    }
+    .orb-right {
+        width: 500px !important;
+        height: 500px !important;
+        background: rgba(99, 102, 241, 0.24) !important;
+        bottom: -100px !important;
+        right: -100px !important;
+        animation-delay: -7s !important;
+    }
+
+    /* Fullscreen Background Floating Diamond Canvas */
+    .diamond-particles-canvas {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 1 !important;
+        pointer-events: none !important;
+    }
+
+    @@keyframes orbFloat {
+        0% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(45px, 35px) scale(1.08); }
+        100% { transform: translate(-35px, 45px) scale(0.94); }
+    }
+
+    @@keyframes cardEntrance {
+        from {
+            opacity: 0;
+            transform: translateY(28px) scale(0.97);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes floatLogo {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-7px); }
+    }
+
+    @@keyframes sparkleShineBright {
+        0%, 100% {
+            transform: scale(0.35) rotate(0deg);
+            opacity: 0.3;
+        }
+        50% {
+            transform: scale(1.25) rotate(90deg);
+            opacity: 1.0;
+            filter: drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+        }
+    }
+
+    @@keyframes sparkleShineCyan {
+        0%, 100% {
+            transform: scale(0.35) rotate(0deg);
+            opacity: 0.3;
+        }
+        50% {
+            transform: scale(1.25) rotate(90deg);
+            opacity: 1.0;
+            filter: drop-shadow(0 0 10px #0284c7) drop-shadow(0 0 4px #38bdf8);
+        }
+    }
+
+    @@keyframes shakeError {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-7px); }
+        40%, 80% { transform: translateX(7px); }
+    }
+
+    /* Master Wrapper - High z-index to stay above background floating diamonds */
+    .adpl-login-container {
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        position: relative !important;
+        z-index: 10 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Master Two-Column Card Box */
+    .adpl-login-card {
+        width: 100% !important;
+        max-width: 880px !important;
+        min-height: 480px !important;
+        background: #ffffff !important;
+        border-radius: 28px !important;
+        box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.45),
+                    0 0 0 1px rgba(255, 255, 255, 0.18),
+                    0 8px 24px -4px rgba(2, 132, 199, 0.15) !important;
+        display: flex !important;
+        flex-direction: row !important;
+        overflow: hidden !important;
+        position: relative !important;
+        z-index: 10 !important;
+        animation: cardEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    }
+
+    /* Left Brand Logo Panel (Harmonious Richer Mid-Tone Sky-Blue Gradient matching page background with sharp Black logo contrast) */
+    .adpl-brand-panel {
+        width: 48% !important;
+        background: linear-gradient(145deg, #7dd3fc 0%, #38bdf8 45%, #0284c7 100%) !important;
+        background-color: #38bdf8 !important;
+        border-radius: 28px 30% 30% 28px !important;
+        box-shadow: 0 10px 30px rgba(2, 132, 199, 0.25) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 40px 32px !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+
+    /* High-Visibility Diamond Sparkle Stars in Brand Panel */
+    .brand-sparkle {
+        position: absolute !important;
+        pointer-events: none !important;
+        z-index: 2 !important;
+    }
+
+    /* Sparkle 1: Top-Right Deep Cyan/Blue */
+    .sparkle-1 {
+        top: 18% !important;
+        right: 16% !important;
+        width: 24px !important;
+        height: 24px !important;
+        color: #0369a1 !important;
+        animation: sparkleShineCyan 3.2s ease-in-out infinite !important;
+    }
+
+    /* Sparkle 2: Top-Left Solid Bright White */
+    .sparkle-2 {
+        top: 20% !important;
+        left: 15% !important;
+        width: 24px !important;
+        height: 24px !important;
+        color: #ffffff !important;
+        animation: sparkleShineBright 2.8s ease-in-out infinite 0.4s !important;
+    }
+
+    /* Sparkle 3: Bottom-Left Solid Bright White (Upper line) */
+    .sparkle-3 {
+        bottom: 25% !important;
+        left: 14% !important;
+        width: 22px !important;
+        height: 22px !important;
+        color: #ffffff !important;
+        animation: sparkleShineBright 3.4s ease-in-out infinite 1.2s !important;
+    }
+
+    /* Sparkle 4: Bottom-Left Deep Cyan/Blue */
+    .sparkle-4 {
+        bottom: 16% !important;
+        left: 22% !important;
+        width: 20px !important;
+        height: 20px !important;
+        color: #0369a1 !important;
+        animation: sparkleShineCyan 3.6s ease-in-out infinite 0.8s !important;
+    }
+
+    /* Sparkle 5: Bottom-Right Solid Bright White */
+    .sparkle-5 {
+        bottom: 20% !important;
+        right: 16% !important;
+        width: 22px !important;
+        height: 22px !important;
+        color: #ffffff !important;
+        animation: sparkleShineBright 3.0s ease-in-out infinite 1.6s !important;
+    }
+
+    .adpl-brand-logo-wrap {
+        text-align: center !important;
+        position: relative !important;
+        z-index: 3 !important;
+        animation: floatLogo 4.5s ease-in-out infinite !important;
+    }
+
+    .adpl-brand-logo-wrap img {
+        max-width: 100% !important;
+        width: 320px !important;
+        height: auto !important;
+        display: block !important;
+        margin: 0 auto !important;
+        filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.12)) !important;
+        transition: transform 0.3s ease !important;
+    }
+    .adpl-brand-logo-wrap img:hover {
+        transform: scale(1.04) !important;
+    }
+
+    /* Right Login Form Panel */
+    .adpl-form-panel {
+        width: 52% !important;
+        padding: 48px 44px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        background: #ffffff !important;
+        position: relative !important;
+    }
+
+    .adpl-header-group {
+        text-align: center !important;
+        margin-bottom: 26px !important;
+    }
+
+    .adpl-login-title {
+        font-size: 32px !important;
+        font-weight: 800 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.5px !important;
+        margin: 0 0 6px 0 !important;
+        line-height: 1.2 !important;
+    }
+
+    .adpl-login-subtitle {
+        font-size: 13.5px !important;
+        color: #64748b !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+    }
+
+    /* Custom Input Field Groups */
+    .adpl-input-group {
+        position: relative !important;
+        width: 100% !important;
+        margin-bottom: 18px !important;
+    }
+
+    .adpl-input-field {
+        width: 100% !important;
+        height: 48px !important;
+        padding: 0 46px 0 16px !important;
+        background-color: #f1f5f9 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        color: #0f172a !important;
+        outline: none !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+        transition: all 0.22s ease !important;
+    }
+
+    .adpl-input-field:focus {
+        background-color: #ffffff !important;
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.16) !important;
+    }
+
+    /* Vector SVG Icons */
+    .adpl-input-icon {
+        position: absolute !important;
+        right: 14px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        pointer-events: none !important;
+    }
+
+    .input-svg-icon {
+        width: 18px !important;
+        height: 18px !important;
+        stroke: #64748b !important;
+        transition: stroke 0.2s ease !important;
+    }
+
+    .adpl-input-field:focus ~ .adpl-input-icon .input-svg-icon {
+        stroke: #0284c7 !important;
+    }
+
+    /* Password Toggle Button */
+    .adpl-pwd-toggle-btn {
+        position: absolute !important;
+        right: 10px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        background: transparent !important;
+        border: none !important;
+        cursor: pointer !important;
+        padding: 6px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        outline: none !important;
+    }
+
+    .toggle-svg-icon {
+        width: 20px !important;
+        height: 20px !important;
+        stroke: #64748b !important;
+        transition: stroke 0.2s ease !important;
+    }
+
+    .adpl-pwd-toggle-btn:hover .toggle-svg-icon {
+        stroke: #0284c7 !important;
+    }
+
+    /* Error Alert Card */
+    .adpl-error-card {
+        background: #fef2f2 !important;
+        border: 1.5px solid #fecaca !important;
+        border-left: 4px solid #ef4444 !important;
+        border-radius: 9px !important;
+        padding: 10px 14px !important;
+        margin-bottom: 18px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        color: #991b1b !important;
+        animation: shakeError 0.4s ease-in-out both !important;
+    }
+
+    .alert-svg-icon {
+        width: 18px !important;
+        height: 18px !important;
+        stroke: #ef4444 !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* High-Impact Submit Button */
+    .adpl-btn-submit {
+        width: 100% !important;
+        height: 48px !important;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.2px !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 9px !important;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        margin-top: 4px !important;
+    }
+
+    .btn-svg-icon {
+        width: 18px !important;
+        height: 18px !important;
+        stroke: #ffffff !important;
+    }
+
+    .adpl-btn-submit:hover:not(:disabled) {
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 22px rgba(2, 132, 199, 0.45) !important;
+    }
+
+    .adpl-btn-submit:active:not(:disabled) {
+        transform: translateY(0) scale(0.99) !important;
+    }
+
+    .adpl-btn-submit:disabled {
+        background: #94a3b8 !important;
+        color: #e2e8f0 !important;
+        opacity: 0.7 !important;
+        cursor: not-allowed !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    .adpl-form-footer {
+        margin-top: 22px !important;
+        text-align: center !important;
+        font-size: 12px !important;
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+    }
+
+    .shield-svg-icon {
+        width: 14px !important;
+        height: 14px !important;
+        stroke: #0284c7 !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* ==========================================================================
+       Responsive Breakpoints for Mobile & Tablet
+       ========================================================================== */
+    @@media (max-width: 991px) {
+        .adpl-login-card {
+            max-width: 740px !important;
+            min-height: auto !important;
+        }
+        .adpl-brand-panel {
+            padding: 30px 24px !important;
+        }
+        .adpl-brand-logo-wrap img {
+            width: 260px !important;
+        }
+        .adpl-form-panel {
+            padding: 40px 32px !important;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        body.adpl-login-page-body, body {
+            padding: 15px !important;
+            align-items: center !important;
+        }
+        .adpl-login-card {
+            flex-direction: column !important;
+            max-width: 440px !important;
+            border-radius: 20px !important;
+        }
+        .adpl-brand-panel {
+            width: 100% !important;
+            height: 180px !important;
+            border-radius: 20px 20px 0 0 !important;
+            box-shadow: none !important;
+            padding: 24px 20px !important;
+        }
+        .adpl-brand-logo-wrap img {
+            width: 220px !important;
+        }
+        .adpl-form-panel {
+            width: 100% !important;
+            padding: 30px 22px 34px !important;
+        }
+        .adpl-login-title {
+            font-size: 26px !important;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        body.adpl-login-page-body, body {
+            padding: 10px !important;
+        }
+        .adpl-login-card {
+            border-radius: 16px !important;
+        }
+        .adpl-brand-panel {
+            height: 150px !important;
+            padding: 18px !important;
+        }
+        .adpl-brand-logo-wrap img {
+            width: 190px !important;
+        }
+        .adpl-form-panel {
+            padding: 24px 18px 28px !important;
+        }
+        .adpl-login-title {
+            font-size: 24px !important;
+        }
+        .adpl-input-field {
+            height: 44px !important;
+            font-size: 13.5px !important;
+        }
+        .adpl-btn-submit {
+            height: 44px !important;
+            font-size: 14px !important;
+        }
+    }
+</style>
+
+<!-- Ambient Glowing Background Orbs -->
+<div class="ambient-glow-orb orb-left"></div>
+<div class="ambient-glow-orb orb-right"></div>
+
+<!-- Fullscreen Floating Transparent Diamonds Canvas (Background Layer) -->
+<canvas id="diamondCanvas" class="diamond-particles-canvas"></canvas>
+
+<!-- Main Login Container (Z-Index: 10, Always Above Background Diamonds) -->
+<div ng-controller="Login" class="adpl-login-container">
+    <div class="adpl-login-card">
+        <!-- Left Brand Logo Panel in full #bae6fd with Diamond Sparkles -->
+        <div class="adpl-brand-panel">
+            <!-- Sparkle 1: Top-Right Cyan/Blue Star -->
+            <div class="brand-sparkle sparkle-1">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
+                </svg>
+            </div>
+            <!-- Sparkle 2: Top-Left Solid Bright White Star -->
+            <div class="brand-sparkle sparkle-2">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
+                </svg>
+            </div>
+            <!-- Sparkle 3: Bottom-Left Solid Bright White Star (Upper line) -->
+            <div class="brand-sparkle sparkle-3">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
+                </svg>
+            </div>
+            <!-- Sparkle 4: Bottom-Left Cyan/Blue Star -->
+            <div class="brand-sparkle sparkle-4">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
+                </svg>
+            </div>
+            <!-- Sparkle 5: Bottom-Right Solid Bright White Star -->
+            <div class="brand-sparkle sparkle-5">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
+                </svg>
+            </div>
+
+            <!-- Company Logo in Front -->
+            <div class="adpl-brand-logo-wrap">
+                <img src="@Url.Content("~/Content/images/LabTech.png")" alt="Anjali Labtech Limited" />
+            </div>
+        </div>
+
+        <!-- Right Login Form Panel -->
+        <div class="adpl-form-panel">
+            <div class="adpl-header-group">
+                <h1 class="adpl-login-title">Login</h1>
+                <p class="adpl-login-subtitle">Enter your credentials to continue</p>
+            </div>
+
+            <form ng-submit="LoginCheck()" novalidate>
+                <!-- Username Input -->
+                <div class="adpl-input-group">
+                    <input type="text" 
+                           ng-model="username" 
+                           name="Username" 
+                           id="username" 
+                           class="adpl-input-field" 
+                           placeholder="Username" 
+                           autocomplete="username" 
+                           autocapitalize="none" 
+                           ng-enter="LoginCheck()" 
+                           required />
+                    <span class="adpl-input-icon">
+                        <svg class="input-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </span>
+                </div>
+
+                <!-- Password Input -->
+                <div class="adpl-input-group">
+                    <input type="{{showPassword ? 'text' : 'password'}}" 
+                           ng-model="password" 
+                           name="Password" 
+                           id="password" 
+                           class="adpl-input-field" 
+                           placeholder="Password" 
+                           autocomplete="current-password" 
+                           ng-enter="LoginCheck()" 
+                           required />
+                    <button type="button" 
+                            class="adpl-pwd-toggle-btn" 
+                            ng-click="showPassword = !showPassword" 
+                            title="{{showPassword ? 'Hide password' : 'Show password'}}"
+                            tabindex="-1">
+                        <!-- Eye Open SVG when password visible -->
+                        <svg ng-if="showPassword" class="toggle-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                        <!-- Eye Slashed SVG when password hidden -->
+                        <svg ng-if="!showPassword" class="toggle-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                            <line x1="1" y1="1" x2="23" y2="23"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Animated Error Alert -->
+                <div class="adpl-error-card" ng-if="msg">
+                    <svg class="alert-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <span>{{msg}}</span>
+                </div>
+
+                <!-- Submit Action Button -->
+                <button type="button" 
+                        class="adpl-btn-submit" 
+                        ng-disabled="!(username && password) || IsLoading" 
+                        ng-click="LoginCheck()">
+                    <span ng-if="!IsLoading" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <svg class="btn-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                            <polyline points="10 17 15 12 10 7"></polyline>
+                            <line x1="15" y1="12" x2="3" y2="12"></line>
+                        </svg>
+                        Login
+                    </span>
+                    <span ng-if="IsLoading" style="display: inline-flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-spinner fa-spin"></i> Authenticating...
+                    </span>
+                </button>
+
+                <!-- Footer Note with Clean Shield SVG and Proper Bullet -->
+                <div class="adpl-form-footer">
+                    <svg class="shield-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span>Protected by ADPL Security &bull; All Rights Reserved</span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* ==========================================================================
+       Fullscreen Floating Transparent Diamonds Background Simulation
+       - Higher particle density & crisp visibility
+       - 2D Elastic collisions: diamonds bounce away from each other on impact
+       - Viewport boundary bounce: diamonds continuously stay on screen
+       ========================================================================== */
+    (function () {
+        var canvas = document.getElementById('diamondCanvas');
+        if (!canvas) return;
+        var ctx = canvas.getContext('2d');
+        var particles = [];
+        var particleCount = window.innerWidth < 768 ? 26 : 48;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function createParticle(initial) {
+            var size = Math.random() * 26 + 18; // 18px to 44px
+            var speed = Math.random() * 0.75 + 0.35; // smooth gentle floating speed
+            var angle = Math.random() * Math.PI * 2;
+            return {
+                x: Math.random() * (canvas.width - 80) + 40,
+                y: Math.random() * (canvas.height - 80) + 40,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                size: size,
+                radius: size * 0.62, // circular collision boundary radius
+                mass: size,
+                rotation: Math.random() * Math.PI * 2,
+                vRot: (Math.random() - 0.5) * 0.015,
+                opacity: Math.random() * 0.28 + 0.24, // High-clarity luxury translucency
+                pulse: Math.random() * Math.PI * 2,
+                pulseSpeed: Math.random() * 0.025 + 0.012,
+                colorHue: Math.random() > 0.4 ? '56, 189, 248' : '125, 211, 252' // Ice Cyan & Sky Blue
+            };
+        }
+
+        for (var i = 0; i < particleCount; i++) {
+            particles.push(createParticle(true));
+        }
+
+        function handleCollisions() {
+            for (var i = 0; i < particles.length; i++) {
+                var p1 = particles[i];
+
+                // 1. Boundary bounce against screen edges (diamonds always remain in screen)
+                var pad = p1.radius;
+                if (p1.x - pad < 0) {
+                    p1.x = pad;
+                    p1.vx = Math.abs(p1.vx);
+                } else if (p1.x + pad > canvas.width) {
+                    p1.x = canvas.width - pad;
+                    p1.vx = -Math.abs(p1.vx);
+                }
+
+                if (p1.y - pad < 0) {
+                    p1.y = pad;
+                    p1.vy = Math.abs(p1.vy);
+                } else if (p1.y + pad > canvas.height) {
+                    p1.y = canvas.height - pad;
+                    p1.vy = -Math.abs(p1.vy);
+                }
+
+                // 2. Diamond-to-Diamond Elastic Collisions (Bounce away on hit)
+                for (var j = i + 1; j < particles.length; j++) {
+                    var p2 = particles[j];
+                    var dx = p2.x - p1.x;
+                    var dy = p2.y - p1.y;
+                    var distSq = dx * dx + dy * dy;
+                    var minDist = p1.radius + p2.radius;
+
+                    if (distSq < minDist * minDist && distSq > 0) {
+                        var dist = Math.sqrt(distSq);
+                        var nx = dx / dist;
+                        var ny = dy / dist;
+
+                        // Positional separation to prevent overlapping/clumping
+                        var overlap = 0.5 * (minDist - dist);
+                        p1.x -= nx * overlap;
+                        p1.y -= ny * overlap;
+                        p2.x += nx * overlap;
+                        p2.y += ny * overlap;
+
+                        // Relative velocity along collision normal
+                        var kx = p1.vx - p2.vx;
+                        var ky = p1.vy - p2.vy;
+                        var impulse = 2 * (nx * kx + ny * ky) / (p1.mass + p2.mass);
+
+                        // Elastic impulse bounce away from each other
+                        p1.vx -= impulse * p2.mass * nx;
+                        p1.vy -= impulse * p2.mass * ny;
+                        p2.vx += impulse * p1.mass * nx;
+                        p2.vy += impulse * p1.mass * ny;
+
+                        // Sparkle flash flare on impact
+                        p1.pulse += 1.2;
+                        p2.pulse += 1.2;
+                        p1.vRot = (Math.random() - 0.5) * 0.035;
+                        p2.vRot = (Math.random() - 0.5) * 0.035;
+                    }
+                }
+            }
+        }
+
+        function drawFacetedDiamond(ctx, p) {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+
+            var currentOpacity = p.opacity + Math.sin(p.pulse) * 0.10;
+            if (currentOpacity < 0.14) currentOpacity = 0.14;
+            if (currentOpacity > 0.65) currentOpacity = 0.65;
+            ctx.globalAlpha = currentOpacity;
+
+            var w = p.size;
+            var h = p.size * 0.88;
+            var topH = h * 0.34;
+            var tableW = w * 0.52;
+
+            // Diamond Vertices
+            var topL = { x: -tableW / 2, y: -h / 2 };
+            var topR = { x: tableW / 2, y: -h / 2 };
+            var midL = { x: -w / 2, y: -h / 2 + topH };
+            var midR = { x: w / 2, y: -h / 2 + topH };
+            var bot  = { x: 0, y: h / 2 };
+            var midML = { x: -w * 0.22, y: -h / 2 + topH };
+            var midMR = { x: w * 0.22, y: -h / 2 + topH };
+
+            // Translucent Prismatic Glow
+            ctx.fillStyle = 'rgba(' + p.colorHue + ', 0.09)';
+            ctx.strokeStyle = 'rgba(' + p.colorHue + ', 0.82)';
+            ctx.lineWidth = 1.4;
+            ctx.lineJoin = 'round';
+
+            // Outer contour
+            ctx.beginPath();
+            ctx.moveTo(topL.x, topL.y);
+            ctx.lineTo(topR.x, topR.y);
+            ctx.lineTo(midR.x, midR.y);
+            ctx.lineTo(bot.x, bot.y);
+            ctx.lineTo(midL.x, midL.y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Internal Facet Lines (Crown & Pavilion)
+            ctx.beginPath();
+            ctx.moveTo(topL.x, topL.y); ctx.lineTo(midML.x, midML.y);
+            ctx.moveTo(topR.x, topR.y); ctx.lineTo(midMR.x, midMR.y);
+            ctx.moveTo(topL.x, topL.y); ctx.lineTo(midMR.x, midMR.y);
+            ctx.moveTo(topR.x, topR.y); ctx.lineTo(midML.x, midML.y);
+            ctx.moveTo(midL.x, midL.y); ctx.lineTo(midR.x, midR.y);
+            ctx.moveTo(midML.x, midML.y); ctx.lineTo(bot.x, bot.y);
+            ctx.moveTo(midMR.x, midMR.y); ctx.lineTo(bot.x, bot.y);
+            ctx.stroke();
+
+            // Twinkling Glint on Vertex
+            var sparkleVal = Math.sin(p.pulse * 1.6);
+            if (sparkleVal > 0.50) {
+                var spLen = (sparkleVal - 0.50) * 14;
+                ctx.strokeStyle = 'rgba(255, 255, 255, ' + (sparkleVal * 0.95) + ')';
+                ctx.lineWidth = 1.3;
+                ctx.beginPath();
+                ctx.moveTo(topR.x - spLen, topR.y); ctx.lineTo(topR.x + spLen, topR.y);
+                ctx.moveTo(topR.x, topR.y - spLen); ctx.lineTo(topR.x, topR.y + spLen);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            handleCollisions();
+
+            for (var i = 0; i < particles.length; i++) {
+                var p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rotation += p.vRot;
+                p.pulse += p.pulseSpeed;
+
+                drawFacetedDiamond(ctx, p);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    })();
+
+    /* ==========================================================================
+       AngularJS Login Controller & Directives
+       ========================================================================== */
+    var app;
+    try {
+        app = angular.module('app');
+    } catch (e) {
+        app = angular.module('app', ['ngTouch']);
+    }
+
+    app.controller("Login", function ($scope, $http, $q, $interval) {
+        $scope.Login = {};
+        $scope.username = "";
+        $scope.password = "";
+        $scope.Invalid = false;
+        $scope.IsLoading = false;
+        $scope.showPassword = false;
+        $scope.msg = "";
+
+        $scope.LoginCheck = function () {
+            if ($scope.username && $scope.password && $scope.username.trim() !== "" && $scope.password.trim() !== "") {
+                $scope.Invalid = true;
+                $scope.msg = "";
+            } else {
+                $scope.username = "";
+                $scope.password = "";
+                $scope.Invalid = false;
+                $scope.msg = "Please enter both Username and Password.";
+                return;
+            }
+
+            if ($scope.Invalid) {
+                $scope.IsLoading = true;
+                var User = {
+                    username: $scope.username.trim(),
+                    password: $scope.password.trim()
+                };
+
+                $http({
+                    url: '@Url.Action("LoginUser","Login")',
+                    method: "GET",
+                    params: User
+                }).then(function (response) {
+                    $scope.IsLoading = false;
+                    if (response.data.Status == 1) {
+                        if (response.data.UserID == 12) {
+                            window.location.href = "@Url.Action("ApprovePricing","Pricing")";
+                        } else {
+                            window.location.href = "@Url.Action("Index","Home")";
+                        }
+                    } else {
+                        $scope.msg = "UserName Or Password Incorrect.!!!";
+                    }
+                }, function (error) {
+                    $scope.IsLoading = false;
+                    $scope.msg = "Server communication error. Please try again.";
+                });
+            }
+        };
+    });
+
+    app.directive('ngEnter', function () {
+        return function (scope, element, attrs) {
+            element.bind("keydown keypress", function (event) {
+                if (event.which === 13) {
+                    scope.$apply(function () {
+                        scope.$eval(attrs.ngEnter);
+                    });
+                    event.preventDefault();
+                }
+            });
+        };
+    });
+</script>

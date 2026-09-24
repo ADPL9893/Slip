@@ -1,0 +1,858 @@
+@{
+    ViewBag.Title = "Add Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Add Reports / Loss Report Management - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .addreports-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Entrance Animation */
+    .reports-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .report-uploader-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+
+    /* Page Header Card */
+    .reports-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 18px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .reports-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .reports-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .reports-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .reports-header-card:hover .reports-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .reports-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .reports-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .reports-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .reports-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    .reports-header-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: #f0f9ff;
+        color: #0369a1;
+        border: 1.5px solid #bae6fd;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    /* Individual Report Uploader Card */
+    .report-uploader-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        transition: all 0.25s ease !important;
+        margin-bottom: 20px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+    }
+    .report-uploader-card:hover {
+        border-color: #0284c7 !important;
+        box-shadow: 0 8px 22px rgba(2, 132, 199, 0.12) !important;
+        transform: translateY(-2px);
+    }
+
+    .report-card-header {
+        padding: 14px 18px !important;
+        background: #f8fafc !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 10px !important;
+    }
+
+    .report-card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .report-card-icon-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+        background: #e0f2fe;
+        color: #0284c7;
+        border: 1px solid #bae6fd;
+    }
+    .report-uploader-card:hover .report-card-icon-badge {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        border-color: transparent;
+    }
+
+    .report-card-title {
+        margin: 0 !important;
+        font-size: 14.5px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .badge-format-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .report-card-body {
+        padding: 16px 18px 18px 18px !important;
+        background: #ffffff !important;
+    }
+
+    .report-card-desc {
+        font-size: 12px;
+        color: #64748b;
+        margin-bottom: 14px;
+        line-height: 1.4;
+    }
+
+    .report-card-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .report-file-input-wrapper {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .report-file-input {
+        width: 100%;
+        height: 38px;
+        padding: 6px 10px;
+        font-size: 12px;
+        color: #334155;
+        background: #f8fafc;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+    }
+    .report-file-input:focus,
+    .report-file-input:hover {
+        border-color: #0284c7;
+        background: #ffffff;
+    }
+
+    .btn-report-upload {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 20px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3) !important;
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        white-space: nowrap;
+        text-decoration: none !important;
+        height: 38px;
+    }
+    .btn-report-upload:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4) !important;
+        color: #ffffff !important;
+    }
+    .btn-report-upload:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .reports-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .reports-header-left {
+            width: 100%;
+        }
+
+        .reports-header-badge {
+            align-self: flex-start;
+        }
+
+        .report-card-controls {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .report-file-input-wrapper {
+            width: 100%;
+            min-width: 100%;
+        }
+
+        .btn-report-upload {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+    }
+</style>
+
+<div ng-controller="Diamond" class="addreports-page">
+    <!-- Top Header Card (SaaS Ice-Blue Theme) -->
+    <div class="reports-header-card">
+        <div class="reports-header-left">
+            <div class="reports-header-icon">
+                <i class="fa fa-file-excel-o"></i>
+            </div>
+            <div>
+                <div class="reports-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>Slip</span> / 
+                    <span>Loss Report Management</span>
+                </div>
+                <h4 class="reports-header-title">Loss Report Management</h4>
+            </div>
+        </div>
+        <div>
+            <span class="reports-header-badge">
+                <i class="fa fa-cloud-upload"></i> 8 Upload Modules
+            </span>
+        </div>
+    </div>
+
+    <!-- 8 Report Uploader Cards in Responsive Grid View -->
+    <div class="row">
+        <!-- 1. DAILY REPORT -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-calendar-check-o"></i>
+                        </div>
+                        <h4 class="report-card-title">Daily Report</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Upload and process daily production & loss tracking Excel sheets.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="field" type="file" accept=".xlsx" file-model="Planning.field" ng-model="Diamond.field" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="DailyUpload()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. ROUGH TO 4P OK LOT SUMMARY -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-diamond"></i>
+                        </div>
+                        <h4 class="report-card-title">Rough To 4P Ok Lot Summary</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Import rough diamond lot stage transitions to 4P OK summary.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="filename" type="file" accept=".xlsx" file-model="Planning.filename" ng-model="Diamond.filename" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="Upload()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. AFTER 4P OK LOT SUMMARY -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-check-circle-o"></i>
+                        </div>
+                        <h4 class="report-card-title">After 4P Ok Lot Summary</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Upload lot summary records for processed diamonds after 4P stage.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="filename2" type="file" accept=".xlsx" file-model="Planning.filename2" ng-model="Diamond.filename2" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="Upload2()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. PROCESS WISE TIMING -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-clock-o"></i>
+                        </div>
+                        <h4 class="report-card-title">Process Wise Timing</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Import manufacturing timeline and duration metrics per process.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="filename3" type="file" accept=".xlsx" file-model="Planning.filename3" ng-model="Diamond.filename3" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="Upload3()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. PROCESS WISE ISSUE RECEIVE LOSS -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-exchange"></i>
+                        </div>
+                        <h4 class="report-card-title">Process Wise Issue Receive Loss</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Track issue, receive, and variance losses across departmental workflows.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="filename4" type="file" accept=".xlsx" file-model="Planning.filename4" ng-model="Diamond.filename4" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="Upload4()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. PREDICTION DETAILS -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-magic"></i>
+                        </div>
+                        <h4 class="report-card-title">Prediction Details</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Import yield prediction analysis and estimated weight calculation data.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="filename5" type="file" accept=".xlsx" file-model="Planning.filename5" ng-model="Diamond.filename5" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="Upload5()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. SAWING LOSS -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-scissors"></i>
+                        </div>
+                        <h4 class="report-card-title">Sawing Loss</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Upload sawing and cutting stage weight differential and loss data.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="filename6" type="file" accept=".xlsx" file-model="Planning.filename6" ng-model="Diamond.filename6" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="Upload6()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. IDEAL LABOUR -->
+        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+            <div class="report-uploader-card">
+                <div class="report-card-header">
+                    <div class="report-card-title-group">
+                        <div class="report-card-icon-badge">
+                            <i class="fa fa-users"></i>
+                        </div>
+                        <h4 class="report-card-title">Ideal Labour</h4>
+                    </div>
+                    <span class="badge-format-tag"><i class="fa fa-file-excel-o"></i> .xlsx</span>
+                </div>
+                <div class="report-card-body">
+                    <div class="report-card-desc">
+                        Import standard labour metrics, target allocations, and wage rates.
+                    </div>
+                    <div class="report-card-controls">
+                        <div class="report-file-input-wrapper">
+                            <input id="filename7" type="file" accept=".xlsx" file-model="Planning.filename7" ng-model="Diamond.filename7" class="report-file-input" />
+                        </div>
+                        <button class="btn-report-upload" type="button" ng-click="Upload7()">
+                            <i class="fa fa-cloud-upload"></i> Upload
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var Paramdata = [{}];
+    var ReturnLogID = 0;
+    let IssueList = [];
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    }
+
+    module.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+
+    module.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$log', '$timeout', '$interval', 'uiGridConstants', function ($scope, $filter, $http, $q, $log, $timeout, $interval, uiGridConstants, $window) {
+        $scope.Diamond = {};
+        $scope.Planning = {};
+
+        $scope.DailyUpload = function () {
+            var formData = new FormData();
+            var file = document.getElementById('field').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("Daily_Report_Insert_Using_Excel", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && ret.data.Message == "Record Is Inserted") {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('field').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload daily report.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+
+        $scope.Upload = function () {
+            var formData = new FormData();
+            var file = document.getElementById('filename').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("RoughTo4POk_Loss_Insert_Using_Excel", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && ret.data.Message == "Record Is Inserted") {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('filename').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload file.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+
+        $scope.Upload2 = function () {
+            var formData = new FormData();
+            var file = document.getElementById('filename2').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("After4POk_Loss_Insert_Using_Excel", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && ret.data.Message == "Record Is Inserted") {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('filename2').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload file.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+
+        $scope.Upload3 = function () {
+            var formData = new FormData();
+            var file = document.getElementById('filename3').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("Process_Wise_Timing_Insert_Using_Excel", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && ret.data.Message == "Record Is Inserted") {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('filename3').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload file.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+
+        $scope.Upload4 = function () {
+            var formData = new FormData();
+            var file = document.getElementById('filename4').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("Process_Wise_Issue_Receive_Loss_Insert_Using_Excel", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && ret.data.Message == "Record Is Inserted") {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('filename4').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload file.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+
+        $scope.Upload5 = function () {
+            var formData = new FormData();
+            var file = document.getElementById('filename5').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("Pridiction_Details_Insert_Using_Excel", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && (ret.data.Message == "Upload completed successfully" || ret.data.Message == "Record Is Inserted")) {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('filename5').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload file.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+
+        $scope.Upload6 = function () {
+            var formData = new FormData();
+            var file = document.getElementById('filename6').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("Sawing_Loss_Details_Insert_Using_Excel", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && ret.data.Message == "Record Is Inserted") {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('filename6').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload file.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+
+        $scope.Upload7 = function () {
+            var formData = new FormData();
+            var file = document.getElementById('filename7').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("TRN_Ideal_Labour_Upload", "Slip")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data && ret.data.Message == "Record Is Inserted") {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('filename7').value = "";
+                    } else {
+                        Noty("error", (ret.data && ret.data.Message) ? ret.data.Message : "Failed to upload file.");
+                    }
+                }, function () {
+                    hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+            } else {
+                Noty("error", "Please select an Excel file to upload.");
+            }
+        };
+    }]);
+</script>

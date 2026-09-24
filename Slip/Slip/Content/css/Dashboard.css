@@ -1,0 +1,344 @@
+.fixed .content-wrapper {
+    margin-top: 0 !important;
+}
+
+.card {
+    min-height: 92vh !important;
+}
+
+.dropmulti button {
+    text-align: left;
+    position: relative;
+}
+
+    .dropmulti button span {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+
+/*for Multiselect dropdown*/
+.dropmulti ul li a {
+    color: #000 !important;
+}
+
+.dropmulti ul {
+    max-height: 390px;
+    overflow-y: auto;
+    background-color: rgb(255, 255, 255) !important;
+    border: medium none transparent;
+    display: block;
+    height: auto;
+    width: 100%;
+    max-width: 770px;
+}
+
+    .dropmulti ul li {
+        display: block;
+        width: 100%;
+    }
+
+        .dropmulti ul li a:hover, .dropmulti ul li a:focus {
+            background-color: rgb(81, 81, 81);
+            color: #fff !important;
+        }
+
+.dropmulti {
+    width: 100%;
+}
+
+.font-green-sharp {
+    color: #4DB3A2 !important;
+    margin-left: 10px !important;
+}
+
+.button {
+    color: black !important;
+    font-size: 40px;
+    margin: 10px 35px;
+    width: 214px;
+    font-weight: bold;
+}
+
+.ui-grid-icon-blank::before {
+    content: none !important;
+}
+
+button {
+    color: #090909;
+    padding: 0.4em 0.2em 0.2em 0.2em;
+    font-size: 18px;
+    border-radius: 0.5em;
+    background: #e8e8e8;
+    cursor: pointer;
+    border: 1px solid #e8e8e8;
+    transition: all 0.3s;
+    box-shadow: 6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff;
+}
+
+.RED {
+    background-color: #ff00009e !important;
+    color: black !important;
+}
+
+.GREEN {
+    background-color: #00740085 !important;
+    color: black !important;
+}
+
+.WHITE {
+    background-color: #FFF !important;
+    color: black !important;
+}
+
+.GREY {
+    /*background-color: #7070709e !important;*/
+    background-color: #70707063 !important;
+    color: black !important;
+}
+
+.Yellow {
+    background-color: #74740085 !important;
+    color: black !important;
+}
+
+.LIGHTGREEN {
+    background-color: #acff013b !important;
+    color: black !important;
+}
+
+
+.RED:focus {
+    box-shadow: inset 4px 4px 12px #ff0000, inset -4px -4px 12px #ff0000;
+}
+
+.GREEN:focus {
+    box-shadow: inset 4px 4px 12px #007400, inset -4px -4px 12px #007400;
+}
+
+.WHITE:focus {
+    box-shadow: inset 4px 4px 12px #999, inset -4px -4px 12px #999;
+}
+
+.GREY:focus {
+    box-shadow: inset 4px 4px 12px #7070709e, inset -4px -4px 12px #7070709e;
+}
+
+.Yellow:focus {
+    box-shadow: inset 4px 4px 12px #7070709e, inset -4px -4px 12px #7070709e;
+}
+
+.btn_details {
+    /*font-size: 15px !important;
+        position: absolute;*/
+    font-size: 15px !important;
+    text-align: right;
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+.btn_Group hr {
+    margin-bottom: 6px !important;
+    margin-top: 6px !important;
+}
+
+table {
+    /*border-collapse: collapse;*/
+    border-spacing: 0;
+    width: 100%;
+    border: 2px solid #4C92B9;
+}
+
+.table_div {
+    width: 100%;
+}
+
+.border {
+    border: 2px solid #4C92B9;
+}
+
+.table_div th {
+    font-weight: 700;
+    color: white;
+    background-color: #449bca;
+    border: 1px solid white;
+    padding: 0 5px;
+    text-align: center !important;
+}
+
+.table_div tfoot {
+    color: black;
+    background-color: #deedf5;
+    font-weight: 600;
+}
+
+.table_div th, .table_div td {
+    text-align: left;
+    padding: 8px;
+}
+
+.table_div td, .table_div th {
+    text-align: center !important;
+    white-space: nowrap;
+}
+
+.scrollable {
+    height: 50vh;
+    overflow-y: scroll;
+    border: 2px solid black;
+}
+
+#FetchRoughStock .scrollable {
+    height: 40vh !important;
+    overflow-y: scroll;
+    border: 2px solid black;
+}
+
+.scrollable thead {
+    position: sticky;
+    /*background-color: white;*/
+    z-index: 2;
+    top: 0;
+}
+
+.scrollable::-webkit-scrollbar {
+    width: 15px; /* width of the entire scrollbar */
+}
+
+.scrollable::-webkit-scrollbar-track {
+    background: #449CBA; /* color of the tracking area */
+    border: 2px solid #4C92B9;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+    background-color: #449bca;
+    border: 2px solid BLACK;
+    border-radius: 5PX;
+}
+
+    .scrollable::-webkit-scrollbar-thumb:hover {
+        background-color: #2F7097;
+    }
+
+.scrollable tfoot {
+    position: sticky;
+    color: black;
+    z-index: 1;
+    bottom: 0;
+    background-color: #deedf5;
+}
+
+.datepicker-dropdown.datepicker-orient-top:after, .datepicker-dropdown.datepicker-orient-top:before {
+    display: none !important;
+    bottom: 0 !important;
+    border-bottom: 0 !important;
+    border-top: 0 !important;
+}
+
+.paddingZero {
+    padding: 0;
+}
+
+.modal-dialog {
+    width: 85%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) !important;
+}
+
+.main_container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.subdiv {
+    width: 100%;
+}
+
+.subdiv2 {
+    width: 50%;
+}
+
+.demo-container {
+    box-shadow: inset 4px 4px 12px #999, inset -4px -4px 12px #999;
+    border: 2px solid black;
+    padding: 10px;
+    height:420px;
+}
+
+.RoughDetailsGrid {
+    height: 35vh !important;
+}
+
+
+.DiscNav {
+    cursor: pointer;
+    width:auto;
+}
+
+.DiscNav ul.nav {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    height: 40px;
+    line-height: 38px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}
+
+.DiscNav ul.nav li {
+    display: block;
+    padding: 0 18px;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    background: #449bca; /* you can change the backgorund color here. */
+    margin: 0 1px;
+    float: left;
+    border-radius: 7px;
+}
+
+    .DiscNav .active {
+        background: rgb(209, 239, 255) !important;
+        overflow: hidden;
+        color: black !important;
+        box-shadow: inset #449bca 0px -5px 15px 0px,2px 3px 3px grey !important;
+        text-shadow: 1px 1px 1px rgba(55, 44, 69, 0.50);
+        font-size: 16px;
+        font-weight: 600;
+        margin: -7px 2px 0 1px !important;
+        border-right: none !important;
+        border-bottom: 4px solid #449bca !important; /* you can change the border color matching to your background color */
+        padding: 0 25px !important;
+        /*box-shadow:0px -1px 4px grey;*/
+    }
+
+.DiscNav ul.nav li:hover {
+    background: rgb(209, 239, 255) !important;
+    overflow: hidden;
+    color: black !important;
+    box-shadow: inset #449bca 0px -5px 15px 0px,1px 1px 2px grey !important;
+    text-shadow: 1px 1px 1px rgba(55, 44, 69, 0.50);
+    font-size: 15px;
+    font-weight: 600;
+    margin: -3px 2px 0 1px !important;
+    border-right: none !important;
+    border-bottom: 4px solid #449bca !important; /* you can change the border color matching to your background color */
+/*    padding: 0 24px !important;*/
+    /*box-shadow:0px -1px 4px grey;*/
+}
+
+.Header {
+    display:flex;
+    grid-gap:5px;
+    flex-direction:row;
+}
+
+.filter {
+    margin-left:20px;
+}

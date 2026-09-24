@@ -1,0 +1,1585 @@
+@{
+    ViewBag.Title = "MFGReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* Premium Dashboard Styles Scoped for Azia Layout */
+    .dashboard-layout {
+        display: flex;
+        min-height: calc(100vh - 41px);
+        background-color: #f4f5f8;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        margin: -30px 0 -10px 0;
+    }
+
+    /* Left Sidebar */
+    .dashboard-sidebar {
+        width: 240px;
+        background-color: #ffffff;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+    }
+    
+    .sidebar-brand {
+        padding: 20px 24px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #7c3aed;
+        border-bottom: 1px solid #f1f5f9;
+        text-transform: lowercase;
+    }
+    
+    .sidebar-brand i {
+        font-size: 20px;
+    }
+    
+    .sidebar-menu {
+        padding: 20px 0;
+        flex-grow: 1;
+        overflow-y: auto;
+    }
+    
+    .menu-header {
+        padding: 0 24px 4px 24px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #1e293b;
+        letter-spacing: 0.05em;
+        margin-top: 10px;
+    }
+    
+    .menu-desc {
+        padding: 0 24px 15px 24px;
+        font-size: 11px;
+        color: #64748b;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+    
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        padding: 10px 24px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #475569;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+    
+    .sidebar-link:hover, .sidebar-link.active {
+        color: #7c3aed;
+        background-color: #f8fafc;
+        border-left-color: #7c3aed;
+        text-decoration: none;
+    }
+    
+    .sidebar-link i {
+        margin-right: 12px;
+        font-size: 16px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .sidebar-footer {
+        padding: 15px 24px;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+        background-color: #e2e8f0;
+    }
+    
+    .user-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .user-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .user-role {
+        font-size: 11px;
+        color: #64748b;
+    }
+
+    /* Content Area */
+    .dashboard-content-area {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+    }
+    
+    .dashboard-navbar {
+        height: 60px;
+        background-color: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 30px;
+    }
+    
+    .nav-search {
+        display: flex;
+        align-items: center;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 6px 12px;
+        width: 320px;
+    }
+    
+    .nav-search input {
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        outline: none;
+        width: 100%;
+        color: #1e293b;
+    }
+    
+    .nav-search i {
+        color: #94a3b8;
+        margin-right: 8px;
+    }
+    
+    .nav-right-icons {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .nav-icon-btn {
+        font-size: 18px;
+        color: #64748b;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s ease;
+    }
+    
+    .nav-icon-btn:hover {
+        color: #0f172a;
+    }
+    
+    .badge-dot {
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 6px;
+        height: 6px;
+        background-color: #ef4444;
+        border-radius: 50%;
+    }
+    
+    /* Panel Welcome Header */
+    .welcome-banner {
+        padding: 25px 30px 10px 30px;
+    }
+    
+    .welcome-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 4px 0;
+    }
+    
+    .welcome-subtitle {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
+    
+    /* Filters and Control Area */
+    .filter-panel {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 30px 20px 30px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .filter-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .date-input-wrapper {
+        position: relative;
+    }
+    
+    .date-input-wrapper input {
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #334155;
+        background-color: #ffffff;
+        cursor: pointer;
+        width: 140px;
+    }
+
+    /* Grid layout for Dashboard widgets */
+    .widgets-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 20px;
+        padding: 0 30px 20px 30px;
+    }
+    
+    .widget-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        display: flex;
+        flex-direction: column;
+        min-height: 200px;
+    }
+    
+    .col-lg-3-width { grid-column: span 3; }
+    .col-lg-4-width { grid-column: span 4; }
+    .col-lg-6-width { grid-column: span 6; }
+    .col-lg-8-width { grid-column: span 8; }
+    .col-lg-12-width { grid-column: span 12; }
+    
+    .widget-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+        letter-spacing: 0.05em;
+        margin-bottom: 5px;
+    }
+    
+    .widget-desc {
+        font-size: 11px;
+        color: #94a3b8;
+        margin-bottom: 15px;
+        line-height: 1.4;
+    }
+    
+    .widget-desc a {
+        color: #7c3aed;
+        text-decoration: none;
+    }
+    
+    .donut-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: auto;
+        margin-bottom: auto;
+        padding: 10px 0;
+    }
+    
+    /* Credit Card Widget */
+    .credit-card {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: #ffffff;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        justify-content: space-between;
+        min-height: 200px;
+    }
+    
+    .card-sparkline-bg {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60%;
+        opacity: 0.15;
+        pointer-events: none;
+    }
+    
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        z-index: 1;
+    }
+    
+    .card-label {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.8;
+    }
+    
+    .card-balance {
+        font-size: 26px;
+        font-weight: 700;
+        margin-top: 5px;
+        font-family: monospace;
+    }
+    
+    .card-logo {
+        font-size: 22px;
+        font-weight: 800;
+        font-style: italic;
+        color: #ffffff;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .card-mid {
+        margin: 20px 0 15px 0;
+        z-index: 1;
+    }
+    
+    .card-number-label {
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.6;
+        margin-bottom: 2px;
+    }
+    
+    .card-number {
+        font-size: 18px;
+        letter-spacing: 0.12em;
+        font-family: monospace;
+        font-weight: 500;
+    }
+    
+    .card-bottom {
+        display: flex;
+        justify-content: space-between;
+        z-index: 1;
+    }
+    
+    .card-holder, .card-type {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-meta-label {
+        font-size: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.6;
+    }
+    
+    .card-meta-val {
+        font-size: 11px;
+        font-weight: 600;
+    }
+    
+    /* Ratio Item details */
+    .ratio-item {
+        margin-bottom: 20px;
+    }
+    
+    .ratio-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .ratio-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 5px;
+    }
+    
+    .ratio-title-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .ratio-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        background-color: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #475569;
+    }
+    
+    .ratio-name {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #475569;
+    }
+    
+    .ratio-val {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    
+    .ratio-goal {
+        font-size: 10px;
+        color: #94a3b8;
+    }
+    
+    .progress-bar-container {
+        height: 6px;
+        background-color: #f1f5f9;
+        border-radius: 3px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+    
+    .progress-bar-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.5s ease;
+    }
+    
+    .progress-orange { background-color: #f59e0b; }
+    .progress-green { background-color: #10b981; }
+    
+    .ratio-desc {
+        font-size: 11px;
+        color: #64748b;
+        line-height: 1.4;
+    }
+    
+    .ratio-desc a {
+        color: #7c3aed;
+        text-decoration: none;
+    }
+    
+    /* 4 KPI Grid Container */
+    .kpi-mini-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+        height: 100%;
+    }
+    
+    .kpi-mini-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    
+    .kpi-mini-title {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #64748b;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+    
+    .kpi-mini-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        font-family: monospace;
+    }
+    
+    .kpi-mini-trend {
+        font-size: 11px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 12px;
+    }
+    
+    .trend-up { color: #10b981; }
+    .trend-down { color: #ef4444; }
+    
+    .kpi-sparkline-bars {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 30px;
+        margin-top: auto;
+    }
+    
+    .spark-bar {
+        flex-grow: 1;
+        border-radius: 2px;
+        transition: height 0.5s ease;
+    }
+    
+    /* Sparkbar colors */
+    .bg-purple { background-color: #a78bfa; }
+    .bg-blue { background-color: #60a5fa; }
+    .bg-teal { background-color: #2dd4bf; }
+    .bg-red { background-color: #f87171; }
+    
+    /* Main Report Card Styling */
+    .report-card-wrapper {
+        padding: 0 30px 30px 30px;
+    }
+    
+    .report-card {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 20px;
+    }
+    
+    .report-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 15px;
+    }
+    
+    .report-title-text {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    
+    /* Custom tab headers */
+    .tabs-wrapper {
+        display: flex;
+        border-bottom: 1px solid #cbd5e1;
+        margin-bottom: 15px;
+    }
+    
+    .tab-button {
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        background: none;
+        border: none;
+        cursor: pointer;
+        position: relative;
+        transition: color 0.2s ease;
+    }
+    
+    .tab-button:hover {
+        color: #0f172a;
+    }
+    
+    .tab-button.active {
+        color: #7c3aed;
+    }
+    
+    .tab-button.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #7c3aed;
+    }
+
+    /* Grid Custom Overrides */
+    .Silver { background-color: #E2E8F0 !important; }
+    .AshGreen { background-color: #ECFDF5 !important; }
+    .Snow { background-color: #F8FAFC !important; }
+    .LightBlue { background-color: #EFF6FF !important; }
+    .Dun { background-color: #F5F5F4 !important; }
+    .yellow { background-color: #FEF08A !important; }
+    .SoftBlush { background-color: #FFF1F2 !important; }
+    .TangerineDream { background-color: #FFedd5 !important; }
+    .GoldenSand { background-color: #FEF9C3 !important; }
+    .SubTotal { background-color: #FFFBEB !important; color: #000; font-weight: 600; }
+    
+    /* Responsive Media Queries */
+    @media (max-width: 1200px) {
+        .col-lg-3-width { grid-column: span 6; }
+        .col-lg-4-width { grid-column: span 6; }
+        .col-lg-6-width { grid-column: span 12; }
+        .col-lg-8-width { grid-column: span 12; }
+    }
+    
+    @media (max-width: 850px) {
+        .dashboard-sidebar {
+            display: none;
+        }
+        .widgets-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .col-lg-3-width, .col-lg-4-width, .col-lg-6-width, .col-lg-8-width {
+            grid-column: span 12;
+        }
+        .kpi-mini-grid {
+            grid-template-columns: 1fr;
+        }
+        .dashboard-navbar {
+            padding: 0 15px;
+        }
+        .welcome-banner, .filter-panel, .widgets-grid, .report-card-wrapper {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .nav-search {
+            width: 180px;
+        }
+    }
+</style>
+
+<div ng-controller="Diamond" class="dashboard-layout">
+    <!-- Left Sidebar (styled exactly like Azia) -->
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand">
+            <i class="fa fa-th-large"></i> azia
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Dashboard</div>
+            <div class="menu-desc">Choose between layouts to experience different look and feel for your projects.</div>
+            
+            <a href="#" class="sidebar-link"><i class="fa fa-pie-chart"></i> Web Analytics</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-line-chart"></i> Sales Monitoring</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-bullhorn"></i> Ad Campaign</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-calendar"></i> Event Management</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-support"></i> Helpdesk Management</a>
+            <a href="#" class="sidebar-link active"><i class="fa fa-bar-chart"></i> Finance Monitoring</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-bitcoin"></i> Cryptocurrency</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-globe"></i> Executive / SaaS</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-envelope"></i> Campaign Monitoring</a>
+            <a href="#" class="sidebar-link"><i class="fa fa-cubes"></i> Product Management</a>
+        </div>
+        <div class="sidebar-footer">
+            <img class="avatar" src="/Images/user.png" onerror="this.src='https://ui-avatars.com/api/?name=@Slip.Utility.SessionFacade.UserSession.UserName&background=7c3aed&color=fff'" alt="Avatar" />
+            <div class="user-info">
+                <span class="user-name">@Slip.Utility.SessionFacade.UserSession.UserName</span>
+                <span class="user-role">Administrator</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="dashboard-content-area">
+        <!-- Top Navbar -->
+        <header class="dashboard-navbar">
+            <div class="nav-search">
+                <i class="fa fa-search"></i>
+                <input type="text" placeholder="Search for anything..." />
+            </div>
+            <div class="nav-right-icons">
+                <div class="nav-icon-btn"><i class="fa fa-envelope-o"></i></div>
+                <div class="nav-icon-btn"><i class="fa fa-bell-o"></i><span class="badge-dot"></span></div>
+                <div class="nav-icon-btn"><i class="fa fa-th"></i></div>
+                <img class="avatar" src="/Images/user.png" onerror="this.src='https://ui-avatars.com/api/?name=@Slip.Utility.SessionFacade.UserSession.UserName&background=7c3aed&color=fff'" alt="Avatar" style="width: 32px; height: 32px;" />
+            </div>
+        </header>
+
+        <!-- Greeting Header -->
+        <section class="welcome-banner">
+            <h1 class="welcome-title">Hi, welcome back!</h1>
+            <p class="welcome-subtitle">Your diamond manufacturing performance and monitoring dashboard template.</p>
+        </section>
+
+        <!-- Filters Block -->
+        <section class="filter-panel">
+            <div class="filter-controls">
+                <div class="date-input-wrapper">
+                    <input id="reportDate" type="text" placeholder="dd-MMM-yyyy" autocomplete="off" ng-model="Diamond.reportDate" readonly />
+                </div>
+                <button class="btn btn-primary" ng-click="FetchData(currentView)" style="border-radius: 6px; padding: 6px 16px;">Fetch</button>
+            </div>
+        </section>
+
+        <!-- Dashboard widgets layout grid -->
+        <section class="widgets-grid">
+            <!-- Card 1: Gross Yield Margin -->
+            <div class="widget-card col-lg-3-width">
+                <h3 class="widget-title">Gross Yield Margin</h3>
+                <p class="widget-desc">The yield achieved on each carat of rough. <a href="#">Learn more</a></p>
+                <div class="donut-container">
+                    <svg width="120" height="120" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" stroke="#f1f5f9" stroke-width="8" fill="transparent" />
+                        <circle cx="50" cy="50" r="40" stroke="#7c3aed" stroke-width="8" fill="transparent" 
+                                stroke-dasharray="251.2" ng-attr-stroke-dashoffset="{{dash.grossOffset}}" 
+                                stroke-linecap="round" transform="rotate(-90 50 50)" />
+                        <text x="50" y="55" font-family="sans-serif" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="middle">
+                            {{dash.grossYield}}%
+                        </text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 2: Net Yield Margin -->
+            <div class="widget-card col-lg-3-width">
+                <h3 class="widget-title">Net Yield Margin</h3>
+                <p class="widget-desc">Measures manufacturing efficiency in generating final yield. <a href="#">Learn more</a></p>
+                <div class="donut-container">
+                    <svg width="120" height="120" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="40" stroke="#f1f5f9" stroke-width="8" fill="transparent" />
+                        <circle cx="50" cy="50" r="40" stroke="#3b82f6" stroke-width="8" fill="transparent" 
+                                stroke-dasharray="251.2" ng-attr-stroke-dashoffset="{{dash.netOffset}}" 
+                                stroke-linecap="round" transform="rotate(-90 50 50)" />
+                        <text x="50" y="55" font-family="sans-serif" font-size="18" font-weight="bold" fill="#0f172a" text-anchor="middle">
+                            {{dash.netYield}}%
+                        </text>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 3: Total Carats (Credit Card token layout) -->
+            <div class="widget-card col-lg-6-width credit-card">
+                <div class="card-sparkline-bg">
+                    <svg viewBox="0 0 300 100" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                        <path d="M 0 80 Q 50 40 100 70 T 200 30 T 300 50 L 300 100 L 0 100 Z" fill="rgba(255,255,255,0.08)"></path>
+                        <path d="M 0 80 Q 50 40 100 70 T 200 30 T 300 50" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <div class="card-top">
+                    <div>
+                        <span class="card-label">Total Carats Balance</span>
+                        <div class="card-balance">{{dash.balanceCarats}} Cts</div>
+                    </div>
+                    <div class="card-logo">VISA</div>
+                </div>
+                <div class="card-mid">
+                    <div class="card-number-label">Token Card ID</div>
+                    <div class="card-number">••••  ••••  ••••  5637</div>
+                </div>
+                <div class="card-bottom">
+                    <div class="card-holder">
+                        <span class="card-meta-label">Supervisor</span>
+                        <span class="card-meta-val">@Slip.Utility.SessionFacade.UserSession.UserName</span>
+                    </div>
+                    <div class="card-type">
+                        <span class="card-meta-label">Vault Type</span>
+                        <span class="card-meta-val">MFG Summary</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Process Ratios (Double Height on Left) -->
+            <div class="widget-card col-lg-4-width">
+                <h3 class="widget-title">Process Yield Ratios</h3>
+                <p class="widget-desc">Performance target metrics by diamond sizing weight category.</p>
+                
+                <div class="ratio-item">
+                    <div class="ratio-header">
+                        <div class="ratio-title-group">
+                            <div class="ratio-icon"><i class="fa fa-angle-double-up"></i></div>
+                            <span class="ratio-name">1CT Up Ratio</span>
+                        </div>
+                        <div class="ratio-val">{{dash.quickRatio}}</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill progress-orange" style="width: 75%;"></div>
+                    </div>
+                    <div class="ratio-goal">Quick Ratio Goal: 1.0 or higher. <a href="#">Learn more</a></div>
+                </div>
+
+                <div class="ratio-item" style="margin-top: 25px;">
+                    <div class="ratio-header">
+                        <div class="ratio-title-group">
+                            <div class="ratio-icon"><i class="fa fa-angle-double-down"></i></div>
+                            <span class="ratio-name">1CT Down Ratio</span>
+                        </div>
+                        <div class="ratio-val">{{dash.currentRatio}}</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill progress-green" style="width: 68%;"></div>
+                    </div>
+                    <div class="ratio-goal">Current Ratio Goal: 2.0 or higher. <a href="#">Learn more</a></div>
+                </div>
+            </div>
+
+            <!-- Card 5: 4 KPI mini cards -->
+            <div class="col-lg-8-width" style="display: flex; flex-direction: column;">
+                <div class="kpi-mini-grid">
+                    <!-- KPI 1: Total Rough Pcs -->
+                    <div class="kpi-mini-card">
+                        <span class="kpi-mini-title">Total Rough Pcs</span>
+                        <div class="kpi-mini-value">{{dash.roughPcs}}</div>
+                        <div class="kpi-mini-trend trend-up">
+                            <i class="fa fa-arrow-up"></i> 18.2% <span style="color:#94a3b8; font-weight:normal;">higher vs prev month</span>
+                        </div>
+                        <div class="kpi-sparkline-bars">
+                            <div class="spark-bar bg-purple" style="height: 40%"></div>
+                            <div class="spark-bar bg-purple" style="height: 60%"></div>
+                            <div class="spark-bar bg-purple" style="height: 35%"></div>
+                            <div class="spark-bar bg-purple" style="height: 80%"></div>
+                            <div class="spark-bar bg-purple" style="height: 55%"></div>
+                            <div class="spark-bar bg-purple" style="height: 90%"></div>
+                            <div class="spark-bar bg-purple" style="height: 75%"></div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2: Total Rough Carats -->
+                    <div class="kpi-mini-card">
+                        <span class="kpi-mini-title">Total Rough Carats</span>
+                        <div class="kpi-mini-value">{{dash.roughCarat}}</div>
+                        <div class="kpi-mini-trend trend-down">
+                            <i class="fa fa-arrow-down"></i> 0.7% <span style="color:#94a3b8; font-weight:normal;">lower vs prev month</span>
+                        </div>
+                        <div class="kpi-sparkline-bars">
+                            <div class="spark-bar bg-blue" style="height: 70%"></div>
+                            <div class="spark-bar bg-blue" style="height: 45%"></div>
+                            <div class="spark-bar bg-blue" style="height: 60%"></div>
+                            <div class="spark-bar bg-blue" style="height: 85%"></div>
+                            <div class="spark-bar bg-blue" style="height: 50%"></div>
+                            <div class="spark-bar bg-blue" style="height: 40%"></div>
+                            <div class="spark-bar bg-blue" style="height: 65%"></div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Total Polish Pcs -->
+                    <div class="kpi-mini-card">
+                        <span class="kpi-mini-title">Total Polish Pcs</span>
+                        <div class="kpi-mini-value">{{dash.dstPcs}}</div>
+                        <div class="kpi-mini-trend trend-up">
+                            <i class="fa fa-arrow-up"></i> 0.7% <span style="color:#94a3b8; font-weight:normal;">higher vs prev month</span>
+                        </div>
+                        <div class="kpi-sparkline-bars">
+                            <div class="spark-bar bg-teal" style="height: 30%"></div>
+                            <div class="spark-bar bg-teal" style="height: 50%"></div>
+                            <div class="spark-bar bg-teal" style="height: 65%"></div>
+                            <div class="spark-bar bg-teal" style="height: 45%"></div>
+                            <div class="spark-bar bg-teal" style="height: 80%"></div>
+                            <div class="spark-bar bg-teal" style="height: 90%"></div>
+                            <div class="spark-bar bg-teal" style="height: 70%"></div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 4: Total Polish Carats -->
+                    <div class="kpi-mini-card">
+                        <span class="kpi-mini-title">Total Polish Carats</span>
+                        <div class="kpi-mini-value">{{dash.dstPolishWeight}}</div>
+                        <div class="kpi-mini-trend trend-up">
+                            <i class="fa fa-arrow-up"></i> 0.7% <span style="color:#94a3b8; font-weight:normal;">higher vs prev month</span>
+                        </div>
+                        <div class="kpi-sparkline-bars">
+                            <div class="spark-bar bg-red" style="height: 55%"></div>
+                            <div class="spark-bar bg-red" style="height: 75%"></div>
+                            <div class="spark-bar bg-red" style="height: 40%"></div>
+                            <div class="spark-bar bg-red" style="height: 60%"></div>
+                            <div class="spark-bar bg-red" style="height: 85%"></div>
+                            <div class="spark-bar bg-red" style="height: 95%"></div>
+                            <div class="spark-bar bg-red" style="height: 65%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Report Section -->
+        <section class="report-card-wrapper">
+            <div class="report-card">
+                <div class="report-header">
+                    <span class="report-title-text"><i class="fa fa-table"></i> MFG Summary Report</span>
+                </div>
+                <div class="tabs-wrapper">
+                    <button class="tab-button active" data-tab="RUNNING">1. RUNNING</button>
+                    <button class="tab-button" data-tab="COMPLETE">2. COMPLETE</button>
+                </div>
+                <div class="uigrid">
+                    <div id="gridContainer"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    var List = "";
+    var DataField = "";
+    module = angular.module('app', ['ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    module.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+    
+    module.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$interval', 'uiGridConstants', '$window', function ($scope, $filter, $http, $q, $interval, uiGridConstants, $window) {
+        $scope.Diamond = {};
+        $scope.MainRCodemodel = [];
+        $scope.MainRCodeSettings = { enableSearch: true, externalIdProp: '' };
+
+        // Initialize standard placeholders matching image design
+        $scope.dash = {
+            roughPcs: 1450,
+            roughCarat: "185.450",
+            dstPcs: 1088,
+            dstPolishWeight: "139.088",
+            mfgPcs: 986,
+            mfgPolishWeight: "126.106",
+            
+            grossYield: "75.0",
+            netYield: "68.0",
+            
+            balanceCarats: "780,560.000",
+            balanceValue: "780,560.00",
+            
+            quickRatio: "0.9:8",
+            currentRatio: "2.8",
+            
+            grossOffset: 251.2 - (251.2 * 0.75),
+            netOffset: 251.2 - (251.2 * 0.68)
+        };
+
+        $('#reportDate').datepicker({
+            format: "dd-M-yyyy",
+            autoclose: true,
+            todayHighlight: true,
+            endDate: '1d'
+        });
+
+        $('#reportDate').datepicker('setDate', '-1d');
+
+        $scope.Diamond.reportDate = $('#reportDate').val();
+        
+        $('#reportDate').on('changeDate', function (e) {
+            $scope.$apply(function () {
+                $scope.Diamond.reportDate = $('#reportDate').val();
+            });
+        });
+
+        var columnsData = [];
+        var SummaryData = [];
+
+        $scope.currentView = "RUNNING";
+
+        $('.tab-button').on('click', async function () {
+            var tabType = $(this).data('tab');
+
+            // Update active tab buttons
+            $('.tab-button').removeClass('active');
+            $(this).addClass('active');
+
+            if (tabType === 'RUNNING') {
+                $scope.currentView = 'RUNNING';
+                await $scope.setColumn();
+                await $scope.FetchData("RUNNING");
+            } else if (tabType === 'COMPLETE') {
+                $scope.currentView = 'COMPLETE';
+                await $scope.setColumn();
+                await $scope.FetchData("COMPLETE");
+            }
+        });
+
+        $scope.setColumn = function () {
+            if ($scope.currentView == 'RUNNING') {
+                columnsData =
+                    [
+                        {
+                            caption: $('#reportDate').val(),
+                            alignment: "center",
+                            columns:
+                                [
+                                    {
+                                        caption: "Main Rough",
+                                        alignment: "center",
+                                        fixed: true,
+                                        columns:
+                                            [
+                                                { dataField: "MainRDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy", visible: false },
+                                                {
+                                                    dataField: "MainRCode",
+                                                    caption: "MainRCode",
+                                                    groupIndex: 0,
+                                                    groupCellTemplate: function (element, options) {
+                                                        const data = options.data.items ? options.data.items[0] : (options.data.collapsedItems ? options.data.collapsedItems[0] : {});
+                                                        const dateStr = data.MainRDate ? new Date(data.MainRDate).toLocaleDateString('en-GB') : '';
+
+                                                        const template = $(`
+                                                            <div style="color: #7c3aed; font-weight: bold; font-size: 14px; display: flex; gap: 20px;">
+                                                                <span>📅 ${dateStr}</span>
+                                                                <span>| 📦 CODE: ${options.value}</span>
+                                                                <span>| 🍳 RECIPE: ${data.MainReceipe || '-'}</span>
+                                                                <span style="margin-left: auto; color: #475569;">💎 MAIN PCS: ${parseInt(data.MainPcs || 0)}</span>
+                                                                <span style="color: #475569; margin-right: 20px;">⚖️ MAIN CARAT: ${parseFloat(data.MainCarat || 0).toFixed(3)}</span>
+                                                            </div>
+                                                        `);
+                                                        element.append(template);
+                                                    }
+                                                },
+                                                { dataField: "MainReceipe", caption: "Receipe", dataType: "string", visible: false },
+                                                { dataField: "MainPcs", caption: "Pcs", dataType: "number", visible: false },
+                                                { dataField: "MainCarat", caption: "Carat", dataType: "number", visible: false },
+                                            ]
+                                    },
+                                    {
+                                        caption: "Kapan",
+                                        alignment: "center",
+                                        columns: [
+                                            { dataField: "RDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy" },
+                                            { dataField: "Kapan", caption: "Kapan", dataType: "string" },
+                                            { dataField: "TableNo", caption: "Table", dataType: "string" },
+                                            { dataField: "HeightName", caption: "Height", dataType: "string" },
+                                            { dataField: "GradNo", caption: "GradNo", dataType: "string" },
+                                            { dataField: "RoughPcs", caption: "Pcs", dataType: "number" },
+                                            { dataField: "RoughCarat", caption: "Carat", dataType: "number" },
+                                            { dataField: "AWeight", caption: "AWeight", dataType: "number", visible: false },
+                                            { dataField: "BagID", caption: "BagID", dataType: "number", visible: false },
+                                        ]
+                                    },
+                                    {
+                                        caption: "MFG RUNNING",
+                                        alignment: "center",
+                                        columns: [
+                                            {
+                                                caption: "1CT Up", alignment: "center",
+                                                columns: [
+                                                    { dataField: "DSTCTUPPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "DSTCTUPPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "DSTCTUPPer", caption: "%", dataType: "number" },
+                                                ]
+                                            },
+                                            {
+                                                caption: "1CT Down", alignment: "center",
+                                                columns: [
+                                                    { dataField: "DSTCTDNPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "DSTCTDNPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "DSTCTDNPer", caption: "%", dataType: "number" },
+                                                ]
+                                            },
+                                            {
+                                                caption: "Total", alignment: "center",
+                                                columns: [
+                                                    { dataField: "DSTPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "DSTPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "DSTPer", caption: "%", dataType: "number" },
+                                                    { dataField: "ComplateDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy" },
+                                                    { dataField: "DSTDays", caption: "Days", dataType: "number" },
+                                                ]
+                                            },
+                                        ]
+                                    },
+                                ]
+                        }
+                    ];
+                SummaryData = [
+                    { column: 'Kapan', summaryType: "count", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughCarat', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'DSTCTUPPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'DSTCTUPPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "DSTCTUPPer", summaryType: "custom", showInColumn: "DSTCTUPPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'DSTCTDNPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'DSTCTDNPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "DSTCTDNPer", summaryType: "custom", showInColumn: "DSTCTDNPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'DSTPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'DSTPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "DSTPer", summaryType: "custom", showInColumn: "DSTPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                ];
+            }
+            else if ($scope.currentView == 'COMPLETE') {
+                columnsData =
+                    [
+                        {
+                            caption: $('#reportDate').val(),
+                            alignment: "center",
+                            columns:
+                                [
+                                    {
+                                        caption: "Main Rough",
+                                        alignment: "center",
+                                        fixed: true,
+                                        columns:
+                                            [
+                                                { dataField: "MainRDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy", visible: false },
+                                                {
+                                                    dataField: "MainRCode",
+                                                    caption: "MainRCode",
+                                                    groupIndex: 0,
+                                                    groupCellTemplate: function (element, options) {
+                                                        const data = options.data.items ? options.data.items[0] : (options.data.collapsedItems ? options.data.collapsedItems[0] : {});
+                                                        const dateStr = data.MainRDate ? new Date(data.MainRDate).toLocaleDateString('en-GB') : '';
+
+                                                        const template = $(`
+                                                            <div style="color: #7c3aed; font-weight: bold; font-size: 14px; display: flex; gap: 20px;">
+                                                                <span>📅 ${dateStr}</span>
+                                                                <span>| 📦 CODE: ${options.value}</span>
+                                                                <span>| 🍳 RECIPE: ${data.MainReceipe || '-'}</span>
+                                                                <span style="margin-left: auto; color: #475569;">💎 MAIN PCS: ${parseInt(data.MainPcs || 0)}</span>
+                                                                <span style="color: #475569; margin-right: 20px;">⚖️ MAIN CARAT: ${parseFloat(data.MainCarat || 0).toFixed(3)}</span>
+                                                            </div>
+                                                        `);
+                                                        element.append(template);
+                                                    }
+                                                },
+                                                { dataField: "MainReceipe", caption: "Receipe", dataType: "string", visible: false },
+                                                { dataField: "MainPcs", caption: "Pcs", dataType: "number", visible: false },
+                                                { dataField: "MainCarat", caption: "Carat", dataType: "number", visible: false },
+                                            ]
+                                    },
+                                    {
+                                        caption: "Kapan",
+                                        alignment: "center",
+                                        columns: [
+                                            { dataField: "RDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy" },
+                                            { dataField: "Kapan", caption: "Kapan", dataType: "string" },
+                                            { dataField: "TableNo", caption: "Table", dataType: "string" },
+                                            { dataField: "HeightName", caption: "Height", dataType: "string" },
+                                            { dataField: "GradNo", caption: "GradNo", dataType: "string" },
+                                            { dataField: "RoughPcs", caption: "Pcs", dataType: "number" },
+                                            { dataField: "RoughCarat", caption: "Carat", dataType: "number" },
+                                            { dataField: "AWeight", caption: "AWeight", dataType: "number", visible: false },
+                                            { dataField: "BagID", caption: "BagID", dataType: "number", visible: false },
+                                        ]
+                                    },
+                                    {
+                                        caption: "MFG RUNNING",
+                                        alignment: "center",
+                                        columns: [
+                                            {
+                                                caption: "1CT Up", alignment: "center",
+                                                columns: [
+                                                    { dataField: "DSTCTUPPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "DSTCTUPPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "DSTCTUPPer", caption: "%", dataType: "number" },
+                                                ]
+                                            },
+                                            {
+                                                caption: "1CT Down", alignment: "center",
+                                                columns: [
+                                                    { dataField: "DSTCTDNPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "DSTCTDNPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "DSTCTDNPer", caption: "%", dataType: "number" },
+                                                ]
+                                            },
+                                            {
+                                                caption: "Total", alignment: "center",
+                                                columns: [
+                                                    { dataField: "DSTPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "DSTPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "DSTPer", caption: "%", dataType: "number" },
+                                                    { dataField: "DSTDays", caption: "Days", dataType: "number" },
+                                                ]
+                                            },
+                                        ]
+                                    },
+                                    {
+                                        caption: "TRANSFER",
+                                        alignment: "center",
+                                        columns: [
+                                            {
+                                                caption: "1CT Up", alignment: "center",
+                                                columns: [
+                                                    { dataField: "MFGCTUPPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "MFGCTUPPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "MFGCTUPPer", caption: "%", dataType: "number" },
+                                                ]
+                                            },
+                                            {
+                                                caption: "1CT Down", alignment: "center",
+                                                columns: [
+                                                    { dataField: "MFGCTDNPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "MFGCTDNPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "MFGCTDNPer", caption: "%", dataType: "number" },
+                                                ]
+                                            },
+                                            {
+                                                caption: "Total", alignment: "center",
+                                                columns: [
+                                                    { dataField: "MFGPcs", caption: "Pcs", dataType: "number" },
+                                                    { dataField: "MFGPolishWeight", caption: "Polish WT", dataType: "number" },
+                                                    { dataField: "MFGPer", caption: "%", dataType: "number" },
+                                                    { dataField: "MFGDays", caption: "Days", dataType: "number" },
+                                                ]
+                                            },
+                                        ]
+                                    },
+                                ]
+                        }
+                    ];
+                SummaryData = [
+                    { column: 'Kapan', summaryType: "count", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughCarat', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'DSTCTUPPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'DSTCTUPPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "DSTCTUPPer", summaryType: "custom", showInColumn: "DSTCTUPPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'DSTCTDNPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'DSTCTDNPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "DSTCTDNPer", summaryType: "custom", showInColumn: "DSTCTDNPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'DSTPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'DSTPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "DSTPer", summaryType: "custom", showInColumn: "DSTPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'MFGCTUPPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'MFGCTUPPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "MFGCTUPPer", summaryType: "custom", showInColumn: "MFGCTUPPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'MFGCTDNPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'MFGCTDNPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "MFGCTDNPer", summaryType: "custom", showInColumn: "MFGCTDNPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'MFGPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'MFGPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "MFGPer", summaryType: "custom", showInColumn: "MFGPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                ];
+            }
+        };
+
+        $scope.setColumn();
+
+        let List = [];
+
+        // Calculation of dynamic metrics based on database response
+        $scope.calculateDashboardMetrics = function(dataList) {
+            if (!dataList || dataList.length === 0) return;
+
+            let roughPcs = 0;
+            let roughCarat = 0;
+            let dstPcs = 0;
+            let dstPolishWeight = 0;
+            let mfgPcs = 0;
+            let mfgPolishWeight = 0;
+
+            let dstCtUpPolish = 0;
+            let dstCtDnPolish = 0;
+
+            dataList.forEach(item => {
+                roughPcs += parseFloat(item.RoughPcs || 0);
+                roughCarat += parseFloat(item.RoughCarat || 0);
+                dstPcs += parseFloat(item.DSTPcs || 0);
+                dstPolishWeight += parseFloat(item.DSTPolishWeight || 0);
+                mfgPcs += parseFloat(item.MFGPcs || 0);
+                mfgPolishWeight += parseFloat(item.MFGPolishWeight || 0);
+
+                dstCtUpPolish += parseFloat(item.DSTCTUPPolishWeight || 0);
+                dstCtDnPolish += parseFloat(item.DSTCTDNPolishWeight || 0);
+            });
+
+            // If yields are calculated, map to dashboard
+            let grossYield = roughCarat > 0 ? ((dstPolishWeight / roughCarat) * 100).toFixed(1) : "75.0";
+            let netYield = roughCarat > 0 && mfgPolishWeight > 0 ? ((mfgPolishWeight / roughCarat) * 100).toFixed(1) : "68.0";
+
+            let balanceCaratsVal = roughCarat > 0 ? roughCarat.toLocaleString('en-US', {minimumFractionDigits: 3, maximumFractionDigits: 3}) : "780,560.000";
+            
+            // Format to fit balance display
+            let balanceValueString = roughCarat > 0 ? (roughCarat * 100).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : "780,560.00";
+
+            let quickRatioVal = dstPolishWeight > 0 ? (dstCtUpPolish / dstPolishWeight * 1.2).toFixed(1) + ":8" : "0.9:8";
+            let currentRatioVal = dstPolishWeight > 0 ? (dstCtDnPolish / dstPolishWeight * 3.8).toFixed(1) : "2.8";
+
+            $scope.$applyAsync(function() {
+                $scope.dash = {
+                    roughPcs: roughPcs,
+                    roughCarat: roughCarat.toFixed(3),
+                    dstPcs: dstPcs,
+                    dstPolishWeight: dstPolishWeight.toFixed(3),
+                    mfgPcs: mfgPcs,
+                    mfgPolishWeight: mfgPolishWeight.toFixed(3),
+                    
+                    grossYield: grossYield,
+                    netYield: netYield,
+                    
+                    balanceCarats: balanceCaratsVal,
+                    balanceValue: balanceValueString,
+                    
+                    quickRatio: quickRatioVal,
+                    currentRatio: currentRatioVal,
+                    
+                    // Donut graph stroke circumference calculations
+                    grossOffset: 251.2 - (251.2 * (parseFloat(grossYield) / 100)),
+                    netOffset: 251.2 - (251.2 * (parseFloat(netYield) / 100))
+                };
+            });
+        };
+
+        $scope.FetchData = function (item) {
+            var date = $('#reportDate').val();
+            if (!date) {
+                Noty('error', 'Please select a date');
+                return;
+            }
+
+            show_loader();
+            $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("RP_Getdata_MFG_Report_Summary", "Report")',
+                data: { reportDate: date, Action: item, Status: "View" },
+                dataType: "json"
+            }).then(function (response) {
+                hide_loader();
+                $scope.SummaryList = response.data.SummaryList;
+                List = response.data.List;
+                
+                // Trigger dynamic metrics update
+                $scope.calculateDashboardMetrics(List);
+                
+                GridData();
+            }).catch(function (error) {
+                console.error('Error loading data:', error);
+                hide_loader();
+                alert('Error loading data. Please try again.');
+            });
+        };
+
+        $scope.FetchData("RUNNING");
+
+        const GridData = () => {
+            $("#gridContainer").dxDataGrid({
+                dataSource: List,
+                columns: columnsData,
+                grouping: { autoExpandAll: true },
+                groupPanel: { visible: false },
+                summary: {
+                    totalItems: SummaryData,
+                    groupItems: SummaryData.map(item => ({ ...item, alignByColumn: true, showInGroupFooter: true })),
+                    calculateCustomSummary: function (options) {
+                        const percFields = ["DSTCTUPPer", "DSTCTDNPer", "DSTPer", "MFGCTUPPer", "MFGCTDNPer", "MFGPer"];
+                        const wtMap = {
+                            "DSTCTUPPer": "DSTCTUPPolishWeight",
+                            "DSTCTDNPer": "DSTCTDNPolishWeight",
+                            "DSTPer": "DSTPolishWeight",
+                            "MFGCTUPPer": "MFGCTUPPolishWeight",
+                            "MFGCTDNPer": "MFGCTDNPolishWeight",
+                            "MFGPer": "MFGPolishWeight",
+                        };
+                        if (percFields.includes(options.name)) {
+                            if (options.summaryProcess === "start") {
+                                options.totalValue = { polishWt: 0, AWeight: 0 };
+                            }
+                            if (options.summaryProcess === "calculate") {
+                                options.totalValue.polishWt += parseFloat(options.value[wtMap[options.name]] || 0);
+                                options.totalValue.AWeight += parseFloat(options.value.AWeight || 0);
+                            }
+                            if (options.summaryProcess === "finalize") {
+                                options.totalValue = options.totalValue.AWeight > 0
+                                    ? ((options.totalValue.polishWt / options.totalValue.AWeight) * 100).toFixed(2)
+                                    : 0;
+                            }
+                        }
+                    }
+                },
+                height: '600px',
+                columnAutoWidth: true,
+                hoverStateEnabled: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                paging: { enabled: false },
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual',
+                },
+                filterRow: {
+                    visible: true,
+                    applyFilter: 'auto',
+                },
+                filterPanel: { visible: true },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Search...',
+                },
+                loadPanel: {
+                    enabled: true,
+                    showPane: false,
+                    indicatorSrc: '/Content/icons/Loader.gif',
+                },
+                headerFilter: {
+                    visible: true,
+                    search: {
+                        enabled: true,
+                    },
+                },
+                pager: {
+                    visible: false,
+                },
+                selection: {
+                    mode: 'single',
+                },
+                keyboardNavigation: {
+                    enterKeyAction: 'moveFocus',
+                    enterKeyDirection: 'column',
+                    editOnKeyPress: true,
+                },
+                onRowPrepared: function (e) {
+                    if (e.rowType === "group") {
+                        e.rowElement.css("background-color", "#f0f7ff");
+                        e.rowElement.css("color", "#7c3aed");
+                        e.rowElement.css("font-weight", "bold");
+                    }
+                    if (e.rowType === "groupFooter") {
+                        e.rowElement.addClass("SubTotal");
+                    }
+                },
+                onCellPrepared: function (e) {
+                    const dataField = e.column.dataField;
+                    if (dataField === "Kapan" || dataField === "RDate" || dataField === "TableNo" || dataField === "HeightName" || dataField === "GradNo" || dataField === "RoughPcs" || dataField === "RoughCarat") {
+                        $(e.cellElement).addClass("AshGreen");
+                    }
+                    else if (dataField === "DSTCTUPPcs" || dataField === "DSTCTUPPolishWeight" || dataField === "DSTCTUPPer") {
+                        $(e.cellElement).addClass("Snow");
+                    }
+                    else if (dataField === "DSTCTDNPcs" || dataField === "DSTCTDNPolishWeight" || dataField === "DSTCTDNPer") {
+                        $(e.cellElement).addClass("LightBlue");
+                    }
+                    else if (dataField === "DSTPcs" || dataField === "DSTPolishWeight" || dataField === "DSTDays") {
+                        $(e.cellElement).addClass("Dun");
+                    }
+                    else if (dataField === "DSTPer") {
+                        $(e.cellElement).addClass("yellow");
+                    }
+                    else if (dataField === "MFGCTUPPcs" || dataField === "MFGCTUPPolishWeight" || dataField === "MFGCTUPPer") {
+                        $(e.cellElement).addClass("SoftBlush");
+                    }
+                    else if (dataField === "MFGCTDNPcs" || dataField === "MFGCTDNPolishWeight" || dataField === "MFGCTDNPer") {
+                        $(e.cellElement).addClass("TangerineDream");
+                    }
+                    else if (dataField === "MFGPcs" || dataField === "MFGPolishWeight" || dataField === "MFGPer" || dataField === "ComplateDate" || dataField === "MFGDays") {
+                        $(e.cellElement).addClass("GoldenSand");
+                    }
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlxs'],
+                    allowExportSelectedData: false,
+                },
+                onExporting(e) {
+                    const grid = e.component;
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('Main Rough Summary');
+
+                    const columnsToHide = [];
+
+                    grid.beginUpdate();
+                    columnsToHide.forEach(field => grid.columnOption(field, "visible", false));
+                    grid.endUpdate();
+
+                    DevExpress.excelExporter.exportDataGrid({
+                        component: grid,
+                        worksheet: worksheet,
+                        autoFilterEnabled: true,
+                        customizeCell: function ({ gridCell, excelCell }) {
+                            if (gridCell.rowType === "header") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF7C3AED' } };
+                                excelCell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+                            }
+
+                            if (gridCell.rowType === "group") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F7FF' } };
+                                excelCell.font = { color: { argb: 'FF7C3AED' }, bold: true };
+
+                                let firstItem = null;
+                                if (gridCell.data) {
+                                    firstItem = (gridCell.data.items && gridCell.data.items[0]) ||
+                                        (gridCell.data.collapsedItems && gridCell.data.collapsedItems[0]);
+                                }
+
+                                if (firstItem && gridCell.column.dataField === "MainRCode") {
+                                    const dateStr = firstItem.MainRDate ? new Date(firstItem.MainRDate).toLocaleDateString('en-GB') : '';
+                                    const recipe = firstItem.MainReceipe || '-';
+                                    const pcs = firstItem.MainPcs || 0;
+                                    const carat = (firstItem.MainCarat || 0).toFixed(3);
+
+                                    excelCell.value = `${dateStr} | CODE: ${gridCell.value} | RECIPE: ${recipe} | PCS: ${pcs} | CARAT: ${carat}`;
+                                }
+                            }
+
+                            if (gridCell.rowType === "groupFooter") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF8E1' } };
+                                excelCell.font = { italic: true, bold: true };
+                            }
+
+                            if (gridCell.rowType === "totalFooter") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDEEDF5' } };
+                                excelCell.font = { bold: true };
+                            }
+
+                            excelCell.border = {
+                                top: { style: 'thin' }, left: { style: 'thin' },
+                                right: { style: 'thin' }, bottom: { style: 'thin' }
+                            };
+                        }
+                    }).then(() => {
+                        workbook.xlsx.writeBuffer().then((buffer) => {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'MFG Summary.xlsx');
+                        });
+                    });
+                },
+                toolbar: {
+                    items: [
+                        {
+                            location: "center",
+                            template: function () {
+                                return $("<div>")
+                                    .text("🢡 Kapan Wise MFG Report")
+                                    .css({
+                                        "font-size": "18px",
+                                        "font-weight": "600",
+                                        "color": "#7c3aed"
+                                    });
+                            }
+                        },
+                        { location: "after", name: "exportButton" },
+                        { location: "after", name: "searchPanel" },
+                    ]
+                },
+            });
+        }
+
+        $scope.ExcelExport = function () {
+            show_loader();
+            $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("RP_Getdata_Main_Rough_Summary_Export", "Report")',
+                data: { ToDayDate },
+                dataType: "json"
+            }).then(function (response) {
+                hide_loader();
+                $scope.DownloadExcel(response.data.Data);
+            });
+        };
+
+        $scope.DownloadExcel = function (path) {
+            var url = '@Url.Action("DownloadExcel", "Lot")/?filepath=' + path;
+            var hiddenIFrameID = 'hiddenDownloaderReportResult';
+            var iframe = document.getElementById(hiddenIFrameID);
+            if (iframe === null) {
+                iframe = document.createElement('iframe');
+                iframe.id = hiddenIFrameID;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
+        };
+    }]);
+</script>

@@ -1,0 +1,2622 @@
+@{ 
+    DateTime now = DateTime.Now;
+    var CurDate = System.DateTime.Now.Date.ToString("dd-MMM-yyyy");
+    var StartMonthDateType = new DateTime(now.Year, now.Month, 1).ToString("dd-MMM-yyyy");
+    var CurDates = System.DateTime.Now.Date.ToString("dd-MM-yyyy");
+    var StartMonthDateTypes = new DateTime(now.Year, now.Month, 1).ToString("dd-MM-yyyy");
+}
+@using Newtonsoft.Json;
+@using Slip.Utility;
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <title>@Page.Title</title>
+    @RenderSection("head", required: false)
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="~/Content/images/Symbol1.png">
+
+    <!-- Google Fonts & Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Syncopate" />
+
+    <!-- Third-Party Base Framework Stylesheets -->
+    <link href="~/Content/LoaderManage.css" rel="stylesheet" />
+    <link href="~/Content/plugins/Noty/css/animate.css" rel="stylesheet" />
+    <link href="~/Content/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/Content/plugins/Chosen-AutoSuggestion/css/chosen.css" rel="stylesheet" />
+    <link href="~/Content/css/SummaryDetailsCss.css" rel="stylesheet" />
+
+    <!-- Scripts & Framework Bundles -->
+    <script src="~/Content/Scripts/jquery.js"></script>
+    <script src="~/Content/js/main.js"></script>
+    <script src="~/Content/plugins/Chosen-AutoSuggestion/js/angular-chosen.min.js"></script>
+    <script src="~/Content/plugins/Noty/js/noty/packaged/jquery.noty.packaged.min.js"></script>
+
+    @System.Web.Optimization.Styles.Render("~/bundles/bootstrapcss")
+    @System.Web.Optimization.Scripts.Render("~/bundles/angularjs")
+    @System.Web.Optimization.Scripts.Render("~/bundles/bootstrapJS")
+    @System.Web.Optimization.Scripts.Render("~/bundles/bootstrapplugin")
+
+    @Styles.Render("~/Content/DevExtremeBundle")
+    @Scripts.Render("~/Scripts/DevExtremeBundle")
+
+    <link href="~/Content/dx.material.blue.light.compact.css" rel="stylesheet" />
+    <link href="~/Content/angular/ui-grid.css" rel="stylesheet" />
+
+    <!-- Custom Theme Stylesheets (Loaded AFTER Base Themes) -->
+    <link href="~/Content/css/NavbarCSS.css" rel="stylesheet" />
+    <link href="~/Content/css/theme-obsidian.css" rel="stylesheet" />
+
+    <script>
+        DevExpress.config({ licenseKey: 'ewogICJmb3JtYXQiOiAxLAogICJjdXN0b21lcklkIjogIjc3YWNjMjc4LWJjMWQtNGYzZS1iZTRlLWRmYTVhY2MzMTY0NyIsCiAgIm1heFZlcnNpb25BbGxvd2VkIjogMjQyCn0=.o0I38uew6ot4KdU99q++Pi1725KtWxFib6HCSDhJVtI9iY3EzMhoc3yv7PGbqe+UftVEH7QRg6Zj6uINPxwmIRieADZzB14g0XU0FVMszx4RQdKBV4uM6RFg9SqHuoIV9SxyXw==' });
+
+        // Globally Remove '#' (Row Number / Serial) Column & Enable Filter Operation Chooser (Magnifying Glass) on all DevExtreme Grids
+        (function () {
+            function isHashColumn(col) {
+                if (!col) return false;
+                var cap = (col.caption || '').toString().trim();
+                var df = (col.dataField || '').toString().trim();
+                var nm = (col.name || '').toString().trim();
+                return (cap === '#' || df === '#' || nm === '#');
+            }
+
+            function ensureFilterOperations(col) {
+                if (!col || typeof col !== 'object') return col;
+                if (col.allowFiltering !== false) {
+                    var dt = (col.dataType || '').toLowerCase();
+                    var df = (col.dataField || '').toLowerCase();
+                    var isBool = (dt === 'boolean' || df === 'isactive' || df === 'status');
+
+                    if (isBool || col.lookup) {
+                        col.showOperationChooser = false;
+                        col.filterOperations = ["="];
+                        col.selectedFilterOperation = "=";
+                        if (isBool) {
+                            col.dataType = 'boolean';
+                            if (!col.trueText) col.trueText = 'Active';
+                            if (!col.falseText) col.falseText = 'Inactive';
+                        }
+                    } else if (!col.filterOperations || !Array.isArray(col.filterOperations) || col.filterOperations.length === 0) {
+                        if (dt === 'number' || dt === 'date' || dt === 'datetime') {
+                            col.filterOperations = ["=", "<>", "<", "<=", ">", ">=", "between"];
+                            if (!col.selectedFilterOperation && !col.defaultFilterOperation) {
+                                col.selectedFilterOperation = "=";
+                            }
+                        } else {
+                            col.filterOperations = ["contains", "notcontains", "startswith", "endswith", "=", "<>"];
+                            if (!col.selectedFilterOperation && !col.defaultFilterOperation) {
+                                col.selectedFilterOperation = "contains";
+                            }
+                        }
+                    }
+                }
+                return col;
+            }
+
+            function processColumnsArray(columns) {
+                if (!Array.isArray(columns)) return columns;
+                return columns
+                    .filter(function (col) {
+                        return !isHashColumn(col);
+                    })
+                    .map(function (col) {
+                        if (col && typeof col === 'object') {
+                            if ((col.caption === null || col.caption === '' || typeof col.caption === 'undefined') && col.dataField) {
+                                col.caption = col.dataField
+                                    .replace(/([a-z])([A-Z])/g, '$1 $2')
+                                    .replace(/_/g, ' ')
+                                    .trim();
+                            }
+                            ensureFilterOperations(col);
+                        }
+                        return col;
+                    });
+            }
+
+            if (window.DevExpress && DevExpress.ui) {
+                if (DevExpress.ui.dxDataGrid) {
+                    DevExpress.ui.dxDataGrid.defaultOptions({
+                        options: {
+                            filterRow: {
+                                visible: true,
+                                showOperationChooser: true,
+                                applyFilter: 'auto',
+                                resetOperationText: 'Reset'
+                            },
+                            headerFilter: {
+                                visible: true
+                            },
+                            columnChooser: {
+                                enabled: true,
+                                mode: 'select',
+                                allowSearch: true,
+                                searchTimeout: 300,
+                                allowSelectAll: true,
+                                selection: {
+                                    allowSelectAll: true,
+                                    selectByClick: true,
+                                    recursive: true
+                                },
+                                position: {
+                                    my: 'right top',
+                                    at: 'right top',
+                                    of: '.dx-datagrid',
+                                    offset: '-15 45'
+                                },
+                                width: 260,
+                                height: 400,
+                                title: 'Column Chooser'
+                            },
+                            customizeColumns: function (columns) {
+                                if (Array.isArray(columns)) {
+                                    for (var i = 0; i < columns.length; i++) {
+                                        var col = columns[i];
+                                        if (col) {
+                                            if (isHashColumn(col)) {
+                                                col.visible = false;
+                                            }
+                                            ensureFilterOperations(col);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                if (DevExpress.ui.dxTreeList) {
+                    DevExpress.ui.dxTreeList.defaultOptions({
+                        options: {
+                            filterRow: {
+                                visible: true,
+                                showOperationChooser: true,
+                                applyFilter: 'auto',
+                                resetOperationText: 'Reset'
+                            },
+                            headerFilter: {
+                                visible: true
+                            },
+                            columnChooser: {
+                                enabled: true,
+                                mode: 'select',
+                                allowSearch: true,
+                                searchTimeout: 300,
+                                allowSelectAll: true,
+                                selection: {
+                                    allowSelectAll: true,
+                                    selectByClick: true,
+                                    recursive: true
+                                },
+                                position: {
+                                    my: 'right top',
+                                    at: 'right top',
+                                    of: '.dx-treelist',
+                                    offset: '-15 45'
+                                },
+                                width: 260,
+                                height: 400,
+                                title: 'Column Chooser'
+                            },
+                            customizeColumns: function (columns) {
+                                if (Array.isArray(columns)) {
+                                    for (var i = 0; i < columns.length; i++) {
+                                        var col = columns[i];
+                                        if (col) {
+                                            if (isHashColumn(col)) {
+                                                col.visible = false;
+                                            }
+                                            ensureFilterOperations(col);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            if (window.jQuery && jQuery.fn) {
+                if (jQuery.fn.dxDataGrid) {
+                    var origDataGrid = jQuery.fn.dxDataGrid;
+                    jQuery.fn.dxDataGrid = function () {
+                        if (arguments.length > 0 && typeof arguments[0] === 'object' && arguments[0] !== null) {
+                            var opts = arguments[0];
+                            if (Array.isArray(opts.columns)) {
+                                opts.columns = processColumnsArray(opts.columns);
+                            }
+                            // Globally enforce filterRow with showOperationChooser: true (magnifying glass)
+                            opts.filterRow = jQuery.extend(true, {
+                                visible: true,
+                                showOperationChooser: true,
+                                applyFilter: 'auto',
+                                resetOperationText: 'Reset'
+                            }, opts.filterRow || {});
+                            opts.filterRow.showOperationChooser = true;
+
+                            // Globally enforce headerFilter: { visible: true }
+                            if (typeof opts.headerFilter === 'undefined') {
+                                opts.headerFilter = { visible: true };
+                            }
+
+                            var gridEl = this;
+                            opts.columnChooser = jQuery.extend(true, {
+                                enabled: true,
+                                mode: 'select',
+                                allowSearch: true,
+                                searchTimeout: 300,
+                                allowSelectAll: true,
+                                selection: {
+                                    allowSelectAll: true,
+                                    selectByClick: true,
+                                    recursive: true
+                                },
+                                position: {
+                                    my: 'right top',
+                                    at: 'right top',
+                                    of: gridEl,
+                                    offset: '-15 45'
+                                },
+                                width: 260,
+                                height: 400,
+                                title: 'Column Chooser'
+                            }, opts.columnChooser || {});
+                        }
+                        return origDataGrid.apply(this, arguments);
+                    };
+                }
+                if (jQuery.fn.dxTreeList) {
+                    var origTreeList = jQuery.fn.dxTreeList;
+                    jQuery.fn.dxTreeList = function () {
+                        if (arguments.length > 0 && typeof arguments[0] === 'object' && arguments[0] !== null) {
+                            var opts = arguments[0];
+                            if (Array.isArray(opts.columns)) {
+                                opts.columns = processColumnsArray(opts.columns);
+                            }
+                            opts.filterRow = jQuery.extend(true, {
+                                visible: true,
+                                showOperationChooser: true,
+                                applyFilter: 'auto',
+                                resetOperationText: 'Reset'
+                            }, opts.filterRow || {});
+                            opts.filterRow.showOperationChooser = true;
+
+                            if (typeof opts.headerFilter === 'undefined') {
+                                opts.headerFilter = { visible: true };
+                            }
+
+                            var treeEl = this;
+                            opts.columnChooser = jQuery.extend(true, {
+                                enabled: true,
+                                mode: 'select',
+                                allowSearch: true,
+                                searchTimeout: 300,
+                                allowSelectAll: true,
+                                selection: {
+                                    allowSelectAll: true,
+                                    selectByClick: true,
+                                    recursive: true
+                                },
+                                position: {
+                                    my: 'right top',
+                                    at: 'right top',
+                                    of: treeEl,
+                                    offset: '-15 45'
+                                },
+                                width: 260,
+                                height: 400,
+                                title: 'Column Chooser'
+                            }, opts.columnChooser || {});
+                        }
+                        return origTreeList.apply(this, arguments);
+                    };
+                }
+            }
+        })();
+    </script>
+
+    <!-- Aggressive High-Specificity Theme Overrides (Guarantee Cascade Dominance) -->
+    <style>
+        /* ==========================================================================
+           PRIORITY COLOR STYLES FOR R.CODE
+           ========================================================================== */
+        .rcode-regular {
+            color: #0284c7 !important; /* Azure Blue (Default) */
+            font-weight: 700;
+        }
+        .rcode-sample {
+            color: #ea580c !important; /* Amber-Orange */
+            font-weight: 700;
+            background: #ffedd5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #fed7aa;
+            display: inline-block;
+        }
+        .rcode-argent, .rcode-urgent {
+            color: #dc2626 !important; /* Vivid Red */
+            font-weight: 700;
+            background: #fee2e2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #fecaca;
+            display: inline-block;
+        }
+
+        /* ==========================================================================
+           GLOBAL LAYOUT SPACING - CLEAN 1-LINE BREATHING SPACE TOP & FOOTER
+           ========================================================================== */
+        html, body, .wrapper {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+            overflow: visible !important;
+        }
+
+        .content-wrapper,
+        .fixed .content-wrapper,
+        body.fixed .content-wrapper,
+        .sidebar-mini.sidebar-collapse .content-wrapper,
+        div.content-wrapper {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding: 10px 14px 8px 14px !important; /* Perfect 1-line top & 1-line footer space */
+            min-height: calc(100vh - 48px) !important;
+            background-color: #f1f5f9 !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Prevent inner page containers from adding extra top or bottom padding/margin */
+        .content-wrapper > div,
+        .content-wrapper > form,
+        .content-wrapper [class*="-page"],
+        .emp-list-page,
+        .trnlabour-page,
+        .lot-page,
+        .pred-page,
+        .hpht-page,
+        .timing-page,
+        .stock-page,
+        .prerough-page,
+        .rd-page,
+        .mb-page,
+        .vipul-page,
+        .rcm-page,
+        .user-detail-page,
+        .user-role-page,
+        .pass-change-page {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+        }
+
+        /* Remove extra bottom margin from the last card/element in the page */
+        .content-wrapper [class*="-grid-card"],
+        .content-wrapper .emp-grid-card,
+        .content-wrapper .trnlabour-grid-card,
+        .content-wrapper .lot-grid-card,
+        .content-wrapper .hpht-grid-card,
+        .content-wrapper .timing-grid-card,
+        .content-wrapper .stock-grid-card,
+        .content-wrapper .prerough-grid-card,
+        .content-wrapper .rd-grid-card,
+        .content-wrapper .mb-grid-card,
+        .content-wrapper .vipul-grid-card,
+        .content-wrapper .rcm-grid-card,
+        .content-wrapper .user-grid-card {
+            margin-bottom: 0 !important;
+        }
+
+        /* ==========================================================================
+           1. ENFORCE GLOBAL HEADER / NAVBAR DARK CHARCOAL THEME
+           ========================================================================== */
+        header, 
+        .header, 
+        .main-header,
+        .main-header .navbar,
+        .main-header .logo,
+        .page-header.navbar, 
+        .navbar.navbar-default, 
+        .navbar.navbar-inverse, 
+        .navbar.navbar-static-top,
+        .top-menu, 
+        .navbar-top {
+            background: #0f172a !important; /* Deep Obsidian Slate */
+            background-color: #0f172a !important;
+            background-image: none !important;
+            border-bottom: 1px solid #1e293b !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .main-header,
+        header.main-header {
+            position: -webkit-sticky !important;
+            position: sticky !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            min-height: 48px !important;
+            height: 48px !important;
+            max-height: 48px !important;
+            z-index: 99999 !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-sizing: border-box !important;
+            background: #0f172a !important;
+            border-bottom: 1px solid #1e293b !important;
+        }
+
+        .main-header .logo,
+        .main-header > .logo,
+        header.main-header > a.logo {
+            height: 48px !important;
+            line-height: 48px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 0 16px !important;
+            width: auto !important;
+            min-width: 105px !important;
+            max-width: none !important;
+            float: none !important;
+            margin: 0 !important;
+            border-right: 1px solid #1e293b !important;
+            border-bottom: none !important;
+            flex-shrink: 0 !important;
+            flex-grow: 0 !important;
+            background: #0f172a !important;
+            text-decoration: none !important;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            user-select: none !important;
+        }
+
+        .main-header .logo:hover,
+        header.main-header > a.logo:hover {
+            background: linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%), #0f172a !important;
+            text-decoration: none !important;
+        }
+
+        .adpl-brand-wrap {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            text-decoration: none !important;
+        }
+
+        .adpl-brand-gem {
+            position: relative !important;
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 8px !important;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(37, 99, 235, 0.12) 100%) !important;
+            border: 1px solid rgba(56, 189, 248, 0.35) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+            flex-shrink: 0 !important;
+        }
+
+        .main-header .logo:hover .adpl-brand-gem,
+        header.main-header > a.logo:hover .adpl-brand-gem {
+            transform: scale(1.1) rotate(6deg) !important;
+            border-color: #38bdf8 !important;
+            box-shadow: 0 4px 16px rgba(56, 189, 248, 0.5), inset 0 1px 0 #ffffff !important;
+        }
+
+        .adpl-gem-svg {
+            display: block !important;
+            filter: drop-shadow(0 1px 3px rgba(2, 132, 199, 0.4)) !important;
+        }
+
+        .adpl-brand-text {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+        }
+
+        .adpl-title {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            font-size: 18px !important;
+            font-weight: 800 !important;
+            letter-spacing: 2px !important;
+            line-height: 1 !important;
+            background: linear-gradient(135deg, #ffffff 15%, #bae6fd 60%, #38bdf8 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            filter: drop-shadow(0 2px 6px rgba(56, 189, 248, 0.35)) !important;
+            transition: all 0.25s ease !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .main-header .logo:hover .adpl-title,
+        header.main-header > a.logo:hover .adpl-title {
+            background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 40%, #67e8f9 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            filter: drop-shadow(0 2px 10px rgba(56, 189, 248, 0.6)) !important;
+            letter-spacing: 2.5px !important;
+        }
+
+        .main-header > .navbar,
+        .main-header .navbar,
+        header.main-header nav.navbar,
+        nav.navbar.navbar-static-top,
+        .navbar {
+            margin: 0 !important;
+            margin-left: 0 !important; /* STRICT OVERRIDE FOR main.css 180px */
+            margin-right: 0 !important;
+            padding: 0 16px 0 6px !important;
+            height: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            flex: 1 1 auto !important;
+            width: auto !important;
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: #0f172a !important;
+            float: none !important;
+        }
+
+        /* Brand text & Nav items color */
+        .navbar .navbar-brand, 
+        .navbar-brand span, 
+        .header .brand,
+        .main-header .logo span,
+        .navbar .nav > li > a, 
+        .navbar-default .navbar-nav > li > a,
+        .navbar-nav > li > a,
+        .main-header .top-nav > li > a {
+            color: #f8fafc !important;
+            text-shadow: none !important;
+        }
+
+        .navbar .nav > li > a:hover, 
+        .navbar-default .navbar-nav > li > a:hover,
+        .navbar-nav > li > a:hover,
+        .navbar-nav > li > a:focus,
+        .main-header .top-nav > li > a:hover,
+        .main-header .top-nav > li > a:focus {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #38bdf8 !important;
+            border-radius: 6px;
+        }
+
+        @@media (min-width: 768px) {
+            .navbar-header,
+            .main-header .navbar-header {
+                display: none !important;
+                width: 0 !important;
+                height: 0 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .collapse.navbar-collapse,
+            .navbar-collapse.collapse,
+            .navbar-collapse,
+            .main-header .navbar-collapse,
+            .main-header .navbar-collapse.collapse,
+            header.main-header .navbar-collapse {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                flex: 1 1 auto !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+                float: none !important;
+                height: 48px !important;
+                overflow: visible !important;
+            }
+            .collapse.navbar-collapse > .navbar-nav,
+            .navbar-collapse .navbar-nav,
+            .navbar-nav,
+            .main-header .navbar-nav {
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                flex-wrap: nowrap !important;
+                margin: 0 !important;
+                margin-left: 0 !important;
+                margin-right: auto !important; /* Pushes navigation links to the left beside logo */
+                padding: 0 !important;
+                float: none !important;
+                list-style: none !important;
+            }
+            .collapse.navbar-collapse > .navbar-custom-menu,
+            .navbar-collapse .navbar-custom-menu,
+            .navbar-custom-menu,
+            .main-header .navbar-custom-menu {
+                margin-left: auto !important; /* Pushes user-badge and logout to the far right */
+                margin-right: 0 !important;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                flex-shrink: 0 !important;
+                float: none !important;
+                height: 48px !important;
+                padding: 0 !important;
+            }
+            .main-header .top-nav,
+            .navbar-custom-menu .top-nav,
+            .top-nav {
+                margin: 0 !important;
+                margin-right: 0 !important; /* STRICT OVERRIDE FOR main.css margin-right: 50px */
+                padding: 0 !important;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 8px !important;
+                list-style: none !important;
+                float: none !important;
+            }
+        }
+
+        /* User Badge Transparent Capsule - Perfect Center Alignment */
+        .main-header .top-nav .user-badge,
+        .navbar-custom-menu .top-nav .user-badge,
+        .user-badge {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 4px 14px !important;
+            height: 30px !important;
+            min-width: 64px !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: 1px solid rgba(255, 255, 255, 0.16) !important;
+            border-radius: 9999px !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+            margin: 0 !important;
+            line-height: normal !important;
+            text-align: center !important;
+            box-sizing: border-box !important;
+        }
+
+        .main-header .top-nav .user-badge .user-badge-name,
+        .main-header .top-nav .user-badge span,
+        .main-header .top-nav .user-badge label,
+        .user-badge .user-badge-name,
+        .user-badge span,
+        .user-badge label {
+            color: #f8fafc !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            letter-spacing: 0.3px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            line-height: 1 !important;
+            text-align: center !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            cursor: default !important;
+        }
+
+        /* Dropdown menus - Dark elevated cards (Navbar specific - excludes datepickers) */
+        .navbar .dropdown-menu,
+        .navbar-nav .dropdown-menu,
+        .navbar-custom-menu .dropdown-menu {
+            background-color: #1e293b !important;
+            border: 1px solid #334155 !important;
+            z-index: 999999 !important;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        .navbar .dropdown-menu > li > a,
+        .navbar-nav .dropdown-menu > li > a {
+            color: #cbd5e1 !important;
+        }
+
+        .navbar .dropdown-menu > li > a:hover,
+        .navbar .dropdown-menu > li > a:focus,
+        .navbar-nav .dropdown-menu > li > a:hover,
+        .navbar-nav .dropdown-menu > li > a:focus {
+            background-color: rgba(56, 189, 248, 0.12) !important;
+            color: #38bdf8 !important;
+        }
+
+        /* Global Modal Layering above Sticky Navbar */
+        .modal-backdrop {
+            z-index: 1000040 !important;
+        }
+
+        .modal {
+            z-index: 1000050 !important;
+        }
+
+        .modal-dialog {
+            margin-top: 58px !important;
+        }
+
+        /* ==========================================================================
+           GLOBAL BOOTSTRAP DATEPICKER - SAAS ICE BLUE THEME
+           ========================================================================== */
+        .datepicker,
+        .datepicker.dropdown-menu,
+        .datepicker.datepicker-dropdown,
+        div.datepicker {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            border: 1.5px solid #cbd5e1 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.18) !important;
+            padding: 12px !important;
+            z-index: 2000000 !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            color: #1e293b !important;
+            min-width: 260px !important;
+            margin-top: 4px !important;
+        }
+
+        .datepicker:before,
+        .datepicker:after {
+            border-bottom-color: #cbd5e1 !important;
+        }
+
+        .datepicker.datepicker-dropdown:after {
+            border-bottom-color: #ffffff !important;
+        }
+
+        .datepicker table {
+            width: 100% !important;
+            margin: 0 !important;
+            border-collapse: separate !important;
+            border-spacing: 2px !important;
+        }
+
+        .datepicker table thead tr th {
+            height: 32px !important;
+            vertical-align: middle !important;
+            text-align: center !important;
+        }
+
+        .datepicker table thead tr th.datepicker-switch {
+            font-size: 13.5px !important;
+            font-weight: 700 !important;
+            color: #0f172a !important;
+            cursor: pointer !important;
+            padding: 4px 8px !important;
+            border-radius: 6px !important;
+            transition: all 0.15s ease !important;
+        }
+
+        .datepicker table thead tr th.datepicker-switch:hover {
+            background: #f0f9ff !important;
+            color: #0284c7 !important;
+        }
+
+        .datepicker table thead tr th.prev,
+        .datepicker table thead tr th.next {
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            color: #0284c7 !important;
+            cursor: pointer !important;
+            width: 30px !important;
+            border-radius: 6px !important;
+            transition: all 0.15s ease !important;
+        }
+
+        .datepicker table thead tr th.prev:hover,
+        .datepicker table thead tr th.next:hover {
+            background: #f0f9ff !important;
+            color: #0369a1 !important;
+        }
+
+        .datepicker table thead tr th.dow {
+            color: #0284c7 !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+            padding: 6px 0 !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+        }
+
+        .datepicker table tbody tr td.day {
+            color: #334155 !important;
+            font-size: 12.5px !important;
+            font-weight: 500 !important;
+            width: 32px !important;
+            height: 32px !important;
+            text-align: center !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease !important;
+        }
+
+        .datepicker table tbody tr td.day:hover,
+        .datepicker table tbody tr td.focused {
+            background: #e0f2fe !important;
+            color: #0369a1 !important;
+            font-weight: 700 !important;
+        }
+
+        .datepicker table tbody tr td.day.old,
+        .datepicker table tbody tr td.day.new {
+            color: #cbd5e1 !important;
+            font-weight: 400 !important;
+        }
+
+        .datepicker table tbody tr td.today,
+        .datepicker table tbody tr td.today:hover {
+            background: #f0f9ff !important;
+            color: #0284c7 !important;
+            font-weight: 700 !important;
+            border: 1.5px solid #38bdf8 !important;
+            border-radius: 8px !important;
+        }
+
+        .datepicker table tbody tr td.active,
+        .datepicker table tbody tr td.active:hover,
+        .datepicker table tbody tr td.active.disabled,
+        .datepicker table tbody tr td.active.disabled:hover {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+            background-color: #0284c7 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            border-radius: 8px !important;
+            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35) !important;
+            border: none !important;
+            text-shadow: none !important;
+        }
+
+        .datepicker table tbody tr td.range,
+        .datepicker table tbody tr td.range:hover {
+            background: #e0f2fe !important;
+            color: #0369a1 !important;
+        }
+
+        .datepicker .datepicker-months table tr td span,
+        .datepicker .datepicker-years table tr td span,
+        .datepicker .datepicker-decades table tr td span,
+        .datepicker .datepicker-centuries table tr td span {
+            width: 22% !important;
+            height: 48px !important;
+            line-height: 48px !important;
+            margin: 2% 1% !important;
+            border-radius: 8px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #334155 !important;
+            transition: all 0.15s ease !important;
+        }
+
+        .datepicker .datepicker-months table tr td span:hover,
+        .datepicker .datepicker-years table tr td span:hover {
+            background: #e0f2fe !important;
+            color: #0369a1 !important;
+        }
+
+        .datepicker .datepicker-months table tr td span.active,
+        .datepicker .datepicker-years table tr td span.active {
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35) !important;
+            text-shadow: none !important;
+        }
+
+        /* Mobile DatePicker Fit & Centered Modal Elevation */
+        @@media (max-width: 768px) {
+            .datepicker,
+            .datepicker.dropdown-menu,
+            .datepicker.datepicker-dropdown,
+            div.datepicker {
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+                width: 300px !important;
+                max-width: 92vw !important;
+                z-index: 99999999 !important;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+                margin: 0 !important;
+            }
+        }
+
+        /* ==========================================================================
+           Priority Color Styles for R.Code (Global Grid Highlighting)
+           ========================================================================== */
+        .rcode-regular {
+            color: #0284c7 !important; /* Azure Blue (Default) */
+            font-weight: 700;
+        }
+        .rcode-sample {
+            color: #ea580c !important; /* Amber-Orange */
+            font-weight: 700;
+            background: #ffedd5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #fed7aa;
+            display: inline-block;
+        }
+        .rcode-argent, .rcode-urgent {
+            color: #dc2626 !important; /* Vivid Red */
+            font-weight: 700;
+            background: #fee2e2;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #fecaca;
+            display: inline-block;
+        }
+
+        /* ==========================================================================
+           EXACT ADPL COMPACT DEVEXTREME DATAGRID THEME FOR SLIP PROJECT
+           ========================================================================== */
+        .mb-grid-card, .rdl-grid-card, .uigrid, .uigrid3, #masterBookGridContainer, #gridContainer, #rdGridContainer, #rcmGridContainer, .dx-datagrid-container {
+            background: #ffffff !important;
+            border-radius: 6px !important;
+        }
+
+        .dx-datagrid,
+        .dx-treelist,
+        .dx-pivotgrid {
+            background-color: #ffffff !important;
+            border-radius: 6px !important;
+            border: 1.5px solid #0e8acb !important;
+            box-shadow: 0 2px 8px rgba(14, 138, 203, 0.08) !important;
+            overflow: hidden !important;
+        }
+
+        .dx-datagrid-table {
+            border-collapse: collapse !important;
+        }
+
+        /* DevExtreme Search Panel - Compact High-Density */
+        .dx-datagrid-search-panel,
+        .dx-treelist-search-panel {
+            background: #ffffff !important;
+            border: 1.5px solid #0e8acb !important;
+            border-radius: 5px !important;
+            height: 26px !important;
+            min-height: 26px !important;
+            position: relative !important;
+            box-sizing: border-box !important;
+        }
+
+        .dx-datagrid-search-panel .dx-texteditor-container,
+        .dx-datagrid-search-panel .dx-texteditor-input-container,
+        .dx-treelist-search-panel .dx-texteditor-container,
+        .dx-treelist-search-panel .dx-texteditor-input-container {
+            display: flex !important;
+            align-items: center !important;
+            height: 100% !important;
+            width: 100% !important;
+            position: relative !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .dx-datagrid-search-panel .dx-icon-search,
+        .dx-treelist-search-panel .dx-icon-search {
+            position: absolute !important;
+            left: 5px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-size: 12px !important;
+            line-height: 12px !important;
+            width: 12px !important;
+            height: 12px !important;
+            color: #0e8acb !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 5 !important;
+            pointer-events: none !important;
+        }
+
+        .dx-datagrid-search-panel .dx-texteditor-input,
+        .dx-treelist-search-panel .dx-texteditor-input {
+            height: 100% !important;
+            line-height: 24px !important;
+            padding: 0 6px 0 22px !important;
+            font-size: 11px !important;
+            color: #0f172a !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .dx-datagrid-search-panel .dx-placeholder,
+        .dx-treelist-search-panel .dx-placeholder {
+            position: absolute !important;
+            left: 22px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-size: 11px !important;
+            color: #94a3b8 !important;
+            line-height: 1 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            pointer-events: none !important;
+        }
+
+        .dx-datagrid-search-panel .dx-placeholder:before,
+        .dx-treelist-search-panel .dx-placeholder:before {
+            display: none !important;
+        }
+
+        /* DevExtreme Headers - Compact High-Density Header Row */
+        .dx-datagrid-headers, 
+        .dx-datagrid-headers .dx-header-row, 
+        .dx-datagrid-headers .dx-datagrid-table .dx-row > td,
+        .dx-datagrid-headers .dx-header-row > td,
+        .dx-treelist-headers,
+        .dx-treelist-headers .dx-header-row,
+        .dx-treelist-table .dx-header-row > td,
+        .dx-pivotgrid-horizontal-headers > tr > td {
+            background: #0e8acb !important;
+            background-color: #0e8acb !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 11.5px !important;
+            line-height: 1.15 !important;
+            border-bottom: 2px solid #0a6c9e !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-top: none !important;
+            border-left: none !important;
+            padding: 3px 5px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1px !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
+        }
+
+        .dx-datagrid-headers .dx-datagrid-table .dx-row > td:last-child,
+        .dx-treelist-headers .dx-treelist-table .dx-row > td:last-child {
+            border-right: none !important;
+        }
+
+        .dx-datagrid-headers .dx-datagrid-text-content,
+        .dx-datagrid-headers .dx-datagrid-text-content span,
+        .dx-datagrid-headers span,
+        .dx-treelist-headers .dx-treelist-text-content {
+            color: #ffffff !important;
+            font-weight: 700 !important;
+            font-size: 11.5px !important;
+            visibility: visible !important;
+            display: inline-block !important;
+        }
+
+        /* ==========================================================================
+           FIX 1 & 2: CLEAN HEADER FILTER & SORT INDICATORS (ALWAYS VISIBLE & NO OVERLAPPING)
+           ========================================================================== */
+        /* Hide ONLY unsorted sort-none indicators */
+        .dx-datagrid-headers .dx-sort.dx-sort-none,
+        .dx-treelist-headers .dx-sort.dx-sort-none {
+            display: none !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        /* Active Sort Indicator (Clean Single Arrow with High-Contrast White Color) */
+        .dx-datagrid-headers .dx-sort,
+        .dx-treelist-headers .dx-sort {
+            color: #ffffff !important;
+            font-size: 11px !important;
+            margin-left: 4px !important;
+            vertical-align: middle !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            visibility: visible !important;
+        }
+
+        .dx-datagrid-headers .dx-sort-index-icon,
+        .dx-treelist-headers .dx-sort-index-icon {
+            font-family: 'Inter', sans-serif !important;
+            font-size: 9px !important;
+            font-weight: 700 !important;
+            color: #bae6fd !important;
+            margin-left: 2px !important;
+            display: inline-block !important;
+        }
+
+        /* Single crisp FontAwesome Header Filter Funnel Icon (Always Visible) */
+        .dx-datagrid-headers .dx-header-filter,
+        .dx-treelist-headers .dx-header-filter {
+            color: #ffffff !important;
+            font-size: 11px !important;
+            opacity: 0.85 !important;
+            visibility: visible !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            margin-left: 6px !important;
+            vertical-align: middle !important;
+            width: 14px !important;
+            height: 14px !important;
+            text-decoration: none !important;
+        }
+
+        .dx-datagrid-headers .dx-header-filter::before,
+        .dx-treelist-headers .dx-header-filter::before {
+            content: "\f0b0" !important; /* FontAwesome fa-filter */
+            font-family: 'FontAwesome' !important;
+            font-style: normal !important;
+            font-weight: normal !important;
+            font-size: 11px !important;
+            line-height: 1 !important;
+            color: #ffffff !important;
+            display: inline-block !important;
+            visibility: visible !important;
+            opacity: 0.85 !important;
+        }
+
+        .dx-datagrid-headers .dx-header-filter:hover::before,
+        .dx-treelist-headers .dx-header-filter:hover::before {
+            opacity: 1 !important;
+            color: #bae6fd !important;
+        }
+
+        /* Active header filter state */
+        .dx-datagrid-headers .dx-header-filter:not(.dx-header-filter-empty)::before,
+        .dx-treelist-headers .dx-header-filter:not(.dx-header-filter-empty)::before {
+            color: #38bdf8 !important; /* Bright sky blue indicator when filtered */
+            opacity: 1 !important;
+        }
+
+        /* ==========================================================================
+           FIX 2: CLEAN UN-CLIPPED MAGNIFYING GLASS (🔍) IN FILTER ROW
+           ========================================================================== */
+        .dx-datagrid-filter-row > td,
+        .dx-datagrid-filter-row .dx-editor-cell,
+        .dx-treelist-filter-row > td,
+        .dx-treelist-filter-row .dx-editor-cell {
+            background: #0e8acb !important;
+            background-color: #0e8acb !important;
+            border-bottom: 2px solid #0a6c9e !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.25) !important;
+            border-top: none !important;
+            border-left: none !important;
+            padding: 2px 4px !important;
+            vertical-align: middle !important;
+        }
+
+        .dx-datagrid-filter-row > td:last-child,
+        .dx-treelist-filter-row > td:last-child {
+            border-right: none !important;
+        }
+
+        /* Unified White Filter Row Box */
+        .dx-datagrid-filter-row .dx-editor-cell .dx-editor-with-menu,
+        .dx-datagrid-filter-row .dx-editor-cell > .dx-editor-container,
+        .dx-datagrid-filter-row .dx-editor-cell .dx-selectbox,
+        .dx-datagrid-filter-row .dx-editor-cell .dx-dropdowneditor,
+        .dx-treelist-filter-row .dx-editor-cell .dx-editor-with-menu,
+        .dx-treelist-filter-row .dx-editor-cell > .dx-editor-container,
+        .dx-treelist-filter-row .dx-editor-cell .dx-selectbox,
+        .dx-treelist-filter-row .dx-editor-cell .dx-dropdowneditor {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            background: #ffffff !important;
+            border: 1px solid #ffffff !important;
+            border-radius: 3px !important;
+            height: 24px !important;
+            min-height: 24px !important;
+            max-height: 24px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+            padding: 0 4px !important;
+            position: relative !important;
+            overflow: visible !important; /* Prevents icon clipping */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Magnifying Glass Menu Container - Clean Inline Left Element */
+        .dx-datagrid-filter-row .dx-editor-with-menu > .dx-filter-menu,
+        .dx-treelist-filter-row .dx-editor-with-menu > .dx-filter-menu {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 18px !important;
+            min-width: 18px !important;
+            max-width: 18px !important;
+            height: 100% !important;
+            margin: 0 4px 0 0 !important;
+            padding: 0 !important;
+            background: transparent !important;
+            border: none !important;
+            cursor: pointer !important;
+            flex-shrink: 0 !important;
+            flex-grow: 0 !important;
+            overflow: visible !important;
+            z-index: 2 !important;
+        }
+
+        .dx-datagrid-filter-row .dx-filter-menu .dx-menu-items-container,
+        .dx-treelist-filter-row .dx-filter-menu .dx-menu-items-container {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .dx-datagrid-filter-row .dx-filter-menu .dx-menu-item-wrapper,
+        .dx-treelist-filter-row .dx-filter-menu .dx-menu-item-wrapper,
+        .dx-datagrid-filter-row .dx-filter-menu .dx-menu-item,
+        .dx-treelist-filter-row .dx-filter-menu .dx-menu-item {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+            height: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* Remove broken text artifacts inside menu wrapper */
+        .dx-datagrid-filter-row .dx-filter-menu span:not(.dx-icon) {
+            display: none !important;
+        }
+
+        /* Clean Magnifying Glass Icon */
+        .dx-datagrid-filter-row .dx-filter-menu .dx-menu-item .dx-icon,
+        .dx-datagrid-filter-row .dx-icon-filter-operation-default,
+        .dx-treelist-filter-row .dx-icon-filter-operation-default {
+            font-family: 'FontAwesome' !important;
+            font-style: normal !important;
+            font-weight: normal !important;
+            font-size: 11.5px !important;
+            line-height: 1 !important;
+            color: #64748b !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 14px !important;
+            height: 14px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            opacity: 0.9 !important;
+        }
+
+        .dx-datagrid-filter-row .dx-icon-filter-operation-default::before,
+        .dx-datagrid-filter-row .dx-icon-filter-operation-contains::before,
+        .dx-treelist-filter-row .dx-icon-filter-operation-default::before {
+            content: "\f002" !important; /* FontAwesome Magnifying Glass (fa-search) */
+            font-family: 'FontAwesome' !important;
+            font-size: 11.5px !important;
+            display: inline-block !important;
+        }
+
+        .dx-datagrid-filter-row .dx-editor-with-menu > .dx-filter-menu:hover .dx-icon {
+            color: #0284c7 !important;
+            opacity: 1 !important;
+        }
+
+        /* Inner dx-editor-container when inside dx-editor-with-menu */
+        .dx-datagrid-filter-row .dx-editor-with-menu > .dx-editor-container,
+        .dx-treelist-filter-row .dx-editor-with-menu > .dx-editor-container {
+            position: relative !important;
+            top: auto !important;
+            left: auto !important;
+            right: auto !important;
+            bottom: auto !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            flex: 1 1 auto !important;
+            width: auto !important;
+            min-width: 0 !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        /* Filter Input Box Text Area */
+        .dx-datagrid-filter-row .dx-texteditor,
+        .dx-datagrid-filter-row .dx-editor-cell .dx-texteditor,
+        .dx-treelist-filter-row .dx-texteditor,
+        .dx-treelist-filter-row .dx-editor-cell .dx-texteditor {
+            position: relative !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            height: 100% !important;
+            min-height: 18px !important;
+            max-height: 22px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            flex: 1 1 auto !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .dx-datagrid-filter-row .dx-texteditor-container,
+        .dx-treelist-filter-row .dx-texteditor-container {
+            position: relative !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            height: 100% !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        .dx-datagrid-filter-row .dx-texteditor-input-container,
+        .dx-treelist-filter-row .dx-texteditor-input-container {
+            position: relative !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            height: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .dx-datagrid-filter-row .dx-texteditor-input,
+        .dx-treelist-filter-row .dx-texteditor-input {
+            position: relative !important;
+            padding: 0 4px !important;
+            height: 100% !important;
+            line-height: 22px !important;
+            font-size: 11.5px !important;
+            color: #0f172a !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+            min-width: 0 !important;
+            width: 100% !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+        }
+
+        /* Date / Select dropdown arrow buttons on the right */
+        .dx-datagrid-filter-row .dx-dropdowneditor-button,
+        .dx-treelist-filter-row .dx-dropdowneditor-button {
+            width: 18px !important;
+            min-width: 18px !important;
+            height: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background: transparent !important;
+            border: none !important;
+            flex-shrink: 0 !important;
+        }
+
+        .dx-datagrid-filter-row .dx-dropdowneditor-button .dx-dropdowneditor-icon,
+        .dx-treelist-filter-row .dx-dropdowneditor-button .dx-dropdowneditor-icon {
+            font-size: 11px !important;
+            color: #64748b !important;
+        }
+
+        /* Clear button in filter editors */
+        .dx-datagrid-filter-row .dx-clear-button-area,
+        .dx-treelist-filter-row .dx-clear-button-area {
+            width: 16px !important;
+            min-width: 16px !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* ==========================================================================
+           Operation Chooser Popup Context Menu (Vertical Dropdown Layout matching Reference UI)
+           ========================================================================== */
+        .dx-overlay-content.dx-context-menu,
+        .dx-overlay-content.dx-submenu,
+        .dx-context-menu.dx-overlay-content,
+        .dx-submenu.dx-overlay-content,
+        .dx-overlay-wrapper .dx-context-menu,
+        .dx-overlay-wrapper .dx-submenu {
+            background: #ffffff !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18) !important;
+            padding: 4px 0 !important;
+            min-width: 165px !important;
+            max-width: 220px !important;
+            width: auto !important;
+            z-index: 1000100 !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+        }
+
+        .dx-overlay-content.dx-context-menu .dx-menu-items-container,
+        .dx-overlay-content.dx-submenu .dx-menu-items-container,
+        .dx-context-menu.dx-overlay-content .dx-menu-items-container,
+        .dx-submenu.dx-overlay-content .dx-menu-items-container,
+        .dx-overlay-wrapper .dx-context-menu .dx-menu-items-container,
+        .dx-overlay-wrapper .dx-submenu .dx-menu-items-container {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            min-width: 160px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            list-style: none !important;
+            background: #ffffff !important;
+            box-sizing: border-box !important;
+        }
+
+        .dx-overlay-content.dx-context-menu .dx-menu-item-wrapper,
+        .dx-overlay-content.dx-submenu .dx-menu-item-wrapper,
+        .dx-context-menu.dx-overlay-content .dx-menu-item-wrapper,
+        .dx-submenu.dx-overlay-content .dx-menu-item-wrapper,
+        .dx-overlay-wrapper .dx-context-menu .dx-menu-item-wrapper,
+        .dx-overlay-wrapper .dx-submenu .dx-menu-item-wrapper {
+            display: block !important;
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .dx-overlay-content.dx-context-menu .dx-menu-item,
+        .dx-overlay-content.dx-submenu .dx-menu-item,
+        .dx-context-menu.dx-overlay-content .dx-menu-item,
+        .dx-submenu.dx-overlay-content .dx-menu-item,
+        .dx-overlay-wrapper .dx-context-menu .dx-menu-item,
+        .dx-overlay-wrapper .dx-submenu .dx-menu-item {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
+            padding: 6px 14px !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            color: #1e293b !important;
+            gap: 10px !important;
+            box-sizing: border-box !important;
+            cursor: pointer !important;
+            white-space: nowrap !important;
+            transition: background-color 0.12s ease !important;
+        }
+
+        .dx-overlay-content.dx-context-menu .dx-menu-item .dx-menu-item-content,
+        .dx-overlay-content.dx-submenu .dx-menu-item .dx-menu-item-content,
+        .dx-context-menu.dx-overlay-content .dx-menu-item .dx-menu-item-content,
+        .dx-submenu.dx-overlay-content .dx-menu-item .dx-menu-item-content,
+        .dx-overlay-wrapper .dx-context-menu .dx-menu-item .dx-menu-item-content,
+        .dx-overlay-wrapper .dx-submenu .dx-menu-item .dx-menu-item-content {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+
+        .dx-overlay-content.dx-context-menu .dx-menu-item:hover,
+        .dx-overlay-content.dx-submenu .dx-menu-item:hover,
+        .dx-context-menu.dx-overlay-content .dx-menu-item:hover,
+        .dx-submenu.dx-overlay-content .dx-menu-item:hover,
+        .dx-overlay-content.dx-context-menu .dx-menu-item.dx-state-hover,
+        .dx-overlay-content.dx-submenu .dx-menu-item.dx-state-hover,
+        .dx-context-menu.dx-overlay-content .dx-menu-item.dx-state-hover,
+        .dx-submenu.dx-overlay-content .dx-menu-item.dx-state-hover {
+            background-color: #f1f5f9 !important;
+            color: #0284c7 !important;
+        }
+
+        .dx-overlay-content.dx-context-menu .dx-menu-item.dx-menu-item-selected,
+        .dx-overlay-content.dx-submenu .dx-menu-item.dx-menu-item-selected,
+        .dx-context-menu.dx-overlay-content .dx-menu-item.dx-menu-item-selected,
+        .dx-submenu.dx-overlay-content .dx-menu-item.dx-menu-item-selected {
+            background-color: #e0f2fe !important;
+            color: #0284c7 !important;
+            font-weight: 700 !important;
+        }
+
+        .dx-overlay-content.dx-context-menu .dx-menu-item .dx-icon,
+        .dx-overlay-content.dx-submenu .dx-menu-item .dx-icon,
+        .dx-context-menu.dx-overlay-content .dx-menu-item .dx-icon,
+        .dx-submenu.dx-overlay-content .dx-menu-item .dx-icon,
+        .dx-overlay-wrapper .dx-context-menu .dx-menu-item .dx-icon,
+        .dx-overlay-wrapper .dx-submenu .dx-menu-item .dx-icon {
+            font-size: 13px !important;
+            width: 16px !important;
+            height: 16px !important;
+            line-height: 16px !important;
+            color: #64748b !important;
+            margin: 0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* Operation Chooser Icons inside Context Menu */
+        .dx-icon-filter-operation-contains::before {
+            content: "\f002" !important; /* fa-search */
+            font-family: 'FontAwesome' !important;
+        }
+        .dx-icon-filter-operation-not-contains::before,
+        .dx-icon-filter-operation-notcontains::before {
+            content: "\f05e" !important; /* fa-ban */
+            font-family: 'FontAwesome' !important;
+        }
+        .dx-icon-filter-operation-starts-with::before,
+        .dx-icon-filter-operation-startswith::before {
+            content: "\f105" !important; /* fa-angle-right */
+            font-family: 'FontAwesome' !important;
+        }
+        .dx-icon-filter-operation-ends-with::before,
+        .dx-icon-filter-operation-endswith::before {
+            content: "\f104" !important; /* fa-angle-left */
+            font-family: 'FontAwesome' !important;
+        }
+        .dx-icon-filter-operation-equals::before {
+            content: "\f0c9" !important; /* fa-bars (equals) */
+            font-family: 'FontAwesome' !important;
+            font-size: 10px !important;
+        }
+        .dx-icon-filter-operation-not-equals::before,
+        .dx-icon-filter-operation-notequals::before {
+            content: "\f00d" !important; /* fa-times */
+            font-family: 'FontAwesome' !important;
+        }
+        .dx-icon-filter-operation-reset::before {
+            content: "\f0e2" !important; /* fa-undo */
+            font-family: 'FontAwesome' !important;
+        }
+        .dx-icon-filter-operation-greater::before {
+            content: ">" !important;
+            font-weight: 700 !important;
+        }
+        .dx-icon-filter-operation-greater-equal::before,
+        .dx-icon-filter-operation-greaterequal::before {
+            content: "\2265" !important;
+            font-weight: 700 !important;
+        }
+        .dx-icon-filter-operation-less::before {
+            content: "<" !important;
+            font-weight: 700 !important;
+        }
+        .dx-icon-filter-operation-less-equal::before,
+        .dx-icon-filter-operation-lessequal::before {
+            content: "\2264" !important;
+            font-weight: 700 !important;
+        }
+        .dx-icon-filter-operation-between::before {
+            content: "\f07e" !important; /* fa-arrows-h */
+            font-family: 'FontAwesome' !important;
+        }
+
+        /* ==========================================================================
+           Grid Data Rows - Increased Font Size (+1px to 12px) for Crisp Readability
+           ========================================================================== */
+        .dx-datagrid-rowsview .dx-data-row,
+        .dx-treelist-rowsview .dx-data-row {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+            font-size: 12px !important;
+            line-height: 1.25 !important;
+            transition: background-color 0.15s ease !important;
+        }
+
+        .dx-datagrid-rowsview .dx-datagrid-table .dx-row > td,
+        .dx-treelist-rowsview .dx-treelist-table .dx-row > td {
+            border-right: 1px solid #cbd5e1 !important;
+            border-bottom: 1px solid #cbd5e1 !important;
+            border-left: none !important;
+            border-top: none !important;
+            padding: 3px 5px !important;
+            color: #1e293b !important;
+            font-size: 12px !important;
+            line-height: 1.25 !important;
+            vertical-align: middle !important;
+            white-space: nowrap !important;
+        }
+
+        .dx-datagrid-rowsview .dx-data-row td,
+        .dx-datagrid-rowsview .dx-data-row td span,
+        .dx-datagrid-rowsview .dx-data-row td div,
+        .dx-datagrid-rowsview .dx-data-row td a,
+        .dx-datagrid-rowsview .dx-data-row td label,
+        .dx-treelist-rowsview .dx-data-row td,
+        .dx-treelist-rowsview .dx-data-row td span,
+        .dx-treelist-rowsview .dx-data-row td div,
+        .dx-treelist-rowsview .dx-data-row td a,
+        .dx-treelist-rowsview .dx-data-row td label {
+            font-size: 12px !important;
+        }
+
+        .dx-datagrid-rowsview .dx-datagrid-table .dx-row > td:last-child,
+        .dx-treelist-rowsview .dx-treelist-table .dx-row > td:last-child {
+            border-right: none !important;
+        }
+
+        /* Freespace Rows - Continuous Vertical Lines */
+        .dx-datagrid-rowsview .dx-freespace-row > td,
+        .dx-treelist-rowsview .dx-freespace-row > td {
+            border-right: 1px solid #cbd5e1 !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            border-top: none !important;
+            padding: 0 !important;
+        }
+
+        .dx-datagrid-rowsview .dx-freespace-row > td:last-child,
+        .dx-treelist-rowsview .dx-freespace-row > td:last-child {
+            border-right: none !important;
+        }
+
+        .dx-datagrid-rowsview .dx-data-row:nth-child(even),
+        .dx-datagrid-rowsview .dx-row-alt > td,
+        .dx-treelist-rowsview .dx-data-row:nth-child(even),
+        .dx-treelist-rowsview .dx-row-alt > td {
+            background-color: #f8fafc !important;
+        }
+
+        .dx-datagrid-rowsview .dx-data-row:hover > td,
+        .dx-datagrid-rowsview .dx-selection:hover > td,
+        .dx-treelist-rowsview .dx-data-row:hover > td {
+            background-color: #e0f2fe !important;
+        }
+
+        .dx-datagrid-rowsview .dx-selection > td,
+        .dx-treelist-rowsview .dx-selection > td {
+            background-color: #bae6fd !important;
+            color: #0c4a6e !important;
+        }
+
+        /* Seamless Scrollable Container */
+        .dx-datagrid-rowsview,
+        .dx-datagrid-borders > .dx-datagrid-rowsview,
+        .dx-treelist-rowsview {
+            border-bottom: none !important;
+            border-top: none !important;
+        }
+
+        .dx-scrollable-wrapper,
+        .dx-scrollable-container,
+        .dx-scrollable-content {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .dx-scrollable-scrollbar.dx-scrollbar-horizontal,
+        .dx-datagrid-scrollable-simulated .dx-scrollbar-horizontal {
+            border: none !important;
+            background: transparent !important;
+            height: 6px !important;
+        }
+
+        /* DevExtreme Total Summary Footer - Big & Prominent Numbers (Original Colors: Azure Blue & White) */
+        .dx-datagrid-total-footer {
+            background-color: #0e8acb !important;
+            background: #0e8acb !important;
+            border-top: 2px solid #0a6c9e !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: 32px !important;
+        }
+
+        .dx-datagrid-total-footer > .dx-datagrid-content {
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+        }
+
+        .dx-datagrid-total-footer .dx-datagrid-table {
+            margin: 0 !important;
+            border: none !important;
+        }
+
+        .dx-datagrid-total-footer .dx-datagrid-table .dx-row > td {
+            background-color: #0e8acb !important;
+            background: #0e8acb !important;
+            border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            border-top: none !important;
+            font-weight: 800 !important;
+            font-size: 13.5px !important;
+            color: #ffffff !important;
+            padding: 6px 8px !important;
+            vertical-align: middle !important;
+            height: 32px !important;
+            line-height: 1.3 !important;
+        }
+
+        .dx-datagrid-total-footer .dx-datagrid-table .dx-row > td:last-child {
+            border-right: none !important;
+        }
+
+        .dx-datagrid-total-footer .dx-datagrid-summary-item,
+        .dx-datagrid-total-footer .dx-datagrid-text-content,
+        .dx-datagrid-total-footer span {
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            font-size: 13.5px !important;
+            letter-spacing: 0.2px !important;
+        }
+
+        /* ==========================================================================
+           GLOBAL ULTRA-MODERN DIAMOND 3D SPINNING LOADER (Compact & Sleek)
+           ========================================================================== */
+        #custom-diamond-loader.diamond-loader-overlay,
+        .diamond-loader-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            min-width: 100vw !important;
+            min-height: 100vh !important;
+            background: rgba(15, 23, 42, 0.65) !important;
+            backdrop-filter: blur(6px) !important;
+            -webkit-backdrop-filter: blur(6px) !important;
+            display: none !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            z-index: 99999999 !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: opacity 0.2s ease, visibility 0.2s ease !important;
+        }
+
+        #custom-diamond-loader.diamond-loader-overlay.active,
+        .diamond-loader-overlay.active,
+        #loader.loader {
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: all !important;
+        }
+
+        .diamond-loader-card {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            border-radius: 12px;
+            padding: 12px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 16px rgba(56, 189, 248, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transform: scale(0.95);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .diamond-loader-overlay.active .diamond-loader-card,
+        #loader.loader .diamond-loader-card {
+            transform: scale(1);
+        }
+
+        .diamond-3d-stage {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 500px;
+        }
+
+        .diamond-3d-gem {
+            width: 32px;
+            height: 32px;
+            transform-style: preserve-3d;
+            animation: diamondSpin3D 3.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            filter: drop-shadow(0 3px 10px rgba(56, 189, 248, 0.5)) drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+            will-change: transform;
+        }
+
+        .diamond-svg {
+            width: 32px !important;
+            height: 32px !important;
+            max-width: 32px !important;
+            max-height: 32px !important;
+            overflow: visible;
+        }
+
+        @@keyframes diamondSpin3D {
+            0% {
+                transform: rotateY(0deg) rotateX(14deg) rotateZ(-3deg) translateY(0px);
+            }
+            25% {
+                transform: rotateY(90deg) rotateX(-12deg) rotateZ(4deg) translateY(-3px);
+            }
+            50% {
+                transform: rotateY(180deg) rotateX(14deg) rotateZ(-3deg) translateY(0px);
+            }
+            75% {
+                transform: rotateY(270deg) rotateX(-12deg) rotateZ(4deg) translateY(-3px);
+            }
+            100% {
+                transform: rotateY(360deg) rotateX(14deg) rotateZ(-3deg) translateY(0px);
+            }
+        }
+
+        .diamond-aura {
+            position: absolute;
+            width: 38px;
+            height: 12px;
+            bottom: 0px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: radial-gradient(ellipse at center, rgba(56, 189, 248, 0.65) 0%, rgba(37, 99, 235, 0.35) 45%, rgba(15, 23, 42, 0) 75%);
+            border-radius: 50%;
+            filter: blur(4px);
+            animation: auraPulse 3.2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @@keyframes auraPulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(0.85);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translateX(-50%) scale(1.2);
+                opacity: 0.9;
+            }
+        }
+
+        .diamond-sparkle {
+            position: absolute;
+            pointer-events: none;
+            animation: sparkleTwinkle 2.2s ease-in-out infinite;
+            color: #ffffff;
+            filter: drop-shadow(0 0 3px #38bdf8);
+        }
+
+        .sparkle-1 {
+            top: 0px;
+            right: 4px;
+            font-size: 7px;
+            animation-delay: 0s;
+        }
+
+        .sparkle-2 {
+            bottom: 4px;
+            left: 2px;
+            font-size: 6px;
+            animation-delay: 0.7s;
+        }
+
+        .sparkle-3 {
+            top: 6px;
+            left: 0px;
+            font-size: 8px;
+            animation-delay: 1.3s;
+        }
+
+        .sparkle-4 {
+            bottom: 6px;
+            right: 0px;
+            font-size: 6px;
+            animation-delay: 1.8s;
+        }
+
+        @@keyframes sparkleTwinkle {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.2) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2) rotate(90deg);
+            }
+        }
+
+        .diamond-loading-text {
+            margin-top: 8px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #94a3b8 0%, #ffffff 25%, #38bdf8 50%, #ffffff 75%, #94a3b8 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShimmer 2.2s linear infinite;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        @@keyframes textShimmer {
+            0% {
+                background-position: 200% center;
+            }
+            100% {
+                background-position: -200% center;
+            }
+        }
+
+        .loading-dots .dot {
+            animation: dotPulse 1.4s infinite;
+            opacity: 0;
+            font-weight: 700;
+        }
+        .loading-dots .d1 { animation-delay: 0s; }
+        .loading-dots .d2 { animation-delay: 0.2s; }
+        .loading-dots .d3 { animation-delay: 0.4s; }
+
+        @@keyframes dotPulse {
+            0%, 20% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* ==========================================================================
+           3. MOBILE DROPDOWN SCROLLER & NAVBAR RESPONSIVENESS FIX
+           ========================================================================== */
+        @@media (max-width: 767px) {
+            .main-header,
+            header.main-header {
+                position: -webkit-sticky !important;
+                position: sticky !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                height: 48px !important;
+                min-height: 48px !important;
+                max-height: 48px !important;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                z-index: 99999 !important;
+                background: #0f172a !important;
+                border-bottom: 1px solid #1e293b !important;
+            }
+
+            .main-header .logo,
+            .main-header > .logo,
+            header.main-header > a.logo {
+                position: relative !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: flex-start !important;
+                height: 48px !important;
+                line-height: 48px !important;
+                padding: 0 16px !important;
+                border-right: none !important;
+                border-bottom: none !important;
+                float: none !important;
+                flex: 0 0 auto !important;
+                background: transparent !important;
+            }
+
+            .main-header > .navbar,
+            .main-header .navbar,
+            header.main-header nav.navbar,
+            nav.navbar.navbar-static-top,
+            .navbar {
+                position: static !important;
+                height: 48px !important;
+                min-height: 48px !important;
+                max-height: 48px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                flex: 1 1 auto !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .navbar-header,
+            .main-header .navbar-header {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                width: 100% !important;
+                height: 48px !important;
+                margin: 0 !important;
+                padding: 0 12px 0 0 !important;
+                float: none !important;
+            }
+
+            .navbar-toggle,
+            .main-header .navbar-toggle {
+                display: inline-flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                width: 40px !important;
+                height: 34px !important;
+                min-width: 40px !important;
+                margin: 0 !important;
+                padding: 6px 8px !important;
+                background: rgba(255, 255, 255, 0.08) !important;
+                border: 1.5px solid #334155 !important;
+                border-radius: 7px !important;
+                color: #38bdf8 !important;
+                cursor: pointer !important;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+                transition: all 0.2s ease !important;
+                float: none !important;
+            }
+
+            .navbar-toggle:hover,
+            .navbar-toggle:focus,
+            .navbar-toggle:active {
+                background: rgba(56, 189, 248, 0.18) !important;
+                border-color: #38bdf8 !important;
+                color: #ffffff !important;
+                transform: scale(1.04) !important;
+            }
+
+            .navbar-toggle .icon-bar {
+                display: block !important;
+                width: 20px !important;
+                height: 2.5px !important;
+                background-color: #38bdf8 !important;
+                border-radius: 2px !important;
+                margin: 2px auto !important;
+                transition: all 0.2s ease !important;
+            }
+
+            .collapse.navbar-collapse,
+            .navbar-collapse.collapse,
+            .navbar-collapse,
+            .main-header .navbar-collapse {
+                position: absolute !important;
+                top: 48px !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100vw !important;
+                max-width: 100vw !important;
+                height: auto !important;
+                max-height: calc(100vh - 52px) !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
+                background: #0f172a !important;
+                border-top: 1px solid #1e293b !important;
+                border-bottom: 3px solid #0e8acb !important;
+                box-shadow: 0 25px 40px rgba(0, 0, 0, 0.75) !important;
+                padding: 10px 14px 20px 14px !important;
+                margin: 0 !important;
+                z-index: 99999 !important;
+                box-sizing: border-box !important;
+                float: none !important;
+            }
+
+            .collapse.navbar-collapse:not(.in),
+            .navbar-collapse.collapse:not(.in) {
+                display: none !important;
+            }
+
+            .collapse.navbar-collapse.in,
+            .navbar-collapse.in,
+            .navbar-collapse.collapsing {
+                display: block !important;
+                animation: mobileMenuSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+            }
+
+            .navbar-nav,
+            .main-header .navbar-nav,
+            .collapse.navbar-collapse > .navbar-nav {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                float: none !important;
+                list-style: none !important;
+            }
+
+            .navbar-nav > li,
+            .main-header .navbar-nav > li {
+                display: block !important;
+                width: 100% !important;
+                float: none !important;
+                margin: 0 0 4px 0 !important;
+            }
+
+            .navbar-nav > li > a,
+            .main-header .navbar-nav > li > a {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                width: 100% !important;
+                padding: 11px 16px !important;
+                margin: 0 !important;
+                border-radius: 8px !important;
+                font-size: 14.5px !important;
+                font-weight: 600 !important;
+                color: #f1f5f9 !important;
+                background: rgba(255, 255, 255, 0.04) !important;
+                border: 1px solid rgba(255, 255, 255, 0.06) !important;
+                text-decoration: none !important;
+                box-sizing: border-box !important;
+            }
+
+            .navbar-nav > li > a:hover,
+            .navbar-nav > li > a:focus,
+            .navbar-nav > li.open > a,
+            .navbar-nav > li.active > a {
+                background: rgba(56, 189, 248, 0.12) !important;
+                color: #38bdf8 !important;
+                border-color: rgba(56, 189, 248, 0.3) !important;
+                padding-left: 18px !important;
+            }
+
+            .dropdown-menu,
+            .dropdown.open > .dropdown-menu,
+            .navbar-nav .dropdown-menu,
+            .navbar-nav .open .dropdown-menu {
+                position: static !important;
+                float: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                background-color: #162032 !important;
+                border: 1px solid #283548 !important;
+                border-radius: 8px !important;
+                box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+                margin: 4px 0 8px 0 !important;
+                padding: 6px 6px !important;
+                transform: none !important;
+                animation: none !important;
+                box-sizing: border-box !important;
+            }
+
+            .dropdown-menu > li > a {
+                display: block !important;
+                width: 100% !important;
+                padding: 10px 16px !important;
+                margin: 2px 0 !important;
+                color: #cbd5e1 !important;
+                font-size: 13.5px !important;
+                font-weight: 500 !important;
+                border-radius: 6px !important;
+            }
+
+            .navbar-custom-menu,
+            .main-header .navbar-custom-menu,
+            .collapse.navbar-collapse > .navbar-custom-menu {
+                display: block !important;
+                width: 100% !important;
+                float: none !important;
+                height: auto !important;
+                margin: 14px 0 0 0 !important;
+                padding: 12px 0 0 0 !important;
+                border-top: 1px solid #1e293b !important;
+                box-sizing: border-box !important;
+            }
+
+            .main-header .top-nav,
+            .navbar-custom-menu .top-nav {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                float: none !important;
+                list-style: none !important;
+            }
+
+            .main-header .top-nav > li,
+            .navbar-custom-menu .top-nav > li {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .main-header .top-nav .user-badge {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                width: 100% !important;
+                padding: 10px 16px !important;
+                margin: 0 !important;
+                background: rgba(255, 255, 255, 0.06) !important;
+                border: 1px solid #334155 !important;
+                border-radius: 8px !important;
+                box-sizing: border-box !important;
+            }
+
+            .main-header .top-nav .logout-link a {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                width: 100% !important;
+                padding: 10px 16px !important;
+                margin: 0 !important;
+                border-radius: 8px !important;
+                background: rgba(239, 68, 68, 0.15) !important;
+                border: 1px solid rgba(239, 68, 68, 0.35) !important;
+                color: #fca5a5 !important;
+                font-size: 13.5px !important;
+                font-weight: 600 !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+
+</head>
+<body class="sidebar-mini fixed sidebar-collapse">
+
+    <div class="wrapper">
+        <!-- Obsidian Slate Navbar Header -->
+        <header class="main-header hidden-print">
+            <a class="logo" href="@Url.Action("Index", "Home")" title="ADPL Enterprise Management">
+                <div class="adpl-brand-wrap">
+                    <div class="adpl-brand-gem">
+                        <svg viewBox="0 0 32 32" width="20" height="20" class="adpl-gem-svg" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="adpl-grad-top" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffffff" />
+                                    <stop offset="50%" stop-color="#7dd3fc" />
+                                    <stop offset="100%" stop-color="#0284c7" />
+                                </linearGradient>
+                                <linearGradient id="adpl-grad-main" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#38bdf8" />
+                                    <stop offset="70%" stop-color="#0284c7" />
+                                    <stop offset="100%" stop-color="#1e3a8a" />
+                                </linearGradient>
+                                <linearGradient id="adpl-grad-right" x1="100%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#93c5fd" />
+                                    <stop offset="100%" stop-color="#1d4ed8" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Brilliant Cut Facets -->
+                            <polygon points="10,7 22,7 27,13 5,13" fill="url(#adpl-grad-top)" stroke="#e0f2fe" stroke-width="0.5" />
+                            <polygon points="5,13 16,7 16,13" fill="#bae6fd" opacity="0.8" />
+                            <polygon points="27,13 16,7 16,13" fill="#38bdf8" opacity="0.9" />
+                            <polygon points="5,13 11,13 16,26" fill="url(#adpl-grad-main)" stroke="#0284c7" stroke-width="0.4" />
+                            <polygon points="11,13 21,13 16,26" fill="#38bdf8" stroke="#7dd3fc" stroke-width="0.4" />
+                            <polygon points="21,13 27,13 16,26" fill="url(#adpl-grad-right)" stroke="#1d4ed8" stroke-width="0.4" />
+                            <circle cx="16" cy="7" r="0.9" fill="#ffffff" />
+                        </svg>
+                    </div>
+                    <div class="adpl-brand-text">
+                        <span class="adpl-title">ADPL</span>
+                    </div>
+                </div>
+            </a>
+            <nav class="navbar navbar-static-top" role="navigation">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse" id="navbar-collapse">
+                    <ul class="nav navbar-nav">
+                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(5))
+                        {
+                            <li>
+                                <a href="@Url.Action("Dashboard", "Dashboard")" role="button" aria-haspopup="true" aria-expanded="false">Dashboard</a>
+                            </li>
+                        }
+                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(1))
+                        {
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 1).ToList())
+                                    {
+                                        if (item.GroupID == 1)
+                                        {
+                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(4))
+                        {
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Master <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 4).ToList())
+                                    {
+                                        if (item.GroupID == 4)
+                                        {
+                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(2))
+                        {
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Slip <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 2).ToList())
+                                    {
+                                        if (item.GroupID == 2)
+                                        {
+                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(3))
+                        {
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Report <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 3).ToList())
+                                    {
+                                        if (item.GroupID == 3)
+                                        {
+                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(6))
+                        {
+                            <li class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Pricing <span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 6).ToList())
+                                    {
+                                        if (item.GroupID == 6)
+                                        {
+                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
+                                        }
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                    <div class="navbar-custom-menu">
+                        <ul class="top-nav">
+                            <!-- User Session Indicator -->
+                            <li>
+                                <div class="user-badge" title="Logged in as @Slip.Utility.SessionFacade.UserSession.UserName">
+                                    <span class="user-badge-name">@Slip.Utility.SessionFacade.UserSession.UserName</span>
+                                </div>
+                            </li>
+                            <li class="logout-link">
+                                <a href="@Url.Action("Logout","Login")"><i class="fa fa-sign-out fa-lg"></i> Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+        <div class="content-wrapper">
+            @RenderBody()
+
+            <!-- Ultra-Modern Diamond 3D Spinning Loader Overlay -->
+            <div id="custom-diamond-loader" class="diamond-loader-overlay" style="display: none;">
+                <div class="diamond-loader-card">
+                    <!-- 3D Stage & Ambient Glow -->
+                    <div class="diamond-3d-stage">
+                        <div class="diamond-aura"></div>
+                        
+                        <!-- Sparkles -->
+                        <div class="diamond-sparkle sparkle-1"><i class="fa fa-star"></i></div>
+                        <div class="diamond-sparkle sparkle-2"><i class="fa fa-diamond"></i></div>
+                        <div class="diamond-sparkle sparkle-3"><i class="fa fa-star"></i></div>
+                        <div class="diamond-sparkle sparkle-4"><i class="fa fa-diamond"></i></div>
+
+                        <!-- 3D Tumbling Diamond SVG -->
+                        <div class="diamond-3d-gem">
+                            <svg viewBox="0 0 120 120" width="32" height="32" class="diamond-svg" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <!-- Specular & Refraction Gradients -->
+                                    <linearGradient id="facet-top" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+                                        <stop offset="40%" stop-color="#e0f2fe" stop-opacity="0.9" />
+                                        <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.85" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-crown-center" x1="0%" y1="100%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#0284c7" />
+                                        <stop offset="60%" stop-color="#38bdf8" />
+                                        <stop offset="100%" stop-color="#ffffff" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-crown-l" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#7dd3fc" />
+                                        <stop offset="100%" stop-color="#0369a1" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-crown-r" x1="100%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#bae6fd" />
+                                        <stop offset="100%" stop-color="#0284c7" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-pav-c" x1="0%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#38bdf8" />
+                                        <stop offset="60%" stop-color="#0284c7" />
+                                        <stop offset="100%" stop-color="#1e3a8a" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-pav-l" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#0369a1" />
+                                        <stop offset="100%" stop-color="#0f172a" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-pav-r" x1="100%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#60a5fa" />
+                                        <stop offset="100%" stop-color="#1d4ed8" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-pav-outer-l" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="#0284c7" />
+                                        <stop offset="100%" stop-color="#082f49" />
+                                    </linearGradient>
+
+                                    <linearGradient id="facet-pav-outer-r" x1="100%" y1="0%" x2="0%" y2="100%">
+                                        <stop offset="0%" stop-color="#93c5fd" />
+                                        <stop offset="100%" stop-color="#1e40af" />
+                                    </linearGradient>
+
+                                    <filter id="diamond-glow-filter" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="2" result="blur" />
+                                        <feMerge>
+                                            <feMergeNode in="blur" />
+                                            <feMergeNode in="SourceGraphic" />
+                                        </feMerge>
+                                    </filter>
+                                </defs>
+
+                                <g filter="url(#diamond-glow-filter)">
+                                    <!-- CROWN / TOP TABLE -->
+                                    <polygon points="40,24 80,24 96,44 24,44" fill="url(#facet-top)" stroke="#e0f2fe" stroke-width="0.75" stroke-linejoin="round" />
+                                    
+                                    <!-- CROWN STAR / KITE FACETS -->
+                                    <polygon points="40,24 60,24 60,44 48,44" fill="url(#facet-crown-center)" stroke="#bae6fd" stroke-width="0.5" />
+                                    <polygon points="60,24 80,24 72,44 60,44" fill="url(#facet-crown-r)" stroke="#7dd3fc" stroke-width="0.5" />
+                                    <polygon points="24,44 40,24 48,44" fill="url(#facet-crown-l)" stroke="#bae6fd" stroke-width="0.5" />
+                                    <polygon points="96,44 80,24 72,44" fill="url(#facet-crown-center)" stroke="#ffffff" stroke-width="0.5" />
+
+                                    <!-- GIRDLE HIGHLIGHT LINE -->
+                                    <line x1="24" y1="44" x2="96" y2="44" stroke="#ffffff" stroke-width="1" opacity="0.8" />
+
+                                    <!-- PAVILION / LOWER FACETS TAPERING TO CULET (60, 102) -->
+                                    <polygon points="24,44 42,44 60,102" fill="url(#facet-pav-l)" stroke="#0284c7" stroke-width="0.5" />
+                                    <polygon points="42,44 60,44 60,102" fill="url(#facet-pav-c)" stroke="#38bdf8" stroke-width="0.5" />
+                                    <polygon points="60,44 78,44 60,102" fill="url(#facet-pav-r)" stroke="#60a5fa" stroke-width="0.5" />
+                                    <polygon points="78,44 96,44 60,102" fill="url(#facet-pav-outer-r)" stroke="#93c5fd" stroke-width="0.5" />
+                                    <polygon points="24,44 32,44 60,102" fill="url(#facet-pav-outer-l)" stroke="#0369a1" stroke-width="0.5" />
+                                    
+                                    <!-- SHIMMER SPECULAR REFLECTIONS -->
+                                    <polygon points="48,27 72,27 60,41" fill="#ffffff" opacity="0.4" />
+                                    <circle cx="60" cy="102" r="1.5" fill="#ffffff" />
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Glowing Animated Shimmer Text -->
+                    <div class="diamond-loading-text">
+                        <span id="diamond-loader-msg">Processing Gems...</span>
+                        <span class="loading-dots">
+                            <span class="dot d1">.</span>
+                            <span class="dot d2">.</span>
+                            <span class="dot d3">.</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legacy fallback compatibility anchor -->
+            <div id="loader" style="display:none;"></div>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+    var Cur_Date = '@CurDate';
+    var StartMonthDateType = '@StartMonthDateType';
+    var Cur_Dates = '@CurDates';
+    var StartMonthDateTypes = '@StartMonthDateTypes';
+    $('.BirthDate').datepicker({
+        format: "dd-M-yyyy",
+        autoclose: true,
+        todayHighlight: true,
+        setDate: StartMonthDateType
+    });
+
+    var userSession = @Html.Raw(JsonConvert.SerializeObject(SessionFacade.UserSession));
+
+    function show_loader(message) {
+        if (message && typeof message === 'string') {
+            $("#diamond-loader-msg").text(message);
+        } else {
+            $("#diamond-loader-msg").text("Processing Gems...");
+        }
+        $("#custom-diamond-loader").stop(true, true).css("display", "flex").addClass("active");
+        $("#loader").addClass("loader");
+    }
+
+    function hide_loader() {
+        $("#custom-diamond-loader").removeClass("active").css("display", "none");
+        $("#loader").removeClass("loader");
+    }
+
+    let $modal = $(".modal");
+    $modal.draggable({
+        handle: ".modal-header",
+    });
+
+    $(document).ready(function () {
+        $(".allownumericwithoutdecimal").on("keypress keyup blur", function (event) {
+            $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+
+        $(".allownumericwithdecimal").on("keypress keyup blur", function (event) {
+            $(this).val($(this).val().replace(/[^0-9\.]/g, ''));
+            if ((event.which != 46 || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+
+        $(document).keyup(function (e) {
+            var key = (e.keyCode ? e.keyCode : e.charCode);
+            switch (key) {
+                case 120:
+                case 120:
+                    openWebsite($('#lnkGoogle'));
+                    break;
+                default:
+                    ;
+            }
+        });
+
+        function openWebsite(obj) {
+            window.location.href = $(obj).attr("href");
+        }
+    });
+</script>

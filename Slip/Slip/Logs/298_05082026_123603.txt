@@ -1,0 +1,8 @@
+Time: 05-Aug-26 12:36:03 PM
+--------------------------------------------------------------------------------------------
+Location
+--------------------------------------------------------------------------------------------
+   at System.Data.ProviderBase.FieldNameLookup.GetOrdinal(String fieldName)
+   at System.Data.SqlClient.SqlDataReader.GetOrdinal(String name)
+   at System.Data.SqlClient.SqlDataReader.get_Item(String name)
+   at Slip.Controllers.DiamxDataController.ExportAVLStockWithSales(String date) in D:\Work\Slip\Slip\Slip\Controllers\DiamxDataController.cs:line 925

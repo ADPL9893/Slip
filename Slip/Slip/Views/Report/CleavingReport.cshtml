@@ -1,0 +1,1104 @@
+
+@{
+    ViewBag.Title = "CleavingReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .scrollable {
+        height: 79vh !important;
+        overflow-y: scroll;
+        border: 1px solid black;
+    }
+
+        .scrollable thead {
+            position: sticky;
+            background-color: white;
+            z-index: 2;
+            top: 0;
+        }
+
+        .scrollable::-webkit-scrollbar {
+            width: 15px; /* width of the entire scrollbar */
+        }
+
+        .scrollable::-webkit-scrollbar-track {
+            background: #449CBA; /* color of the tracking area */
+            border: 1px solid #4C92B9;
+        }
+
+        .scrollable::-webkit-scrollbar-thumb {
+            background-color: #449bca;
+            border: 1px solid BLACK;
+            border-radius: 5PX;
+        }
+
+            .scrollable::-webkit-scrollbar-thumb:hover {
+                background-color: #2F7097;
+            }
+
+        .scrollable .grand-total-row {
+            position: sticky;
+            color: black;
+            z-index: 1;
+            bottom: 0;
+            background-color: #deedf5;
+        }
+
+    .tbl-container {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 4px 6px 9px rgba(0,0,0,0.4);
+        margin-bottom: 50px;
+    }
+
+        .tbl-container table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .tbl-container thead {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+        }
+
+        .tbl-container th {
+            padding: 8px;
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-right: 1px solid rgba(255,255,255,0.2);
+        }
+
+            .tbl-container th:last-child {
+                border-right: none;
+            }
+
+        .tbl-container .section-header {
+            background: rgba(255,255,255,0.1);
+            font-size: 0.8em;
+            padding: 8px;
+        }
+
+        .tbl-container td {
+            padding: 3px;
+            font-size: 1.1em;
+            color: black;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+            border-right: 1px solid #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+            .tbl-container td:last-child {
+                border-right: none;
+            }
+
+
+        .tbl-container tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
+        .tbl-container .Total {
+            background-color: #7e8bb3 !important;
+            color: #fff !important;
+            font-weight: 600;
+            font-size: 1.2em;
+        }
+
+    .Silver {
+        background-color: #C2C2C1;
+    }
+
+    .AshGreen {
+        background-color: #CBD4C2;
+    }
+
+    .Snow {
+        background-color: #FFFCFF;
+    }
+
+    .LightBlue {
+        background-color: #ACD9EC;
+    }
+
+
+    .LightGreen {
+        background-color: #28a10070;
+    }
+
+    .LightOrange {
+        background-color: #ff470052;
+    }
+
+    .yellow {
+        background-color: yellow;
+    }
+
+    .Dun {
+        background-color: #CABBA5;
+    }
+
+    .SoftBlush {
+        background-color: #FFE4E1;
+    }
+
+    .TangerineDream {
+        background-color: #FF9966;
+    }
+
+    .GoldenSand {
+        background-color: #DDD06A;
+    }
+
+    .SubTotal {
+        background-color: #fff8e1;
+        color: #000;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .slider {
+        position: relative;
+        width: 100%;
+        height: 670px;
+        border-radius: 12px;
+        box-shadow: 4px 6px 9px rgba(0,0,0,0.4);
+        border: 1px solid #ccc;
+    }
+
+    .slider-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .slider .nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(0,0,0,0.5);
+        color: #fff;
+        border: none;
+        font-size: 20px;
+        padding: 8px;
+        cursor: pointer;
+    }
+
+    .left {
+        left: 0;
+    }
+
+    .right {
+        right: 0;
+    }
+
+    .count {
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    .bagImage .tbl-container2 {
+        overflow-x: auto;
+        border-radius: 12px;
+        box-shadow: 4px 6px 9px rgba(0,0,0,0.4);
+        margin-bottom: 10px;
+    }
+
+    .bagImage table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .bagImage th {
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .bagImage td {
+        font-size: 14px;
+    }
+
+    .bagImage th, .bagImage td {
+        border: 2px solid #000;
+        padding: 3px 6px;
+        text-align: center;
+    }
+
+    .Prediction_tbl tr th {
+        background-color: #EBF1DE !important;
+    }
+
+    .highLight {
+        background-color: yellow !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+    }
+</style>
+<div ng-controller="Diamond">
+    <div class="page-title">
+        <div class="col-lg-12">
+            <div class="col-lg-2">
+                <h5><a href="@Url.Action("Index", "Home")"><i class="fa fa-home fa-lg"></i>&nbsp;Home</a></h5>
+            </div>
+            <div class="col-lg-10">
+                <div class="col-lg-2 col-lg-offset-1" style="margin-top: 3px;">
+                    <input id="reportDate" type="text" class="form-control input-sm" placeholder="dd-MMM-yyyy" autocomplete="off" ng-model="Diamond.reportDate" readonly />
+                </div>
+                <div class="col-lg-1">
+                    <button class="btn btn-primary" ng-click="FetchData('RUNNING')">Fetch</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="well bs-component">
+                    <legend class="font-green-sharp">
+                        <b style="position:absolute">Cleaving Summary</b>
+                        <div align="right">
+                            &nbsp;@*<a class="btn btn-primary" ng-click="ExcelExport()">Excel</a>*@
+                        </div>
+                    </legend>
+                    <div class="card-body">
+                        <h3 class="font-green-sharp">🢡 Stock Summary</h3>
+                        <div class="tbl-container" style="width: 23%;">
+                            <table id="trfTable">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>SizeCode</th>
+                                        <th>Pcs</th>
+                                        <th>Weight</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="trfPckTableBody">
+                                    <tr ng-repeat="item in SummaryList" ng-class="{'Total': item.SizeCode === 'TOTAL'}">
+                                        <td>{{item.RDate}}</td>
+                                        <td>{{item.SizeCode}}</td>
+                                        <td>{{item.Pcs}}</td>
+                                        <td>{{item.Weight}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="padding:0 !important">
+                            <div class="tabs">
+                                <div class="tab active" data-tab="RUNNING">1.RUNNING</div>
+                                <div class="tab" data-tab="COMPLETE">2.COMPLETE</div>
+                            </div>
+                        </div>
+                        <div class="uigrid">
+                            <div id="gridContainer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="showImagePopUp" role="dialog" aria-labelledby="exampleModalCenterTitle">
+        <div class="modal-dialog modal-lg" style="width:75%">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="col-lg-12 col-md-12 col-sm-12 paddingZero">
+                        <div class="col-lg-6 col-md-6 col-sm-6 paddingZero">
+                            <h4 class="font-green-sharp">
+                                Bag Image
+                            </h4>
+                        </div>
+                        <button type="button" ng-click="ClosePopupFilterDetails();" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group bagImage">
+                        <div class="tbl-container2" style="width: 100%;">
+                            <table class="Prediction_tbl">
+                                <tbody>
+                                    <tr>
+                                        <th rowspan="2" style="vertical-align:central">BagNo</th>
+                                        <th colspan="3">1CT UP PRD</th>
+                                        <th colspan="3">1CT DOWN PRD</th>
+                                        <th colspan="3">TOTAL PRD</th>
+                                    </tr>
+                                    <tr>
+                                        <th>PCS</th>
+                                        <th>POLISH WT</th>
+                                        <th>%</th>
+                                        <th>PCS</th>
+                                        <th>POLISH WT</th>
+                                        <th>%</th>
+                                        <th>PCS</th>
+                                        <th>POLISH WT</th>
+                                        <th>%</th>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ImageBagNo}}</td>
+                                        <td>{{PrdData.PrdCTUPPcs}}</td>
+                                        <td>{{PrdData.PrdCTUPPolishWeight}}</td>
+                                        <td class="highLight">{{PrdData.PrdCTUPPer}}</td>
+                                        <td>{{PrdData.PrdCTDNPcs}}</td>
+                                        <td>{{PrdData.PrdCTDNPolishWeight}}</td>
+                                        <td class="highLight">{{PrdData.PrdCTDNPer}}</td>
+                                        <td>{{PrdData.PrdPcs}}</td>
+                                        <td>{{PrdData.PrdPolishWeight}}</td>
+                                        <td class="highLight">{{PrdData.PrdPer}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="slider" ng-if="images.length">
+                            <button class="nav left" ng-click="prev()">❮</button>
+                            <img ng-src="{{images[currentIndex].ImagePath}}" class="slider-img" />
+                            <button class="nav right" ng-click="next()">❯</button>
+                            <div class="count">
+                                {{currentIndex + 1}} / {{images.length}}
+                            </div>
+                        </div>
+                    </div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var List = "";
+    var DataField = "";
+    module = angular.module('app', ['ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    module.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+    module.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$interval', 'uiGridConstants', function ($scope, $filter, $http, $q, $interval, uiGridConstants, $window) {
+        $scope.Diamond = {};
+        $scope.MainRCodemodel = [];
+        $scope.MainRCodeSettings = { enableSearch: true, externalIdProp: '' };
+
+        debugger
+        $('#reportDate').datepicker({
+            format: "dd-M-yyyy",
+            autoclose: true,
+            todayHighlight: true,
+            endDate: '1d'
+        });
+
+        $('#reportDate').datepicker('setDate', '-1d');
+
+        $scope.Diamond.reportDate = $('#reportDate').val();
+
+        $('#reportDate').on('changeDate', function (e) {
+            debugger
+            $scope.$apply(function () {
+                $scope.Diamond.reportDate = $('#reportDate').val();
+            });
+        });
+
+        var columnsData = [];
+        var SummaryData = [];
+
+        let tabType = "RUNNING";
+        let currentView = "RUNNING";
+
+        $('.tab').on('click', async function () {
+            var tabType = $(this).data('tab');
+
+            // Update active tab
+            $('.tab').removeClass('active');
+            $(this).addClass('active');
+
+
+            // Switch grid view
+            if (tabType === 'RUNNING') {
+                currentView = 'RUNNING';
+                //$(".hide1").show();
+                //$(".hide2").hide();
+                //dataSelect = false;
+                await $scope.setColumn();
+                await $scope.FetchData("RUNNING");
+            } else if (tabType === 'COMPLETE') {
+                currentView = 'COMPLETE';
+                //$(".hide2").show();
+                //$(".hide1").hide();
+                //dataSelectDetails = false;
+                await $scope.setColumn();
+                await $scope.FetchData("COMPLETE")
+            }
+        });
+
+        $scope.setColumn = function () {
+            if (currentView == 'RUNNING') {
+                columnsData = [{
+                    caption: $('#reportDate').val(),
+                    alignment: "center",
+                    columns: [{
+                        caption: "Main Rough",
+                        alignment: "center",
+                        fixed: true,
+                        columns: [
+                            { dataField: "MainRDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy", visible: false },
+                            {
+                                dataField: "MainRCode",
+                                caption: "MainRCode",
+                                groupIndex: 0, // Enable grouping by this column
+                                groupCellTemplate: function (element, options) {
+                                    // Extracting data from the first item in the group
+                                    debugger
+                                    const data = options.data.items ? options.data.items[0] : (options.data.collapsedItems ? options.data.collapsedItems[0] : {});
+                                    const dateStr = data.MainRDate ? new Date(data.MainRDate).toLocaleDateString('en-GB') : '';
+
+                                    const template = $(`
+                                        <div style="color: #1e3c72; font-weight: bold; font-size: 14px; display: flex; gap: 20px;">
+                                            <span>📅 ${dateStr}</span>
+                                            <span>| 📦 CODE: ${options.value}</span>
+                                            <span>| 🍳 RECIPE: ${data.MainReceipe || '-'}</span>
+                                            <span style="margin-left: auto; color: #d9534f;">💎 MAIN PCS: ${parseInt(data.MainPcs || 0)}</span>
+                                            <span style="color: #d9534f; margin-right: 20px;">⚖️ MAIN CARAT: ${parseFloat(data.MainCarat || 0).toFixed(3)}</span>
+                                        </div>
+                                    `);
+                                    element.append(template);
+                                }
+                            },
+                            { dataField: "MainReceipe", caption: "Receipe", dataType: "string", visible: false },
+                            { dataField: "MainPcs", caption: "Pcs", dataType: "number", visible: false },
+                            { dataField: "MainCarat", caption: "Carat", dataType: "number", visible: false },
+                        ]
+                    },
+                    {
+                        caption: "Kapan",
+                        alignment: "center",
+                        columns: [
+                            { dataField: "RDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy" },
+                            { dataField: "Kapan", caption: "Kapan", dataType: "string" },
+                            { dataField: "TableNo", caption: "Table", dataType: "string" },
+                            { dataField: "HeightName", caption: "Height", dataType: "string" },
+                            { dataField: "GradNo", caption: "GradNo", dataType: "string" },
+                            { dataField: "RoughPcs", caption: "Pcs", dataType: "number" },
+                            { dataField: "RoughCarat", caption: "Carat", dataType: "number" },
+                            { dataField: "AWeight", caption: "AWeight", dataType: "number", visible: false },
+                            { dataField: "BagID", caption: "BagID", dataType: "number", visible: false },
+                        ]
+                    },
+                    {
+                        caption: "Prediction",
+                        alignment: "center",
+                        columns: [
+                            {
+                                caption: "1CT Up", alignment: "center",
+                                columns: [
+                                    { dataField: "PrdCTUPPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "PrdCTUPPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "PrdCTUPPer", caption: "%", dataType: "number" },
+                                    { dataField: "PrdCTUPPrdAmt", caption: "Labour ($)", dataType: "number" },
+                                    { dataField: "PrdCTUPPrcAmt", caption: "Prc ($)", dataType: "number" },
+                                ]
+                            },
+                            {
+                                caption: "1CT Down", alignment: "center",
+                                columns: [
+                                    { dataField: "PrdCTDNPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "PrdCTDNPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "PrdCTDNPer", caption: "%", dataType: "number" },
+                                    { dataField: "PrdCTDNPrdAmt", caption: "Labour ($)", dataType: "number" },
+                                    { dataField: "PrdCTDNPrcAmt", caption: "Prc ($)", dataType: "number" },
+                                ]
+                            },
+                            {
+                                caption: "Total", alignment: "center",
+                                columns: [
+                                    { dataField: "PrdPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "PrdPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "PrdPer", caption: "%", dataType: "number" },
+                                    { dataField: "PrdAmt", caption: "Labour ($)", dataType: "number" },
+                                    { dataField: "PrcAmt", caption: "Prc ($)", dataType: "number" },
+                                    { dataField: "PrdDays", caption: "Days", dataType: "number" },
+                                ]
+                            },
+                        ]
+                    },
+                    ]
+                }];
+
+                // 2. Summary Configuration (Used for both Group and Grand Total)
+                SummaryData = [
+                    { column: 'Kapan', summaryType: "count", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughCarat', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPrdAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPrcAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "PrdCTUPPer", summaryType: "custom", showInColumn: "PrdCTUPPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPrdAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPrcAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "PrdCTDNPer", summaryType: "custom", showInColumn: "PrdCTDNPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'PrdPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'PrdPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrcAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "PrdPer", summaryType: "custom", showInColumn: "PrdPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                ];
+            }
+            else if (currentView == 'COMPLETE') {
+                columnsData = [{
+                    caption: $('#reportDate').val(),
+                    alignment: "center",
+                    columns: [{
+                        caption: "Main Rough",
+                        alignment: "center",
+                        fixed: true,
+                        columns: [
+                            { dataField: "MainRDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy", visible: false },
+                            {
+                                dataField: "MainRCode",
+                                caption: "MainRCode",
+                                groupIndex: 0, // Enable grouping by this column
+                                groupCellTemplate: function (element, options) {
+                                    // Extracting data from the first item in the group
+                                    debugger
+                                    const data = options.data.items ? options.data.items[0] : (options.data.collapsedItems ? options.data.collapsedItems[0] : {});
+                                    const dateStr = data.MainRDate ? new Date(data.MainRDate).toLocaleDateString('en-GB') : '';
+
+                                    const template = $(`
+                                  <div style="color: #1e3c72; font-weight: bold; font-size: 14px; display: flex; gap: 20px;">
+                                      <span>📅 ${dateStr}</span>
+                                      <span>| 📦 CODE: ${options.value}</span>
+                                      <span>| 🍳 RECIPE: ${data.MainReceipe || '-'}</span>
+                                      <span style="margin-left: auto; color: #d9534f;">💎 MAIN PCS: ${parseInt(data.MainPcs || 0)}</span>
+                                      <span style="color: #d9534f; margin-right: 20px;">⚖️ MAIN CARAT: ${parseFloat(data.MainCarat || 0).toFixed(3)}</span>
+                                  </div>
+                              `);
+                                    element.append(template);
+                                }
+                            },
+                            { dataField: "MainReceipe", caption: "Receipe", dataType: "string", visible: false },
+                            { dataField: "MainPcs", caption: "Pcs", dataType: "number", visible: false },
+                            { dataField: "MainCarat", caption: "Carat", dataType: "number", visible: false },
+                        ]
+                    },
+                    {
+                        caption: "Kapan",
+                        alignment: "center",
+                        columns: [
+                            { dataField: "RDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy" },
+                            { dataField: "Kapan", caption: "Kapan", dataType: "string" },
+                            { dataField: "TableNo", caption: "Table", dataType: "string" },
+                            { dataField: "HeightName", caption: "Height", dataType: "string" },
+                            { dataField: "GradNo", caption: "GradNo", dataType: "string" },
+                            { dataField: "RoughPcs", caption: "Pcs", dataType: "number" },
+                            { dataField: "RoughCarat", caption: "Carat", dataType: "number" },
+                            { dataField: "AWeight", caption: "AWeight", dataType: "number", visible: false },
+                            { dataField: "BagID", caption: "BagID", dataType: "number", visible: false },
+                        ]
+                    },
+                    {
+                        caption: "Prediction",
+                        alignment: "center",
+                        columns: [
+                            {
+                                caption: "1CT Up", alignment: "center",
+                                columns: [
+                                    { dataField: "PrdCTUPPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "PrdCTUPPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "PrdCTUPPer", caption: "%", dataType: "number" },
+                                    { dataField: "PrdCTUPPrdAmt", caption: "Labour ($)", dataType: "number" },
+                                    { dataField: "PrdCTUPPrcAmt", caption: "Prc ($)", dataType: "number" },
+                                ]
+                            },
+                            {
+                                caption: "1CT Down", alignment: "center",
+                                columns: [
+                                    { dataField: "PrdCTDNPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "PrdCTDNPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "PrdCTDNPer", caption: "%", dataType: "number" },
+                                    { dataField: "PrdCTDNPrdAmt", caption: "Labour ($)", dataType: "number" },
+                                    { dataField: "PrdCTDNPrcAmt", caption: "Prc ($)", dataType: "number" },
+                                ]
+                            },
+                            {
+                                caption: "Total", alignment: "center",
+                                columns: [
+                                    { dataField: "PrdPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "PrdPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "PrdPer", caption: "%", dataType: "number" },
+                                    { dataField: "PrdAmt", caption: "Labour ($)", dataType: "number" },
+                                    { dataField: "PrcAmt", caption: "Prc ($)", dataType: "number" },
+                                    { dataField: "PrdDays", caption: "Days", dataType: "number" },
+                                ]
+                            },
+                        ]
+                    },
+                    {
+                        caption: "Cleaving",
+                        alignment: "center",
+                        columns: [
+                            {
+                                caption: "1CT Up", alignment: "center",
+                                columns: [
+                                    { dataField: "ClvCTUPPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "ClvCTUPPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "ClvCTUPPer", caption: "%", dataType: "number" },
+                                ]
+                            },
+                            {
+                                caption: "1CT Down", alignment: "center",
+                                columns: [
+                                    { dataField: "ClvCTDNPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "ClvCTDNPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "ClvCTDNPer", caption: "%", dataType: "number" },
+                                ]
+                            },
+                            {
+                                caption: "Total", alignment: "center",
+                                columns: [
+                                    { dataField: "ClvPcs", caption: "Pcs", dataType: "number" },
+                                    { dataField: "ClvPolishWeight", caption: "Polish WT", dataType: "number" },
+                                    { dataField: "ClvPer", caption: "%", dataType: "number" },
+                                    { dataField: "ComplateDate", caption: "Date", dataType: "date", format: "dd/MM/yyyy" },
+                                    { dataField: "ClvDays", caption: "Days", dataType: "number" },
+                                ]
+                            },
+                        ]
+                    },
+                    ]
+                }];
+
+                // 2. Summary Configuration (Used for both Group and Grand Total)
+                SummaryData = [
+                    { column: 'Kapan', summaryType: "count", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'RoughCarat', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPrdAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTUPPrcAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "PrdCTUPPer", summaryType: "custom", showInColumn: "PrdCTUPPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPrdAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdCTDNPrcAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "PrdCTDNPer", summaryType: "custom", showInColumn: "PrdCTDNPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'PrdPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'PrdPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrdAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { column: 'PrcAmt', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "PrdPer", summaryType: "custom", showInColumn: "PrdPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'ClvCTUPPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'ClvCTUPPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "ClvCTUPPer", summaryType: "custom", showInColumn: "ClvCTUPPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'ClvCTDNPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'ClvCTDNPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "ClvCTDNPer", summaryType: "custom", showInColumn: "ClvCTDNPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                    { column: 'ClvPcs', summaryType: "sum", valueFormat: "#0", displayFormat: "{0}" },
+                    { column: 'ClvPolishWeight', summaryType: "sum", valueFormat: "#0.000", displayFormat: "{0}" },
+                    { name: "ClvPer", summaryType: "custom", showInColumn: "ClvPer", valueFormat: "#0.00", displayFormat: "{0}" },
+                ];
+            }
+        }
+
+        $scope.setColumn();
+
+        let List = [];
+
+        $scope.FetchData = function (item) {
+          debugger
+            var date = $('#reportDate').val();
+            if (!date) {
+                Noty('error', 'Please select a date');
+                return;
+            }
+
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("RP_Getdata_Cleaving_Report_Summary", "Report")',
+                data: { reportDate: date, Action: item, Status: "View" },
+                dataType: "json"
+            }).then(function (response) {
+                console.log("Raw Response:", response.data);
+                hide_loader();
+                $scope.SummaryList = response.data.SummaryList;
+                List = response.data.List;
+                GridData();
+            })
+                .catch(function (error) {
+                    console.error('Error loading data:', error);
+                    hide_loader();
+                    alert('Error loading data. Please try again.');
+                });
+        };
+
+        $scope.FetchData("RUNNING");
+
+        const GridData = () => {
+            $("#gridContainer").dxDataGrid({
+                dataSource: List,
+                columns: columnsData,
+                grouping: { autoExpandAll: true },
+                groupPanel: { visible: false },
+                summary: {
+                    totalItems: SummaryData,
+                    groupItems: SummaryData.map(item => ({ ...item, alignByColumn: true, showInGroupFooter: true })),
+                    calculateCustomSummary: function (options) {
+                        if (currentView == 'RUNNING') {
+                            const percFields = ["PrdCTUPPer", "PrdCTDNPer", "PrdPer"];
+                            const wtMap = {
+                                "PrdCTUPPer": "PrdCTUPPolishWeight",
+                                "PrdCTDNPer": "PrdCTDNPolishWeight",
+                                "PrdPer": "PrdPolishWeight",
+                            };
+                            if (percFields.includes(options.name)) {
+                                if (options.summaryProcess === "start") {
+                                    options.totalValue = { polishWt: 0, AWeight: 0 };
+                                }
+                                if (options.summaryProcess === "calculate") {
+                                    options.totalValue.polishWt += parseFloat(options.value[wtMap[options.name]] || 0);
+                                    options.totalValue.AWeight += parseFloat(options.value.AWeight || 0);
+                                }
+                                if (options.summaryProcess === "finalize") {
+                                    options.totalValue = options.totalValue.AWeight > 0
+                                        ? ((options.totalValue.polishWt / options.totalValue.AWeight) * 100).toFixed(2)
+                                        : 0;
+                                }
+                            }
+                        }
+                        else if (currentView == 'COMPLETE') {
+                            const percFields = ["PrdCTUPPer", "PrdCTDNPer", "PrdPer", "ClvCTUPPer", "ClvCTDNPer", "ClvPer"];
+                            const wtMap = {
+                                "PrdCTUPPer": "PrdCTUPPolishWeight",
+                                "PrdCTDNPer": "PrdCTDNPolishWeight",
+                                "PrdPer": "PrdPolishWeight",
+                                "ClvCTUPPer": "ClvCTUPPolishWeight",
+                                "ClvCTDNPer": "ClvCTDNPolishWeight",
+                                "ClvPer": "ClvPolishWeight"
+                            };
+                            if (percFields.includes(options.name)) {
+                                if (options.summaryProcess === "start") {
+                                    options.totalValue = { polishWt: 0, AWeight: 0 };
+                                }
+                                if (options.summaryProcess === "calculate") {
+                                    options.totalValue.polishWt += parseFloat(options.value[wtMap[options.name]] || 0);
+                                    options.totalValue.AWeight += parseFloat(options.value.AWeight || 0);
+                                }
+                                if (options.summaryProcess === "finalize") {
+                                    options.totalValue = options.totalValue.AWeight > 0
+                                        ? ((options.totalValue.polishWt / options.totalValue.AWeight) * 100).toFixed(2)
+                                        : 0;
+                                }
+                            }
+                        }
+                    }
+                },
+                height: '100%',
+                columnAutoWidth: true,
+                hoverStateEnabled: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                //rowAlternationEnabled: true,
+                showBorders: true,
+                height: '100%',
+                paging: { enabled: false },
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual',
+                },
+                filterRow: {
+                    visible: true,
+                    applyFilter: 'auto',
+                },
+                filterPanel: { visible: true },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Search...',
+                },
+                loadPanel: {
+                    enabled: true,
+                    showPane: false,
+                    indicatorSrc: '/Content/icons/Loader.gif',
+                },
+                headerFilter: {
+                    visible: true,
+                    search: {
+                        enabled: true,
+                    },
+                },
+                pager: {
+                    visible: false,
+                },
+                selection: {
+                    mode: 'single',
+                    //mode: 'multiple',
+                    //mode: 'none',
+                },
+                keyboardNavigation: {
+                    enterKeyAction: 'moveFocus',
+                    enterKeyDirection: 'column',
+                    editOnKeyPress: true,
+                },
+                onCellDblClick(e) {
+                    debugger
+                    if (e.column.dataField == "PrdPer") {
+                        $scope.loadImages(e.data.Kapan, e.data)
+                    }
+                    else if (e.column.dataField == "MainRCode") {
+                        $scope.loadMainRCodeImages(e.value, e.data.aggregates)
+                    }
+                },
+                onRowPrepared: function (e) {
+                    // 1. Group Header (Main Row) Color
+                    if (e.rowType === "group") {
+                        e.rowElement.css("background-color", "#f0f7ff"); // Light Blue-ish
+                        e.rowElement.css("color", "#1e3c72");
+                        e.rowElement.css("font-weight", "bold");
+                    }
+                    // 2. Subtotal Row (Group Footer) Color
+                    if (e.rowType === "groupFooter") {
+                        e.rowElement.addClass("SubTotal"); // Soft Yellow
+                    }
+
+                },
+                onCellPrepared: function (e) {
+                    const dataField = e.column.dataField;
+                    //if (dataField === "MainRDate" || dataField === "MainRCode" || dataField === "MainReceipe" || dataField === "MainGradNo" || dataField === "MainPcs" || dataField === "MainCarat") {
+                    //    $(e.cellElement).addClass("Silver");
+                    //}
+                    if (dataField === "Kapan" || dataField === "RDate" || dataField === "TableNo" || dataField === "HeightName" || dataField === "GradNo" || dataField === "RoughPcs" || dataField === "RoughCarat") {
+                        $(e.cellElement).addClass("AshGreen");
+                    }
+                    else if (dataField === "PrdCTUPPcs" || dataField === "PrdCTUPPolishWeight" || dataField === "PrdCTUPPer" || dataField === "PrdCTUPPrdAmt" || dataField === "PrdCTUPPrcAmt") {
+                        $(e.cellElement).addClass("Snow");
+                    }
+                    else if (dataField === "PrdCTDNPcs" || dataField === "PrdCTDNPolishWeight" || dataField === "PrdCTDNPer" || dataField === "PrdCTDNPrdAmt" || dataField === "PrdCTDNPrcAmt") {
+                        $(e.cellElement).addClass("LightBlue");
+                    }
+                    else if (dataField === "PrdPcs" || dataField === "PrdPolishWeight" || dataField === "PrdDays" || dataField === "PrdAmt" || dataField === "PrcAmt") {
+                        $(e.cellElement).addClass("Dun");
+                    }
+                    else if (dataField === "PrdPer") {
+                        $(e.cellElement).addClass("yellow");
+                    }
+                    else if (dataField === "ClvCTUPPcs" || dataField === "ClvCTUPPolishWeight" || dataField === "ClvCTUPPer") {
+                        $(e.cellElement).addClass("SoftBlush");
+                    }
+                    else if (dataField === "ClvCTDNPcs" || dataField === "ClvCTDNPolishWeight" || dataField === "ClvCTDNPer") {
+                        $(e.cellElement).addClass("TangerineDream");
+                    }
+                    else if (dataField === "ClvPcs" || dataField === "ClvPolishWeight" || dataField === "ClvPer" || dataField === "ComplateDate" || dataField === "ClvDays") {
+                        $(e.cellElement).addClass("GoldenSand");
+                    }
+                },
+                export: {
+                    enabled: true,
+                    //formats: ['pdf', 'xlxs'],
+                    formats: ['xlxs'],
+                    allowExportSelectedData: false,
+                },
+                onExporting(e) {
+                    const grid = e.component;
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('Main Rough Summary');
+
+                    // Specify columns to skip in Excel
+                    const columnsToHide = []//["MainRDate", "MainPcs", "MainCarat", "MainReceipe"];
+
+                    grid.beginUpdate();
+                    columnsToHide.forEach(field => grid.columnOption(field, "visible", false));
+                    grid.endUpdate();
+
+                    DevExpress.excelExporter.exportDataGrid({
+                        component: grid,
+                        worksheet: worksheet,
+                        autoFilterEnabled: true,
+                        customizeCell: function ({ gridCell, excelCell }) {
+
+                            // 1. STYLE HEADERS
+                            if (gridCell.rowType === "header") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3C72' } };
+                                excelCell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+                            }
+
+                            // 2. STYLE GROUP HEADERS (The "Main Row" in Excel)
+                            if (gridCell.rowType === "group") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F7FF' } };
+                                excelCell.font = { color: { argb: 'FF1E3C72' }, bold: true };
+
+                                // Get the data record for this group to build the summary string
+                                let firstItem = null;
+                                if (gridCell.data) {
+                                    firstItem = (gridCell.data.items && gridCell.data.items[0]) ||
+                                        (gridCell.data.collapsedItems && gridCell.data.collapsedItems[0]);
+                                }
+
+                                // If we found the data, build the full string: Date | Code | Recipe | Pcs | Carat
+                                if (firstItem && gridCell.column.dataField === "MainRCode") {
+                                    const dateStr = firstItem.MainRDate ? new Date(firstItem.MainRDate).toLocaleDateString('en-GB') : '';
+                                    const recipe = firstItem.MainReceipe || '-';
+                                    const pcs = firstItem.MainPcs || 0;
+                                    const carat = (firstItem.MainCarat || 0).toFixed(3);
+
+                                    excelCell.value = `${dateStr} | CODE: ${gridCell.value} | RECIPE: ${recipe} | PCS: ${pcs} | CARAT: ${carat}`;
+                                }
+                            }
+
+                            // 3. STYLE SUBTOTALS (Group Footers)
+                            if (gridCell.rowType === "groupFooter") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF8E1' } };
+                                excelCell.font = { italic: true, bold: true };
+                            }
+
+                            // 4. STYLE FINAL TOTALS
+                            if (gridCell.rowType === "totalFooter") {
+                                excelCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFDEEDF5' } };
+                                excelCell.font = { bold: true };
+                            }
+
+                            // Cell Borders
+                            excelCell.border = {
+                                top: { style: 'thin' }, left: { style: 'thin' },
+                                right: { style: 'thin' }, bottom: { style: 'thin' }
+                            };
+                        }
+                    }).then(() => {
+                        workbook.xlsx.writeBuffer().then((buffer) => {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Cleaving Summary.xlsx');
+                        });
+
+                        // Restore columns in web view (if you need them visible again)
+                        // grid.beginUpdate();
+                        // columnsToHide.forEach(field => grid.columnOption(field, "visible", true));
+                        // grid.endUpdate();
+                    });
+                },
+                toolbar: {
+                    items: [
+                        {
+                            location: "center",
+                            template: function () {
+                                return $("<div>")
+                                    .text("🢡 Kapan Wise Cleaving Report")
+                                    .css({
+                                        "font-size": "18px",
+                                        "font-weight": "600",
+                                        "color": "#449bca"
+                                    });
+                            }
+                        },
+                        { location: "after", name: "exportButton" },
+                        { location: "after", name: "searchPanel" },
+                    ]
+                },
+            });
+        }
+
+        $scope.images = [];
+        $scope.currentIndex = 0;
+
+        $scope.loadImages = function (Kapan, Data) {
+            $scope.PrdData = Data;
+            $scope.ImageBagNo = Data.Kapan;
+            $http.get('/Master/GetKapanImages', {
+                params: { RCode: Kapan, MainRCode: '', Status :'Kapan'}
+            }).then(function (res) {
+                debugger
+                $scope.images = res.data.List;
+                $scope.currentIndex = 0;
+                $("#showImagePopUp").modal("show");
+            });
+        };
+
+        $scope.loadMainRCodeImages = function (MainRCode, Data) {
+            debugger
+            $scope.ImageBagNo = MainRCode;
+            $scope.PrdData = {
+                PrdCTUPPcs: Data[3],
+                PrdCTUPPolishWeight: parseFloat(Data[4]).toFixed(3),
+                PrdCTUPPer: parseFloat(Data[5]).toFixed(2),
+                PrdCTDNPcs: Data[6],
+                PrdCTDNPolishWeight: parseFloat(Data[7]).toFixed(3),
+                PrdCTDNPer: parseFloat(Data[8]).toFixed(2),
+                PrdPcs: Data[9],
+                PrdPolishWeight: parseFloat(Data[10]).toFixed(3),
+                PrdPer: parseFloat(Data[11]).toFixed(2),
+            };
+            $http.get('/Master/GetKapanImages', {
+                params: { RCode: '', MainRCode: MainRCode ,Status :'MainRough' }
+            }).then(function (res) {
+                debugger
+                $scope.images = res.data.List;
+                $scope.currentIndex = 0;
+                $("#showImagePopUp").modal("show");
+            });
+        };
+
+        $scope.next = function () {
+            $scope.currentIndex =
+                ($scope.currentIndex + 1) % $scope.images.length;
+        };
+
+        $scope.prev = function () {
+            $scope.currentIndex =
+                ($scope.currentIndex - 1 + $scope.images.length) % $scope.images.length;
+        };
+
+        // 🔁 Auto slide every 3 seconds
+        //$interval(function () {
+        //    if ($scope.images.length > 1)
+        //        $scope.next();
+        //}, 3000);
+
+        $scope.ExcelExport = function () {
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("RP_Getdata_Main_Rough_Summary_Export", "Report")',
+                data: { ToDayDate},
+                dataType: "json"
+            }).then(function (response) {
+                hide_loader();
+                debugger
+                $scope.DownloadExcel(response.data.Data);
+            });
+        };
+
+        $scope.DownloadExcel = function (path) {
+            var url = '@Url.Action("DownloadExcel", "Lot")/?filepath=' + path;
+            var hiddenIFrameID = 'hiddenDownloaderReportResult';
+            var iframe = document.getElementById(hiddenIFrameID);
+            if (iframe === null) {
+                iframe = document.createElement('iframe');
+                iframe.id = hiddenIFrameID;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
+        };
+    }]);
+</script>

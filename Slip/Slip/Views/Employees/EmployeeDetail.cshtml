@@ -1,0 +1,908 @@
+@{
+    ViewBag.Title = "Employee List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Employee Detail List - Distinct Mid-Tone Ice Blue Theming & SaaS Styling
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes dropSlideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .emp-list-page {
+        padding: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .emp-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .emp-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Border) */
+    .emp-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 12px 18px !important;
+        margin-bottom: 10px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .emp-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .emp-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .emp-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .emp-header-card:hover .emp-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .emp-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .emp-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .emp-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .emp-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    .emp-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-emp-add {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important; /* Premium Dark Blue */
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 18px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-emp-add:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important;
+        color: #ffffff !important;
+    }
+    .btn-emp-add:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Grid Card Container (Clean Neutral White Background with Distinct Border) */
+    .emp-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .emp-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .emp-card-header {
+        background: #ffffff !important;
+        padding: 13px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    .emp-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .emp-card-title-left i {
+        font-size: 15px;
+        color: #0284c7;
+    }
+    .emp-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .emp-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .emp-grid-body {
+        padding: 0 !important;
+    }
+
+    .emp-grid-card .uigrid,
+    .emp-grid-card #gridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridContainer {
+        width: 100% !important;
+    }
+
+    /* Badges */
+    .badge-status-pill {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-pill-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    /* Action Buttons in Grid */
+    .grid-btn-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .grid-action-btn-edit {
+        color: #0284c7 !important;
+        background: #e0f2fe !important;
+        border: none !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        text-decoration: none !important;
+    }
+    .grid-action-btn-edit:hover {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+        transform: scale(1.08) translateY(-1px) !important;
+    }
+
+    .grid-action-btn-del {
+        color: #ef4444 !important;
+        background: #fee2e2 !important;
+        border: none !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+    }
+    .grid-action-btn-del:hover {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+        transform: scale(1.08) translateY(-1px) !important;
+    }
+
+    /* Delete Modal */
+    #ConfirmDeleteModal .modal-dialog {
+        max-width: 500px;
+        margin: 60px auto;
+    }
+    #ConfirmDeleteModal .modal-content {
+        border-radius: 12px !important;
+        border: 1px solid #334155 !important;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35) !important;
+        overflow: hidden !important;
+        background: #ffffff !important;
+    }
+    #ConfirmDeleteModal .modal-header {
+        background: #0f172a !important; /* Obsidian Slate Navy Header */
+        color: #ffffff !important;
+        padding: 14px 20px !important;
+        border-bottom: 1px solid #1e293b !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+    #ConfirmDeleteModal .modal-header:before,
+    #ConfirmDeleteModal .modal-header:after {
+        display: none !important;
+    }
+    .modal-header-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .modal-header-title,
+    #ConfirmDeleteModal .modal-header-title,
+    #ConfirmDeleteModal .modal-header h4,
+    #ConfirmDeleteModal h4 {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important; /* Crisp High-Contrast Pure White */
+        margin: 0 !important;
+        letter-spacing: 0.25px !important;
+        line-height: 1.3 !important;
+    }
+    .modal-close-btn,
+    #ConfirmDeleteModal .close,
+    #ConfirmDeleteModal .modal-close-btn {
+        background: transparent !important;
+        border: none !important;
+        font-size: 24px !important;
+        font-weight: 300 !important;
+        color: #cbd5e1 !important;
+        cursor: pointer !important;
+        opacity: 0.85 !important;
+        transition: all 0.2s ease !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        text-shadow: none !important;
+    }
+    .modal-close-btn:hover,
+    #ConfirmDeleteModal .close:hover,
+    #ConfirmDeleteModal .modal-close-btn:hover {
+        color: #ffffff !important;
+        opacity: 1 !important;
+        transform: scale(1.15) !important;
+    }
+
+    .delete-dialog-content {
+        text-align: center;
+        padding: 20px 10px 10px;
+    }
+    .delete-warning-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #fef2f2;
+        color: #ef4444;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin-bottom: 12px;
+    }
+    .delete-dialog-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 6px 0;
+    }
+    .delete-dialog-text {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .btn-modal-action {
+        border-radius: 8px;
+        padding: 7px 16px;
+        font-size: 12.5px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .btn-modal-action:hover {
+        transform: translateY(-2px);
+    }
+    .btn-modal-reset {
+        background: #f1f5f9;
+        color: #475569;
+    }
+    .btn-modal-reset:hover {
+        background: #e2e8f0;
+    }
+    .btn-modal-delete {
+        background: #ef4444;
+        color: #ffffff;
+    }
+    .btn-modal-delete:hover {
+        background: #dc2626;
+    }
+
+    /* ==========================================================================
+       Mobile Responsive Styling
+       ========================================================================== */
+    @@media (max-width: 768px) {
+        .emp-list-page {
+            padding: 0 0 15px 0;
+        }
+
+        .emp-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .emp-header-left {
+            width: 100%;
+        }
+
+        .emp-header-actions {
+            width: 100%;
+            display: flex;
+        }
+
+        .btn-emp-add {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px 16px !important;
+            font-size: 13.5px !important;
+        }
+
+        .emp-card-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 12px 14px !important;
+        }
+
+        .emp-card-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .emp-grid-card {
+            min-height: 480px;
+        }
+
+        .emp-grid-card .uigrid,
+        .emp-grid-card #gridContainer {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+
+        .dx-datagrid-search-panel {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 6px !important;
+        }
+
+        #ConfirmDeleteModal .modal-dialog {
+            margin: 20px 12px !important;
+            max-width: calc(100% - 24px) !important;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .emp-header-icon {
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+        }
+
+        .emp-header-title {
+            font-size: 16px !important;
+        }
+
+        .emp-card-title-left h3 {
+            font-size: 14px !important;
+        }
+    }
+</style>
+
+<div ng-controller="EmployeeDetailCtrl" class="emp-list-page">
+    <!-- Header Banner Card -->
+    <div class="emp-header-card">
+        <div class="emp-header-left">
+            <div class="emp-header-icon">
+                <i class="fa fa-users"></i>
+            </div>
+            <div>
+                <div class="emp-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>Employee List</span>
+                </div>
+                <h4 class="emp-header-title">Employee List</h4>
+            </div>
+        </div>
+        <div class="emp-header-actions">
+            <button class="btn-emp-add" ng-click="OpenAddNew()" title="Open Employee Registration in new tab">
+                <i class="fa fa-plus-circle"></i> Add New
+            </button>
+        </div>
+    </div>
+
+    <!-- DataGrid Container Card -->
+    <div class="emp-grid-card">
+        <div class="emp-card-header">
+            <div class="emp-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Employee Records ({{List.length || 0}} Records)</h3>
+            </div>
+            <div class="emp-card-actions">
+                <span class="badge-status-pill badge-pill-info">
+                    <i class="fa fa-database"></i> {{List.length || 0}} Total Records
+                </span>
+            </div>
+        </div>
+        <div class="emp-grid-body">
+            <div class="uigrid">
+                <div id="gridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="ConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-exclamation-triangle" style="color: #ef4444; font-size: 18px;"></i>
+                        <h4 class="modal-header-title">Confirm Delete Employee</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #ffffff;">
+                    <div class="delete-dialog-content">
+                        <div class="delete-warning-icon">
+                            <i class="fa fa-trash-o"></i>
+                        </div>
+                        <h4 class="delete-dialog-title">Delete Employee Record?</h4>
+                        <p class="delete-dialog-text">
+                            Are you sure you want to delete employee <strong>{{SelectedDeleteItem.EmployeeName || SelectedDeleteItem.EmpName || 'this record'}}</strong> 
+                            <span ng-if="SelectedDeleteItem.EmpCode || SelectedDeleteItem.EmployeeCode">({{SelectedDeleteItem.EmpCode || SelectedDeleteItem.EmployeeCode}})</span>?
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button">
+                        <i class="fa fa-trash"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
+    }
+
+    module.controller("EmployeeDetailCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.List = [];
+        $scope.DataField = [];
+        $scope.IsLoading = false;
+        $scope.SelectedDeleteItem = null;
+
+        // Open Add New in new browser tab
+        $scope.OpenAddNew = function () {
+            window.open('@Url.Action("Index", "Employees")?id=0', '_blank');
+        };
+
+        // Open Edit in new browser tab
+        $scope.EditRow = function (id) {
+            window.open('@Url.Action("Index", "Employees")?id=' + (id || 0), '_blank');
+        };
+
+        // Fetch Data from Server
+        $scope.FetchData = function () {
+            $scope.IsLoading = true;
+            if (typeof show_loader === 'function') show_loader();
+
+            $http.get('@Url.Action("EMP_Employee_Getdata", "Employees")')
+            .then(function (response) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+
+                var rawList = (response.data && response.data.EMPEmployeeList) ? response.data.EMPEmployeeList : [];
+                $scope.List = rawList;
+
+                var rawFields = (response.data && response.data.DataField) ? response.data.DataField : [];
+                $scope.BuildGridColumns(rawFields);
+            }, function () {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                if (typeof Noty === 'function') {
+                    Noty("error", "Error loading employee list from server.");
+                }
+            });
+        };
+
+        // Format Grid Columns (Compact High-Density Display)
+        $scope.BuildGridColumns = function (dataFields) {
+            var gridColumns = [];
+
+            // 1. Index / Serial # Column
+            gridColumns.push({
+                caption: '#',
+                width: 40,
+                alignment: 'center',
+                allowReordering: false,
+                fixed: true,
+                fixedPosition: 'left',
+                cellTemplate: function (container, options) {
+                    $("<span>")
+                        .text(options.rowIndex + 1)
+                        .css({ "font-weight": "600", "color": "#64748b" })
+                        .appendTo(container);
+                }
+            });
+
+            // 2. Process backend dynamic DataFields
+            if (dataFields && dataFields.length > 0) {
+                angular.forEach(dataFields, function (field) {
+                    var col = angular.copy(field);
+                    var fieldKey = (col.dataField || '').toLowerCase();
+
+                    // Ensure clean, human-readable caption
+                    if (!col.caption || col.caption === null || col.caption === '') {
+                        if (fieldKey === 'empcode' || fieldKey === 'employeecode' || fieldKey === 'code') {
+                            col.caption = 'Code';
+                        } else if (fieldKey === 'employeename' || fieldKey === 'empname' || fieldKey === 'name') {
+                            col.caption = 'Employee Name';
+                        } else if (fieldKey === 'gender') {
+                            col.caption = 'Gender';
+                        } else if (fieldKey === 'age') {
+                            col.caption = 'Age';
+                        } else if (fieldKey === 'mobileno' || fieldKey === 'mobile' || fieldKey === 'phoneno' || fieldKey === 'phone') {
+                            col.caption = 'Mobile No';
+                        } else if (fieldKey === 'balance') {
+                            col.caption = 'Balance';
+                        } else if (fieldKey === 'designation') {
+                            col.caption = 'Designation';
+                        } else if (fieldKey === 'employeetype' || fieldKey === 'emptype') {
+                            col.caption = 'Employee Type';
+                        } else if (fieldKey === 'username' || fieldKey === 'user_name') {
+                            col.caption = 'User Name';
+                        } else if (fieldKey === 'company' || fieldKey === 'companyname') {
+                            col.caption = 'Company';
+                        } else if (fieldKey === 'isactive' || fieldKey === 'status') {
+                            col.caption = 'Status';
+                        } else if (fieldKey === 'createdbyuser' || fieldKey === 'createdby' || fieldKey === 'createduser') {
+                            col.caption = 'Created By';
+                        } else if (col.dataField) {
+                            col.caption = col.dataField
+                                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                                .replace(/_/g, ' ')
+                                .trim();
+                        }
+                    }
+
+                    // Special styling for Employee Name
+                    if (fieldKey === 'employeename' || fieldKey === 'empname' || fieldKey === 'name') {
+                        col.minWidth = 120;
+                        col.cellTemplate = function (container, options) {
+                            $("<strong>")
+                                .text(options.value || '-')
+                                .css({ "color": "#1e293b", "font-weight": "600" })
+                                .appendTo(container);
+                        };
+                    }
+                    // Special styling for Employee Code
+                    else if (fieldKey === 'empcode' || fieldKey === 'employeecode' || fieldKey === 'code') {
+                        col.minWidth = 70;
+                        col.alignment = 'center';
+                        col.cellTemplate = function (container, options) {
+                            $("<span>")
+                                .text(options.value || '-')
+                                .css({ "font-weight": "600", "color": "#2563eb" })
+                                .appendTo(container);
+                        };
+                    }
+                    // Special styling for Status
+                    else if (fieldKey === 'isactive' || fieldKey === 'status') {
+                        col.minWidth = 65;
+                        col.alignment = 'center';
+                        col.cellTemplate = function (container, options) {
+                            var val = options.value;
+                            var isActive = (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+                            if (isActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        };
+                    }
+                    // Special styling for Gender
+                    else if (fieldKey === 'gender') {
+                        col.minWidth = 65;
+                        col.alignment = 'center';
+                        col.cellTemplate = function (container, options) {
+                            if (options.value) {
+                                var g = options.value.toString().toUpperCase();
+                                var isMale = (g === 'MALE' || g === 'M');
+                                $("<span>")
+                                    .addClass("badge-status-pill " + (isMale ? "badge-pill-info" : "badge-pill-warning"))
+                                    .text(options.value)
+                                    .appendTo(container);
+                            } else {
+                                $("<span>").text("-").appendTo(container);
+                            }
+                        };
+                    }
+                    // Special styling for Designation / Employee Type
+                    else if (fieldKey === 'designation' || fieldKey === 'employeetype') {
+                        col.minWidth = 80;
+                    }
+                    // Special formatting for Dates
+                    else if (fieldKey.indexOf('date') !== -1 || fieldKey === 'dob') {
+                        col.minWidth = 85;
+                        col.dataType = 'date';
+                        col.format = 'dd-MMM-yyyy';
+                        col.alignment = 'center';
+                    }
+
+                    gridColumns.push(col);
+                });
+            }
+
+            // 3. Action Column (Edit & Delete)
+            gridColumns.push({
+                caption: 'Action',
+                width: 75,
+                alignment: 'center',
+                fixed: true,
+                fixedPosition: 'right',
+                allowReordering: false,
+                cellTemplate: function (container, options) {
+                    var group = $("<div>").addClass("grid-btn-group");
+
+                    // Edit Button
+                    $("<button>")
+                        .addClass("grid-action-btn-edit")
+                        .attr("title", "Edit Employee")
+                        .html('<i class="fa fa-pencil"></i>')
+                        .on("click", function () {
+                            $scope.$apply(function () {
+                                $scope.EditRow(options.data.ID || options.data.EmployeeID);
+                            });
+                        })
+                        .appendTo(group);
+
+                    // Delete Button
+                    $("<button>")
+                        .addClass("grid-action-btn-del")
+                        .attr("title", "Delete Employee")
+                        .html('<i class="fa fa-trash-o"></i>')
+                        .on("click", function () {
+                            $scope.$apply(function () {
+                                $scope.PromptDelete(options.data);
+                            });
+                        })
+                        .appendTo(group);
+
+                    group.appendTo(container);
+                }
+            });
+
+            $scope.InitGrid(gridColumns);
+        };
+
+        // Delete handlers
+        $scope.PromptDelete = function (item) {
+            $scope.SelectedDeleteItem = item;
+            $("#ConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem) {
+                $("#ConfirmDeleteModal").modal("hide");
+                return;
+            }
+            var empId = $scope.SelectedDeleteItem.ID || $scope.SelectedDeleteItem.EmployeeID;
+            if (!empId) {
+                $("#ConfirmDeleteModal").modal("hide");
+                return;
+            }
+
+            $scope.IsLoading = true;
+            if (typeof show_loader === 'function') show_loader();
+
+            var JsonPassData = { "EmployeeID": empId };
+            var Action = "DELETE";
+
+            $http({
+                method: "post",
+                url: '@Url.Action("InsertUpdateEmployee", "Employees")',
+                data: { model: JsonPassData, Action: Action },
+                dataType: "json"
+            }).then(function (ret) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                $("#ConfirmDeleteModal").modal("hide");
+
+                var respMsg = (ret.data && typeof ret.data === 'string') ? ret.data : (ret.data && ret.data.message ? ret.data.message : '');
+                if (respMsg === "Recored Is Deleted" || respMsg.toLowerCase().indexOf("deleted") !== -1) {
+                    if (typeof Noty === 'function') Noty("success", "Record Deleted Successfully");
+                    $scope.FetchData();
+                } else {
+                    if (typeof Noty === 'function') Noty("error", respMsg || "Record Not Deleted");
+                }
+            }, function () {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                $("#ConfirmDeleteModal").modal("hide");
+                if (typeof Noty === 'function') Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // DevExtreme DataGrid Initialization
+        $scope.InitGrid = function (columns) {
+            $("#gridContainer").dxDataGrid({
+                dataSource: $scope.List,
+                keyExpr: 'ID',
+                columns: columns,
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual'
+                },
+                paging: { 
+                    enabled: false 
+                },
+                pager: { 
+                    visible: false 
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 280,
+                    placeholder: 'Search all employees...'
+                },
+                filterRow: { 
+                    visible: true,
+                    applyFilter: 'auto'
+                },
+                headerFilter: { visible: true },
+                selection: {
+                    mode: 'single'
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlxs'],
+                    allowExportSelectedData: false
+                },
+                onExporting: function (e) {
+                    if (e.format === 'xlxs') {
+                        if (typeof ExcelJS !== 'undefined') {
+                            var workbook = new ExcelJS.Workbook();
+                            var worksheet = workbook.addWorksheet('Employees');
+                            DevExpress.excelExporter.exportDataGrid({
+                                component: e.component,
+                                worksheet: worksheet,
+                                autoFilterEnabled: true
+                            }).then(function () {
+                                workbook.xlsx.writeBuffer().then(function (buffer) {
+                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'EmployeeList.xlsx');
+                                });
+                            });
+                        }
+                    }
+                },
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'EmployeeName',
+                            summaryType: 'count',
+                            displayFormat: 'Total: {0}'
+                        }
+                    ]
+                }
+            });
+        };
+
+        // Fetch data on load
+        $scope.FetchData();
+    }]);
+</script>

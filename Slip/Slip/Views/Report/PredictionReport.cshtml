@@ -1,0 +1,768 @@
+@{
+    ViewBag.Title = "Prediction Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Prediction Report - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .prediction-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .pred-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .pred-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card - Balanced z-index & overflow visible to let Chosen dropdown float over grid while staying beneath top navbar */
+    .pred-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 14px !important;
+        position: relative !important;
+        z-index: 50 !important;
+        overflow: visible !important;
+        transition: all 0.25s ease !important;
+    }
+    .pred-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .pred-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .pred-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .pred-header-card:hover .pred-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .pred-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .pred-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .pred-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .pred-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    /* Header Actions Toolbar */
+    .pred-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1060;
+    }
+
+    .pred-filter-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #475569;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    /* Chosen Custom Dropdown Styling */
+    .pred-select-wrap {
+        width: 170px;
+        position: relative;
+        z-index: 1070;
+    }
+
+    .pred-select-wrap .chosen-container {
+        width: 100% !important;
+        font-size: 12.5px !important;
+        position: relative !important;
+    }
+
+    .pred-select-wrap .chosen-container-single .chosen-single {
+        height: 36px;
+        line-height: 34px;
+        border-radius: 8px;
+        border: 1.5px solid #cbd5e1;
+        background: #f8fafc;
+        color: #1e293b;
+        font-size: 12.5px;
+        font-weight: 600;
+        box-shadow: none;
+        padding: 0 10px;
+        transition: all 0.2s ease;
+    }
+    .pred-select-wrap .chosen-container-active.chosen-with-drop .chosen-single {
+        border-color: #0284c7;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    .pred-select-wrap .chosen-container .chosen-drop {
+        border-radius: 8px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+        font-size: 12.5px !important;
+        background: #ffffff !important;
+        z-index: 999999 !important;
+        margin-top: 4px !important;
+    }
+
+    .pred-select-wrap .chosen-container .chosen-results {
+        max-height: 240px !important;
+        overflow-y: auto !important;
+        padding: 4px 0 !important;
+        margin: 0 !important;
+    }
+
+    .pred-select-wrap .chosen-container .chosen-results li {
+        padding: 7px 12px !important;
+        line-height: 1.4 !important;
+        color: #1e293b !important;
+        font-size: 12.5px !important;
+    }
+
+    .pred-select-wrap .chosen-container .chosen-results li.highlighted {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+    }
+
+    .pred-select-wrap .chosen-container-single .chosen-search input[type="text"] {
+        border-radius: 6px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 5px 8px !important;
+        font-size: 12px !important;
+        outline: none !important;
+    }
+    .pred-select-wrap .chosen-container-single .chosen-search input[type="text"]:focus {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15) !important;
+    }
+
+    .pred-date-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .pred-date-input {
+        height: 36px;
+        padding: 5px 10px;
+        font-size: 12.5px;
+        color: #1e293b;
+        background-color: #f8fafc;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.2s ease;
+        font-weight: 600;
+        width: 125px;
+        cursor: pointer;
+    }
+    .pred-date-input:focus {
+        border-color: #0284c7;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    /* Action Buttons */
+    .btn-pred-fetch {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 18px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+    }
+    .btn-pred-fetch:hover {
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-pred-excel {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 18px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.28) !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+    }
+    .btn-pred-excel:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    /* Grid Card Container */
+    .pred-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        z-index: 1 !important;
+        transition: all 0.25s ease !important;
+    }
+    .pred-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .pred-card-header {
+        background: #ffffff !important;
+        padding: 12px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    .pred-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .pred-card-title-left i {
+        font-size: 16px;
+        color: #0284c7;
+    }
+    .pred-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .pred-grid-body {
+        padding: 0 !important;
+    }
+
+    .pred-grid-card .uigrid,
+    .pred-grid-card #gridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridContainer {
+        width: 100% !important;
+    }
+
+    /* DevExtreme DataGrid Styling */
+    #gridContainer .dx-datagrid {
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+    }
+    #gridContainer .dx-datagrid-headers {
+        background: #f8fafc !important;
+        color: #334155 !important;
+        font-weight: 700 !important;
+        font-size: 12.5px !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+    #gridContainer .dx-datagrid-headers .dx-header-row > td {
+        padding: 11px 10px !important;
+        color: #1e293b !important;
+        font-weight: 700 !important;
+    }
+    #gridContainer .dx-data-row {
+        font-size: 12.5px;
+        transition: background-color 0.15s ease;
+    }
+    #gridContainer .dx-data-row:hover {
+        background-color: #f1f8fe !important;
+    }
+    #gridContainer .dx-row-alt {
+        background-color: #fafbfc;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 992px) {
+        .pred-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .pred-header-left {
+            width: 100%;
+        }
+
+        .pred-header-actions {
+            width: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .pred-header-actions {
+            flex-direction: column;
+        }
+
+        .pred-select-wrap,
+        .pred-date-wrap,
+        .pred-date-input,
+        .btn-pred-fetch,
+        .btn-pred-excel {
+            width: 100% !important;
+            justify-content: center !important;
+            text-align: center !important;
+        }
+
+        .pred-card-header {
+            padding: 12px 14px !important;
+        }
+
+        .pred-grid-card {
+            min-height: 480px;
+        }
+
+        .pred-grid-card .uigrid,
+        .pred-grid-card #gridContainer {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+    }
+</style>
+
+<div ng-controller="Diamond" class="prediction-page">
+    <!-- Top Header Card (SaaS Ice-Blue Theme with Action Toolbar) -->
+    <div class="pred-header-card">
+        <div class="pred-header-left">
+            <div class="pred-header-icon">
+                <i class="fa fa-line-chart"></i>
+            </div>
+            <div>
+                <div class="pred-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>Report</span> / 
+                    <span>Prediction Report</span>
+                </div>
+                <h4 class="pred-header-title">Prediction Report</h4>
+            </div>
+        </div>
+
+        <!-- Header Actions Toolbar (RCode Select, From Date, To Date, Fetch, Excel) -->
+        <div class="pred-header-actions">
+            <!-- RCode Dropdown -->
+            <div class="pred-select-wrap">
+                <select id="RCode" chosen="GetRCodeList" class="form-control input-sm" ng-options="item.id as item.value for item in GetRCodeList" ng-model="Diamond.RCode">
+                    <option value="">Select RCode</option>
+                </select>
+            </div>
+
+            <!-- From Date -->
+            <span class="pred-filter-label">From:</span>
+            <div class="pred-date-wrap">
+                <input id="FromDate" type="text" class="pred-date-input" placeholder="dd-M-yyyy" autocomplete="off" ng-model="Diamond.FromDate" readonly />
+            </div>
+
+            <!-- To Date -->
+            <span class="pred-filter-label">To:</span>
+            <div class="pred-date-wrap">
+                <input id="ToDate" type="text" class="pred-date-input" placeholder="dd-M-yyyy" autocomplete="off" ng-model="Diamond.ToDate" readonly />
+            </div>
+
+            <!-- Action Buttons -->
+            <button class="btn-pred-fetch" type="button" ng-click="FatchData()">
+                <i class="fa fa-search"></i> Fetch
+            </button>
+            <button class="btn-pred-excel" type="button" ng-click="ExcelExport()">
+                <i class="fa fa-file-excel-o"></i> Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- DevExtreme DataGrid Card -->
+    <div class="pred-grid-card">
+        <div class="pred-card-header">
+            <div class="pred-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Prediction Details</h3>
+            </div>
+        </div>
+
+        <div class="pred-grid-body">
+            <div class="uigrid">
+                <div id="gridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let IssueList = [];
+    let List = [];
+    let DataField = [];
+    let DataFieldSummary = [];
+
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['frapontillo.bootstrap-duallistbox', 'ngTouch', 'angularjs-dropdown-multiselect']);
+    }
+
+    module.directive('chosen', ['$timeout', function ($timeout) {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            if (list) {
+                scope.$watchCollection(list, function () {
+                    $timeout(function () {
+                        element.trigger('chosen:updated');
+                    }, 50);
+                });
+            }
+
+            if (attrs['ngModel']) {
+                scope.$watch(attrs['ngModel'], function () {
+                    $timeout(function () {
+                        element.trigger('chosen:updated');
+                    }, 50);
+                });
+            }
+
+            element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    }]);
+
+    module.controller("Diamond", function ($scope, $http, $timeout) {
+        $scope.Diamond = {};
+
+        var loopPromises = [];
+        var promise = $http.get('@Url.Action("Getdata_For_DropDown", "Master")').then(function (response) {
+            var RCodeList = [];
+            for (var i = 0; i < response.data.RCodeList.length; i++) {
+                var obj = { id: response.data.RCodeList[i]["RCode"], value: response.data.RCodeList[i]["RCode"] };
+                RCodeList.push(obj);
+            }
+            $scope.GetRCodeList = RCodeList;
+            $timeout(function () {
+                $('#RCode').trigger('chosen:updated');
+            }, 60);
+        });
+        loopPromises.push(promise);
+
+        $scope.FatchData = function () {
+            const RCode = $scope.Diamond.RCode;
+            const FromDate = $('#FromDate').val();
+            const ToDate = $('#ToDate').val();
+
+            if (!RCode && !FromDate && !ToDate) {
+                Noty("error", "Please Select RCode.");
+                return;
+            }
+
+            if (RCode) {
+                if (FromDate || ToDate) {
+                    Noty("error", "You Can Only Select RCode OR Date");
+                    return;
+                }
+            }
+
+            if (FromDate || ToDate) {
+                if (FromDate && !ToDate) {
+                    Noty("error", "Please Select ToDate.");
+                    return;
+                }
+                if (!FromDate && ToDate) {
+                    Noty("error", "Please Select FromDate.");
+                    return;
+                }
+                if (FromDate != "" && ToDate != "") {
+                    if (new Date(FromDate) > new Date(ToDate)) {
+                        Noty("error", "Please Select Valid ToDate!");
+                        return;
+                    }
+                }
+                if (RCode) {
+                    Noty("error", "You Can Only Select RCode OR Date");
+                    return;
+                }
+            }
+
+            show_loader();
+            $http({
+                method: "POST",
+                url: '@Url.Action("RP_Pridiction_Getdata", "Report")',
+                data: { RCode, FromDate, ToDate }
+            }).then(function (response) {
+                hide_loader();
+                List = response.data.List;
+                DataField = response.data.DataField;
+                DataFieldSummary = response.data.DataFieldSummary;
+
+                GridData();
+            }).catch(function (error) {
+                hide_loader();
+                Noty("error", "Error loading prediction data.");
+            });
+        };
+
+        const GridData = () => {
+            $("#gridContainer").dxDataGrid({
+                dataSource: List,
+                columns: DataField,
+                editing: {
+                    allowUpdating: false,
+                    allowDeleting: false,
+                    useIcons: true,
+                },
+                keyExpr: 'ID',
+                columnAutoWidth: true,
+                columnResizingMode: 'widget',
+                allowColumnResizing: true,
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                height: 'calc(100vh - 210px)',
+                paging: { enabled: false },
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual',
+                },
+                filterRow: {
+                    visible: true,
+                    applyFilter: 'auto',
+                },
+                filterPanel: { visible: true },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Search...',
+                },
+                loadPanel: {
+                    enabled: true,
+                    showPane: false,
+                    indicatorSrc: '/Content/icons/Loader.gif',
+                },
+                headerFilter: {
+                    visible: true,
+                },
+                pager: {
+                    visible: false,
+                },
+                selection: {
+                    mode: 'single',
+                },
+                keyboardNavigation: {
+                    enterKeyAction: 'moveFocus',
+                    enterKeyDirection: 'column',
+                    editOnKeyPress: true,
+                },
+                summary: {
+                    totalItems: DataFieldSummary
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlxs'],
+                    allowExportSelectedData: false,
+                },
+                onExporting(e) {
+                    if (e.format == 'pdf') {
+                        const doc = new jsPDF();
+
+                        DevExpress.pdfExporter.exportDataGrid({
+                            jsPDFDocument: doc,
+                            component: e.component,
+                            indent: 5,
+                        }).then(() => {
+                            doc.save('Labour.pdf');
+                        });
+                    }
+                    else if (e.format == 'xlxs') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Details');
+
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Pridiction Details.xlsx');
+                            });
+                        });
+                    }
+                },
+            });
+        };
+
+        $scope.ExcelExport = function () {
+            const RCode = $scope.Diamond.RCode;
+            const FromDate = $('#FromDate').val();
+            const ToDate = $('#ToDate').val();
+
+            if (!RCode && !FromDate && !ToDate) {
+                Noty("error", "Please Select RCode.");
+                return;
+            }
+
+            if (RCode) {
+                if (FromDate || ToDate) {
+                    Noty("error", "You Can Only Select RCode OR Date");
+                    return;
+                }
+            }
+
+            if (FromDate || ToDate) {
+                if (FromDate && !ToDate) {
+                    Noty("error", "Please Select ToDate.");
+                    return;
+                }
+                if (!FromDate && ToDate) {
+                    Noty("error", "Please Select FromDate.");
+                    return;
+                }
+                if (FromDate != "" && ToDate != "") {
+                    if (new Date(FromDate) > new Date(ToDate)) {
+                        Noty("error", "Please Select Valid ToDate!");
+                        return;
+                    }
+                }
+                if (RCode) {
+                    Noty("error", "You Can Only Select RCode OR Date");
+                    return;
+                }
+            }
+
+            show_loader();
+            $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("RP_Prd_Summary_Export", "Report")',
+                data: JSON.stringify({ RCode, FromDate, ToDate }),
+                dataType: "json"
+            }).then(function (data) {
+                hide_loader();
+                $scope.DownloadExcel(data.data.Data);
+            }).catch(function (error) {
+                hide_loader();
+                Noty("error", "Error exporting prediction summary.");
+            });
+        };
+
+        $scope.DownloadExcel = function (path) {
+            var url = '@Url.Action("DownloadExcel", "Home")/?filepath=' + path;
+            var hiddenIFrameID = 'hiddenDownloaderReportResult';
+            var iframe = document.getElementById(hiddenIFrameID);
+            if (iframe === null) {
+                iframe = document.createElement('iframe');
+                iframe.id = hiddenIFrameID;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
+        };
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $('#FromDate, #ToDate').datepicker({
+            format: "dd-M-yyyy",
+            autoclose: true,
+            todayHighlight: true
+        });
+
+        // Ensure clicking or tapping on mobile immediately opens the datepicker
+        $(document).on('click focus touchstart', '#FromDate, #ToDate', function (e) {
+            if (!$(this).prop('disabled')) {
+                $(this).datepicker('show');
+            }
+        });
+    });
+</script>

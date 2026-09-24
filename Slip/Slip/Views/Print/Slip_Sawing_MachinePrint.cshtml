@@ -1,0 +1,84 @@
+﻿@model System.Data.DataSet
+@{
+    ViewBag.Title = "Slip_Sawing_MachinePrint";
+    Layout = null;
+}
+
+<style>
+    .Bold {
+        font-weight: 600
+    }
+
+    table {
+        width: 100%;
+        font-size: 9px;
+    }
+
+    .container {
+        padding: 0 !important;
+    }
+
+    table tr th, table tr td {
+        vertical-align: middle !important;
+        padding: 2px 3px 0 3px;
+    }
+
+    .main-container {
+        width: 100%;
+        display: flex;
+        gap: 5px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: auto
+    }
+
+    .table-container {
+        width: 49.5%
+    }
+</style>
+
+<div class="main-container">
+    @for (var i = 0; i < Model.Tables[0].Rows.Count; i++)
+    {
+        <div class="table-container">
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th colspan="4" style="background-color:grey;color:white;text-align:center">SAWING MACHINE REPORT</th>
+                    </tr>
+                    <tr>
+                        <th>DATE : @Model.Tables[0].Rows[i]["Date"]</th>
+                        <th>SHIFT : @Model.Tables[0].Rows[i]["Shift"]</th>
+                        <th>M.No : @Model.Tables[0].Rows[i]["MachineNo"]</th>
+                        <th>EMP : @Model.Tables[0].Rows[i]["EmpName"]</th>
+                    </tr>
+                    <tr>
+                        <th>StoneID</th>
+                        <th>Pie</th>
+                        <th>Depth</th>
+                        <th>Opening</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (var j = 0; j < Model.Tables[1].Rows.Count; j++)
+                    {
+                        if (Convert.ToInt32(Model.Tables[0].Rows[i]["LogID"]) == Convert.ToInt32(Model.Tables[1].Rows[j]["LogID"]))
+                        {
+                            <tr>
+                                <td>@Model.Tables[1].Rows[j]["StoneID"]</td>
+                                <td>@Model.Tables[1].Rows[j]["Pie"]</td>
+                                <td>@Model.Tables[1].Rows[j]["Depth"]</td>
+                                <td>@Model.Tables[1].Rows[j]["Opening"]</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    }
+    </div>
+<script>
+    document.title = "SAWING MACHINE REPORT";
+    window.print();
+</script>

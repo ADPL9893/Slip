@@ -1,0 +1,1305 @@
+@{
+    ViewBag.Title = "Rough Code Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Rough Code Master - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .rcm-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .rcm-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .rcm-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Border) */
+    .rcm-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .rcm-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .rcm-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .rcm-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .rcm-header-card:hover .rcm-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .rcm-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .rcm-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .rcm-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .rcm-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    /* Add New Configuration Button */
+    .btn-rcm-add-main {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 18px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-rcm-add-main:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important;
+        color: #ffffff !important;
+    }
+    .btn-rcm-add-main:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Grid Card Container (Matching EmployeeDetail.cshtml & Lot.cshtml) */
+    .rcm-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .rcm-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .rcm-card-header {
+        background: #ffffff !important;
+        padding: 12px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    .rcm-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .rcm-card-title-left i {
+        font-size: 16px;
+        color: #0284c7;
+    }
+    .rcm-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .rcm-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rcm-grid-body {
+        padding: 0 !important;
+    }
+
+    .rcm-grid-card .uigrid,
+    .rcm-grid-card #gridContainer,
+    .rcm-grid-card #rcmGridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridContainer,
+    #rcmGridContainer {
+        width: 100% !important;
+    }
+
+    /* Grid Action Buttons */
+    .grid-btn-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .grid-action-btn-edit,
+    .grid-btn-edit {
+        color: #0284c7 !important;
+        background: #e0f2fe !important;
+        border: none !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        text-decoration: none !important;
+    }
+    .grid-action-btn-edit:hover,
+    .grid-btn-edit:hover {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+        transform: scale(1.08) translateY(-1px) !important;
+    }
+
+    .grid-action-btn-del,
+    .grid-btn-del {
+        color: #ef4444 !important;
+        background: #fee2e2 !important;
+        border: none !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+    }
+    .grid-action-btn-del:hover,
+    .grid-btn-del:hover {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+        transform: scale(1.08) translateY(-1px) !important;
+    }
+
+    /* Badges */
+    .badge-status-pill {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-pill-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .rcm-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .rcm-header-left {
+            width: 100%;
+        }
+
+        .btn-rcm-add-main {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+
+        .rcm-card-header {
+            padding: 12px 14px !important;
+        }
+
+        .rcm-grid-card {
+            min-height: 480px;
+        }
+
+        .rcm-grid-card .uigrid,
+        .rcm-grid-card #rcmGridContainer {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+    }
+
+    /* ==========================================================================
+       Unmodified Modal Styling (100% Preserved - Exact As-Is)
+       ========================================================================== */
+    #ConfigModal .modal-dialog {
+        max-width: 860px;
+        width: 92%;
+        margin: 30px auto;
+    }
+
+    #ConfigModal .modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    /* Sleek Dark Navy/Slate Header (Strict Left Title & Right X Button) */
+    #ConfigModal .modal-header {
+        background: #111827 !important;
+        color: #ffffff;
+        padding: 14px 20px !important;
+        border-bottom: 1px solid #1f2937;
+        position: relative;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    #ConfigModal .modal-header:before,
+    #ConfigModal .modal-header:after {
+        display: none !important;
+    }
+
+    .modal-header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+
+    .modal-header-title-left {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+    }
+
+    #ConfigModal .modal-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+        letter-spacing: 0.3px;
+        line-height: 1.3;
+    }
+
+    #ConfigModal .modal-title-icon {
+        color: #10b981;
+        font-size: 17px;
+    }
+
+    #ConfigModal .btn-close-header {
+        color: #94a3b8;
+        opacity: 1;
+        font-size: 24px;
+        font-weight: 300;
+        text-shadow: none;
+        margin: 0;
+        padding: 0 4px;
+        transition: color 0.15s ease;
+        line-height: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        cursor: pointer;
+    }
+    #ConfigModal .btn-close-header:hover {
+        color: #ffffff;
+    }
+
+    /* Modal Body & Card Sections */
+    #ConfigModal .modal-body {
+        padding: 20px 22px 10px 22px;
+        background: #f8fafc;
+        max-height: calc(85vh - 120px);
+        overflow-y: auto;
+    }
+
+    .rcm-modal-section {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 18px 4px 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .rcm-modal-section-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #2563eb;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+    .rcm-modal-section-title i {
+        font-size: 12px;
+    }
+
+    .rcm-form-group {
+        margin-bottom: 14px;
+    }
+
+    .rcm-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #334155;
+        margin-bottom: 5px;
+        display: block;
+    }
+    .rcm-label .req {
+        color: #ef4444;
+        margin-left: 2px;
+        font-weight: bold;
+    }
+    .rcm-label .helper-note {
+        font-size: 10.5px;
+        font-weight: 500;
+        text-transform: none;
+        color: #64748b;
+        margin-left: 4px;
+    }
+
+    .rcm-input {
+        width: 100%;
+        height: 38px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        color: #1e293b;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        outline: none;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .rcm-input::placeholder {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+    .rcm-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+    .rcm-input:disabled,
+    .rcm-input[disabled] {
+        background-color: #f1f5f9 !important;
+        color: #64748b !important;
+        cursor: not-allowed !important;
+    }
+
+    /* Chosen Fixes inside Modal */
+    .chosen-container {
+        width: 100% !important;
+        font-size: 12.5px;
+    }
+    .chosen-container-single .chosen-single {
+        height: 38px !important;
+        line-height: 36px !important;
+        border-radius: 6px !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
+        font-size: 12.5px !important;
+        color: #1e293b !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+        padding: 0 12px !important;
+    }
+    .chosen-container-single .chosen-single span {
+        margin-right: 24px;
+    }
+    .chosen-container-single .chosen-single div b {
+        background-position: 0 8px !important;
+    }
+    .chosen-container-active.chosen-with-drop .chosen-single {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+    .chosen-container .chosen-drop {
+        border-radius: 6px !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important;
+        font-size: 12.5px !important;
+        z-index: 99999 !important;
+    }
+    .chosen-container .chosen-results li.highlighted {
+        background: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+    /* Toggle Status Control */
+    .active-toggle-wrap {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        height: 38px;
+    }
+    .active-toggle-wrap input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #10b981;
+        margin: 0;
+    }
+
+    /* Modal Footer Buttons */
+    #ConfigModal .modal-footer {
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        padding: 12px 22px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-rcm-reset {
+        background: #ffffff;
+        color: #334155 !important;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        height: 36px;
+        padding: 0 16px;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-rcm-reset:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .btn-rcm-save {
+        background: #2563eb;
+        color: #ffffff !important;
+        border: 1px solid #1d4ed8;
+        border-radius: 6px;
+        height: 36px;
+        padding: 0 22px;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+        transition: all 0.15s ease;
+    }
+    .btn-rcm-save:hover {
+        background: #1d4ed8;
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+    }
+    .btn-rcm-save:disabled,
+    .btn-rcm-save[disabled] {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+</style>
+
+@if (ViewBag.IsAdmin == true || (ViewBag.CanView != null && (bool)ViewBag.CanView))
+{
+<div ng-controller="RoughCodeMasterCtrl" class="rcm-page">
+    <!-- Top Header Card (SaaS Ice-Blue Theme) -->
+    <div class="rcm-header-card">
+        <div class="rcm-header-left">
+            <div class="rcm-header-icon">
+                <i class="fa fa-barcode"></i>
+            </div>
+            <div>
+                <div class="rcm-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>Rough Code Master</span>
+                </div>
+                <h4 class="rcm-header-title">Rough Code Master</h4>
+            </div>
+        </div>
+        <div>
+            <!-- Add New Configuration Button -->
+            <button class="btn-rcm-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                <i class="fa fa-plus"></i> ADD NEW RECORD
+            </button>
+        </div>
+    </div>
+
+    <!-- DevExtreme DataGrid Card -->
+    <div class="rcm-grid-card">
+        <div class="rcm-card-header">
+            <div class="rcm-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Configuration Records</h3>
+                <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
+                    <i class="fa fa-database"></i> {{ConfigList.length || 0}} Records
+                </span>
+            </div>
+        </div>
+
+        <div class="rcm-grid-body">
+            <div class="uigrid">
+                <div id="gridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Popup for Add / Edit Configuration (Clean Reference Management Style - 100% Preserved) -->
+    <div class="modal fade" id="ConfigModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Sleek Dark Slate Header: Left Title and Right X Button -->
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-diamond modal-title-icon"></i>
+                            <h4 class="modal-title">Rough Code Management</h4>
+                        </div>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <!-- SECTION 1: BRANCH & VOUCHER SPECIFICATIONS -->
+                    <div class="rcm-modal-section">
+                        <div class="rcm-modal-section-title">
+                            <i class="fa fa-building text-primary"></i>
+                            BRANCH & VOUCHER SPECIFICATIONS
+                        </div>
+                        <div class="row">
+                            <!-- Branch -->
+                            <div class="col-md-6 col-sm-6 col-xs-12 rcm-form-group">
+                                <label class="rcm-label" for="ModalBranchID">
+                                    BRANCH <span class="req">*</span>
+                                </label>
+                                <select id="ModalBranchID" chosen="BranchList" class="form-control rcm-input" ng-model="FormModel.BranchID" ng-options="item.id as item.value for item in BranchList">
+                                    <option value="">Select Branch</option>
+                                </select>
+                            </div>
+
+                            <!-- Voucher Type -->
+                            <div class="col-md-6 col-sm-6 col-xs-12 rcm-form-group">
+                                <label class="rcm-label" for="ModalVoucherType">
+                                    VOUCHER TYPE <span class="req">*</span>
+                                </label>
+                                <select id="ModalVoucherType" chosen="VoucherTypeList" class="form-control rcm-input" ng-model="FormModel.VoucherType" ng-options="item.value as item.value for item in VoucherTypeList">
+                                    <option value="">Select Voucher Type</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Voucher Name -->
+                            <div class="col-md-6 col-sm-6 col-xs-12 rcm-form-group">
+                                <label class="rcm-label" for="ModalVoucherName">
+                                    VOUCHER NAME
+                                </label>
+                                <input type="text" id="ModalVoucherName" ng-model="FormModel.VoucherName" placeholder="Enter Voucher Name" class="rcm-input" />
+                            </div>
+
+                            <!-- Numeric Method -->
+                            <div class="col-md-6 col-sm-6 col-xs-12 rcm-form-group">
+                                <label class="rcm-label" for="ModalNumericMethod">
+                                    NUMERIC METHOD <span class="req">*</span>
+                                </label>
+                                <select id="ModalNumericMethod" class="form-control rcm-input" ng-model="FormModel.NumericMethod" ng-change="OnMethodChange()">
+                                    <option value="Automatic">Automatic (Auto-Generated)</option>
+                                    <option value="Manual">Manual (User Entered)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 2: NUMBERING PATTERN & RULES -->
+                    <div class="rcm-modal-section">
+                        <div class="rcm-modal-section-title">
+                            <i class="fa fa-sliders text-primary"></i>
+                            NUMBERING PATTERN & RULES
+                        </div>
+                        <div class="row">
+                            <!-- Prefix -->
+                            <div class="col-md-4 col-sm-4 col-xs-12 rcm-form-group">
+                                <label class="rcm-label" for="ModalPrefix">
+                                    PREFIX <span class="req" ng-if="FormModel.NumericMethod === 'Automatic'">*</span>
+                                    <span class="helper-note" ng-if="FormModel.NumericMethod !== 'Automatic'">(Optional)</span>
+                                </label>
+                                <input type="text" id="ModalPrefix" ng-model="FormModel.Prefix" ng-disabled="FormModel.NumericMethod === 'Manual'" placeholder="Enter Prefix" class="rcm-input" />
+                            </div>
+
+                            <!-- Separator -->
+                            <div class="col-md-4 col-sm-4 col-xs-12 rcm-form-group">
+                                <label class="rcm-label" for="ModalSeparator">
+                                    SEPARATOR
+                                </label>
+                                <input type="text" id="ModalSeparator" ng-model="FormModel.Separator" ng-disabled="FormModel.NumericMethod === 'Manual'" placeholder="Enter Separator (e.g. -)" class="rcm-input" />
+                            </div>
+
+                            <!-- Start From -->
+                            <div class="col-md-4 col-sm-4 col-xs-12 rcm-form-group">
+                                <label class="rcm-label" for="ModalStartFrom">
+                                    START FROM <span class="req">*</span>
+                                </label>
+                                <input type="number" id="ModalStartFrom" ng-model="FormModel.StartFrom" min="1" ng-disabled="FormModel.NumericMethod === 'Manual'" placeholder="Enter Starting Number" class="rcm-input" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECTION 3: STATUS & ACTIVATION CONTROLS -->
+                    <div class="rcm-modal-section" style="margin-bottom: 5px;">
+                        <div class="rcm-modal-section-title">
+                            <i class="fa fa-toggle-on text-primary"></i>
+                            STATUS & ACTIVATION CONTROLS
+                        </div>
+                        <div class="row">
+                            <!-- Status Active -->
+                            <div class="col-md-6 col-sm-6 col-xs-12 rcm-form-group">
+                                <label class="rcm-label">STATUS</label>
+                                <div class="active-toggle-wrap">
+                                    <input type="checkbox" id="ModalIsActive" ng-model="FormModel.IsActive" />
+                                    <label for="ModalIsActive" style="margin: 0; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                        <span ng-if="FormModel.IsActive" class="text-success"><i class="fa fa-check-circle"></i> Active</span>
+                                        <span ng-if="!FormModel.IsActive" class="text-danger"><i class="fa fa-times-circle"></i> Inactive</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Current Counter Indicator (for Existing Records) -->
+                            <div class="col-md-6 col-sm-6 col-xs-12 rcm-form-group" ng-if="FormModel.ConfigID > 0">
+                                <label class="rcm-label">LAST GENERATED NO</label>
+                                <div style="height: 38px; display: flex; align-items: center; font-size: 13px; font-weight: 700; color: #2563eb;">
+                                    <span class="badge-status-pill badge-pill-info" style="font-size: 12px; padding: 4px 10px;">
+                                        <i class="fa fa-info-circle"></i> {{FormModel.CurrentNo !== null && FormModel.CurrentNo !== undefined ? FormModel.CurrentNo : 'None Yet'}}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clean Actions Footer (Reset and Save/Update only) -->
+                <div class="modal-footer">
+                    <button class="btn-rcm-reset" type="button" ng-click="ResetForm()">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-rcm-save" type="button" ng-click="SaveConfig()" ng-disabled="IsSaving">
+                        <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i> 
+                        {{FormModel.ConfigID > 0 ? 'UPDATE' : 'SAVE'}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal (Triggered via Grid Delete Action - 100% Preserved) -->
+    <div class="modal fade" id="ConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
+                    <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
+                    <p style="font-size: 13px; color: #334155; margin: 0;">
+                        Are you sure you want to delete configuration for <strong>{{SelectedDeleteItem.BranchName || ('Branch #' + SelectedDeleteItem.BranchID)}}</strong> ({{SelectedDeleteItem.VoucherType}})?
+                    </p>
+                </div>
+                <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
+                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
+                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
+    }
+
+    // Chosen Directive with Scope Watchers
+    module.directive('chosen', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var list = attrs['chosen'];
+                if (list) {
+                    scope.$watchCollection(list, function () {
+                        $timeout(function () {
+                            element.trigger('chosen:updated');
+                        }, 50);
+                    });
+                }
+                if (attrs['ngModel']) {
+                    scope.$watch(attrs['ngModel'], function () {
+                        $timeout(function () {
+                            element.trigger('chosen:updated');
+                        }, 50);
+                    });
+                }
+                element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+            }
+        };
+    }]);
+
+    module.controller("RoughCodeMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        // Permissions
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.BranchList = [];
+        $scope.VoucherTypeList = [];
+        $scope.ConfigList = [];
+
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.SelectedDeleteItem = null;
+
+        // Form Model - Clean Blank Default State
+        $scope.FormModel = {
+            ConfigID: 0,
+            BranchID: null,
+            VoucherType: '',
+            VoucherName: '',
+            NumericMethod: 'Automatic',
+            Prefix: '',
+            Separator: '-',
+            StartFrom: null,
+            CurrentNo: null,
+            IsActive: true
+        };
+
+        $scope.OnMethodChange = function () {
+            if ($scope.FormModel.NumericMethod === 'Manual') {
+                $scope.FormModel.Prefix = '';
+                $scope.FormModel.Separator = '';
+                $scope.FormModel.StartFrom = null;
+            } else if (!$scope.FormModel.Separator) {
+                $scope.FormModel.Separator = '-';
+            }
+        };
+
+        // Open Add Modal
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#ConfigModal").modal("show");
+            $timeout(function () {
+                $('#ModalBranchID').trigger('chosen:updated');
+                $('#ModalVoucherType').trigger('chosen:updated');
+            }, 60);
+        };
+
+        // Reset Form - Completely Clean Blank Form
+        $scope.ResetForm = function () {
+            $scope.FormModel = {
+                ConfigID: 0,
+                BranchID: null,
+                VoucherType: '',
+                VoucherName: '',
+                NumericMethod: 'Automatic',
+                Prefix: '',
+                Separator: '-',
+                StartFrom: null,
+                CurrentNo: null,
+                IsActive: true
+            };
+            $timeout(function () {
+                $('#ModalBranchID').trigger('chosen:updated');
+                $('#ModalVoucherType').trigger('chosen:updated');
+            }, 40);
+        };
+
+        // Edit Item in Modal - Guaranteed Dropdown Selection
+        $scope.EditItem = function (item) {
+            if (!item) return;
+
+            var bId = parseInt(item.BranchID || item.BranchId || 0);
+            var vType = (item.VoucherType || '').toString().trim();
+
+            // Match Branch by ID or by BranchName in BranchList
+            if ($scope.BranchList && $scope.BranchList.length > 0) {
+                var foundB = null;
+                if (bId > 0) {
+                    foundB = $scope.BranchList.find(function(b) { return b.id == bId; });
+                }
+                if (!foundB && item.BranchName) {
+                    foundB = $scope.BranchList.find(function(b) { return b.value && b.value.toLowerCase().trim() === item.BranchName.toLowerCase().trim(); });
+                }
+                if (foundB) {
+                    bId = foundB.id;
+                } else if (bId > 0 && item.BranchName) {
+                    $scope.BranchList.push({ id: bId, value: item.BranchName });
+                }
+            } else if (bId > 0 && item.BranchName) {
+                $scope.BranchList = [{ id: bId, value: item.BranchName }];
+            }
+
+            // Match Voucher Type in VoucherTypeList
+            if ($scope.VoucherTypeList && $scope.VoucherTypeList.length > 0 && vType) {
+                var foundV = $scope.VoucherTypeList.find(function(v) {
+                    return (v.value && v.value.toLowerCase().trim() === vType.toLowerCase()) ||
+                           (v.moduleName && v.moduleName.toLowerCase().trim() === vType.toLowerCase());
+                });
+                if (foundV) {
+                    vType = foundV.value || foundV.moduleName;
+                } else {
+                    $scope.VoucherTypeList.push({ id: 9999, moduleName: vType, value: vType });
+                }
+            } else if (vType) {
+                $scope.VoucherTypeList = [{ id: 9999, moduleName: vType, value: vType }];
+            }
+
+            $scope.FormModel = {
+                ConfigID: item.ConfigID,
+                BranchID: bId,
+                VoucherType: vType,
+                VoucherName: item.VoucherName || '',
+                NumericMethod: item.NumericMethod || 'Automatic',
+                Prefix: item.Prefix || '',
+                Separator: (item.Separator !== undefined && item.Separator !== null) ? item.Separator : '-',
+                StartFrom: (item.StartFrom !== null && item.StartFrom !== undefined) ? parseInt(item.StartFrom) : null,
+                CurrentNo: item.CurrentNo,
+                IsActive: (item.IsActive === true || item.IsActive === 1 || item.IsActive === 'true' || item.IsActive === 'True')
+            };
+
+            $("#ConfigModal").modal("show");
+
+            $timeout(function () {
+                $('#ModalBranchID').trigger('chosen:updated');
+                $('#ModalVoucherType').trigger('chosen:updated');
+            }, 80);
+
+            $timeout(function () {
+                $('#ModalBranchID').trigger('chosen:updated');
+                $('#ModalVoucherType').trigger('chosen:updated');
+            }, 250);
+        };
+
+        // Prompt Delete (Triggered from grid row)
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.ConfigID) return;
+            $scope.SelectedDeleteItem = item;
+            $("#ConfirmDeleteModal").modal("show");
+        };
+
+        // Execute Delete
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem) return;
+            $http.post('@Url.Action("VoucherDetails_Insert_Update_Delete", "Master")', {
+                model: { ConfigID: $scope.SelectedDeleteItem.ConfigID },
+                Action: 'DELETE'
+            }).then(function (res) {
+                $("#ConfirmDeleteModal").modal("hide");
+                if (res.data && res.data.success) {
+                    Noty("success", "Configuration deleted successfully!");
+                    $scope.LoadConfigList();
+                    if ($scope.FormModel.ConfigID === $scope.SelectedDeleteItem.ConfigID) {
+                        $("#ConfigModal").modal("hide");
+                        $scope.ResetForm();
+                    }
+                } else {
+                    Noty("error", res.data.message || "Failed to delete configuration.");
+                }
+            }, function () {
+                $("#ConfirmDeleteModal").modal("hide");
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // Load Dropdowns (Branch List & Voucher Type List) with Multi-Tier Fallback
+        $scope.InitDropdowns = function () {
+            $http.post('@Url.Action("Getdata_For_DropDown", "Master")').then(function (res) {
+                var bList = [];
+                if (res.data && res.data.BranchList && res.data.BranchList.length > 0) {
+                    for (var i = 0; i < res.data.BranchList.length; i++) {
+                        var bId = res.data.BranchList[i]["ID"] || res.data.BranchList[i]["id"];
+                        var bVal = res.data.BranchList[i]["Value"] || res.data.BranchList[i]["value"] || res.data.BranchList[i]["Name"];
+                        if (bId !== undefined && bId !== null) {
+                            bList.push({
+                                id: parseInt(bId),
+                                value: bVal
+                            });
+                        }
+                    }
+                } else if (res.data && res.data.UserList && res.data.UserList.length > 0) {
+                    for (var j = 0; j < res.data.UserList.length; j++) {
+                        var uId = res.data.UserList[j]["UserID"] || res.data.UserList[j]["ID"] || res.data.UserList[j]["id"];
+                        var uVal = res.data.UserList[j]["UserName"] || res.data.UserList[j]["Value"] || res.data.UserList[j]["value"];
+                        if (uId !== undefined && uId !== null) {
+                            bList.push({
+                                id: parseInt(uId),
+                                value: uVal
+                            });
+                        }
+                    }
+                }
+
+                if (bList.length > 0) {
+                    $scope.BranchList = bList;
+                    $timeout(function () {
+                        $('#ModalBranchID').trigger('chosen:updated');
+                    }, 100);
+                } else {
+                    $scope.FetchDedicatedDropdowns();
+                }
+            }, function () {
+                $scope.FetchDedicatedDropdowns();
+            });
+
+            // Voucher Types
+            $scope.FetchDedicatedDropdowns();
+        };
+
+        $scope.FetchDedicatedDropdowns = function () {
+            $http.get('@Url.Action("GetRoughCodeMasterDropdowns", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    if ((!$scope.BranchList || $scope.BranchList.length === 0) && res.data.BranchList && res.data.BranchList.length > 0) {
+                        var list = [];
+                        for (var k = 0; k < res.data.BranchList.length; k++) {
+                            var id = res.data.BranchList[k]["id"] || res.data.BranchList[k]["ID"];
+                            var val = res.data.BranchList[k]["value"] || res.data.BranchList[k]["Value"];
+                            if (id !== undefined && id !== null) {
+                                list.push({ id: parseInt(id), value: val });
+                            }
+                        }
+                        $scope.BranchList = list;
+                    }
+
+                    if (res.data.VoucherTypeList && res.data.VoucherTypeList.length > 0) {
+                        $scope.VoucherTypeList = res.data.VoucherTypeList;
+                    } else {
+                        $scope.VoucherTypeList = [
+                            { id: 1, moduleName: 'Rough Distribution', value: 'Rough Distribution' },
+                            { id: 2, moduleName: 'Pre-Rough', value: 'Pre-Rough' },
+                            { id: 3, moduleName: 'Lot Master', value: 'Lot Master' }
+                        ];
+                    }
+
+                    $timeout(function () {
+                        $('#ModalBranchID').trigger('chosen:updated');
+                        $('#ModalVoucherType').trigger('chosen:updated');
+                    }, 100);
+                }
+            });
+        };
+
+        // Load Grid List
+        $scope.LoadConfigList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_VoucherDetailsList", "Master")').then(function (res) {
+                $scope.IsLoading = false;
+                if (res.data && res.data.success) {
+                    $scope.ConfigList = res.data.list || [];
+                    $scope.InitGrid();
+                } else {
+                    Noty("error", res.data.message || "Failed to load configurations.");
+                }
+            }, function () {
+                $scope.IsLoading = false;
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // Save / Update Configuration
+        $scope.SaveConfig = function () {
+            if (!$scope.FormModel.BranchID) {
+                Noty("error", "Please select Branch!");
+                $('#ModalBranchID').trigger('chosen:open');
+                return;
+            }
+            if (!$scope.FormModel.VoucherType) {
+                Noty("error", "Please select Voucher Type!");
+                $('#ModalVoucherType').trigger('chosen:open');
+                return;
+            }
+            if ($scope.FormModel.NumericMethod === 'Automatic') {
+                if (!$scope.FormModel.Prefix) {
+                    Noty("error", "Please enter Prefix for Automatic numbering!");
+                    $('#ModalPrefix').focus();
+                    return;
+                }
+            }
+            if (!$scope.FormModel.StartFrom || $scope.FormModel.StartFrom <= 0) {
+                Noty("error", "Please enter valid Start From number!");
+                $('#ModalStartFrom').focus();
+                return;
+            }
+
+            var action = $scope.FormModel.ConfigID > 0 ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("VoucherDetails_Insert_Update_Delete", "Master")', {
+                model: $scope.FormModel,
+                Action: action
+            }).then(function (res) {
+                $scope.IsSaving = false;
+                if (res.data && res.data.success) {
+                    $("#ConfigModal").modal("hide");
+                    Noty("success", $scope.FormModel.ConfigID > 0 ? "Configuration updated successfully!" : "Configuration saved successfully!");
+                    $scope.ResetForm();
+                    $scope.LoadConfigList();
+                } else {
+                    Noty("error", res.data.message || "Failed to save configuration.");
+                }
+            }, function () {
+                $scope.IsSaving = false;
+                Noty("error", "Error saving configuration to server.");
+            });
+        };
+
+        // DevExtreme Grid Initialization
+        $scope.InitGrid = function () {
+            $("#gridContainer").dxDataGrid({
+                dataSource: $scope.ConfigList,
+                keyExpr: 'ConfigID',
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'standard',
+                    rowRenderingMode: 'standard'
+                },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: {
+                    visible: true,
+                    width: 250,
+                    placeholder: 'Search configurations...'
+                },
+                filterRow: { visible: true },
+                headerFilter: { visible: true },
+                columns: [
+                    {
+                        caption: '#',
+                        width: 45,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Branch Name',
+                        dataField: 'BranchName',
+                        minWidth: 140,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.BranchName || ('Branch #' + options.data.BranchID)).css({ "color": "#1e293b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Voucher Type',
+                        dataField: 'VoucherType',
+                        minWidth: 130
+                    },
+                    {
+                        caption: 'Voucher Name',
+                        dataField: 'VoucherName',
+                        minWidth: 140
+                    },
+                    {
+                        caption: 'Numeric Method',
+                        dataField: 'NumericMethod',
+                        width: 120,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.NumericMethod === 'Automatic') {
+                                $("<span>").addClass("badge-status-pill badge-pill-info").html('<i class="fa fa-magic"></i> Automatic').appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-warning").html('<i class="fa fa-pencil"></i> Manual').appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Prefix',
+                        dataField: 'Prefix',
+                        width: 90,
+                        alignment: 'center'
+                    },
+                    {
+                        caption: 'Separator',
+                        dataField: 'Separator',
+                        width: 80,
+                        alignment: 'center'
+                    },
+                    {
+                        caption: 'Start From',
+                        dataField: 'StartFrom',
+                        width: 90,
+                        alignment: 'right'
+                    },
+                    {
+                        caption: 'Last Generated No',
+                        dataField: 'CurrentNo',
+                        width: 120,
+                        alignment: 'right',
+                        cellTemplate: function (container, options) {
+                            var val = options.data.CurrentNo;
+                            if (val !== null && val !== undefined) {
+                                $("<strong>").text(val).css({ "color": "#2563eb" }).appendTo(container);
+                            } else {
+                                $("<span>").text('-').css({ "color": "#94a3b8" }).appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Status',
+                        dataField: 'IsActive',
+                        width: 85,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action',
+                        width: 90,
+                        alignment: 'center',
+                        fixed: true,
+                        fixedPosition: 'right',
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>");
+
+                            if ($scope.CanEdit) {
+                                $("<button>")
+                                    .addClass("grid-btn-edit")
+                                    .attr("title", "Edit Configuration")
+                                    .html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () {
+                                        $scope.$apply(function () {
+                                            $scope.EditItem(options.data);
+                                        });
+                                    })
+                                    .appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>")
+                                    .addClass("grid-btn-del")
+                                    .attr("title", "Delete Configuration")
+                                    .html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () {
+                                        $scope.$apply(function () {
+                                            $scope.PromptDelete(options.data);
+                                        });
+                                    })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        // Modal Event Listener to ensure Chosen dropdowns expand properly inside Modal
+        $('#ConfigModal').on('shown.bs.modal', function () {
+            $timeout(function () {
+                $('#ModalBranchID').trigger('chosen:updated');
+                $('#ModalVoucherType').trigger('chosen:updated');
+            }, 40);
+        });
+
+        // Init
+        $scope.InitDropdowns();
+        $scope.LoadConfigList();
+    }]);
+</script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Rough Code Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}

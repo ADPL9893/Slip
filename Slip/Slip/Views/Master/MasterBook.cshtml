@@ -1,0 +1,1192 @@
+@{
+    ViewBag.Title = "Master Book";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Master Book Modern Scoped Styling
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .masterbook-page-wrapper {
+        padding: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Entrance Animations */
+    .mb-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .mb-filter-toolbar { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+    .mb-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Top Page Header Card (Clean White Neutral Header Card) */
+    .mb-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 12px 18px !important;
+        margin-bottom: 10px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        transition: all 0.25s ease !important;
+    }
+    .mb-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .mb-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .mb-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .mb-header-card:hover .mb-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .mb-header-title-wrap {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mb-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .mb-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .mb-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    .mb-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mb-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .mb-count-pill {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 9px;
+        border-radius: 20px;
+        border: 1px solid #cbd5e1 !important;
+    }
+
+    /* Single-Line Top Toolbar Flex Container (Entire Card View Solid Ice Blue) */
+    .mb-filter-toolbar {
+        background: #d0e7f7 !important;
+        border-radius: 12px !important;
+        padding: 10px 16px !important;
+        margin-bottom: 10px !important;
+        box-shadow: 0 3px 12px rgba(2, 132, 199, 0.12) !important;
+        border: 1.5px solid #7dd3fc !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        flex-wrap: nowrap !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .mb-filter-toolbar:hover {
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.18) !important;
+        border-color: #38bdf8 !important;
+    }
+
+    .mb-filter-field {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        flex-shrink: 0;
+    }
+
+    .mb-filter-label {
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        color: #0369a1 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        margin: 0 !important;
+    }
+
+    .mb-filter-input {
+        height: 38px;
+        border-radius: 8px;
+        border: 1.5px solid #7dd3fc !important;
+        padding: 6px 10px;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: #0f172a;
+        background-color: #ffffff !important;
+        outline: none;
+        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+        transition: all 0.2s ease;
+    }
+    .mb-filter-input:focus {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.25) !important;
+        background-color: #ffffff !important;
+    }
+
+    .date-range-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        position: relative;
+    }
+    .date-range-sep {
+        font-size: 13px;
+        font-weight: 800;
+        color: #0284c7;
+    }
+
+    .btn-date-search {
+        height: 38px;
+        width: 38px;
+        border-radius: 8px;
+        border: none;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 3px 8px rgba(2, 132, 199, 0.35);
+    }
+    .btn-date-search:hover {
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 12px rgba(2, 132, 199, 0.45);
+    }
+
+    /* 8 Square Filter Buttons Container (Balanced Padding & Shadow) */
+    .mb-btn-group-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+        flex-shrink: 0;
+        overflow-x: auto;
+        overflow-y: visible;
+        padding: 6px 8px;
+    }
+
+    .mb-stage-square-btn {
+        width: 82px;
+        height: 50px;
+        border-radius: 9px;
+        border: none;
+        color: #ffffff !important;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 4px 2px;
+        text-align: center;
+        position: relative;
+        overflow: visible;
+        opacity: 0.95;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+        flex-shrink: 0;
+        margin: 2px 2px;
+    }
+    .mb-stage-square-btn:hover {
+        opacity: 1;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+    }
+    .mb-stage-square-btn.active {
+        opacity: 1;
+        transform: translateY(-2px);
+        box-shadow: 0 0 0 2.5px #d0e7f7, 0 0 0 5px #0284c7, 0 4px 14px rgba(2, 132, 199, 0.45) !important;
+        font-weight: 700;
+        z-index: 5;
+    }
+
+    .mb-stage-square-btn i {
+        font-size: 15px;
+        transition: transform 0.2s ease;
+    }
+    .mb-stage-square-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    .mb-stage-square-btn span {
+        font-size: 10px;
+        line-height: 1.1;
+        white-space: nowrap;
+        letter-spacing: -0.1px;
+        font-weight: 600;
+    }
+
+    /* Distinct & Grouped Gradients for Stage Buttons */
+    .btn-rough-entry     { background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important; }
+    .btn-branch-assign   { background: linear-gradient(135deg, #c2410c 0%, #f97316 100%) !important; }
+    .btn-planning        { background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%) !important; }
+    /* CLV Running & CLV Complete: Shared Teal Cyan Gradient */
+    .btn-clv-running     { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important; }
+    .btn-clv-complete    { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important; }
+    /* MFG Running & MFG Complete: Shared Rose Red Gradient */
+    .btn-mfg-running     { background: linear-gradient(135deg, #be123c 0%, #f43f5e 100%) !important; }
+    .btn-mfg-complete    { background: linear-gradient(135deg, #be123c 0%, #f43f5e 100%) !important; }
+    .btn-mumbai-submit   { background: linear-gradient(135deg, #334155 0%, #475569 100%) !important; }
+
+    /* Single Clean Grid Card Container (No Extra Nested Borders) */
+    .mb-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        min-height: calc(100vh - 215px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .mb-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .mb-grid-card .uigrid,
+    .mb-grid-card #masterBookGridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 215px);
+    }
+
+    #masterBookGridContainer {
+        width: 100% !important;
+    }
+
+    /* Badges & Pills */
+    .badge-status-pill {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: 0.2px;
+    }
+    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-pill-danger  { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pill-info    { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+    .badge-pill-purple  { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .badge-pill-slate   { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+
+    /* Dynamic Stage Matching Header Badges */
+    .badge-stage-rough-entry   { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important; color: #ffffff !important; border: 1px solid #1e3a8a; }
+    .badge-stage-branch-assign { background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%) !important; color: #ffffff !important; border: 1px solid #b45309; }
+    .badge-stage-planning      { background: linear-gradient(135deg, #581c87 0%, #8b5cf6 100%) !important; color: #ffffff !important; border: 1px solid #581c87; }
+    .badge-stage-clv           { background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important; color: #ffffff !important; border: 1px solid #0f766e; }
+    .badge-stage-mfg           { background: linear-gradient(135deg, #9f1239 0%, #f43f5e 100%) !important; color: #ffffff !important; border: 1px solid #9f1239; }
+    .badge-stage-mumbai        { background: linear-gradient(135deg, #1e293b 0%, #475569 100%) !important; color: #ffffff !important; border: 1px solid #1e293b; }
+
+    /* ==========================================================================
+       Priority Color Styles for R.Code (Scoped Badges)
+       ========================================================================== */
+    .rcode-regular {
+        color: #0284c7 !important; /* Azure Blue (Default) */
+        font-weight: 700;
+    }
+    .rcode-sample {
+        color: #ea580c !important; /* Amber-Orange */
+        font-weight: 700;
+        background: #ffedd5;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #fed7aa;
+        display: inline-block;
+    }
+    .rcode-argent, .rcode-urgent {
+        color: #dc2626 !important; /* Vivid Red */
+        font-weight: 700;
+        background: #fee2e2;
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid #fecaca;
+        display: inline-block;
+    }
+
+    /* ==========================================================================
+       Bootstrap DatePicker Fixes for Popups & Mobile View (Solid, High z-index)
+       ========================================================================== */
+    .datepicker.dropdown-menu,
+    .datepicker.datepicker-dropdown,
+    div.datepicker {
+        z-index: 999999 !important;
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        opacity: 1 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+        padding: 8px !important;
+        visibility: visible !important;
+    }
+
+    .datepicker table {
+        background-color: #ffffff !important;
+        margin: 0 !important;
+    }
+
+    .datepicker table tr td,
+    .datepicker table tr th {
+        background-color: transparent !important;
+        border-radius: 6px !important;
+        font-size: 12px !important;
+        padding: 5px !important;
+    }
+
+    .datepicker table tr td.active,
+    .datepicker table tr td.active:hover,
+    .datepicker table tr td.active.disabled,
+    .datepicker table tr td.active.disabled:hover {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        text-shadow: none !important;
+        font-weight: 700;
+    }
+
+    .datepicker table tr td.today,
+    .datepicker table tr td.today:hover {
+        background: #e0f2fe !important;
+        color: #0284c7 !important;
+        font-weight: 700;
+    }
+
+    .datepicker table tr td.day:hover,
+    .datepicker table tr td.focused {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+    }
+
+    .datepicker .datepicker-switch:hover,
+    .datepicker .prev:hover,
+    .datepicker .next:hover,
+    .datepicker tfoot tr th:hover {
+        background: #f1f5f9 !important;
+    }
+
+    /* Custom Responsive Behavior */
+    @@media (max-width: 1280px) {
+        .mb-filter-toolbar {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .mb-btn-group-row {
+            margin-left: 0;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 8px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .mb-header-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .mb-filter-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+            overflow: visible !important;
+        }
+        .mb-filter-field {
+            width: 100% !important;
+        }
+        .date-range-wrap {
+            width: 100%;
+        }
+        .date-range-wrap input {
+            flex: 1;
+        }
+        .mb-btn-group-row {
+            justify-content: flex-start;
+        }
+    }
+
+    /* Grid Action Menu Button */
+    .btn-grid-row-menu {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #0e8acb;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-grid-row-menu:hover {
+        background: #0e8acb;
+        color: #ffffff;
+        border-color: #0e8acb;
+        transform: scale(1.06);
+    }
+
+    /* Floating Popover Container */
+    .mb-report-popover {
+        position: fixed;
+        z-index: 9999999;
+        width: 190px;
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+        animation: fadeInScale 0.18s ease-out forwards;
+    }
+    .mb-popover-header {
+        background: #f1f5f9;
+        padding: 7px 12px;
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #0f172a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .mb-popover-header .popover-close {
+        border: none;
+        background: transparent;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        color: #64748b;
+    }
+    .mb-popover-header .popover-close:hover {
+        color: #ef4444;
+    }
+    .mb-popover-list {
+        list-style: none;
+        margin: 0;
+        padding: 4px 0;
+    }
+    .mb-popover-list li {
+        padding: 8px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #1e293b;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+    .mb-popover-list li:hover {
+        background: #f0f9ff;
+        color: #0284c7;
+    }
+    .text-purple { color: #8b5cf6; }
+    .text-teal   { color: #0d9488; }
+    .text-rose   { color: #e11d48; }
+    .text-amber  { color: #d97706; }
+
+    @@keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-4px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+</style>
+
+<div ng-controller="MasterBookCtrl" class="masterbook-page-wrapper">
+    <!-- Top Page Header Card -->
+    <div class="mb-header-card">
+        <div class="mb-header-left">
+            <div class="mb-header-icon">
+                <i class="fa fa-book"></i>
+            </div>
+            <div class="mb-header-title-wrap">
+                <div class="mb-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / <span>Master</span> / <span>Master Book</span>
+                </div>
+                <div class="mb-title-row">
+                    <h4 class="mb-header-title">Master Book</h4>
+                    <span class="mb-count-pill" ng-show="!IsLoading">{{List.length}} Records</span>
+                    <span class="badge-status-pill" ng-class="GetStageBadgeClass(ActiveFilter)" ng-show="ActiveFilter">{{ActiveFilter}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single-Line Filter Toolbar Card -->
+    <div class="mb-filter-toolbar">
+        <!-- Module Type Dropdown -->
+        <div class="mb-filter-field" style="width: 165px;">
+            <label class="mb-filter-label" for="FilterModuleType">Module Type</label>
+            <select id="FilterModuleType" class="mb-filter-input" ng-model="SelectedModuleType" ng-change="OnModuleTypeChange()">
+                <option value="Pre Rough">Pre Rough</option>
+                <option value="Distribution">Distribution</option>
+                <option value="CLV Chart">CLV Chart</option>
+                <option value="MFG Chart">MFG Chart</option>
+                <option value="Mumbai Submit">Mumbai Submit</option>
+            </select>
+        </div>
+
+        <!-- Date Range Filter -->
+        <div class="mb-filter-field">
+            <label class="mb-filter-label">Date Range</label>
+            <div class="date-range-wrap">
+                <input type="text" id="FromDate" class="mb-filter-input" style="width: 110px;" placeholder="From Date" readonly autocomplete="off" ng-model="FromDate" />
+                <span class="date-range-sep">-</span>
+                <input type="text" id="ToDate" class="mb-filter-input" style="width: 110px;" placeholder="To Date" readonly autocomplete="off" ng-model="ToDate" />
+                <button class="btn-date-search" type="button" ng-click="SearchByDate()" title="Search with Date Filter">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 8 Square Filter Buttons (Choras Shape) -->
+        <div class="mb-btn-group-row">
+            <button type="button" class="mb-stage-square-btn btn-rough-entry" ng-class="{'active': ActiveFilter === 'Rough Entry'}" ng-click="SelectFilter('Rough Entry')" title="Filter: Rough Entry (All Data)">
+                <i class="fa fa-diamond"></i>
+                <span>Rough Entry</span>
+            </button>
+            <button type="button" class="mb-stage-square-btn btn-branch-assign" ng-class="{'active': ActiveFilter === 'Branch Assign'}" ng-click="SelectFilter('Branch Assign')" title="Filter: Branch Assign (All Data)">
+                <i class="fa fa-code-fork"></i>
+                <span>Branch Assign</span>
+            </button>
+            <button type="button" class="mb-stage-square-btn btn-planning" ng-class="{'active': ActiveFilter === 'Planning'}" ng-click="SelectFilter('Planning')" title="Filter: Planning (All Data)">
+                <i class="fa fa-calculator"></i>
+                <span>Planning</span>
+            </button>
+            <button type="button" class="mb-stage-square-btn btn-clv-running" ng-class="{'active': ActiveFilter === 'CLV Running'}" ng-click="SelectFilter('CLV Running')" title="Filter: CLV Running (All Data)">
+                <i class="fa fa-cogs"></i>
+                <span>CLV Running</span>
+            </button>
+            <button type="button" class="mb-stage-square-btn btn-clv-complete" ng-class="{'active': ActiveFilter === 'CLV Complte'}" ng-click="SelectFilter('CLV Complte')" title="Filter: CLV Complete (All Data)">
+                <i class="fa fa-check-square"></i>
+                <span>CLV Complte</span>
+            </button>
+            <button type="button" class="mb-stage-square-btn btn-mfg-running" ng-class="{'active': ActiveFilter === 'MFG Running'}" ng-click="SelectFilter('MFG Running')" title="Filter: MFG Running (All Data)">
+                <i class="fa fa-wrench"></i>
+                <span>MFG Running</span>
+            </button>
+            <button type="button" class="mb-stage-square-btn btn-mfg-complete" ng-class="{'active': ActiveFilter === 'MFG Complte'}" ng-click="SelectFilter('MFG Complte')" title="Filter: MFG Complete (All Data)">
+                <i class="fa fa-flag-checkered"></i>
+                <span>MFG Complte</span>
+            </button>
+            <button type="button" class="mb-stage-square-btn btn-mumbai-submit" ng-class="{'active': ActiveFilter === 'Mumbai Submit'}" ng-click="SelectFilter('Mumbai Submit')" title="Filter: Mumbai Submit (All Data)">
+                <i class="fa fa-send"></i>
+                <span>Mumbai Submit</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- DataGrid Container Card (Single Clean Card) -->
+    <div class="mb-grid-card">
+        <div id="masterBookGridContainer" style="width: 100%;"></div>
+    </div>
+
+    <!-- Floating Context Menu for Reports & Charts -->
+    <div id="mbReportContextMenu" class="mb-report-popover" ng-show="ShowReportMenu" ng-style="ReportMenuStyle" ng-click="$event.stopPropagation()">
+        <div class="mb-popover-header">
+            <span>Reports &amp; Charts</span>
+            <button type="button" class="popover-close" ng-click="CloseReportMenu()">&times;</button>
+        </div>
+        <ul class="mb-popover-list">
+            <li ng-click="OpenReport('Pre Rough')">
+                <i class="fa fa-diamond text-purple"></i> Pre Rough
+            </li>
+            <li ng-click="OpenReport('CLV Chart')">
+                <i class="fa fa-cogs text-teal"></i> CLV Chart
+            </li>
+            <li ng-click="OpenReport('MFG Chart')">
+                <i class="fa fa-wrench text-rose"></i> MFG Chart
+            </li>
+            <li ng-click="OpenReport('IGI complet')">
+                <i class="fa fa-certificate text-amber"></i> IGI complet
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
+    }
+
+    module.controller("MasterBookCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        // Default page load pre-selection: 'Branch Assign' / 'Distribution'
+        $scope.SelectedModuleType = 'Distribution';
+        $scope.ActiveFilter = 'Branch Assign';
+        $scope.FromDate = '';
+        $scope.ToDate = '';
+        $scope.List = [];
+        $scope.DynamicColumns = [];
+        $scope.DynamicSummary = [];
+        $scope.IsLoading = false;
+        $scope.SelectedRowItem = null;
+        $scope.ShowReportMenu = false;
+        $scope.ReportMenuStyle = {};
+
+        // Dynamic Header Badge Class based on Active Stage
+        $scope.GetStageBadgeClass = function (stage) {
+            if (!stage) return 'badge-pill-info';
+            if (stage === 'Rough Entry') return 'badge-stage-rough-entry';
+            if (stage === 'Branch Assign') return 'badge-stage-branch-assign';
+            if (stage === 'Planning') return 'badge-stage-planning';
+            if (stage === 'CLV Running' || stage === 'CLV Complte') return 'badge-stage-clv';
+            if (stage === 'MFG Running' || stage === 'MFG Complte') return 'badge-stage-mfg';
+            if (stage === 'Mumbai Submit') return 'badge-stage-mumbai';
+            return 'badge-pill-info';
+        };
+
+        // Initialize DatePickers & Trigger Initial Default Load (Branch Assign with ALL data)
+        $timeout(function () {
+            $('#FromDate').datepicker({
+                format: "dd-M-yyyy",
+                autoclose: true,
+                todayHighlight: true,
+                orientation: "bottom auto"
+            }).on('changeDate', function (e) {
+                $scope.FromDate = $(this).val();
+            });
+
+            $('#ToDate').datepicker({
+                format: "dd-M-yyyy",
+                autoclose: true,
+                todayHighlight: true,
+                orientation: "bottom auto"
+            }).on('changeDate', function (e) {
+                $scope.ToDate = $(this).val();
+            });
+
+            $("#FromDate").datepicker("setDate", "-1m");
+            $("#ToDate").datepicker("setDate", "0d");
+            $scope.FromDate = $('#FromDate').val();
+            $scope.ToDate = $('#ToDate').val();
+
+            // Default initial fetch: 'Branch Assign' with blank dates (ALL data)
+            $scope.FetchData('Branch Assign', true);
+        }, 100);
+
+        // Module Type dropdown change handler
+        $scope.OnModuleTypeChange = function () {
+            if ($scope.SelectedModuleType === 'Pre Rough') {
+                $scope.ActiveFilter = 'Rough Entry';
+            } else if ($scope.SelectedModuleType === 'Distribution') {
+                $scope.ActiveFilter = 'Branch Assign';
+            } else if ($scope.SelectedModuleType === 'CLV Chart') {
+                $scope.ActiveFilter = 'CLV Running';
+            } else if ($scope.SelectedModuleType === 'MFG Chart') {
+                $scope.ActiveFilter = 'MFG Running';
+            } else if ($scope.SelectedModuleType === 'Mumbai Submit') {
+                $scope.ActiveFilter = 'Mumbai Submit';
+            }
+        };
+
+        // Scenario A: Search Button Click (Type Dropdown / Active Filter + Date Range)
+        $scope.SearchByDate = function () {
+            $scope.FetchData($scope.ActiveFilter, false);
+        };
+
+        // Scenario B: Stage Button Click (Fetch ALL historical data without date restriction)
+        $scope.SelectFilter = function (filterName) {
+            $scope.ActiveFilter = filterName;
+
+            // Sync Module Type dropdown
+            if (filterName === 'Rough Entry') {
+                $scope.SelectedModuleType = 'Pre Rough';
+            } else if (filterName === 'Branch Assign' || filterName === 'Planning') {
+                $scope.SelectedModuleType = 'Distribution';
+            } else if (filterName === 'CLV Running' || filterName === 'CLV Complte') {
+                $scope.SelectedModuleType = 'CLV Chart';
+            } else if (filterName === 'MFG Running' || filterName === 'MFG Complte') {
+                $scope.SelectedModuleType = 'MFG Chart';
+            } else if (filterName === 'Mumbai Submit') {
+                $scope.SelectedModuleType = 'Mumbai Submit';
+            }
+
+            // Fetch ALL data without date restriction
+            $scope.FetchData(filterName, true);
+        };
+
+        // Fetch Grid Data from Server
+        // isAllData === true -> ignores FromDate and ToDate (sends '')
+        // isAllData === false -> sends selected FromDate and ToDate
+        $scope.FetchData = function (filterType, isAllData) {
+            $scope.IsLoading = true;
+            if (typeof show_loader === 'function') show_loader();
+
+            var fromDateParam = '';
+            var toDateParam = '';
+
+            if (!isAllData) {
+                fromDateParam = $('#FromDate').val() || $scope.FromDate || '';
+                toDateParam = $('#ToDate').val() || $scope.ToDate || '';
+            }
+
+            var postData = {
+                FilterType: filterType || $scope.ActiveFilter || 'Branch Assign',
+                FromDate: fromDateParam,
+                ToDate: toDateParam
+            };
+
+            $http.post('@Url.Action("Get_MasterBook_DataList", "Master")', postData)
+            .then(function (res) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+
+                if (res.data && res.data.success) {
+                    $scope.List = res.data.List || [];
+                    $scope.DynamicColumns = res.data.DataField || [];
+                    $scope.DynamicSummary = res.data.DataFieldSummary || [];
+                    $scope.InitGrid();
+                } else {
+                    if (typeof Noty === 'function') {
+                        Noty("error", res.data.message || "Failed to load master book data.");
+                    }
+                }
+            }, function () {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                if (typeof Noty === 'function') {
+                    Noty("error", "Error connecting to server.");
+                }
+            });
+        };
+
+        // Initialize Dynamic DevExtreme DataGrid
+        $scope.InitGrid = function () {
+            var gridCols = [];
+
+            // Add index column (#)
+            gridCols.push({
+                caption: '#',
+                width: 45,
+                alignment: 'center',
+                fixed: true,
+                fixedPosition: 'left',
+                cellTemplate: function (container, options) {
+                    $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                }
+            });
+
+            // Dynamically construct columns from SP Table 1 metadata
+            angular.forEach($scope.DynamicColumns, function (col) {
+                var df = col.dataField || '';
+                var dfLower = df.toLowerCase();
+
+                var c = {
+                    dataField: col.dataField,
+                    caption: col.caption || col.dataField,
+                    dataType: col.dataType || 'string',
+                    alignment: col.alignment || 'left',
+                    visible: col.visible !== false
+                };
+
+                if (col.format) {
+                    c.format = col.format;
+                }
+
+                // Custom badge renderers based on dataField (independent of caption string)
+                if (dfLower === 'isactive') {
+                    c.width = 85;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        if (options.data.IsActive) {
+                            $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                        } else {
+                            $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                        }
+                    };
+                } else if (dfLower === 'stagestatus') {
+                    c.width = 130;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var stage = options.data.StageStatus || '';
+                        var pillClass = "badge-pill-info";
+                        if (stage.indexOf('Complete') > -1 || stage.indexOf('Submitted') > -1) {
+                            pillClass = "badge-pill-success";
+                        } else if (stage.indexOf('Running') > -1) {
+                            pillClass = "badge-pill-warning";
+                        } else if (stage.indexOf('Planning') > -1) {
+                            pillClass = "badge-pill-purple";
+                        }
+                        $("<span>").addClass("badge-status-pill " + pillClass).text(stage).appendTo(container);
+                    };
+                } else if (dfLower === 'priority') {
+                    c.minWidth = 100;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var priority = (options.data[col.dataField] || options.data.Priority || options.data.priority || 'REGULAR').toUpperCase().trim();
+                        if (!priority) priority = 'REGULAR';
+
+                        var badgeClass = "badge-status-pill badge-pill-info";
+                        if (priority === 'SAMPLE') {
+                            badgeClass = "badge-status-pill badge-pill-warning";
+                        } else if (priority === 'ARGENT' || priority === 'URGENT') {
+                            badgeClass = "badge-status-pill badge-pill-danger";
+                        }
+
+                        $("<span>")
+                            .addClass(badgeClass)
+                            .text(priority)
+                            .appendTo(container);
+                    };
+                } else if (dfLower === 'rcode' || dfLower === 'r_code' || dfLower === 'r.code') {
+                    c.minWidth = 110;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var val = options.data[col.dataField] || options.data.RCode || options.data.R_Code || '-';
+                        var priority = (options.data.Priority || options.data.priority || 'REGULAR').toUpperCase().trim();
+                        if (!priority) priority = 'REGULAR';
+
+                        var cls = 'rcode-regular';
+                        if (priority === 'SAMPLE') {
+                            cls = 'rcode-sample';
+                        } else if (priority === 'ARGENT' || priority === 'URGENT') {
+                            cls = 'rcode-argent';
+                        }
+
+                        $("<span>")
+                            .addClass(cls)
+                            .text(val)
+                            .appendTo(container);
+                    };
+                } else if (dfLower === 'jangadno' || dfLower === 'jangad') {
+                    c.minWidth = 105;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var val = options.data[col.dataField] || options.data.JangadNo || '-';
+                        $("<span>").addClass("badge-status-pill badge-pill-slate").text(val).appendTo(container);
+                    };
+                } else if (dfLower === 'branchname' || dfLower === 'br' || dfLower === 'branchshortname') {
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var rawVal = options.data.BranchShortName || options.data.ShortName || options.data[col.dataField] || options.data.BranchName || '';
+                        var displayVal = rawVal;
+
+                        // Normalize "Branch 1" / "Branch #1" / "Branch-1" to "BR-1"
+                        if (typeof displayVal === 'string' && displayVal.toLowerCase().indexOf('branch') > -1) {
+                            displayVal = displayVal.replace(/branch\s*#?\s*/i, 'BR-').trim();
+                        }
+
+                        if (displayVal === 'Not Assigned' || !displayVal) {
+                            $("<span>").text(displayVal || '-').css({ "color": "#94a3b8" }).appendTo(container);
+                        } else {
+                            $("<strong>").text(displayVal).css({ "color": "#0f172a", "font-weight": "700" }).appendTo(container);
+                        }
+                    };
+                } else if (dfLower === 'maingrad' || dfLower === 'grade') {
+                    c.width = 90;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var val = options.data[col.dataField];
+                        if (val) {
+                            var isMix = (val + '').toUpperCase() === 'MIX';
+                            $("<span>").addClass("badge-status-pill " + (isMix ? "badge-pill-warning" : "badge-pill-info")).text(val).appendTo(container);
+                        } else {
+                            $("<span>").text('-').appendTo(container);
+                        }
+                    };
+                }
+
+                gridCols.push(c);
+            });
+
+            // Add Action Column (Hamburger Menu for Reports & Charts) at the very end
+            gridCols.push({
+                caption: 'Action',
+                width: 65,
+                alignment: 'center',
+                fixed: true,
+                fixedPosition: 'right',
+                allowResizing: false,
+                allowReordering: false,
+                allowExporting: false,
+                cellTemplate: function (container, options) {
+                    var $btn = $("<button>")
+                        .addClass("btn-grid-row-menu")
+                        .attr("type", "button")
+                        .attr("title", "View Reports")
+                        .html('<i class="fa fa-bars"></i>')
+                        .on("click", function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (e.originalEvent) {
+                                e.originalEvent.stopPropagation();
+                                e.originalEvent.preventDefault();
+                            }
+                            var btnEl = this;
+                            $scope.$apply(function () {
+                                $scope.OpenReportMenu(options.data, e, btnEl);
+                            });
+                        });
+                    $btn.appendTo(container);
+                }
+            });
+
+            // Format dynamic summaries from SP Table 2 metadata + Total record count
+            var summaryItems = [];
+
+            // Add Total Record Count Summary under the first data column (e.g., JangadNo)
+            var countCol = ($scope.DynamicColumns && $scope.DynamicColumns.length > 0) ? $scope.DynamicColumns[0].dataField : 'JangadNo';
+            summaryItems.push({
+                column: countCol,
+                summaryType: 'count',
+                valueFormat: '#,##0',
+                displayFormat: '{0}'
+            });
+
+            angular.forEach($scope.DynamicSummary, function (s) {
+                var sumCol = s.column || s.dataField;
+                if (sumCol && sumCol !== countCol) {
+                    summaryItems.push({
+                        column: sumCol,
+                        summaryType: s.summaryType || 'sum',
+                        valueFormat: s.valueFormat || '#,##0.000',
+                        displayFormat: '{0}'
+                    });
+                }
+            });
+
+            // Destroy previous grid instance if exists
+            var gridElement = $("#masterBookGridContainer");
+            if (gridElement.data("dxDataGrid")) {
+                gridElement.dxDataGrid("dispose");
+            }
+
+            gridElement.dxDataGrid({
+                dataSource: $scope.List,
+                columns: gridCols,
+                keyExpr: 'ID',
+                height: 'calc(100vh - 215px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual'
+                },
+                paging: { enabled: false },
+                pager: { visible: false },
+                filterRow: { 
+                    visible: true,
+                    applyFilter: 'auto'
+                },
+                headerFilter: { visible: true },
+                searchPanel: {
+                    visible: true,
+                    width: 280,
+                    placeholder: 'Search Master Book...'
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlxs'],
+                    allowExportSelectedData: false
+                },
+                onExporting: function (e) {
+                    if (e.format === 'xlxs') {
+                        if (typeof ExcelJS !== 'undefined') {
+                            var workbook = new ExcelJS.Workbook();
+                            var worksheet = workbook.addWorksheet('MasterBook');
+                            DevExpress.excelExporter.exportDataGrid({
+                                component: e.component,
+                                worksheet: worksheet,
+                                autoFilterEnabled: true
+                            }).then(function () {
+                                workbook.xlsx.writeBuffer().then(function (buffer) {
+                                    var cleanFilter = ($scope.ActiveFilter || 'All').replace(/\s+/g, '_');
+                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'MasterBook_' + cleanFilter + '.xlsx');
+                                });
+                            });
+                        }
+                    }
+                },
+                summary: {
+                    totalItems: summaryItems
+                }
+            });
+        };
+
+        // Open Floating Report Context Menu
+        $scope.OpenReportMenu = function (rowItem, event, btnElement) {
+            // If already open for this exact row, toggle close
+            if ($scope.ShowReportMenu && $scope.SelectedRowItem && $scope.SelectedRowItem === rowItem) {
+                $scope.CloseReportMenu();
+                return;
+            }
+
+            $scope.SelectedRowItem = rowItem;
+            $scope.ShowReportMenu = true;
+
+            var targetEl = btnElement;
+            if (!targetEl && event) {
+                targetEl = event.currentTarget || event.target;
+            }
+            if (targetEl && !$(targetEl).hasClass('btn-grid-row-menu')) {
+                targetEl = $(targetEl).closest('.btn-grid-row-menu')[0] || targetEl;
+            }
+
+            var menuWidth = 195;
+            var menuHeight = 180;
+            var winWidth = $(window).width();
+            var winHeight = $(window).height();
+            var posX = 0;
+            var posY = 0;
+
+            if (targetEl && typeof targetEl.getBoundingClientRect === 'function') {
+                var rect = targetEl.getBoundingClientRect();
+                posX = rect.right - menuWidth;
+                posY = rect.bottom + 4;
+
+                if (posX + menuWidth > winWidth - 10) {
+                    posX = winWidth - menuWidth - 10;
+                }
+                if (posX < 10) {
+                    posX = rect.left > 10 ? rect.left : 10;
+                }
+                if (posY + menuHeight > winHeight - 10) {
+                    posY = Math.max(10, rect.top - menuHeight - 4);
+                }
+            } else {
+                var clickX = (event && (event.clientX || (event.originalEvent && event.originalEvent.clientX))) || (winWidth - menuWidth - 20);
+                var clickY = (event && (event.clientY || (event.originalEvent && event.originalEvent.clientY))) || 100;
+
+                posX = clickX - menuWidth + 20;
+                posY = clickY + 10;
+
+                if (posX + menuWidth > winWidth - 10) {
+                    posX = winWidth - menuWidth - 10;
+                }
+                if (posX < 10) {
+                    posX = 10;
+                }
+                if (posY + menuHeight > winHeight - 10) {
+                    posY = clickY - menuHeight - 5;
+                }
+            }
+
+            $scope.ReportMenuStyle = {
+                top: Math.round(posY) + 'px',
+                left: Math.round(posX) + 'px'
+            };
+        };
+
+        // Close Floating Report Context Menu
+        $scope.CloseReportMenu = function () {
+            $scope.ShowReportMenu = false;
+            $scope.SelectedRowItem = null;
+        };
+
+        var onScrollOrResize = function (e) {
+            if ($scope.ShowReportMenu) {
+                if (e && e.target && $(e.target).closest("#mbReportContextMenu").length > 0) {
+                    return;
+                }
+                $scope.$apply(function () {
+                    $scope.CloseReportMenu();
+                });
+            }
+        };
+
+        // Close menu immediately on any scroll (grid scroll, page scroll, mobile scroll) or window resize
+        window.addEventListener('scroll', onScrollOrResize, true);
+        window.addEventListener('resize', onScrollOrResize);
+
+        // Global Document Click to close menu when clicking outside
+        $(document).off("click.mbReportMenu").on("click.mbReportMenu", function (e) {
+            if ($(e.target).closest("#mbReportContextMenu, .btn-grid-row-menu").length === 0) {
+                if ($scope.ShowReportMenu) {
+                    $scope.$apply(function () {
+                        $scope.CloseReportMenu();
+                    });
+                }
+            }
+        });
+
+        $scope.$on("$destroy", function () {
+            $(document).off("click.mbReportMenu");
+            window.removeEventListener('scroll', onScrollOrResize, true);
+            window.removeEventListener('resize', onScrollOrResize);
+        });
+
+        // Action Click Handler for Reports & Charts
+        $scope.OpenReport = function (reportType) {
+            $scope.CloseReportMenu();
+        };
+    }]);
+</script>

@@ -1,0 +1,72 @@
+@{
+    ViewBag.Title = "Slip Excel Upload";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div ng-controller="SlipExcelController">
+    <div class="page-title">
+        <div class="col-lg-12">
+            <div class="col-md-3" style="margin-top: 8px;">
+                <input id="SlipExcel" type="file" accept=".xlsx,.csv" />
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-primary" ng-click="UploadExcel()">Upload</button>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="well bs-component">
+                    <legend class="font-green-sharp">
+                        <b style="position:absolute">Slip Excel Upload</b>
+                    </legend>
+                    <div class="card-body">
+                        <!-- Add datagrid or successful upload message area here if needed -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const module = angular.module('app', ['frapontillo.bootstrap-duallistbox', 'ngTouch', 'angularjs-dropdown-multiselect']);
+
+    module.controller("SlipExcelController", function ($scope, $http) {
+
+        $scope.UploadExcel = function () {
+            var formData = new FormData();
+            var file = document.getElementById('SlipExcel').files;
+
+            if (file.length > 0) {
+                for (var i = 0; i < file.length; i++) {
+                    formData.append("excelFile", file[i]);
+                }
+                show_loader();
+
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("SlipExcel_Insert_Using_Excel", "Master")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData,
+                    transformRequest: angular.identity
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data.Message == "Records inserted successfully" || ret.data.Message.toLowerCase().includes("success")) {
+                        Noty("success", ret.data.Message);
+                        document.getElementById('SlipExcel').value = "";
+                    }
+                    else {
+                        Noty("error", ret.data.Message);
+                    }
+                }, function (error) {
+                    hide_loader();
+                    Noty("error", "Error uploading file.");
+                });
+            } else {
+                Noty("warning", "Please select a file to upload.");
+            }
+        }
+    });
+</script>

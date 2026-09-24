@@ -1,0 +1,7 @@
+Time: 3/24/2026 8:14:07 PM
+--------------------------------------------------------------------------------------------
+Row out of range
+--------------------------------------------------------------------------------------------
+   at OfficeOpenXml.ExcelRange.ValidateRowCol(Int32 Row, Int32 Col)
+   at OfficeOpenXml.ExcelRange.get_Item(Int32 Row, Int32 Col)
+   at Slip.Controllers.SlipController.Daily_Report_Insert_Using_Excel(HttpPostedFileBase excelFile) in D:\01_ADPL Project\Slip\Slip\Slip\Controllers\SlipController.cs:line 1090

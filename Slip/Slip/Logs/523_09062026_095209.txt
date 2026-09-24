@@ -1,0 +1,6 @@
+Time: 09-06-2026 09:52:09 AM
+--------------------------------------------------------------------------------------------
+Object reference not set to an instance of an object.
+--------------------------------------------------------------------------------------------
+   at Slip.Utility.SessionFacade.get_UserSession() in D:\01_ADPL Project\Slip\Slip\Slip\Utility\SessionFacade.cs:line 26
+   at Slip.Controllers.PricingController.TRN_Approve_Pricing_Insert(List`1 PricingDetails, String ApproveDate, String Action) in D:\01_ADPL Project\Slip\Slip\Slip\Controllers\PricingController.cs:line 669

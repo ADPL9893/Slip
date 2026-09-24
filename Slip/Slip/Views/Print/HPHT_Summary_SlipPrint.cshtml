@@ -1,0 +1,368 @@
+﻿@model System.Data.DataSet
+@{
+    ViewBag.Title = "HPHT_Summary_SlipPrint";
+    Layout = null;
+}
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+    }
+
+    .report {
+        border: 2px solid #000;
+        padding:5px;
+    }
+
+    .report-title {
+        text-align: center;
+        font-weight: bold;
+        border: 2px solid #000;
+        padding: 6px;
+        margin-bottom: 5px;
+        font-size: large;
+        page-break-before: always;
+    }
+
+    .report-container {
+        display: flex;
+        gap: 5px;
+    }
+
+    .report-box {
+        width: 33.33%;
+        border: 1px solid #000;
+    }
+
+    .box-header {
+        text-align: center;
+        font-weight: bold;
+        border-bottom: 1px solid #000;
+        padding: 4px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #000;
+        padding: 3px;
+        text-align: center;
+    }
+
+    th {
+        background: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .Total {
+        font-weight: bold;
+        background: #eaeaea;
+    }
+</style>
+
+<div class="main-container">
+    @for (var i = 0; i < Model.Tables[3].Rows.Count; i++)
+    {
+        <div class="report">
+            <div class="report-title">
+                @Model.Tables[3].Rows[i]["RoughType"] &nbsp;&nbsp; | &nbsp;&nbsp; HPHT REPORT SMALL &nbsp;&nbsp; @Model.Tables[3].Rows[i]["ReportDate"]  &nbsp;&nbsp; ROUND-FANCY &nbsp;&nbsp; [ TABLE NO : @Model.Tables[3].Rows[i]["TableNo"] ] &nbsp;&nbsp; @Model.Tables[3].Rows[i]["Receipe"]
+            </div>
+
+            <div class="report-container">
+
+                <!-- ROUND -->
+                <div class="report-box">
+                    <table>
+                        <tr>
+                            <th colspan="4">ROUND</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4">HPHT REPORT</th>
+                        </tr>
+                        <!-- LOOP ROUND DATA -->
+                        @for (var j = 0; j < Model.Tables[0].Rows.Count; j++)
+                        {
+                            if (Model.Tables[3].Rows[i]["RCode"].ToString() == Model.Tables[0].Rows[j]["RCode"].ToString())
+                            {
+                                <tr>
+                                    <th colspan="4">@Model.Tables[0].Rows[j]["RCode"] &nbsp;&nbsp; @Model.Tables[0].Rows[j]["Power"]</th>
+                                </tr>
+                                <tr>
+                                    <th>COLOR</th>
+                                    <th>PCS</th>
+                                    <th>WEIGHT</th>
+                                    <th>%</th>
+                                </tr>
+
+                                <tr>
+                                    <td>F</td>
+                                    <td>@Model.Tables[0].Rows[j]["FPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["FWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["FPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>G</td>
+                                    <td>@Model.Tables[0].Rows[j]["GPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["GWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["GPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>H</td>
+                                    <td>@Model.Tables[0].Rows[j]["HPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["HWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["HPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>I</td>
+                                    <td>@Model.Tables[0].Rows[j]["IPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["IWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["IPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>OGALELA</td>
+                                    <td>@Model.Tables[0].Rows[j]["OgalelaPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["OgalelaWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["OgalelaPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>COLORPATTA</td>
+                                    <td>@Model.Tables[0].Rows[j]["ColorPattaPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["ColorPattaWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["ColorPattaPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>DAMAGE</td>
+                                    <td>@Model.Tables[0].Rows[j]["DamagePcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["DamageWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["DamagePer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>BLACK</td>
+                                    <td>@Model.Tables[0].Rows[j]["BlackPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["BlackWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["BlackPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>TOTAL LOSS</td>
+                                    <td>@Model.Tables[0].Rows[j]["TotalLossPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["TotalLossWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["TotalLossPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>HPHT WT LOSS</td>
+                                    <td>@Model.Tables[0].Rows[j]["WeightLossPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["WeightLossWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["WeightLossPer"]</td>
+                                </tr>
+                                <tr class="Total">
+                                    <td>TOTAL</td>
+                                    <td>@Model.Tables[0].Rows[j]["TotalPcs"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["TotalWeight"]</td>
+                                    <td>@Model.Tables[0].Rows[j]["TotalPer"]</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+
+                <!-- FANCY -->
+                <div class="report-box">
+                    <table>
+                        <tr>
+                            <th colspan="4">FANCY</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4">HPHT REPORT</th>
+                        </tr>
+                        <!-- LOOP FANCY DATA -->
+                        @for (var k = 0; k < Model.Tables[2].Rows.Count; k++)
+                        {
+                            if (Model.Tables[3].Rows[i]["RCode"].ToString() == Model.Tables[2].Rows[k]["RCode"].ToString())
+                            {
+                                <tr>
+                                    <th colspan="4">@Model.Tables[1].Rows[k]["RCode"] &nbsp;&nbsp; @Model.Tables[1].Rows[k]["Power"]</th>
+                                </tr>
+                                <tr>
+                                    <th>COLOR</th>
+                                    <th>PCS</th>
+                                    <th>WEIGHT</th>
+                                    <th>%</th>
+                                </tr>
+
+                                <tr>
+                                    <td>F</td>
+                                    <td>@Model.Tables[1].Rows[k]["FPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["FWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["FPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>G</td>
+                                    <td>@Model.Tables[1].Rows[k]["GPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["GWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["GPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>H</td>
+                                    <td>@Model.Tables[1].Rows[k]["HPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["HWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["HPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>I</td>
+                                    <td>@Model.Tables[1].Rows[k]["IPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["IWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["IPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>OGALELA</td>
+                                    <td>@Model.Tables[1].Rows[k]["OgalelaPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["OgalelaWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["OgalelaPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>COLORPATTA</td>
+                                    <td>@Model.Tables[1].Rows[k]["ColorPattaPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["ColorPattaWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["ColorPattaPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>DAMAGE</td>
+                                    <td>@Model.Tables[1].Rows[k]["DamagePcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["DamageWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["DamagePer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>BLACK</td>
+                                    <td>@Model.Tables[1].Rows[k]["BlackPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["BlackWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["BlackPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>TOTAL LOSS</td>
+                                    <td>@Model.Tables[1].Rows[k]["TotalLossPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["TotalLossWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["TotalLossPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>HPHT WT LOSS</td>
+                                    <td>@Model.Tables[1].Rows[k]["WeightLossPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["WeightLossWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["WeightLossPer"]</td>
+                                </tr>
+                                <tr class="Total">
+                                    <td>TOTAL</td>
+                                    <td>@Model.Tables[1].Rows[k]["TotalPcs"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["TotalWeight"]</td>
+                                    <td>@Model.Tables[1].Rows[k]["TotalPer"]</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+
+                <!-- ROUND / FANCY -->
+                <div class="report-box">
+                    <table>
+                        <tr>
+                            <th colspan="4">ROUND / FANCY</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4">HPHT REPORT</th>
+                        </tr>
+                        @for (var l = 0; l < Model.Tables[2].Rows.Count; l++)
+                        {
+                            if (Model.Tables[3].Rows[i]["RCode"].ToString() == Model.Tables[2].Rows[l]["RCode"].ToString())
+                            {
+                            <tr>
+                                <th colspan="4">@Model.Tables[2].Rows[l]["RCode"] &nbsp;&nbsp; @Model.Tables[2].Rows[l]["Power"]</th>
+                            </tr>
+                            <tr>
+                                <th>COLOR</th>
+                                <th>PCS</th>
+                                <th>WEIGHT</th>
+                                <th>%</th>
+                            </tr>
+
+                            <!-- LOOP TOTAL DATA -->
+                                <tr>
+                                    <td>F</td>
+                                    <td>@Model.Tables[2].Rows[l]["FPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["FWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["FPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>G</td>
+                                    <td>@Model.Tables[2].Rows[l]["GPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["GWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["GPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>H</td>
+                                    <td>@Model.Tables[2].Rows[l]["HPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["HWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["HPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>I</td>
+                                    <td>@Model.Tables[2].Rows[l]["IPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["IWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["IPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>OGALELA</td>
+                                    <td>@Model.Tables[2].Rows[l]["OgalelaPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["OgalelaWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["OgalelaPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>COLORPATTA</td>
+                                    <td>@Model.Tables[2].Rows[l]["ColorPattaPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["ColorPattaWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["ColorPattaPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>DAMAGE</td>
+                                    <td>@Model.Tables[2].Rows[l]["DamagePcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["DamageWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["DamagePer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>BLACK</td>
+                                    <td>@Model.Tables[2].Rows[l]["BlackPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["BlackWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["BlackPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>TOTAL LOSS</td>
+                                    <td>@Model.Tables[2].Rows[l]["TotalLossPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["TotalLossWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["TotalLossPer"]</td>
+                                </tr>
+                                <tr>
+                                    <td>HPHT WT LOSS</td>
+                                    <td>@Model.Tables[2].Rows[l]["WeightLossPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["WeightLossWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["WeightLossPer"]</td>
+                                </tr>
+                                <tr class="Total">
+                                    <td>TOTAL</td>
+                                    <td>@Model.Tables[2].Rows[l]["TotalPcs"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["TotalWeight"]</td>
+                                    <td>@Model.Tables[2].Rows[l]["TotalPer"]</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<script>
+    document.title = "HPHT REPORT";
+    window.print();
+</script>

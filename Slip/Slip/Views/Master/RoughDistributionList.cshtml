@@ -1,0 +1,1576 @@
+@{
+    ViewBag.Title = "Rough Distribution List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Rough Distribution List - Distinct Mid-Tone Ice Blue Theming & SaaS Styling
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes dropSlideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .rough-dist-list-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .rdl-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .rdl-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Border) */
+    .rdl-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .rdl-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .rdl-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .rdl-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .rdl-header-card:hover .rdl-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .rdl-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .rdl-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .rdl-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .rdl-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    .rdl-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-rdl-add {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important; /* Premium Dark Blue */
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 18px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-rdl-add:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important;
+        color: #ffffff !important;
+    }
+    .btn-rdl-add:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Grid Card Container (Clean Neutral White Background with Distinct Border) */
+    .rdl-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .rdl-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .rdl-card-header {
+        background: #ffffff !important;
+        padding: 13px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    .rdl-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .rdl-card-title-left i {
+        font-size: 15px;
+        color: #0284c7;
+    }
+    .rdl-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .rdl-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rdl-grid-body {
+        padding: 0 !important;
+    }
+
+    .rdl-grid-card .uigrid,
+    .rdl-grid-card #gridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridContainer {
+        width: 100% !important;
+    }
+
+    /* Badges */
+    .badge-status-pill {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-pill-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    /* Action Buttons in Grid */
+    .grid-btn-group {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .grid-action-btn-edit {
+        color: #0284c7 !important;
+        background: #e0f2fe !important;
+        border: none !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        text-decoration: none !important;
+    }
+    .grid-action-btn-edit:hover {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+        transform: scale(1.08) translateY(-1px) !important;
+    }
+
+    .grid-action-btn-del {
+        color: #ef4444 !important;
+        background: #fee2e2 !important;
+        border: none !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 6px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+    }
+    .grid-action-btn-del:hover {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+        transform: scale(1.08) translateY(-1px) !important;
+    }
+
+    /* Delete Modal */
+    #ConfirmDeleteModal .modal-dialog {
+        max-width: 500px;
+        margin: 60px auto;
+    }
+    #ConfirmDeleteModal .modal-content {
+        border-radius: 12px !important;
+        border: 1px solid #334155 !important;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35) !important;
+        overflow: hidden !important;
+        background: #ffffff !important;
+    }
+    .modal-header,
+    #UploadImageModal .modal-header,
+    #ViewImageModal .modal-header,
+    #ConfirmDeleteModal .modal-header {
+        background: #0f172a !important; /* Obsidian Slate Navy Header */
+        color: #ffffff !important;
+        padding: 14px 20px !important;
+        border-bottom: 1px solid #1e293b !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+    .modal-header:before,
+    .modal-header:after,
+    #UploadImageModal .modal-header:before,
+    #UploadImageModal .modal-header:after,
+    #ViewImageModal .modal-header:before,
+    #ViewImageModal .modal-header:after,
+    #ConfirmDeleteModal .modal-header:before,
+    #ConfirmDeleteModal .modal-header:after {
+        display: none !important;
+        content: none !important;
+    }
+    .modal-header-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        margin: 0 !important;
+        float: none !important;
+    }
+    .modal-header-title,
+    .modal-header h4,
+    #UploadImageModal .modal-header-title,
+    #ViewImageModal .modal-header-title,
+    #ConfirmDeleteModal .modal-header-title {
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important; /* Crisp High-Contrast Pure White */
+        margin: 0 !important;
+        letter-spacing: 0.25px !important;
+        line-height: 1.3 !important;
+        display: inline-block !important;
+    }
+    .modal-close-btn,
+    .modal-header .close,
+    #UploadImageModal .close,
+    #ViewImageModal .close,
+    #ConfirmDeleteModal .close,
+    #ConfirmDeleteModal .modal-close-btn {
+        background: transparent !important;
+        border: none !important;
+        font-size: 24px !important;
+        font-weight: 300 !important;
+        color: #cbd5e1 !important;
+        cursor: pointer !important;
+        opacity: 0.85 !important;
+        transition: all 0.2s ease !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+        margin: 0 0 0 auto !important;
+        text-shadow: none !important;
+        float: none !important;
+    }
+    .modal-close-btn:hover,
+    .modal-header .close:hover,
+    #UploadImageModal .close:hover,
+    #ViewImageModal .close:hover,
+    #ConfirmDeleteModal .close:hover,
+    #ConfirmDeleteModal .modal-close-btn:hover {
+        color: #ffffff !important;
+        opacity: 1 !important;
+        transform: scale(1.15) !important;
+    }
+
+    .delete-dialog-content {
+        text-align: center;
+        padding: 20px 10px 10px;
+    }
+    .delete-warning-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #fef2f2;
+        color: #ef4444;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        margin-bottom: 12px;
+    }
+    .delete-dialog-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 6px 0;
+    }
+    .delete-dialog-text {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    .btn-modal-action {
+        border-radius: 8px;
+        padding: 7px 16px;
+        font-size: 12.5px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .btn-modal-action:hover {
+        transform: translateY(-2px);
+    }
+    .btn-modal-reset {
+        background: #f1f5f9;
+        color: #475569;
+    }
+    .btn-modal-reset:hover {
+        background: #e2e8f0;
+    }
+    .btn-modal-delete {
+        background: #ef4444;
+        color: #ffffff;
+    }
+    .btn-modal-delete:hover {
+        background: #dc2626;
+    }
+
+    /* ==========================================================================
+       Jangad Image Upload & Interactive Viewer Modal Styles
+       ========================================================================== */
+    #UploadImageModal .modal-dialog,
+    #ViewImageModal .modal-dialog {
+        margin: 50px auto !important;
+    }
+    #UploadImageModal .modal-dialog {
+        max-width: 580px !important;
+    }
+    #ViewImageModal .modal-dialog {
+        max-width: 920px !important;
+        width: 94% !important;
+    }
+
+    .image-dropzone {
+        border: 2px dashed #93c5fd;
+        background: #f0f9ff;
+        border-radius: 12px;
+        padding: 24px 20px;
+        text-align: center;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        position: relative;
+        margin-top: 10px;
+    }
+    .image-dropzone:hover, .image-dropzone.dragover {
+        border-color: #2563eb;
+        background: #e0f2fe;
+        transform: scale(1.01);
+    }
+    .image-dropzone input[type="file"] {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .dropzone-icon {
+        font-size: 38px;
+        color: #0284c7;
+        margin-bottom: 8px;
+    }
+    .dropzone-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+    .dropzone-hint {
+        font-size: 11.5px;
+        color: #64748b;
+    }
+
+    .selected-files-list {
+        margin-top: 14px;
+        max-height: 140px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .selected-file-item {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #334155;
+    }
+    .selected-file-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .selected-file-size {
+        font-size: 11px;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    /* Interactive Viewer Carousel */
+    .image-viewer-container {
+        position: relative;
+        background: #090d16;
+        border-radius: 12px;
+        overflow: hidden;
+        min-height: 380px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+    }
+    .viewer-main-img-wrap {
+        width: 100%;
+        height: 60vh;
+        max-height: 520px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+    }
+    .viewer-main-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 6px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transition: transform 0.2s ease;
+    }
+    .viewer-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(15, 23, 42, 0.75);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+    }
+    .viewer-nav-btn:hover {
+        background: rgba(2, 132, 199, 0.9);
+        color: #ffffff;
+        transform: translateY(-50%) scale(1.1);
+        border-color: #38bdf8;
+    }
+    .viewer-prev-btn { left: 14px; }
+    .viewer-next-btn { right: 14px; }
+
+    .preview-counter-pill {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(6px);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        z-index: 10;
+        letter-spacing: 0.5px;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .viewer-thumb-strip {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 12px 6px 4px 6px;
+        margin-top: 10px;
+        scrollbar-width: thin;
+    }
+    .viewer-thumb-item {
+        width: 64px;
+        height: 54px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+        background: #0f172a;
+    }
+    .viewer-thumb-item:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    .viewer-thumb-item.active {
+        border-color: #0284c7;
+        opacity: 1;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.4);
+    }
+    .viewer-thumb-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .grid-action-btn-upload {
+        background: #eff6ff !important;
+        color: #2563eb !important;
+        border: 1px solid #bfdbfe !important;
+        width: 30px !important;
+        height: 30px !important;
+        border-radius: 6px !important;
+        font-size: 13px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .grid-action-btn-upload:hover {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #1d4ed8 !important;
+        transform: scale(1.08) translateY(-1px) !important;
+    }
+
+    .btn-grid-view-image {
+        background: #e0f2fe !important;
+        color: #0284c7 !important;
+        border: 1px solid #bae6fd !important;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        font-size: 13px;
+    }
+    .btn-grid-view-image:hover {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+        transform: scale(1.1);
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+    }
+
+    .rdl-modal-form-group {
+        margin-bottom: 12px;
+    }
+    .rdl-modal-label {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 5px;
+        display: block;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+    .rdl-modal-input {
+        height: 36px;
+        border-radius: 7px;
+        border: 1px solid #cbd5e1;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #1e293b;
+        background-color: #ffffff;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+</style>
+
+@if (ViewBag.IsAdmin == true || (ViewBag.CanView != null && (bool)ViewBag.CanView) || (ViewBag.CanAdd != null && (bool)ViewBag.CanAdd) || (ViewBag.CanEdit != null && (bool)ViewBag.CanEdit) || (ViewBag.CanDelete != null && (bool)ViewBag.CanDelete))
+{
+<div ng-controller="RoughDistributionListCtrl" class="rough-dist-list-page">
+    <!-- Header Banner -->
+    <div class="rdl-header-card">
+        <div class="rdl-header-left">
+            <div class="rdl-header-icon">
+                <i class="fa fa-list-alt"></i>
+            </div>
+            <div>
+                <div class="rdl-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>RoughDistributionList</span>
+                </div>
+                <h4 class="rdl-header-title">Rough Distribution List</h4>
+            </div>
+        </div>
+        <div class="rdl-header-actions">
+            <button class="btn-rdl-add" ng-show="CanAdd" ng-click="OpenAddNew()" title="Open Rough Distribution Entry in new tab">
+                <i class="fa fa-plus-circle"></i> Add New
+            </button>
+        </div>
+    </div>
+
+    <!-- DataGrid Container Card -->
+    <div class="rdl-grid-card">
+        <div class="rdl-card-header">
+            <div class="rdl-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Distribution Records ({{List.length}} Records)</h3>
+            </div>
+            <div class="rdl-card-actions">
+                <span class="badge-status-pill badge-pill-info">
+                    <i class="fa fa-database"></i> {{List.length}} Total Records
+                </span>
+            </div>
+        </div>
+        <div class="rdl-grid-body">
+            <div class="uigrid">
+                <div id="gridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="ConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-exclamation-triangle" style="color: #ef4444; font-size: 18px;"></i>
+                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important;">Confirm Delete Distribution</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #ffffff;">
+                    <div class="delete-dialog-content">
+                        <div class="delete-warning-icon">
+                            <i class="fa fa-trash-o"></i>
+                        </div>
+                        <h4 class="delete-dialog-title">Delete Distribution Record?</h4>
+                        <p class="delete-dialog-text">
+                            Are you sure you want to delete distribution for <strong>{{SelectedDeleteItem.BranchName}}</strong> 
+                            ({{SelectedDeleteItem.RoughPcs}} Pcs, {{SelectedDeleteItem.RoughWeight}} Cts)?
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button">
+                        <i class="fa fa-trash"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         Upload Jangad Images Modal
+         ========================================================================== -->
+    <div class="modal fade" id="UploadImageModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="border-radius: 12px; border: 1px solid #334155; box-shadow: 0 20px 45px rgba(0,0,0,0.35); overflow: hidden; background: #ffffff;">
+                <div class="modal-header" style="background: #0f172a; color: #ffffff; padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="modal-header-brand" style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa fa-cloud-upload" style="color: #38bdf8; font-size: 18px;"></i>
+                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important; font-size: 15px;">Upload Jangad Images</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #f8fafc; padding: 20px;">
+                    <!-- Readonly Jangad Details -->
+                    <div style="background: #ffffff; border-radius: 10px; padding: 14px; margin-bottom: 14px; border: 1px solid #e2e8f0;">
+                        <div class="row">
+                            <div class="col-xs-6 rdl-modal-form-group" style="margin-bottom: 0;">
+                                <label class="rdl-modal-label">Selected Jangad No</label>
+                                <input type="text" class="rdl-modal-input" ng-model="UploadModel.JangadNo" readonly style="background: #f1f5f9; font-weight: 700; color: #0369a1;" />
+                            </div>
+                            <div class="col-xs-6 rdl-modal-form-group" style="margin-bottom: 0;">
+                                <label class="rdl-modal-label">Module / Status</label>
+                                <input type="text" class="rdl-modal-input" value="Rough Distribution" readonly style="background: #f1f5f9; font-weight: 600; color: #475569;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Dropzone -->
+                    <div class="image-dropzone">
+                        <input type="file" id="roughDistImageFiles" multiple accept="image/*" onchange="angular.element(this).scope().OnFileSelected(this)" />
+                        <div class="dropzone-icon">
+                            <i class="fa fa-cloud-upload"></i>
+                        </div>
+                        <div class="dropzone-text">Click or Drag &amp; Drop Images Here</div>
+                        <div class="dropzone-hint">Supports multiple JPG, PNG, WEBP files (Max 10MB per image)</div>
+                    </div>
+
+                    <!-- Selected Files List -->
+                    <div class="selected-files-list" ng-if="UploadModel.Files && UploadModel.Files.length > 0">
+                        <div class="selected-file-item" ng-repeat="f in UploadModel.Files">
+                            <div class="selected-file-name">
+                                <i class="fa fa-file-image-o" style="color: #0284c7;"></i>
+                                <span>{{f.name}}</span>
+                            </div>
+                            <span class="selected-file-size">{{f.size}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #ffffff; padding: 12px 20px; border-top: 1px solid #e2e8f0;">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsUploading">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-rdl-add" ng-click="SubmitUploadImages()" type="button" style="padding: 7px 18px !important; font-size: 12.5px !important;" ng-disabled="IsUploading || !UploadModel.Files || UploadModel.Files.length === 0">
+                        <span ng-if="!IsUploading"><i class="fa fa-upload"></i> UPLOAD</span>
+                        <span ng-if="IsUploading"><i class="fa fa-spinner fa-spin"></i> Uploading...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         Interactive View Image Carousel Modal
+         ========================================================================== -->
+    <div class="modal fade" id="ViewImageModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden; background: #0f172a;">
+                <div class="modal-header" style="background: #0f172a; color: #ffffff; padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="modal-header-brand" style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa fa-picture-o" style="color: #38bdf8; font-size: 18px;"></i>
+                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important; font-size: 15px;">Jangad Images - Jangad #{{ActiveJangadNo}}</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #0b1320; padding: 16px;">
+                    <!-- Loading State -->
+                    <div ng-if="IsLoadingImages" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 32px; color: #38bdf8; margin-bottom: 12px;"></i>
+                        <div>Loading Jangad Images...</div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div ng-if="!IsLoadingImages && (!ImageList || ImageList.length === 0)" style="text-align: center; padding: 50px 20px; color: #94a3b8;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.06); display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #64748b; margin-bottom: 14px;">
+                            <i class="fa fa-picture-o"></i>
+                        </div>
+                        <h4 style="color: #f8fafc; font-size: 16px; margin-bottom: 6px;">No Images Found</h4>
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">There are no uploaded images for Jangad #{{ActiveJangadNo}} yet.</p>
+                        <button class="btn btn-rdl-add" style="font-size: 12px; padding: 7px 14px;" ng-click="OpenUploadModal({ JangadNo: ActiveJangadNo })" data-dismiss="modal">
+                            <i class="fa fa-cloud-upload"></i> Upload Images Now
+                        </button>
+                    </div>
+
+                    <!-- Carousel Viewer -->
+                    <div ng-if="!IsLoadingImages && ImageList && ImageList.length > 0">
+                        <div class="image-viewer-container">
+                            <!-- Left Arrow -->
+                            <button class="viewer-nav-btn viewer-prev-btn" ng-click="PrevImage()" ng-if="ImageList.length > 1" title="Previous Image (Left Arrow)">
+                                <i class="fa fa-chevron-left"></i>
+                            </button>
+
+                            <!-- Main Image -->
+                            <div class="viewer-main-img-wrap">
+                                <img ng-src="{{ImageList[ActiveImageIndex].ImagePath}}" 
+                                     alt="Jangad Image" 
+                                     class="viewer-main-img" 
+                                     onerror="this.src='/Content/images/Symbol1.png';" />
+                            </div>
+
+                            <!-- Right Arrow -->
+                            <button class="viewer-nav-btn viewer-next-btn" ng-click="NextImage()" ng-if="ImageList.length > 1" title="Next Image (Right Arrow)">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+
+                            <!-- Floating Carousel Counter Pill (Bottom Center) -->
+                            <div class="preview-counter-pill" ng-if="ImageList.length > 0">
+                                {{ActiveImageIndex + 1}} / {{ImageList.length}}
+                            </div>
+                        </div>
+
+                        <!-- Image Metadata & Action Bar -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 4px 4px 4px; color: #94a3b8; font-size: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <i class="fa fa-clock-o"></i> Uploaded: <strong style="color: #e2e8f0;">{{ImageList[ActiveImageIndex].Created || '-'}}</strong>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" target="_blank" class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);" title="Open original in new tab">
+                                    <i class="fa fa-external-link"></i> Full View
+                                </a>
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" download class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3);" title="Download image">
+                                    <i class="fa fa-download"></i> Download
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-xs" 
+                                        style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); margin-left: 6px;" 
+                                        ng-if="CanDelete" 
+                                        ng-click="DeleteCurrentImage()" 
+                                        title="Delete this image">
+                                    <i class="fa fa-trash-o"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Strip -->
+                        <div class="viewer-thumb-strip" ng-if="ImageList.length > 1">
+                            <div class="viewer-thumb-item" 
+                                 ng-repeat="img in ImageList" 
+                                 ng-class="{'active': $index === ActiveImageIndex}" 
+                                 ng-click="SelectImage($index)">
+                                <img ng-src="{{img.ImagePath}}" class="viewer-thumb-img" onerror="this.src='/Content/images/Symbol1.png';" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #0f172a; border-top: 1px solid #1e293b; padding: 12px 20px;">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" style="background: #1e293b; color: #cbd5e1; border-color: #334155;">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}
+else
+{
+<div class="row" style="margin-top: 20px;">
+    <div class="col-lg-12">
+        <div class="card" style="padding: 20px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <div class="alert alert-danger" style="margin: 0; font-size: 15px; font-weight: 500;">
+                <i class="fa fa-ban" style="margin-right: 8px;"></i>
+                <strong>Access Denied:</strong> You do not have permission to view this page.
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
+    }
+
+    module.controller("RoughDistributionListCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanExport = ('@ViewBag.CanExport' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.List = [];
+        $scope.IsLoading = false;
+        $scope.SelectedDeleteItem = null;
+
+        // Image Upload & Viewer State
+        $scope.UploadModel = {
+            JangadNo: '',
+            PreRoughID: null,
+            DistributionID: null,
+            RoughPcs: '',
+            RoughWeight: '',
+            Status: 'Distribution',
+            Files: []
+        };
+        $scope.IsUploading = false;
+        $scope.ActiveJangadNo = '';
+        $scope.ImageList = [];
+        $scope.ActiveImageIndex = 0;
+        $scope.IsLoadingImages = false;
+
+        // Open Add New in new browser tab
+        $scope.OpenAddNew = function () {
+            window.open('@Url.Action("RoughDistribution", "Master")', '_blank');
+        };
+
+        // Open Entry / Edit in new browser tab
+        $scope.OpenEdit = function (row) {
+            var url = '@Url.Action("RoughDistribution", "Master")';
+            if (row && row.PreRoughID) {
+                url += '?id=' + row.PreRoughID;
+            }
+            window.open(url, '_blank');
+        };
+
+        // Open Upload Image Modal
+        $scope.OpenUploadModal = function (row) {
+            $scope.SelectedUploadRow = row;
+            $scope.UploadModel = {
+                JangadNo: row ? (row.JangadNo || '') : '',
+                PreRoughID: row ? (row.PreRoughID || null) : null,
+                DistributionID: row ? (row.DistributionID || null) : null,
+                RoughPcs: row ? (row.RoughPcs || '') : '',
+                RoughWeight: row ? (row.RoughWeight || '') : '',
+                Status: 'Distribution',
+                Files: []
+            };
+            $('#roughDistImageFiles').val('');
+            $('#UploadImageModal').modal('show');
+        };
+
+        $scope.OnFileSelected = function (element) {
+            $scope.$apply(function () {
+                $scope.UploadModel.Files = [];
+                if (element.files && element.files.length > 0) {
+                    for (var i = 0; i < element.files.length; i++) {
+                        $scope.UploadModel.Files.push({
+                            name: element.files[i].name,
+                            size: (element.files[i].size / 1024).toFixed(1) + ' KB',
+                            file: element.files[i]
+                        });
+                    }
+                }
+            });
+        };
+
+        $scope.SubmitUploadImages = function () {
+            var fileInput = document.getElementById('roughDistImageFiles');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                if (typeof Noty === 'function') Noty("error", "Please select at least one image to upload.");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("JangadNo", $scope.UploadModel.JangadNo || '');
+            if ($scope.UploadModel.DistributionID) {
+                formData.append("DistributionID", $scope.UploadModel.DistributionID);
+            }
+            if ($scope.UploadModel.PreRoughID) {
+                formData.append("PreRoughID", $scope.UploadModel.PreRoughID);
+            }
+            formData.append("Status", "Distribution");
+
+            for (var i = 0; i < fileInput.files.length; i++) {
+                formData.append("file_" + i, fileInput.files[i]);
+            }
+
+            $scope.IsUploading = true;
+            $http.post('@Url.Action("Upload_Jangad_Images", "Master")', formData, {
+                transformRequest: angular.identity,
+                headers: { 'Content-Type': undefined }
+            }).then(function (res) {
+                $scope.IsUploading = false;
+                if (res.data && res.data.success) {
+                    if (typeof Noty === 'function') Noty("success", res.data.message || "Images uploaded successfully!");
+                    $('#UploadImageModal').modal('hide');
+                    $('#roughDistImageFiles').val('');
+                    $scope.UploadModel.Files = [];
+
+                    if ($scope.SelectedUploadRow) {
+                        $scope.SelectedUploadRow.IsImageUpload = true;
+                        var gridInstance = $("#gridContainer").dxDataGrid("instance");
+                        if (gridInstance) {
+                            gridInstance.refresh();
+                        }
+                    }
+                } else {
+                    if (typeof Noty === 'function') Noty("error", res.data.message || "Upload failed.");
+                }
+            }, function (err) {
+                $scope.IsUploading = false;
+                if (typeof Noty === 'function') Noty("error", "Error uploading images to server.");
+            });
+        };
+
+        // Open View Images Modal
+        $scope.OpenViewModal = function (row) {
+            $scope.ActiveViewRow = row;
+            $scope.ActiveJangadNo = row ? (row.JangadNo || '') : '';
+            $scope.ImageList = [];
+            $scope.ActiveImageIndex = 0;
+            $scope.IsLoadingImages = true;
+
+            var distId = row ? (row.DistributionID || '') : '';
+            var prId = row ? (row.PreRoughID || '') : '';
+            var jNo = encodeURIComponent($scope.ActiveJangadNo);
+
+            $('#ViewImageModal').modal('show');
+
+            $http.get('@Url.Action("Get_Jangad_Images", "Master")?DistributionID=' + distId + '&PreRoughID=' + prId + '&JangadNo=' + jNo + '&Status=Distribution')
+            .then(function (res) {
+                $scope.IsLoadingImages = false;
+                if (res.data && res.data.list) {
+                    $scope.ImageList = res.data.list;
+                    $scope.ActiveImageIndex = 0;
+                }
+            }, function () {
+                $scope.IsLoadingImages = false;
+                if (typeof Noty === 'function') Noty("error", "Failed to load images from server.");
+            });
+        };
+
+        $scope.PrevImage = function () {
+            if ($scope.ImageList && $scope.ImageList.length > 1) {
+                $scope.ActiveImageIndex = ($scope.ActiveImageIndex - 1 + $scope.ImageList.length) % $scope.ImageList.length;
+            }
+        };
+
+        $scope.NextImage = function () {
+            if ($scope.ImageList && $scope.ImageList.length > 1) {
+                $scope.ActiveImageIndex = ($scope.ActiveImageIndex + 1) % $scope.ImageList.length;
+            }
+        };
+
+        $scope.SelectImage = function (index) {
+            if (index >= 0 && index < $scope.ImageList.length) {
+                $scope.ActiveImageIndex = index;
+            }
+        };
+
+        // Delete Current Image from Carousel
+        $scope.DeleteCurrentImage = function () {
+            if (!$scope.CanDelete) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to delete images.");
+                return;
+            }
+            var currentImg = $scope.ImageList[$scope.ActiveImageIndex];
+            if (!currentImg || !currentImg.ID) return;
+
+            if (!confirm("Are you sure you want to permanently delete this image?")) return;
+
+            $http.post('@Url.Action("Delete_Jangad_Image", "Master")', { imageId: currentImg.ID })
+            .then(function (res) {
+                if (res.data && res.data.success) {
+                    if (typeof Noty === 'function') Noty("success", "Image deleted successfully!");
+
+                    // Remove from in-memory array
+                    $scope.ImageList.splice($scope.ActiveImageIndex, 1);
+
+                    if ($scope.ImageList.length > 0) {
+                        if ($scope.ActiveImageIndex >= $scope.ImageList.length) {
+                            $scope.ActiveImageIndex = $scope.ImageList.length - 1;
+                        }
+                    } else {
+                        // If all images are deleted, hide modal and remove View icon from grid row
+                        $('#ViewImageModal').modal('hide');
+                        if ($scope.ActiveViewRow) {
+                            $scope.ActiveViewRow.IsImageUpload = false;
+                            var grid = $("#gridContainer").dxDataGrid("instance");
+                            if (grid) grid.refresh();
+                        }
+                    }
+                } else {
+                    if (typeof Noty === 'function') Noty("error", res.data.message || "Failed to delete image.");
+                }
+            }, function () {
+                if (typeof Noty === 'function') Noty("error", "Error connecting to server.");
+            });
+        };
+
+        window.onkeyup = function (event) {
+            if (event.keyCode == 27) {
+                $("#ConfirmDeleteModal").modal("hide");
+                $("#UploadImageModal").modal("hide");
+                $("#ViewImageModal").modal("hide");
+            }
+        };
+
+        // Fetch Data from Server
+        $scope.FetchData = function () {
+            $scope.IsLoading = true;
+            if (typeof show_loader === 'function') show_loader();
+
+            $http.get('@Url.Action("Get_MST_RoughDistributionList", "Master")')
+            .then(function (response) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+
+                var rawList = (response.data && response.data.List) ? response.data.List : [];
+                $scope.List = rawList;
+
+                // Format boolean values & pre-calculate HeightRange
+                for (var i = 0; i < $scope.List.length; i++) {
+                    var row = $scope.List[i];
+                    var act = row.IsActive;
+                    row.IsActive = (act === true || act === 'True' || act === 'true' || act === 1 || act === '1');
+
+                    // Pre-calculate HeightRange for seamless filtering & searching
+                    if (row.FromHeight || row.ToHeight) {
+                        row.HeightRange = (row.FromHeight || 0) + ' - ' + (row.ToHeight || 0);
+                    } else {
+                        row.HeightRange = '-';
+                    }
+                }
+
+                $scope.InitGrid();
+            }, function () {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                Noty("error", "Error loading distribution list from server.");
+            });
+        };
+
+        // Delete handlers
+        $scope.PromptDelete = function (item) {
+            $scope.SelectedDeleteItem = item;
+            $("#ConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem || !$scope.SelectedDeleteItem.DistributionID) {
+                $("#ConfirmDeleteModal").modal("hide");
+                return;
+            }
+
+            $scope.IsLoading = true;
+            $http.post('@Url.Action("RoughDistribution_Delete", "Master")', { distributionID: $scope.SelectedDeleteItem.DistributionID })
+            .then(function (res) {
+                $scope.IsLoading = false;
+                $("#ConfirmDeleteModal").modal("hide");
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Record Deleted Successfully.");
+                    $scope.FetchData();
+                } else {
+                    Noty("error", res.data.message || "Failed to delete record.");
+                }
+            }, function () {
+                $scope.IsLoading = false;
+                $("#ConfirmDeleteModal").modal("hide");
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // DevExtreme DataGrid Initialization
+        $scope.InitGrid = function () {
+            $("#gridContainer").dxDataGrid({
+                dataSource: $scope.List,
+                keyExpr: 'DistributionID',
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "single" },
+                scrolling: {
+                    mode: 'virtual'
+                },
+                paging: { 
+                    enabled: false 
+                },
+                pager: { 
+                    visible: false 
+                },
+                searchPanel: {
+                    visible: true,
+                    width: 280,
+                    placeholder: 'Search all distributions...'
+                },
+                filterRow: { 
+                    visible: true, 
+                    applyFilter: 'auto'
+                },
+                headerFilter: { visible: true },
+                export: {
+                    enabled: @(ViewBag.IsAdmin == true || (ViewBag.CanExport != null && (bool)ViewBag.CanExport) || (ViewBag.CanAdd != null && (bool)ViewBag.CanAdd) ? "true" : "false"),
+                    formats: ['xlxs'],
+                    allowExportSelectedData: false
+                },
+                onExporting: function (e) {
+                    if (e.format === 'xlxs') {
+                        if (typeof ExcelJS !== 'undefined') {
+                            var workbook = new ExcelJS.Workbook();
+                            var worksheet = workbook.addWorksheet('RoughDistribution');
+                            DevExpress.excelExporter.exportDataGrid({
+                                component: e.component,
+                                worksheet: worksheet,
+                                autoFilterEnabled: true
+                            }).then(function () {
+                                workbook.xlsx.writeBuffer().then(function (buffer) {
+                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RoughDistributionList.xlsx');
+                                });
+                            });
+                        }
+                    }
+                },
+                columns: [
+                    {
+                        caption: '#',
+                        width: 55,
+                        alignment: 'center',
+                        allowReordering: false,
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .text(options.rowIndex + 1)
+                                .css({ "font-weight": "600", "color": "#64748b" })
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'VIEW',
+                        dataField: 'View',
+                        width: 48,
+                        alignment: 'center',
+                        allowReordering: false,
+                        allowFiltering: false,
+                        allowSorting: false,
+                        fixed: true,
+                        fixedPosition: 'left',
+                        cellTemplate: function (container, options) {
+                            var hasImage = options.data.IsImageUpload === true || 
+                                           options.data.IsImageUpload === 1 || 
+                                           options.data.IsImageUpload === "1" || 
+                                           options.data.IsImageUpload === "true" ||
+                                           options.data.IsImageUpload === "True";
+
+                            if (hasImage) {
+                                $("<button>")
+                                    .addClass("btn-grid-view-image")
+                                    .attr("type", "button")
+                                    .attr("title", "View Uploaded Images")
+                                    .html('<i class="fa fa-picture-o"></i>')
+                                    .on("click", function (e) {
+                                        e.stopPropagation();
+                                        $scope.$apply(function () {
+                                            $scope.OpenViewModal(options.data);
+                                        });
+                                    })
+                                    .appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'JANGAD',
+                        dataField: 'JangadNo',
+                        minWidth: 130,
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .addClass("badge-status-pill badge-pill-info")
+                                .text(options.data.JangadNo || ('Lot #' + options.data.PreRoughID))
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'PRIORITY',
+                        dataField: 'Priority',
+                        minWidth: 100,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var priority = (options.data.Priority || 'REGULAR').toUpperCase();
+                            var badgeClass = "badge-status-pill badge-pill-info";
+
+                            if (priority === 'SAMPLE') {
+                                badgeClass = "badge-status-pill badge-pill-warning";
+                            } else if (priority === 'ARGENT' || priority === 'URGENT') {
+                                badgeClass = "badge-status-pill badge-pill-danger";
+                            }
+
+                            $("<span>")
+                                .addClass(badgeClass)
+                                .text(priority)
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'R. Name',
+                        dataField: 'RName',
+                        minWidth: 120
+                    },
+                    {
+                        caption: 'BR',
+                        dataField: 'BranchName',
+                        minWidth: 100,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var val = options.data.BranchName || options.data.ShortName || options.data.BranchShortName || ('BR-' + (options.data.BranchID || ''));
+                            var displayVal = val.toString().replace(/Branch\s*#?/i, 'BR-').trim();
+                            $("<strong>")
+                                .text(displayVal)
+                                .css({ "color": "#0f172a", "font-weight": "700" })
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'R. Code',
+                        dataField: 'RCode',
+                        minWidth: 110,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var priority = (options.data.Priority || 'REGULAR').toUpperCase();
+                            var cls = 'rcode-regular';
+                            if (priority === 'SAMPLE') {
+                                cls = 'rcode-sample';
+                            } else if (priority === 'ARGENT' || priority === 'URGENT') {
+                                cls = 'rcode-argent';
+                            }
+
+                            $("<span>")
+                                .addClass(cls)
+                                .text(options.data.RCode || '-')
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'R.Pcs',
+                        dataField: 'RoughPcs',
+                        dataType: 'number',
+                        minWidth: 120,
+                        alignment: 'right',
+                        format: '#,##0'
+                    },
+                    {
+                        caption: 'R.WT',
+                        dataField: 'RoughWeight',
+                        dataType: 'number',
+                        minWidth: 160,
+                        alignment: 'right',
+                        format: '#,##0.000'
+                    },
+                    {
+                        caption: 'Rate',
+                        dataField: 'Rate',
+                        dataType: 'number',
+                        minWidth: 110,
+                        alignment: 'right',
+                        format: '#,##0.00'
+                    },
+                    {
+                        caption: 'Grad No',
+                        dataField: 'GradNo',
+                        minWidth: 110,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.GradNo) {
+                                var isMix = options.data.GradNo.toUpperCase() === 'MIX';
+                                $("<span>")
+                                    .addClass("badge-status-pill " + (isMix ? "badge-pill-warning" : "badge-pill-info"))
+                                    .text(options.data.GradNo)
+                                    .appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'HEIGHT RANGE',
+                        dataField: 'HeightRange',
+                        dataType: 'string',
+                        minWidth: 130,
+                        alignment: 'center',
+                        allowFiltering: true,
+                        allowSorting: true,
+                        cellTemplate: function (container, options) {
+                            var val = options.data.HeightRange || '-';
+                            $("<span>").text(val).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Remarks',
+                        dataField: 'Remarks',
+                        minWidth: 150
+                    },
+                    {
+                        caption: 'Status',
+                        dataField: 'IsActive',
+                        dataType: 'boolean',
+                        trueText: 'Active',
+                        falseText: 'Inactive',
+                        minWidth: 105,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Created Date',
+                        dataField: 'CreatedDate',
+                        dataType: 'date',
+                        minWidth: 120,
+                        alignment: 'center',
+                        format: 'dd-MMM-yyyy'
+                    },
+                    {
+                        caption: 'Action',
+                        width: 125,
+                        alignment: 'center',
+                        fixed: true,
+                        fixedPosition: 'right',
+                        allowReordering: false,
+                        cellTemplate: function (container, options) {
+                            var group = $("<div>").addClass("grid-btn-group");
+
+                            // Upload Image button
+                            $("<button>")
+                                .addClass("grid-action-btn-upload")
+                                .attr("title", "Upload Jangad Images")
+                                .html('<i class="fa fa-cloud-upload"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () {
+                                        $scope.OpenUploadModal(options.data);
+                                    });
+                                })
+                                .appendTo(group);
+
+                            // Edit / Open button (Rendered ONLY IF user has Edit permission)
+                            if ($scope.CanEdit) {
+                                $("<button>")
+                                    .addClass("grid-action-btn-edit")
+                                    .attr("title", "Open in Rough Distribution Entry")
+                                    .html('<i class="fa fa-external-link"></i>')
+                                    .on("click", function () {
+                                        $scope.$apply(function () {
+                                            $scope.OpenEdit(options.data);
+                                        });
+                                    })
+                                    .appendTo(group);
+                            }
+
+                            // Delete button (Rendered ONLY IF user has Delete permission)
+                            if ($scope.CanDelete) {
+                                $("<button>")
+                                    .addClass("grid-action-btn-del")
+                                    .attr("title", "Delete Record")
+                                    .html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () {
+                                        $scope.$apply(function () {
+                                            $scope.PromptDelete(options.data);
+                                        });
+                                    })
+                                    .appendTo(group);
+                            }
+
+                            group.appendTo(container);
+                        }
+                    }
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'RoughPcs',
+                            summaryType: 'sum',
+                            valueFormat: '#,##0',
+                            displayFormat: '{0}'
+                        },
+                        {
+                            column: 'RoughWeight',
+                            summaryType: 'sum',
+                            valueFormat: '#,##0.000',
+                            displayFormat: '{0}'
+                        }
+                    ]
+                }
+            });
+        };
+
+        // Fetch data on load
+        $scope.FetchData();
+    }]);
+</script>

@@ -1,0 +1,119 @@
+.ag-blue .ag-header {
+        background-color: white;
+        border-bottom: 1px solid #ddd;
+    }
+
+    #agHeaderCellLabel {
+        color: #333;
+        font-weight:500;
+    }
+
+    .ag-blue .ag-header-cell {
+        border-right: 1px solid #ddd;
+    }
+
+    .ag-blue .ag-root {
+        border: 1px solid #725E99;
+        font: 7pt Verdana;
+    }
+
+    .ag-blue .ag-cell-no-focus {
+        border-right: 1px dotted #725E99 !important;
+        border-top: 1px solid transparent !important;
+        border-left: 1px solid transparent !important;
+        border-bottom: 1px solid #725E99 !important;
+    }
+
+.ag-blue .ag-cell-focus {
+    background: #ddd;
+    border: 1px solid #ddd;
+}
+
+    .ag-blue .ag-menu .ag-tab-header {
+        background-color: #ddd;
+    }
+
+    #divSalesOrderDetailReport {
+        height: 100%;
+    }
+
+    .myclass {
+        font-weight: 600 !important;
+    }
+
+.ag-cell-value {
+    font-family: "Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-weight: 400;
+    font-size: 13px !important;
+    text-align: left !important;
+    padding-left: 15px !important;
+    vertical-align: top !important;
+}
+
+
+    .ag-blue .ag-header-cell-menu-button {
+        padding: 0px !important;
+    }
+
+    #agMenu svg {
+        height: 10px !important;
+        width: 9px !important;
+    }
+
+   
+
+    .ag-blue .ag-header-cell-text {
+        padding-left: 17px !important;
+    }
+    /*.ag-row-no-focus .ag-row-odd{
+        background: none;
+    }*/
+    .ag-row-no-focus.ag-row-odd {
+        background: none;
+       /*background: rgba(222, 217, 232, 0.5) !important;*/
+    }
+     
+    .ag-row-odd.ag-row-selected {
+        background:#C7C7C7 !important;
+    }
+    .ag-row-even.ag-row-selected {
+        background:#C7C7C7 !important;
+    }
+     .ag-blue .ag-row-group-panel {
+    background-color: #dfdfdf;
+    border-left: 1px solid #6d6a6a;
+    border-right: 1px solid #6d6a6a;
+    border-top: 1px solid #6d6a6a;
+    color: #fff;
+    padding: 4px;
+}
+     .ag-blue .ag-row-group-cell {
+    background: #bdb5df none repeat scroll 0 0;
+    border: 1px solid #725E99;
+    padding: 2px;
+}
+
+.ag-blue .ag-header-icon {
+    color: #725E99;
+    fill: #725E99;
+    stroke: #fff;
+}
+
+
+.ag-fresh .ag-cell-no-focus {
+    border-right: 1px solid #ddd !important;
+    border-bottom: 1px solid #ddd !important;
+}
+.ag-header-row .ag-header-cell-text {
+    font-weight: 600;
+    font-family: "Lato",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+.ag-fresh .ag-body .ag-row-odd {
+    background-color: #f1f1f1;
+}
+.ag-fresh .ag-body .ag-row-focus {
+    background-color: rgba(63, 176, 194,0.15) !important;
+}
+.ag-fresh .ag-row-selected {
+    background-color: rgb(28, 47, 122,0.2) !important;
+}

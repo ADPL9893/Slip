@@ -1,0 +1,68 @@
+﻿
+/*.Summary {
+    margin-bottom: 15px;
+    width: 50% !important;
+    border: 1px solid #328cbd !important;
+}
+
+    .Summary td, .Summary th {
+        width: 20px !important;
+        text-align: center;
+        padding: 2px 20px;
+        border: 1px solid #52a3cf !important;
+    }
+
+    .Summary thead th {
+        font-weight: 700;
+        color: white;
+        background-color: #328cbd;
+    }*/
+
+.modal label {
+    margin-top: 5px !important;
+}
+
+#jqxGrid {
+    height: 65vh !important;
+}
+
+.tabs {
+    display: flex;
+    gap: 2px;
+    margin-bottom: -1px;
+}
+
+.tab {
+    padding: 3px 20px;
+    background: #c8dae9;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+}
+
+    .tab.active {
+        background: #92b2cc !important;
+        border-bottom: 1px solid white;
+        font-weight: bold;
+    }
+
+
+        .tab.active:hover {
+            background: white;
+        }
+
+.tab_checkbox {
+    padding: 0px 8px;
+    background: #c8dae9;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+}
+
+#ChangeSelectionMode {
+    margin: 2px 0px 0px 0px;
+    width: 17px;
+    height: 20px;
+}

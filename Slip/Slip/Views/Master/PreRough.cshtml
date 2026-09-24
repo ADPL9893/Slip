@@ -1,0 +1,2276 @@
+@{
+    ViewBag.Title = "Pre-Rough Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Pre-Rough Master - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .prerough-page-wrapper {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .prerough-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .prerough-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Border) */
+    .prerough-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .prerough-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .prerough-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .prerough-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .prerough-header-card:hover .prerough-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .prerough-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .prerough-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .prerough-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .prerough-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    /* Add New Record Button */
+    .btn-prerough-add {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 18px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-prerough-add:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important;
+        color: #ffffff !important;
+    }
+    .btn-prerough-add:active {
+        transform: translateY(0) !important;
+    }
+
+    .btn-prerough-refresh {
+        background: #ffffff !important;
+        color: #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 7px 12px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 5px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-prerough-refresh:hover {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Grid Card Container (Matching EmployeeDetail.cshtml) */
+    .prerough-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .prerough-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .prerough-card-header {
+        background: #ffffff !important;
+        padding: 13px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    .prerough-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .prerough-card-title-left i {
+        font-size: 15px;
+        color: #0284c7;
+    }
+    .prerough-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .prerough-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .prerough-grid-body {
+        padding: 0 !important;
+    }
+
+    .prerough-grid-card .uigrid,
+    .prerough-grid-card #gridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridContainer {
+        width: 100% !important;
+    }
+
+    /* Badges */
+    .badge-status-pill {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+    /* Grid Action Icons */
+    .grid-action-icon {
+        transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .grid-action-icon:hover {
+        transform: scale(1.18);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+    }
+
+    /* ==========================================================================
+       Modal Layering & Styling (Clearance below Sticky Header)
+       ========================================================================== */
+    .modal {
+        z-index: 1000050 !important;
+    }
+
+    .modal-backdrop {
+        z-index: 1000040 !important;
+    }
+
+    #FetchFilterPopUp .modal-dialog,
+    #FetchDeleteFilterPopUp .modal-dialog,
+    .modal .modal-dialog {
+        max-width: 1140px;
+        margin: 58px auto 30px auto !important;
+    }
+
+    #FetchDeleteFilterPopUp .modal-dialog {
+        max-width: 500px !important;
+    }
+
+    #FetchFilterPopUp .modal-content {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.18);
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .modal-header,
+    #UploadImageModal .modal-header,
+    #ViewImageModal .modal-header,
+    #FetchFilterPopUp .modal-header,
+    #FetchDeleteFilterPopUp .modal-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        color: #ffffff !important;
+        padding: 14px 22px !important;
+        border-bottom: 1px solid #334155 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    .modal-header:before,
+    .modal-header:after,
+    #UploadImageModal .modal-header:before,
+    #UploadImageModal .modal-header:after,
+    #ViewImageModal .modal-header:before,
+    #ViewImageModal .modal-header:after,
+    #FetchFilterPopUp .modal-header:before,
+    #FetchFilterPopUp .modal-header:after,
+    #FetchDeleteFilterPopUp .modal-header:before,
+    #FetchDeleteFilterPopUp .modal-header:after {
+        display: none !important;
+        content: none !important;
+    }
+
+    .modal-header-brand {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        margin: 0 !important;
+        float: none !important;
+    }
+
+    .modal-header-title {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        margin: 0 !important;
+        display: inline-block !important;
+        vertical-align: middle !important;
+    }
+
+    .modal-close-btn,
+    .modal-header .close,
+    #UploadImageModal .close,
+    #ViewImageModal .close,
+    #FetchFilterPopUp .close,
+    #FetchDeleteFilterPopUp .close {
+        color: #ffffff !important;
+        opacity: 0.8 !important;
+        font-size: 24px !important;
+        font-weight: 300 !important;
+        text-shadow: none !important;
+        transition: all 0.2s ease !important;
+        margin-top: 0 !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        line-height: 1 !important;
+        float: none !important;
+        margin-left: auto !important;
+        cursor: pointer !important;
+    }
+    .modal-close-btn:hover,
+    .modal-header .close:hover,
+    #UploadImageModal .close:hover,
+    #ViewImageModal .close:hover,
+    #FetchFilterPopUp .close:hover,
+    #FetchDeleteFilterPopUp .close:hover {
+        opacity: 1 !important;
+        transform: scale(1.15) !important;
+        color: #ef4444 !important;
+    }
+
+    #FetchFilterPopUp .modal-body {
+        padding: 22px 26px;
+        background: #f8fafc;
+        max-height: calc(85vh - 120px);
+        overflow-y: auto;
+    }
+
+    /* Modal Form Sections */
+    .form-section-card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 16px 18px 12px 18px;
+        margin-bottom: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+    }
+
+    .form-section-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-section-header {
+        font-size: 12px;
+        font-weight: 700;
+        color: #334155;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin-bottom: 12px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .form-section-header i {
+        color: #3b82f6;
+        font-size: 13.5px;
+    }
+
+    /* Form Fields & Labels */
+    .prerough-form-group {
+        margin-bottom: 13px;
+    }
+
+    .prerough-label {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 5px;
+        display: block;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+    }
+
+    .prerough-label .req {
+        color: #ef4444;
+        margin-left: 2px;
+    }
+
+    .prerough-input {
+        height: 36px;
+        border-radius: 7px;
+        border: 1px solid #cbd5e1;
+        padding: 6px 12px;
+        font-size: 13px;
+        color: #1e293b;
+        background-color: #ffffff;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+
+    .prerough-input:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+        outline: none;
+    }
+
+    .prerough-input::placeholder {
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    /* Range Input Group for Height */
+    .range-input-group {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .range-separator {
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* Chosen Overrides in Modal */
+    .chosen-container-single .chosen-single {
+        height: 36px !important;
+        line-height: 34px !important;
+        border-radius: 7px !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important;
+        font-size: 13px !important;
+        color: #1e293b !important;
+        padding: 0 0 0 12px !important;
+    }
+    .chosen-container-active.chosen-with-drop .chosen-single {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    }
+    .chosen-container .chosen-drop {
+        border-radius: 0 0 8px 8px !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+    }
+    .chosen-container .chosen-results li.highlighted {
+        background: #2563eb !important;
+    }
+
+    /* Modern Checkbox */
+    .modern-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        height: 36px;
+        padding-top: 4px;
+    }
+    .modern-checkbox-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        cursor: pointer;
+        user-select: none;
+        margin: 0;
+    }
+    .modern-checkbox-label input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #10b981;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    /* Modal Footer */
+    #FetchFilterPopUp .modal-footer,
+    #FetchDeleteFilterPopUp .modal-footer {
+        background: #ffffff;
+        padding: 14px 26px !important;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+        margin: 0 !important;
+    }
+
+    .btn-modal-action {
+        border-radius: 7px;
+        padding: 8px 22px;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-modal-save {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #ffffff;
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+    }
+    .btn-modal-save:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        box-shadow: 0 5px 14px rgba(37, 99, 235, 0.35);
+        transform: translateY(-1px);
+        color: #ffffff;
+    }
+
+    .btn-modal-reset {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+    }
+    .btn-modal-reset:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    .btn-modal-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: #ffffff;
+        box-shadow: 0 3px 10px rgba(239, 68, 68, 0.25);
+    }
+    .btn-modal-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        box-shadow: 0 5px 14px rgba(239, 68, 68, 0.35);
+        transform: translateY(-1px);
+        color: #ffffff;
+    }
+
+    /* Delete Confirmation Dialog */
+    #FetchDeleteFilterPopUp .modal-dialog {
+        max-width: 440px;
+        margin: 120px auto;
+    }
+    .delete-dialog-content {
+        text-align: center;
+        padding: 28px 20px 10px 20px;
+    }
+    .delete-warning-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #fee2e2;
+        color: #ef4444;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin-bottom: 16px;
+    }
+    .delete-dialog-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+    .delete-dialog-text {
+        font-size: 13px;
+        color: #64748b;
+        margin: 0;
+    }
+
+    /* Responsive Tweaks */
+    @@media (max-width: 768px) {
+        .prerough-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .prerough-header-left {
+            width: 100%;
+        }
+
+        .btn-prerough-add {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px 16px !important;
+            font-size: 13.5px !important;
+        }
+
+        .prerough-card-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 12px 14px !important;
+        }
+
+        .prerough-card-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .prerough-grid-card {
+            min-height: 480px;
+        }
+
+        .prerough-grid-card .uigrid,
+        .prerough-grid-card #gridContainer {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+
+        #FetchFilterPopUp .modal-body {
+            padding: 16px;
+        }
+        .form-section-card {
+            padding: 14px;
+        }
+    }
+
+    /* ==========================================================================
+       Jangad Image Upload & Interactive Viewer Modal Styles
+       ========================================================================== */
+    #UploadImageModal .modal-dialog,
+    #ViewImageModal .modal-dialog {
+        margin: 50px auto !important;
+    }
+    #UploadImageModal .modal-dialog {
+        max-width: 580px !important;
+    }
+    #ViewImageModal .modal-dialog {
+        max-width: 920px !important;
+        width: 94% !important;
+    }
+
+    .image-dropzone {
+        border: 2px dashed #93c5fd;
+        background: #f0f9ff;
+        border-radius: 12px;
+        padding: 24px 20px;
+        text-align: center;
+        transition: all 0.25s ease;
+        cursor: pointer;
+        position: relative;
+        margin-top: 10px;
+    }
+    .image-dropzone:hover, .image-dropzone.dragover {
+        border-color: #2563eb;
+        background: #e0f2fe;
+        transform: scale(1.01);
+    }
+    .image-dropzone input[type="file"] {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        opacity: 0;
+        cursor: pointer;
+    }
+    .dropzone-icon {
+        font-size: 38px;
+        color: #0284c7;
+        margin-bottom: 8px;
+    }
+    .dropzone-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 4px;
+    }
+    .dropzone-hint {
+        font-size: 11.5px;
+        color: #64748b;
+    }
+
+    .selected-files-list {
+        margin-top: 14px;
+        max-height: 140px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .selected-file-item {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #334155;
+    }
+    .selected-file-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .selected-file-size {
+        font-size: 11px;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    /* Interactive Viewer Carousel */
+    .image-viewer-container {
+        position: relative;
+        background: #090d16;
+        border-radius: 12px;
+        overflow: hidden;
+        min-height: 380px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        user-select: none;
+    }
+    .viewer-main-img-wrap {
+        width: 100%;
+        height: 60vh;
+        max-height: 520px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+    }
+    .viewer-main-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 6px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transition: transform 0.2s ease;
+    }
+    .viewer-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(15, 23, 42, 0.75);
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+    }
+    .viewer-nav-btn:hover {
+        background: rgba(2, 132, 199, 0.9);
+        color: #ffffff;
+        transform: translateY(-50%) scale(1.1);
+        border-color: #38bdf8;
+    }
+    .viewer-prev-btn { left: 14px; }
+    .viewer-next-btn { right: 14px; }
+
+    .preview-counter-pill {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(6px);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 4px 14px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        z-index: 10;
+        letter-spacing: 0.5px;
+        pointer-events: none;
+        user-select: none;
+    }
+
+    .viewer-thumb-strip {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 12px 6px 4px 6px;
+        margin-top: 10px;
+        scrollbar-width: thin;
+    }
+    .viewer-thumb-item {
+        width: 64px;
+        height: 54px;
+        border-radius: 6px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        opacity: 0.6;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+        background: #0f172a;
+    }
+    .viewer-thumb-item:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+    .viewer-thumb-item.active {
+        border-color: #0284c7;
+        opacity: 1;
+        box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.4);
+    }
+    .viewer-thumb-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .grid-action-btn-upload {
+        background: #eff6ff !important;
+        color: #2563eb !important;
+        border: 1px solid #bfdbfe !important;
+        border-radius: 6px !important;
+        padding: 3px 6px !important;
+        font-size: 12px !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .grid-action-btn-upload:hover {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #1d4ed8 !important;
+        transform: translateY(-1px) scale(1.08) !important;
+    }
+
+    .btn-grid-view-image {
+        background: #e0f2fe !important;
+        color: #0284c7 !important;
+        border: 1px solid #bae6fd !important;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        font-size: 13px;
+    }
+    .btn-grid-view-image:hover {
+        background: #0284c7 !important;
+        color: #ffffff !important;
+        transform: scale(1.1);
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
+    }
+</style>
+
+<div ng-controller="Diamond" class="prerough-page-wrapper">
+    <!-- Modern Header Banner Card -->
+    <div class="prerough-header-card">
+        <div class="prerough-header-left">
+            <div class="prerough-header-icon">
+                <i class="fa fa-diamond"></i>
+            </div>
+            <div>
+                <div class="prerough-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>Pre-Rough Master</span>
+                </div>
+                <h4 class="prerough-header-title">Pre-Rough Master</h4>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-prerough-add" ng-show="CanAdd" ng-click="OpenPopUpMenu()">
+                <i class="fa fa-plus-circle"></i> Add New Record
+            </button>
+        </div>
+    </div>
+
+    <!-- DataGrid Container Card -->
+    <div class="prerough-grid-card">
+        <div class="prerough-card-header">
+            <div class="prerough-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Pre-Rough Records ({{List.length || 0}} Total)</h3>
+            </div>
+            <div class="prerough-card-actions">
+                <span class="badge-status-pill badge-pill-info">
+                    <i class="fa fa-database"></i> {{List.length || 0}} Total Records
+                </span>
+                <button type="button" class="btn-prerough-refresh" ng-click="FetchData()" title="Reload Pre-Rough records">
+                    <i class="fa fa-refresh"></i> Refresh
+                </button>
+            </div>
+        </div>
+        <div class="prerough-grid-body">
+            <div class="uigrid">
+                <div id="gridContainer" style="width:100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Pre-Rough Entry / Edit Modal (100% Unchanged Structure & Logic) -->
+    <div class="modal fade" id="FetchFilterPopUp" role="dialog" aria-labelledby="exampleModalCenterTitle" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" ng-modal="processpopup">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-diamond" style="color: #34d399; font-size: 18px;"></i>
+                        <h4 class="modal-header-title">Pre-Rough Management</h4>
+                    </div>
+                    <button type="button" ng-click="ClosePopupFilterDetails();" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">&times;</button>
+                </div>
+
+                <div class="modal-body" ng-modal="processpopup">
+                    <div class="form-group" hidden>
+                        <input type="text" ng-model="Diamond.ID" class="form-control" />
+                    </div>
+
+                    <!-- Section 1: Lot & Weight Specifications -->
+                    <div class="form-section-card">
+                        <div class="form-section-header">
+                            <i class="fa fa-cube"></i> Lot &amp; Weight Specifications
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="JangadNo">Jangad No <span class="req">*</span></label>
+                                <input type="text" id="JangadNo" ng-model="Diamond.JangadNo" placeholder="Enter Jangad No" tabindex="1" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="RName">R.Name <span class="req">*</span></label>
+                                <input type="text" id="RName" ng-model="Diamond.RName" placeholder="Enter R.Name" tabindex="2" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="RoughPcs">Rough Pcs <span class="req">*</span></label>
+                                <input type="text" id="RoughPcs" ng-model="Diamond.RoughPcs" placeholder="Enter Rough Pcs" tabindex="3" class="prerough-input allownumericwithoutdecimal" />
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="RoughWeight">Rough Weight <span class="req">*</span></label>
+                                <input type="text" id="RoughWeight" ng-model="Diamond.RoughWeight" placeholder="Enter Rough Weight" tabindex="4" class="prerough-input allownumericwithdecimal" />
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="OriginalCarate">O.Carat</label>
+                                <input type="text" id="OriginalCarate" ng-model="Diamond.OriginalCarate" placeholder="Enter Original Carat" tabindex="5" class="prerough-input allownumericwithdecimal" />
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="Rate">Rate</label>
+                                <input type="text" id="Rate" ng-model="Diamond.Rate" placeholder="Enter Rate" tabindex="6" class="prerough-input allownumericwithdecimal" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Dimension & Processing Attributes -->
+                    <div class="form-section-card">
+                        <div class="form-section-header">
+                            <i class="fa fa-sliders"></i> Dimension &amp; Processing Attributes
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="Size">Size <span class="req">*</span></label>
+                                <input type="text" id="Size" ng-model="Diamond.Size" placeholder="Enter Size" tabindex="7" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label">Height (From - To) <span class="req">*</span></label>
+                                <div class="range-input-group">
+                                    <input type="text" ng-model="Diamond.FromHeight" placeholder="From" tabindex="8" class="prerough-input allownumericwithdecimal" />
+                                    <span class="range-separator">-</span>
+                                    <input type="text" ng-model="Diamond.ToHeight" placeholder="To" tabindex="9" class="prerough-input allownumericwithdecimal" />
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="Hours">Hours</label>
+                                <input type="text" id="Hours" ng-model="Diamond.Hours" placeholder="Enter Hours" tabindex="10" class="prerough-input allownumericwithdecimal" />
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="BoxNo">Box No <span class="req">*</span></label>
+                                <input type="text" id="BoxNo" ng-model="Diamond.BoxNo" placeholder="Enter Box No" tabindex="11" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="ReceipeID">Receipe <span class="req">*</span></label>
+                                <select id="ReceipeID" chosen="GetMSTReceipeList" tabindex="12" class="form-control prerough-input" ng-options="item.id as item.value for item in GetMSTReceipeList" ng-model="Diamond.ReceipeID">
+                                    <option value="">Select Receipe</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="SizeCode">Size Code <span class="req">*</span></label>
+                                <select autofocus="" id="SizeCode" chosen="SizeCode" ng-model="Diamond.SizeCode" tabindex="13" class="form-control prerough-input">
+                                    <option value="">Please Select</option>
+                                    <option value="JC">JC</option>
+                                    <option value="JW">JW</option>
+                                    <option value="SW">SW</option>
+                                    <option value="SC">SC</option>
+                                    <option value="G2">G2</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="ColorType">Color Type <span class="req">*</span></label>
+                                <select autofocus="" id="ColorType" chosen="ColorType" ng-model="Diamond.ColorType" tabindex="14" class="form-control prerough-input">
+                                    <option value="">Please Select</option>
+                                    <option value="WHITE">White</option>
+                                    <option value="COLOR">Color</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="FactoryCode">Factory Code <span class="req">*</span></label>
+                                <select autofocus="" id="FactoryCode" chosen="FactoryCode" ng-model="Diamond.FactoryCode" tabindex="15" class="form-control prerough-input">
+                                    <option value="">Please Select</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                    <option value="E">E</option>
+                                    <option value="CUBIC">CUBIC</option>
+                                    <option value="FOUNDRY">FOUNDRY</option>
+                                    <option value="G2">G2</option>
+                                    <option value="TP">TP</option>
+                                    <option value="VAV">VAV</option>
+                                    <option value="RTN">RTN</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="GradNo">Grad No <span class="req">*</span></label>
+                                <select autofocus="" id="GradNo" chosen="GradNo" ng-model="Diamond.GradNo" tabindex="16" class="form-control prerough-input">
+                                    <option value="">Please Select</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                    <option value="MIX">MIX</option>
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="MachineNo">Machine No</label>
+                                <input type="text" id="MachineNo" ng-model="Diamond.MachineNo" placeholder="Enter Machine No" tabindex="17" class="prerough-input" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Commercial & Billing Details -->
+                    <div class="form-section-card">
+                        <div class="form-section-header">
+                            <i class="fa fa-file-text-o"></i> Commercial &amp; Billing Details
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="Party">Party</label>
+                                <input type="text" id="Party" ng-model="Diamond.Party" placeholder="Enter Party Name" tabindex="18" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="InvoiceNo">Invoice No</label>
+                                <input type="text" id="InvoiceNo" ng-model="Diamond.InvoiceNo" placeholder="Enter Invoice No" tabindex="19" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="InvoiceDateInput">Invoice Date</label>
+                                <input type="text" id="InvoiceDateInput" ng-model="Diamond.InvoiceDate" placeholder="Select Invoice Date" tabindex="20" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="PurchaseByUserID">Purchase By</label>
+                                <select id="PurchaseByUserID" chosen="GetUserList" class="form-control prerough-input" ng-options="item.UserID as item.UserName for item in GetUserList" ng-model="Diamond.PurchaseByUserID" tabindex="21">
+                                    <option value="">Select Purchaser</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Remarks & Status -->
+                    <div class="form-section-card">
+                        <div class="form-section-header">
+                            <i class="fa fa-commenting-o"></i> Remarks &amp; Status
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-9 col-md-9 col-sm-8 col-xs-12 prerough-form-group">
+                                <label class="prerough-label" for="Remarks">Remark</label>
+                                <input type="text" id="Remarks" ng-model="Diamond.Remarks" tabindex="22" placeholder="Enter Remarks / Notes" class="prerough-input" />
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 prerough-form-group">
+                                <label class="prerough-label">&nbsp;</label>
+                                <div class="modern-checkbox-wrapper">
+                                    <label class="modern-checkbox-label">
+                                        <input type="checkbox" ng-model="Diamond.IsActive" tabindex="23" />
+                                        <span>Active Record</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" tabindex="24" ng-click="Clear()" type="reset">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete" tabindex="25" ng-show="CanDelete" ng-disabled="Diamond.DeleteButton" ng-click="DeletePacket()" type="button">
+                        <i class="fa fa-trash"></i> Delete
+                    </button>
+                    <button class="btn-modal-action btn-modal-save" tabindex="26" ng-show="(BtnName == 'SAVE' && CanAdd) || (BtnName == 'UPDATE' && CanEdit)" ng-click="DataSave()">
+                        <i class="fa fa-check-circle"></i> {{BtnName}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal (100% Unchanged Structure & Logic) -->
+    <div class="modal fade" id="FetchDeleteFilterPopUp" role="dialog" aria-labelledby="exampleModalCenterTitle">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header" ng-modal="processpopup">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-exclamation-triangle" style="color: #ef4444; font-size: 18px;"></i>
+                        <h4 class="modal-header-title">Confirm Delete</h4>
+                    </div>
+                    <button type="button" ng-click="CloseDeletePopupFilterDetails();" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body" ng-modal="processpopup" style="background: #ffffff;">
+                    <div class="form-group" hidden>
+                        <input type="text" ng-model="Diamond.ID" class="form-control" />
+                    </div>
+                    <div class="delete-dialog-content">
+                        <div class="delete-warning-icon">
+                            <i class="fa fa-trash-o"></i>
+                        </div>
+                        <h4 class="delete-dialog-title">Delete Pre-Rough Item?</h4>
+                        <p class="delete-dialog-text">Are you sure you want to delete this record? This action cannot be undone.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" ng-click="CloseDeletePopupFilterDetails();" type="button">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete" ng-show="CanDelete" ng-disabled="Diamond.DeleteButton" ng-click="DeleteItem()" type="button">
+                        <i class="fa fa-trash"></i> Confirm Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         Upload Image Modal (Clean SaaS Design)
+         ========================================================================== -->
+    <div class="modal fade" id="UploadImageModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-cloud-upload" style="color: #38bdf8; font-size: 18px;"></i>
+                        <h4 class="modal-header-title">Upload Jangad Images</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #f8fafc;">
+                    <!-- Readonly Jangad Details -->
+                    <div class="form-section-card" style="margin-bottom: 12px;">
+                        <div class="row">
+                            <div class="col-xs-6 prerough-form-group" style="margin-bottom: 0;">
+                                <label class="prerough-label">Selected Jangad No</label>
+                                <input type="text" class="prerough-input" ng-model="UploadModel.JangadNo" readonly style="background: #f1f5f9; font-weight: 700; color: #0369a1;" />
+                            </div>
+                            <div class="col-xs-6 prerough-form-group" style="margin-bottom: 0;">
+                                <label class="prerough-label">Module / Status</label>
+                                <input type="text" class="prerough-input" value="Pre-Rough" readonly style="background: #f1f5f9; font-weight: 600; color: #475569;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Dropzone -->
+                    <div class="image-dropzone">
+                        <input type="file" id="preRoughImageFiles" multiple accept="image/*" onchange="angular.element(this).scope().OnFileSelected(this)" />
+                        <div class="dropzone-icon">
+                            <i class="fa fa-cloud-upload"></i>
+                        </div>
+                        <div class="dropzone-text">Click or Drag &amp; Drop Images Here</div>
+                        <div class="dropzone-hint">Supports multiple JPG, PNG, WEBP files (Max 10MB per image)</div>
+                    </div>
+
+                    <!-- Selected Files List -->
+                    <div class="selected-files-list" ng-if="UploadModel.Files && UploadModel.Files.length > 0">
+                        <div class="selected-file-item" ng-repeat="f in UploadModel.Files">
+                            <div class="selected-file-name">
+                                <i class="fa fa-file-image-o" style="color: #0284c7;"></i>
+                                <span>{{f.name}}</span>
+                            </div>
+                            <span class="selected-file-size">{{f.size}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsUploading">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-save" ng-click="SubmitUploadImages()" type="button" ng-disabled="IsUploading || !UploadModel.Files || UploadModel.Files.length === 0">
+                        <span ng-if="!IsUploading"><i class="fa fa-upload"></i> UPLOAD</span>
+                        <span ng-if="IsUploading"><i class="fa fa-spinner fa-spin"></i> Uploading...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         Interactive View Image Carousel Modal
+         ========================================================================== -->
+    <div class="modal fade" id="ViewImageModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-picture-o" style="color: #38bdf8; font-size: 18px;"></i>
+                        <h4 class="modal-header-title">Jangad Images - Jangad #{{ActiveJangadNo}}</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #0b1320; padding: 16px;">
+                    <!-- Loading State -->
+                    <div ng-if="IsLoadingImages" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 32px; color: #38bdf8; margin-bottom: 12px;"></i>
+                        <div>Loading Jangad Images...</div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div ng-if="!IsLoadingImages && (!ImageList || ImageList.length === 0)" style="text-align: center; padding: 50px 20px; color: #94a3b8;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.06); display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #64748b; margin-bottom: 14px;">
+                            <i class="fa fa-picture-o"></i>
+                        </div>
+                        <h4 style="color: #f8fafc; font-size: 16px; margin-bottom: 6px;">No Images Found</h4>
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">There are no uploaded images for Jangad #{{ActiveJangadNo}} yet.</p>
+                        <button class="btn btn-prerough-add" style="font-size: 12px; padding: 7px 14px;" ng-click="OpenUploadModal({ JangadNo: ActiveJangadNo })" data-dismiss="modal">
+                            <i class="fa fa-cloud-upload"></i> Upload Images Now
+                        </button>
+                    </div>
+
+                    <!-- Carousel Viewer -->
+                    <div ng-if="!IsLoadingImages && ImageList && ImageList.length > 0">
+                        <div class="image-viewer-container">
+                            <!-- Left Arrow -->
+                            <button class="viewer-nav-btn viewer-prev-btn" ng-click="PrevImage()" ng-if="ImageList.length > 1" title="Previous Image (Left Arrow)">
+                                <i class="fa fa-chevron-left"></i>
+                            </button>
+
+                            <!-- Main Image -->
+                            <div class="viewer-main-img-wrap">
+                                <img ng-src="{{ImageList[ActiveImageIndex].ImagePath}}" 
+                                     alt="Jangad Image" 
+                                     class="viewer-main-img" 
+                                     onerror="this.src='/Content/images/Symbol1.png';" />
+                            </div>
+
+                            <!-- Right Arrow -->
+                            <button class="viewer-nav-btn viewer-next-btn" ng-click="NextImage()" ng-if="ImageList.length > 1" title="Next Image (Right Arrow)">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+
+                            <!-- Floating Carousel Counter Pill (Bottom Center) -->
+                            <div class="preview-counter-pill" ng-if="ImageList.length > 0">
+                                {{ActiveImageIndex + 1}} / {{ImageList.length}}
+                            </div>
+                        </div>
+
+                        <!-- Image Metadata & Action Bar -->
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 4px 4px 4px; color: #94a3b8; font-size: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <i class="fa fa-clock-o"></i> Uploaded: <strong style="color: #e2e8f0;">{{ImageList[ActiveImageIndex].Created || '-'}}</strong>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" target="_blank" class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);" title="Open original in new tab">
+                                    <i class="fa fa-external-link"></i> Full View
+                                </a>
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" download class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3);" title="Download image">
+                                    <i class="fa fa-download"></i> Download
+                                </a>
+                                <button type="button" 
+                                        class="btn btn-xs" 
+                                        style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); margin-left: 6px;" 
+                                        ng-if="CanDelete" 
+                                        ng-click="DeleteCurrentImage()" 
+                                        title="Delete this image">
+                                    <i class="fa fa-trash-o"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Strip -->
+                        <div class="viewer-thumb-strip" ng-if="ImageList.length > 1">
+                            <div class="viewer-thumb-item" 
+                                 ng-repeat="img in ImageList" 
+                                 ng-class="{'active': $index === ActiveImageIndex}" 
+                                 ng-click="SelectImage($index)">
+                                <img ng-src="{{img.ImagePath}}" class="viewer-thumb-img" onerror="this.src='/Content/images/Symbol1.png';" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #0f172a; border-top: 1px solid #1e293b;">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" style="background: #1e293b; color: #cbd5e1; border-color: #334155;">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var Paramdata = [{}];
+    var Action = "INSERT";
+    var EmployeeID = 0;
+    var ModuleName = "Rough";
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
+    }
+
+    // Chosen Directive with Scope Watchers
+    module.directive('chosen', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var list = attrs['chosen'];
+                if (list) {
+                    scope.$watchCollection(list, function () {
+                        $timeout(function () {
+                            element.trigger('chosen:updated');
+                        }, 50);
+                    });
+                }
+                if (attrs['ngModel']) {
+                    scope.$watch(attrs['ngModel'], function () {
+                        $timeout(function () {
+                            element.trigger('chosen:updated');
+                        }, 50);
+                    });
+                }
+                element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+            }
+        };
+    }]);
+
+    module.controller("Diamond", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.Diamond = {};
+        $scope.BtnName = "SAVE";
+        $scope.Diamond.DeleteButton = true;
+        $scope.GetUserList = [];
+        $scope.GetMSTReceipeList = [];
+        $scope.List = [];
+        $scope.IsLoading = false;
+
+        // Image Upload & Viewer State
+        $scope.UploadModel = {
+            JangadNo: '',
+            PreRoughID: null,
+            DistributionID: null,
+            RoughPcs: '',
+            RoughWeight: '',
+            Status: 'Pre rough',
+            Files: []
+        };
+        $scope.IsUploading = false;
+        $scope.ActiveJangadNo = '';
+        $scope.ImageList = [];
+        $scope.ActiveImageIndex = 0;
+        $scope.IsLoadingImages = false;
+
+        // Fetch Dropdown data (Receipe and User lists)
+        $http.post('@Url.Action("Getdata_For_DropDown", "Master")')
+        .then(function (response) {
+            var MSTReceipeList = [];
+            if (response.data && response.data.ReceipeList) {
+                for (var i = 0; i < response.data.ReceipeList.length; i++) {
+                    var rItem = response.data.ReceipeList[i];
+                    var rId = rItem["ReceipeID"] || rItem["id"] || rItem["ID"];
+                    var rVal = rItem["Receipe"] || rItem["value"] || rItem["ReceipeName"];
+                    if (rId !== undefined && rId !== null) {
+                        MSTReceipeList.push({ 
+                            id: parseInt(rId), 
+                            value: rVal 
+                        });
+                    }
+                }
+            }
+            $scope.GetMSTReceipeList = MSTReceipeList;
+
+            // Load UserList if provided
+            if (response.data && response.data.UserList && response.data.UserList.length > 0) {
+                var uList = [];
+                for (var j = 0; j < response.data.UserList.length; j++) {
+                    var uItem = response.data.UserList[j];
+                    var uId = uItem["UserID"] || uItem["id"] || uItem["ID"];
+                    var uVal = uItem["UserName"] || uItem["value"] || uItem["Name"];
+                    if (uId && uVal) {
+                        uList.push({
+                            UserID: parseInt(uId),
+                            UserName: uVal
+                        });
+                    }
+                }
+                if (uList.length > 0) {
+                    $scope.GetUserList = uList;
+                }
+            }
+
+            // Fallback user list fetch if UserList was empty
+            if (!$scope.GetUserList || $scope.GetUserList.length === 0) {
+                fetchFallbackUsers();
+            }
+
+            $timeout(function () {
+                $('#ReceipeID').trigger('chosen:updated');
+                $('#PurchaseByUserID').trigger('chosen:updated');
+            }, 100);
+        }, function (err) {
+            fetchFallbackUsers();
+        });
+
+        function fetchFallbackUsers() {
+            $http.get('@Url.Action("SEC_UserPrivileges_Getdata", "User")')
+            .then(function (response) {
+                var rawList = (response.data && response.data.SYSModuleList) ? response.data.SYSModuleList : (Array.isArray(response.data) ? response.data : []);
+                var list = [];
+                angular.forEach(rawList, function (item) {
+                    var uid = item.UserID || item.ID || item.id;
+                    var uname = item.UserName || item.userName || item.Name;
+                    if (uid && uname) {
+                        list.push({
+                            UserID: parseInt(uid),
+                            UserName: uname
+                        });
+                    }
+                });
+                if (list.length > 0) {
+                    $scope.GetUserList = list;
+                    $timeout(function () {
+                        $('#PurchaseByUserID').trigger('chosen:updated');
+                    }, 100);
+                } else {
+                    $http.get('@Url.Action("Get_SameAs_UserList", "User")?UserID=0')
+                    .then(function (res2) {
+                        var rawList2 = (res2.data && res2.data.list) ? res2.data.list : (Array.isArray(res2.data) ? res2.data : []);
+                        var list2 = [];
+                        angular.forEach(rawList2, function (item) {
+                            var uid = item.UserID || item.ID || item.id;
+                            var uname = item.UserName || item.userName || item.Name;
+                            if (uid && uname) {
+                                list2.push({
+                                    UserID: parseInt(uid),
+                                    UserName: uname
+                                });
+                            }
+                        });
+                        $scope.GetUserList = list2;
+                        $timeout(function () {
+                            $('#PurchaseByUserID').trigger('chosen:updated');
+                        }, 100);
+                    });
+                }
+            });
+        }
+
+        $scope.ClosePopupFilterDetails = function () {
+            $("#FetchFilterPopUp").modal("hide");
+        };
+
+        $scope.CloseDeletePopupFilterDetails = function () {
+            $("#FetchDeleteFilterPopUp").modal("hide");
+        };
+
+        window.onkeyup = function (event) {
+            if (event.keyCode == 27) {
+                $("#FetchFilterPopUp").modal("hide");
+                $("#FetchDeleteFilterPopUp").modal("hide");
+                $("#UploadImageModal").modal("hide");
+                $("#ViewImageModal").modal("hide");
+            }
+        };
+
+        $scope.OpenPopUpMenu = function () {
+            if (!$scope.CanAdd) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to add new records.");
+                return;
+            }
+            $scope.Diamond = {};
+            $scope.BtnName = "SAVE";
+            Action = "INSERT";
+
+            $("#FetchFilterPopUp").modal("show");
+            $scope.Diamond.DeleteButton = true;
+            $scope.Diamond.IsActive = true;
+            $('#InvoiceDateInput').val('');
+
+            $timeout(function () {
+                $('#PurchaseByUserID').trigger('chosen:updated');
+                $('#ReceipeID').trigger('chosen:updated');
+                $('#SizeCode').trigger('chosen:updated');
+                $('#ColorType').trigger('chosen:updated');
+                $('#FactoryCode').trigger('chosen:updated');
+                $('#GradNo').trigger('chosen:updated');
+            }, 100);
+        };
+
+        // Open Upload Image Modal
+        $scope.OpenUploadModal = function (row) {
+            $scope.SelectedUploadRow = row;
+            $scope.UploadModel = {
+                JangadNo: row ? (row.JangadNo || '') : '',
+                PreRoughID: row ? (row.ID || row.ProcessID || null) : null,
+                DistributionID: null,
+                RoughPcs: row ? (row.RoughPcs || row.CakePcs || '') : '',
+                RoughWeight: row ? (row.RoughWeight || row.CakeWeight || '') : '',
+                Status: 'Pre rough',
+                Files: []
+            };
+            $('#preRoughImageFiles').val('');
+            $('#UploadImageModal').modal('show');
+        };
+
+        $scope.OnFileSelected = function (element) {
+            $scope.$apply(function () {
+                $scope.UploadModel.Files = [];
+                if (element.files && element.files.length > 0) {
+                    for (var i = 0; i < element.files.length; i++) {
+                        $scope.UploadModel.Files.push({
+                            name: element.files[i].name,
+                            size: (element.files[i].size / 1024).toFixed(1) + ' KB',
+                            file: element.files[i]
+                        });
+                    }
+                }
+            });
+        };
+
+        $scope.SubmitUploadImages = function () {
+            var fileInput = document.getElementById('preRoughImageFiles');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                if (typeof Noty === 'function') Noty("error", "Please select at least one image to upload.");
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append("JangadNo", $scope.UploadModel.JangadNo || '');
+            if ($scope.UploadModel.PreRoughID) {
+                formData.append("PreRoughID", $scope.UploadModel.PreRoughID);
+            }
+            formData.append("Status", "Pre rough");
+
+            for (var i = 0; i < fileInput.files.length; i++) {
+                formData.append("file_" + i, fileInput.files[i]);
+            }
+
+            $scope.IsUploading = true;
+            $http.post('@Url.Action("Upload_Jangad_Images", "Master")', formData, {
+                transformRequest: angular.identity,
+                headers: { 'Content-Type': undefined }
+            }).then(function (res) {
+                $scope.IsUploading = false;
+                if (res.data && res.data.success) {
+                    if (typeof Noty === 'function') Noty("success", res.data.message || "Images uploaded successfully!");
+                    $('#UploadImageModal').modal('hide');
+                    $('#preRoughImageFiles').val('');
+                    $scope.UploadModel.Files = [];
+
+                    if ($scope.SelectedUploadRow) {
+                        $scope.SelectedUploadRow.IsImageUpload = true;
+                        var gridInstance = $("#gridContainer").dxDataGrid("instance");
+                        if (gridInstance) {
+                            gridInstance.refresh();
+                        }
+                    }
+                } else {
+                    if (typeof Noty === 'function') Noty("error", res.data.message || "Upload failed.");
+                }
+            }, function (err) {
+                $scope.IsUploading = false;
+                if (typeof Noty === 'function') Noty("error", "Error uploading images to server.");
+            });
+        };
+
+        // Open View Images Modal
+        $scope.OpenViewModal = function (row) {
+            $scope.ActiveViewRow = row;
+            $scope.ActiveJangadNo = row ? (row.JangadNo || '') : '';
+            $scope.ImageList = [];
+            $scope.ActiveImageIndex = 0;
+            $scope.IsLoadingImages = true;
+
+            var prId = row ? (row.ID || row.ProcessID || '') : '';
+            var jNo = encodeURIComponent($scope.ActiveJangadNo);
+
+            $('#ViewImageModal').modal('show');
+
+            $http.get('@Url.Action("Get_Jangad_Images", "Master")?PreRoughID=' + prId + '&JangadNo=' + jNo + '&Status=PreRough')
+            .then(function (res) {
+                $scope.IsLoadingImages = false;
+                if (res.data && res.data.list) {
+                    $scope.ImageList = res.data.list;
+                    $scope.ActiveImageIndex = 0;
+                }
+            }, function () {
+                $scope.IsLoadingImages = false;
+                if (typeof Noty === 'function') Noty("error", "Failed to load images from server.");
+            });
+        };
+
+        $scope.PrevImage = function () {
+            if ($scope.ImageList && $scope.ImageList.length > 1) {
+                $scope.ActiveImageIndex = ($scope.ActiveImageIndex - 1 + $scope.ImageList.length) % $scope.ImageList.length;
+            }
+        };
+
+        $scope.NextImage = function () {
+            if ($scope.ImageList && $scope.ImageList.length > 1) {
+                $scope.ActiveImageIndex = ($scope.ActiveImageIndex + 1) % $scope.ImageList.length;
+            }
+        };
+
+        $scope.SelectImage = function (index) {
+            if (index >= 0 && index < $scope.ImageList.length) {
+                $scope.ActiveImageIndex = index;
+            }
+        };
+
+        // Delete Current Image from Carousel
+        $scope.DeleteCurrentImage = function () {
+            if (!$scope.CanDelete) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to delete images.");
+                return;
+            }
+            var currentImg = $scope.ImageList[$scope.ActiveImageIndex];
+            if (!currentImg || !currentImg.ID) return;
+
+            if (!confirm("Are you sure you want to permanently delete this image?")) return;
+
+            $http.post('@Url.Action("Delete_Jangad_Image", "Master")', { imageId: currentImg.ID })
+            .then(function (res) {
+                if (res.data && res.data.success) {
+                    if (typeof Noty === 'function') Noty("success", "Image deleted successfully!");
+
+                    // Remove from in-memory array
+                    $scope.ImageList.splice($scope.ActiveImageIndex, 1);
+
+                    if ($scope.ImageList.length > 0) {
+                        if ($scope.ActiveImageIndex >= $scope.ImageList.length) {
+                            $scope.ActiveImageIndex = $scope.ImageList.length - 1;
+                        }
+                    } else {
+                        // If all images are deleted, hide modal and remove View icon from grid row
+                        $('#ViewImageModal').modal('hide');
+                        if ($scope.ActiveViewRow) {
+                            $scope.ActiveViewRow.IsImageUpload = false;
+                            var grid = $("#gridContainer").dxDataGrid("instance");
+                            if (grid) grid.refresh();
+                        }
+                    }
+                } else {
+                    if (typeof Noty === 'function') Noty("error", res.data.message || "Failed to delete image.");
+                }
+            }, function () {
+                if (typeof Noty === 'function') Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // Fetch Grid Data
+        $scope.FetchData = function () {
+            $scope.IsLoading = true;
+            if (typeof show_loader === 'function') show_loader();
+
+            $http.get('@Url.Action("Getdata_R_Rough_Add", "Master")')
+            .then(function (response) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+
+                if (response.data && response.data.success === false) {
+                    if (typeof Noty === 'function') Noty("error", response.data.message || "Error fetching Pre-Rough data.");
+                    return;
+                }
+
+                var rawList = (response.data && response.data.DIARoughList) ? response.data.DIARoughList : [];
+                $scope.List = rawList;
+
+                var rawFields = (response.data && response.data.DataField) ? response.data.DataField : [];
+                var rawSummaries = (response.data && response.data.DataFieldSummary) ? response.data.DataFieldSummary : [];
+
+                $scope.BuildGridColumns(rawList, rawFields, rawSummaries);
+            }, function (err) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                if (typeof Noty === 'function') Noty("error", "Error fetching Pre-Rough data.");
+            });
+        };
+
+        // Build DevExtreme dxDataGrid Columns
+        $scope.BuildGridColumns = function (dataList, rawDataFields, summaryList) {
+            var gridColumns = [];
+
+            if (rawDataFields && rawDataFields.length > 0) {
+                angular.forEach(rawDataFields, function (field) {
+                    var col = angular.copy(field);
+                    var fieldKey = (col.dataField || '').toLowerCase();
+
+                    // If this is JangadNo column, inject View Image Column right before it
+                    if (fieldKey === 'jangadno') {
+                        gridColumns.push({
+                            caption: 'View',
+                            width: 48,
+                            alignment: 'center',
+                            allowReordering: false,
+                            allowFiltering: false,
+                            allowSorting: false,
+                            cellTemplate: function (container, options) {
+                                var hasImage = options.data.IsImageUpload === true || 
+                                               options.data.IsImageUpload === 1 || 
+                                               options.data.IsImageUpload === "1" || 
+                                               options.data.IsImageUpload === "true" ||
+                                               options.data.IsImageUpload === "True";
+                                
+                                if (hasImage) {
+                                    $("<button>")
+                                        .addClass("btn-grid-view-image")
+                                        .attr("type", "button")
+                                        .attr("title", "View Uploaded Images")
+                                        .html('<i class="fa fa-picture-o"></i>')
+                                        .on("click", function (e) {
+                                            e.stopPropagation();
+                                            $scope.$apply(function () {
+                                                $scope.OpenViewModal(options.data);
+                                            });
+                                        })
+                                        .appendTo(container);
+                                }
+                            }
+                        });
+                    }
+
+                    // Minimum column width for aesthetic readability
+                    if (!col.minWidth && !col.width) {
+                        col.minWidth = 110;
+                    }
+
+                    // Special formatting for Dates
+                    if (fieldKey.indexOf('date') !== -1 || fieldKey === 'created') {
+                        col.minWidth = 120;
+                        col.dataType = 'date';
+                        col.format = 'dd-MMM-yyyy';
+                        col.alignment = 'center';
+                    }
+
+                    gridColumns.push(col);
+                });
+            }
+
+            // Action Columns (Fixed Right)
+            // 1. Upload Images Action Button
+            gridColumns.push({
+                caption: 'Upload',
+                width: 55,
+                alignment: 'center',
+                fixed: true,
+                fixedPosition: 'right',
+                allowReordering: false,
+                cellTemplate: function (container, options) {
+                    $("<button>")
+                        .addClass("grid-action-btn-upload")
+                        .attr("title", "Upload Jangad Images")
+                        .html('<i class="fa fa-cloud-upload"></i>')
+                        .on("click", function (e) {
+                            e.stopPropagation();
+                            $scope.$apply(function () {
+                                $scope.OpenUploadModal(options.data);
+                            });
+                        })
+                        .appendTo(container);
+                }
+            });
+
+            // 2. Edit Action Button
+            if ($scope.CanEdit) {
+                gridColumns.push({
+                    caption: 'Edit',
+                    width: 55,
+                    alignment: 'center',
+                    fixed: true,
+                    fixedPosition: 'right',
+                    allowReordering: false,
+                    cellTemplate: function (container, options) {
+                        var rowData = options.data;
+                        $("<img>")
+                            .attr("src", "@Url.Content("~/Content/images/Edit.png")")
+                            .attr("title", "Edit Record")
+                            .addClass("grid-action-icon")
+                            .css({
+                                width: "18px",
+                                height: "18px",
+                                margin: "auto",
+                                cursor: "pointer",
+                                display: "block"
+                            })
+                            .on("click", function (e) {
+                                $scope.EditRow(rowData.ProcessID || rowData.ID, rowData);
+                            })
+                            .appendTo(container);
+                    }
+                });
+            }
+
+            // 3. QR Barcode Action Button
+            gridColumns.push({
+                caption: 'QR',
+                width: 55,
+                alignment: 'center',
+                fixed: true,
+                fixedPosition: 'right',
+                allowReordering: false,
+                cellTemplate: function (container, options) {
+                    var rowData = options.data;
+                    $("<img>")
+                        .attr("src", "@Url.Content("~/Content/images/barcode-scanner.png")")
+                        .attr("title", "Print QR / Barcode")
+                        .addClass("grid-action-icon")
+                        .css({
+                            width: "20px",
+                            height: "20px",
+                            margin: "auto",
+                            cursor: "pointer",
+                            display: "block"
+                        })
+                        .on("click", function (e) {
+                            $scope.QRGenerate(rowData.RName || rowData.StoneID, rowData);
+                        })
+                        .appendTo(container);
+                }
+            });
+
+            $scope.InitDataGrid(dataList, gridColumns, summaryList);
+        };
+
+        // Initialize DevExtreme Grid
+        $scope.InitDataGrid = function (dataList, columnsList, summaryList) {
+            $("#gridContainer").dxDataGrid({
+                dataSource: dataList,
+                columns: columnsList,
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual'
+                },
+                paging: { 
+                    enabled: false 
+                },
+                pager: { 
+                    visible: false 
+                },
+                searchPanel: { 
+                    visible: true, 
+                    width: 280, 
+                    placeholder: 'Search pre-rough records...' 
+                },
+                filterRow: { 
+                    visible: true, 
+                    applyFilter: 'auto' 
+                },
+                headerFilter: { visible: true },
+                selection: {
+                    mode: 'single'
+                },
+                summary: {
+                    totalItems: summaryList || []
+                },
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        if (e.data.PctStatus === "COMPLETE") {
+                            $(e.rowElement).addClass("CompStatus");
+                        }
+                    }
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlsx'],
+                    allowExportSelectedData: false
+                },
+                onExporting: function (e) {
+                    if (e.format === 'xlsx') {
+                        if (typeof ExcelJS !== 'undefined') {
+                            const workbook = new ExcelJS.Workbook();
+                            const worksheet = workbook.addWorksheet('PreRough');
+                            DevExpress.excelExporter.exportDataGrid({
+                                component: e.component,
+                                worksheet: worksheet,
+                                autoFilterEnabled: true,
+                            }).then(function () {
+                                workbook.xlsx.writeBuffer().then(function (buffer) {
+                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'PreRough.xlsx');
+                                });
+                            });
+                        }
+                    }
+                }
+            });
+        };
+
+        // Trigger initial data load
+        $scope.FetchData();
+
+        // Edit Row Handler
+        $scope.EditRow = function (RID, row) {
+            if (!$scope.CanEdit) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to edit records.");
+                return;
+            }
+            $scope.$apply(function () {
+                $scope.Diamond = angular.copy(row);
+
+                // Map StoneID / RName interchangeably
+                if (!$scope.Diamond.RName && row.StoneID) {
+                    $scope.Diamond.RName = row.StoneID;
+                }
+
+                // Map RoughPcs & RoughWeight (with CakePcs & CakeWeight fallback)
+                if ($scope.Diamond.RoughPcs === undefined || $scope.Diamond.RoughPcs === null || $scope.Diamond.RoughPcs === "") {
+                    $scope.Diamond.RoughPcs = row.RoughPcs || row.CakePcs || "";
+                }
+                if ($scope.Diamond.RoughWeight === undefined || $scope.Diamond.RoughWeight === null || $scope.Diamond.RoughWeight === "") {
+                    $scope.Diamond.RoughWeight = row.RoughWeight || row.CakeWeight || "";
+                }
+
+                // Map OriginalCarate if named differently in row
+                if ($scope.Diamond.OriginalCarate === undefined || $scope.Diamond.OriginalCarate === null || $scope.Diamond.OriginalCarate === "") {
+                    $scope.Diamond.OriginalCarate = row.OriginalCarate || row.OriginalCarat || row.OCarat || row.O_Carat || row.OrigCarat || "";
+                }
+
+                // Map Rate if needed
+                if ($scope.Diamond.Rate === undefined || $scope.Diamond.Rate === null || $scope.Diamond.Rate === "") {
+                    $scope.Diamond.Rate = row.Rate || "";
+                }
+
+                // Map MachineNo if needed
+                if ($scope.Diamond.MachineNo === undefined || $scope.Diamond.MachineNo === null || $scope.Diamond.MachineNo === "") {
+                    $scope.Diamond.MachineNo = row.MachineNo || row.Machine_No || "";
+                }
+
+                // Map Party, InvoiceNo, InvoiceDate if needed
+                if ($scope.Diamond.Party === undefined || $scope.Diamond.Party === null || $scope.Diamond.Party === "") {
+                    $scope.Diamond.Party = row.Party || "";
+                }
+                if ($scope.Diamond.InvoiceNo === undefined || $scope.Diamond.InvoiceNo === null || $scope.Diamond.InvoiceNo === "") {
+                    $scope.Diamond.InvoiceNo = row.InvoiceNo || "";
+                }
+
+                $scope.Diamond.IsActive = (row.IsActive == "True" || row.IsActive === true || row.IsActive == 1);
+
+                // Map ReceipeID
+                var rawReceipe = (row.ReceipeID !== undefined && row.ReceipeID !== null && row.ReceipeID !== "") ? row.ReceipeID : (row.RecipeID || row.ReceipeId);
+                if (rawReceipe !== undefined && rawReceipe !== null && rawReceipe !== "") {
+                    $scope.Diamond.ReceipeID = parseInt(rawReceipe);
+                } else if (row.Receipe && $scope.GetMSTReceipeList && $scope.GetMSTReceipeList.length > 0) {
+                    var foundReceipe = $scope.GetMSTReceipeList.find(function(x) { return x.value == row.Receipe || x.id == row.Receipe; });
+                    if (foundReceipe) {
+                        $scope.Diamond.ReceipeID = foundReceipe.id;
+                    }
+                }
+
+                // Map PurchaseByUserID
+                var rawPurchaseUser = (row.PurchaseByUserID !== undefined && row.PurchaseByUserID !== null && row.PurchaseByUserID !== "") ? row.PurchaseByUserID : (row.PurchaseByID || row.PurchaserUserID || row.Purchase_By_UserID);
+                if (rawPurchaseUser !== undefined && rawPurchaseUser !== null && rawPurchaseUser !== "") {
+                    $scope.Diamond.PurchaseByUserID = parseInt(rawPurchaseUser);
+                } else if ((row.PurchaseBy || row.Purchaser || row.PurchaseUserName) && $scope.GetUserList && $scope.GetUserList.length > 0) {
+                    var pVal = row.PurchaseBy || row.Purchaser || row.PurchaseUserName;
+                    var foundUser = $scope.GetUserList.find(function(u) { return u.UserName == pVal || u.UserID == pVal; });
+                    if (foundUser) {
+                        $scope.Diamond.PurchaseByUserID = foundUser.UserID;
+                    } else if (!isNaN(parseInt(pVal))) {
+                        $scope.Diamond.PurchaseByUserID = parseInt(pVal);
+                    }
+                }
+
+                $scope.BtnName = "UPDATE";
+                Action = "UPDATE";
+                $scope.Diamond.DeleteButton = false;
+            });
+
+            $('#InvoiceDateInput').val(row.InvoiceDate || '');
+            $("#FetchFilterPopUp").modal("show");
+
+            $timeout(function () {
+                if (!$scope.Diamond.ReceipeID && row.Receipe && $scope.GetMSTReceipeList) {
+                    var foundR = $scope.GetMSTReceipeList.find(function(x) { return x.value == row.Receipe || x.id == row.Receipe; });
+                    if (foundR) {
+                        $scope.Diamond.ReceipeID = foundR.id;
+                    }
+                }
+                if (!$scope.Diamond.PurchaseByUserID && (row.PurchaseBy || row.Purchaser || row.PurchaseUserName) && $scope.GetUserList) {
+                    var pVal2 = row.PurchaseBy || row.Purchaser || row.PurchaseUserName;
+                    var foundU2 = $scope.GetUserList.find(function(u) { return u.UserName == pVal2 || u.UserID == pVal2; });
+                    if (foundU2) {
+                        $scope.Diamond.PurchaseByUserID = foundU2.UserID;
+                    }
+                }
+
+                $('#PurchaseByUserID').trigger('chosen:updated');
+                $('#ReceipeID').trigger('chosen:updated');
+                $('#SizeCode').trigger('chosen:updated');
+                $('#ColorType').trigger('chosen:updated');
+                $('#FactoryCode').trigger('chosen:updated');
+                $('#GradNo').trigger('chosen:updated');
+            }, 150);
+        };
+
+        $scope.QRGenerate = function (RName, dt) {
+            var stoneOrRName = RName || (dt ? (dt.RName || dt.StoneID) : '') || '';
+            var pcs = dt ? (dt.RoughPcs || dt.CakePcs || '') : '';
+            var weight = dt ? (dt.RoughWeight || dt.CakeWeight || '') : '';
+            window.open('@Url.Action("R_PreRoughQRList", "Barcode")?StoneID=' + encodeURIComponent(stoneOrRName) + '&JangadNo=' + (dt ? dt.JangadNo : '') + '&CakePcs=' + pcs + '&CakeWeight=' + weight, '_blank');
+        };
+
+        // Save (Insert / Update) Handler
+        $scope.DataSave = function () {
+            if (Action === "INSERT" && !$scope.CanAdd) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to add records.");
+                return;
+            }
+            if (Action === "UPDATE" && !$scope.CanEdit) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to edit records.");
+                return;
+            }
+            if ($scope.Diamond.JangadNo == undefined || $scope.Diamond.JangadNo == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter JangadNo !");
+                return;
+            }
+
+            // Client-side Duplicate JangadNo check in the current grid dataset (List)
+            var enteredJangad = ($scope.Diamond.JangadNo + "").trim().toLowerCase();
+            if ($scope.List && $scope.List.length > 0) {
+                var isDuplicate = $scope.List.some(function (item) {
+                    var existingJangad = (item.JangadNo || "").toString().trim().toLowerCase();
+                    if (existingJangad === enteredJangad) {
+                        if (Action === "INSERT") {
+                            return true;
+                        } else if (Action === "UPDATE") {
+                            return item.ID != $scope.Diamond.ID;
+                        }
+                    }
+                    return false;
+                });
+
+                if (isDuplicate) {
+                    if (typeof Noty === 'function') Noty("error", "This JangadNo already exists in the grid!");
+                    return;
+                }
+            }
+
+            if ($scope.Diamond.RName == undefined || $scope.Diamond.RName == "") {
+                if (typeof Noty === 'function') Noty("error", "Please enter R.Name !");
+                return;
+            }
+            if ($scope.Diamond.RoughPcs == undefined || $scope.Diamond.RoughPcs === "") {
+                if (typeof Noty === 'function') Noty("error", "Please enter Rough Pcs !");
+                return;
+            }
+            if ($scope.Diamond.RoughWeight == undefined || $scope.Diamond.RoughWeight === "") {
+                if (typeof Noty === 'function') Noty("error", "Please enter Rough Weight !");
+                return;
+            }
+            if ($scope.Diamond.BoxNo == undefined || $scope.Diamond.BoxNo == "") {
+                if (typeof Noty === 'function') Noty("error", "Please enter BoxNo !");
+                return;
+            }
+            if ($scope.Diamond.Size == undefined || $scope.Diamond.Size == "") {
+                if (typeof Noty === 'function') Noty("error", "Please enter Size !");
+                return;
+            }
+            if ($scope.Diamond.FromHeight == undefined || $scope.Diamond.FromHeight == "") {
+                if (typeof Noty === 'function') Noty("error", "Please enter FromHeight !");
+                return;
+            }
+            if ($scope.Diamond.ToHeight == undefined || $scope.Diamond.ToHeight == "") {
+                if (typeof Noty === 'function') Noty("error", "Please enter ToHeight !");
+                return;
+            }
+            if ($scope.Diamond.ReceipeID == undefined || $scope.Diamond.ReceipeID == "") {
+                if (typeof Noty === 'function') Noty("error", "Please select Receipe !");
+                return;
+            }
+            if ($scope.Diamond.SizeCode == undefined || $scope.Diamond.SizeCode == "") {
+                if (typeof Noty === 'function') Noty("error", "Please select SizeCode !");
+                return;
+            }
+            if ($scope.Diamond.ColorType == undefined || $scope.Diamond.ColorType == "") {
+                if (typeof Noty === 'function') Noty("error", "Please select ColorType !");
+                return;
+            }
+            if ($scope.Diamond.FactoryCode == undefined || $scope.Diamond.FactoryCode == "") {
+                if (typeof Noty === 'function') Noty("error", "Please select FactoryCode !");
+                return;
+            }
+            if ($scope.Diamond.GradNo == undefined || $scope.Diamond.GradNo == "") {
+                if (typeof Noty === 'function') Noty("error", "Please select GradNo !");
+                return;
+            }
+
+            // Sync datepicker value if needed
+            if ($('#InvoiceDateInput').val()) {
+                $scope.Diamond.InvoiceDate = $('#InvoiceDateInput').val();
+            }
+
+            // Backward compatibility mapping for stored procedures
+            if (!$scope.Diamond.CakePcs && $scope.Diamond.RoughPcs) {
+                $scope.Diamond.CakePcs = $scope.Diamond.RoughPcs;
+            }
+            if (!$scope.Diamond.CakeWeight && $scope.Diamond.RoughWeight) {
+                $scope.Diamond.CakeWeight = $scope.Diamond.RoughWeight;
+            }
+            if (!$scope.Diamond.StoneID && $scope.Diamond.RName) {
+                $scope.Diamond.StoneID = $scope.Diamond.RName;
+            }
+
+            if (typeof show_loader === 'function') show_loader();
+
+            $http({
+                method: "POST",
+                url: '@Url.Action("R_Rough_Add_Insert_Update_Delete", "Master")',
+                data: { model: $scope.Diamond, Action: Action },
+                dataType: "json"
+            }).then(function (ret) {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (ret.data == "Record Is Inserted") {
+                    if (typeof Noty === 'function') Noty("success", "Process Save Success Fully!");
+                    $scope.FetchData();
+                    $scope.Clear();
+                    $("#FetchFilterPopUp").modal("hide");
+                    $scope.Diamond.DeleteButton = true;
+                }
+                else if (ret.data == "Record Is Updated") {
+                    if (typeof Noty === 'function') Noty("success", "Process Update Success Fully!");
+                    $scope.FetchData();
+                    $scope.Clear();
+                    $("#FetchFilterPopUp").modal("hide");
+                    $scope.Diamond.DeleteButton = true;
+                }
+                else {
+                    if (typeof Noty === 'function') Noty("error", ret.data);
+                }
+            }, function (err) {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (typeof Noty === 'function') Noty("error", "Error processing request.");
+            });
+        };
+
+        $scope.DeletePacket = function () {
+            if (!$scope.CanDelete) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to delete records.");
+                return;
+            }
+            $("#FetchDeleteFilterPopUp").modal("show");
+        };
+
+        $scope.DeleteItem = function () {
+            if (!$scope.CanDelete) {
+                if (typeof Noty === 'function') Noty("error", "You do not have permission to delete records.");
+                return;
+            }
+
+            var JsonPassData = { "ID": $scope.Diamond.ID };
+            var delAction = "DELETE";
+
+            if (typeof show_loader === 'function') show_loader();
+
+            $http({
+                method: "post",
+                url: '@Url.Action("R_Rough_Add_Insert_Update_Delete", "Master")',
+                data: { model: JsonPassData, Action: delAction },
+                dataType: "json"
+            }).then(function (ret) {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (ret.data == "Recored Is Deleted" || ret.data == "Record Is Deleted") {
+                    if (typeof Noty === 'function') Noty("success", "Record Delete SuccessFully");
+                    $("#FetchFilterPopUp").modal("hide");
+                    $("#FetchDeleteFilterPopUp").modal("hide");
+                    $scope.FetchData();
+                    $scope.Clear();
+                }
+                else {
+                    if (typeof Noty === 'function') Noty("error", "Record Not Delete");
+                }
+            }, function (err) {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (typeof Noty === 'function') Noty("error", "Error deleting record.");
+            });
+        };
+
+        $scope.Clear = function () {
+            $scope.BtnName = "SAVE";
+            Action = "INSERT";
+
+            $scope.Diamond = {};
+            $scope.Diamond.DeleteButton = true;
+            $scope.Diamond.IsActive = true;
+            $('#InvoiceDateInput').val('');
+
+            $timeout(function () {
+                $('#PurchaseByUserID').trigger('chosen:updated');
+                $('#ReceipeID').trigger('chosen:updated');
+                $('#SizeCode').trigger('chosen:updated');
+                $('#ColorType').trigger('chosen:updated');
+                $('#FactoryCode').trigger('chosen:updated');
+                $('#GradNo').trigger('chosen:updated');
+            }, 100);
+        };
+
+    }]);
+</script>
+<script type="text/javascript">
+    $('#RejDate').datepicker({
+        format: "dd-M-yyyy",
+        autoclose: true,
+        todayhighlight: true,
+    });
+    $('#InvoiceDateInput').datepicker({
+        format: "dd-M-yyyy",
+        autoclose: true,
+        todayhighlight: true,
+    }).on('changeDate', function (e) {
+        var val = $(this).val();
+        var scope = angular.element(document.querySelector('[ng-controller="Diamond"]')).scope();
+        if (scope && scope.Diamond) {
+            scope.$apply(function () {
+                scope.Diamond.InvoiceDate = val;
+            });
+        }
+    });
+</script>

@@ -1,0 +1,153 @@
+﻿@using System.Data
+@model System.Data.DataSet
+@{
+    ViewBag.Title = "Scanning_STNPrint";
+    Layout = null;
+}
+
+<style>
+    .Bold {
+        font-weight: 600
+    }
+
+    table {
+        width: 100%;
+        font-size: 9px;
+    }
+
+    .container {
+        padding: 0 !important;
+    }
+
+    table tr th, table tr td {
+        vertical-align: middle !important;
+        padding: 2px 3px 0 3px;
+    }
+
+    .main-container {
+        width: 100%;
+        display: flex;
+        gap: 5px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: auto
+    }
+
+    .table-container {
+        width: 49.5%
+    }
+</style>
+
+<div class="main-container">
+    @for (var i = 0; i < Model.Tables[0].Rows.Count; i++)
+    {
+        var header = Model.Tables[0].Rows[0];
+        int LogID = Convert.ToInt32(@Model.Tables[0].Rows[i]["LogID"]);
+        List<DataRow> detailRows = new List<DataRow>();
+
+        foreach (DataRow dr in Model.Tables[1].Rows)
+        {
+            if (Convert.ToInt32(dr["LogID"]) == LogID)
+            {
+                detailRows.Add(dr);
+            }
+        }
+
+        <div class="table-container">
+            
+
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th colspan="3" style="text-align:left">SCANNIG STN</th>
+                        <th colspan="3" style="text-align:left">DATE : @Model.Tables[0].Rows[i]["Date"]</th>
+
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th colspan="2" style="text-align:left">M/C No : @Model.Tables[0].Rows[i]["MachineNo"]</th>
+                        <th colspan="3" style="text-align:left">OP NAME : @Model.Tables[0].Rows[i]["EmpName"]</th>
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th colspan="2" style="text-align:left">Lot No : @Model.Tables[0].Rows[i]["LotCode"]</th>
+                        <th colspan="3" style="text-align:left">PC No : @Model.Tables[0].Rows[i]["PCNo"]</th>
+                    </tr>
+                    <tr>
+                        <th>NO</th>
+                        <th>PACKET WT</th>
+                        <th>M/C WT</th>
+                        <th>NO</th>
+                        <th>PACKET WT</th>
+                        <th>M/C WT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @*@{
+                        int SrNo = 1;
+                    }
+
+                    @for (var j = 0; j < Model.Tables[1].Rows.Count; j++)
+                    {
+                        if (Convert.ToInt32(Model.Tables[0].Rows[i]["LogID"]) == Convert.ToInt32(Model.Tables[1].Rows[j]["LogID"]))
+                        {
+                            <tr>
+                                <td>@SrNo</td>
+                                <td>@Model.Tables[1].Rows[j]["PacketWT"]</td>
+                                <td>@Model.Tables[1].Rows[j]["MachineWT"]</td>
+                            </tr>
+
+                            SrNo++;
+                        }
+
+                        if(SrNo == 10) {
+                            break;
+                        }
+                    }
+
+                    @for (var j = SrNo; j <= 10; j++)
+                    {
+                        <tr>
+                            <td>@SrNo</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+
+                        SrNo++;
+                    }*@
+
+                    @{
+                        int leftNo = 1;
+                        int rightNo = 11;
+                    }
+
+                    @for (int row = 1; row <= 10; row++)
+                    {
+                        DataRow leftRow = (leftNo <= detailRows.Count) ? detailRows[leftNo - 1] : null;
+                        DataRow rightRow = (rightNo <= detailRows.Count) ? detailRows[rightNo - 1] : null;
+
+                        <tr>
+                            <!-- Left side -->
+                            <td>@leftNo</td>
+                            <td>@(leftRow == null ? "" : leftRow["PacketWT"])</td>
+                            <td>@(leftRow == null ? "" : leftRow["MachineWT"])</td>
+
+                            <!-- Right side -->
+                            <td>@rightNo</td>
+                            <td>@(rightRow == null ? "" : rightRow["PacketWT"])</td>
+                            <td>@(rightRow == null ? "" : rightRow["MachineWT"])</td>
+                        </tr>
+
+                        leftNo++;
+                        rightNo++;
+                    }
+                </tbody>
+
+            </table>
+        </div>
+    }
+</div>
+<script>
+    document.title = "SCANNING STN REPORT";
+    window.print();
+</script>

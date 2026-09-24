@@ -1,0 +1,500 @@
+@{
+    ViewBag.Title = "QR Generator";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       QR Generator - Modern SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .qr-page-wrapper {
+        padding: 0 0 20px 0;
+        margin-top: 0;
+        margin-bottom: 0;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .qr-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .qr-card-specs { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Left Accent) */
+    .qr-header-card {
+        background: #f1f5f9 !important;
+        border-radius: 12px !important;
+        padding: 12px 18px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        border: 1px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+        clear: both !important;
+    }
+    .qr-header-card:hover {
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .qr-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .qr-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .qr-header-card:hover .qr-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .qr-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .qr-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .qr-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .qr-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    /* Base Section Card Container */
+    .qr-card {
+        border-radius: 12px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        margin-bottom: 14px !important;
+        overflow: visible !important;
+        position: relative !important;
+        clear: both !important;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+    }
+    .qr-card::after,
+    .qr-card::before,
+    .qr-card-body::after,
+    .qr-card-body::before {
+        content: " " !important;
+        display: table !important;
+        clear: both !important;
+    }
+    .qr-card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+    }
+
+    .qr-card-header {
+        padding: 12px 18px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        border-top-left-radius: 11px !important;
+        border-top-right-radius: 11px !important;
+    }
+
+    .qr-card-title {
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .qr-card-body {
+        padding: 18px 18px 14px !important;
+        background: transparent !important;
+        overflow: visible !important;
+        position: relative !important;
+        clear: both !important;
+    }
+
+    /* Soft Ice Blue Theme for Main Card */
+    .qr-card-specs {
+        background: #e0f2fe !important;
+        border: 1.5px solid #7dd3fc !important;
+    }
+    .qr-card-specs:hover {
+        border-color: #38bdf8 !important;
+    }
+    .qr-card-specs .qr-card-header {
+        background: #bae6fd !important;
+        border-bottom: 1.5px solid #7dd3fc !important;
+    }
+    .qr-card-specs .qr-card-title {
+        color: #0369a1 !important;
+    }
+    .qr-card-specs .qr-label {
+        color: #0c4a6e !important;
+    }
+
+    .qr-form-group {
+        margin-bottom: 14px !important;
+        position: relative !important;
+        overflow: visible !important;
+    }
+
+    .qr-label {
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        margin-bottom: 6px !important;
+        display: block !important;
+    }
+    .qr-label .req {
+        color: #ef4444 !important;
+        margin-left: 2px !important;
+        font-weight: 700;
+    }
+
+    .qr-textarea {
+        width: 100% !important;
+        padding: 10px 14px !important;
+        font-size: 13px !important;
+        color: #0f172a !important;
+        background-color: #ffffff !important;
+        border: 1.5px solid #7dd3fc !important;
+        border-radius: 8px !important;
+        outline: none !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+        transition: all 0.2s ease !important;
+        font-family: 'Consolas', 'Courier New', monospace, sans-serif !important;
+        line-height: 1.5 !important;
+        resize: vertical !important;
+    }
+    .qr-textarea:focus {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.20) !important;
+        background-color: #ffffff !important;
+    }
+
+    .qr-help-banner {
+        background: #ffffff !important;
+        border: 1px solid #bae6fd !important;
+        border-left: 4px solid #0284c7 !important;
+        border-radius: 8px !important;
+        padding: 10px 14px !important;
+        margin-top: 8px !important;
+        margin-bottom: 16px !important;
+        font-size: 12px !important;
+        color: #334155 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    /* Buttons Styling */
+    .qr-btn-row {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        flex-wrap: wrap !important;
+    }
+
+    .btn-qr-generate {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 10px 24px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.28) !important;
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+    }
+    .btn-qr-generate:hover:not(:disabled) {
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.40) !important;
+    }
+    .btn-qr-generate:active:not(:disabled) {
+        transform: translateY(0) scale(0.98) !important;
+    }
+    .btn-qr-generate:disabled {
+        opacity: 0.55 !important;
+        cursor: not-allowed !important;
+        background: #94a3b8 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+
+    .btn-qr-clear {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        color: #475569 !important;
+        border: 1.5px solid #94a3b8 !important;
+        border-radius: 8px !important;
+        padding: 9px 18px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+    }
+    .btn-qr-clear:hover {
+        background: #f1f5f9 !important;
+        background-color: #f1f5f9 !important;
+        border-color: #64748b !important;
+        color: #0f172a !important;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12) !important;
+        transform: translateY(-2px) !important;
+    }
+
+    /* ==========================================================================
+       Print Styling
+       ========================================================================== */
+    .qr-box {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: #fff;
+        display: flex;
+        align-items: center;
+        page-break-inside: avoid;
+    }
+    .qr-box img {
+        width: 100px;
+        height: 100px;
+        margin-right: 20px;
+    }
+    .qr-box .qr-text {
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+    }
+
+    @@media print {
+        body * {
+            visibility: hidden;
+        }
+
+        #input-area, .page-title, .main-header, .main-sidebar, aside, header, footer {
+            display: none !important;
+        }
+
+        #print-area, #print-area * {
+            visibility: visible;
+        }
+
+        #print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .qr-box {
+            border: none;
+            padding: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+
+        .row {
+            display: block !important;
+            margin: 0 !important;
+        }
+
+        .col-md-12 {
+            width: 100% !important;
+            float: none !important;
+            padding: 0 !important;
+        }
+    }
+
+    /* Mobile Responsive */
+    @@media (max-width: 768px) {
+        .qr-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 10px !important;
+        }
+
+        .qr-card-body {
+            padding: 14px 12px !important;
+        }
+
+        .btn-qr-generate,
+        .btn-qr-clear {
+            width: 100% !important;
+        }
+    }
+</style>
+
+<div ng-controller="QRGeneratorController" class="qr-page-wrapper">
+    <div id="input-area">
+        <!-- Top Header Card -->
+        <div class="qr-header-card">
+            <div class="qr-header-left">
+                <div class="qr-header-icon">
+                    <i class="fa fa-qrcode"></i>
+                </div>
+                <div>
+                    <div class="qr-breadcrumb">
+                        <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                        <span>Master</span> / 
+                        <span>QR Generator</span>
+                    </div>
+                    <h4 class="qr-header-title">QR Generator</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Form Card (Ice Blue Theme) -->
+        <div class="row">
+            <div class="col-xs-12 col-md-12">
+                <div class="qr-card qr-card-specs">
+                    <div class="qr-card-header">
+                        <h5 class="qr-card-title">
+                            <i class="fa fa-qrcode text-primary"></i> 1. Stone IDs &amp; QR Code Generation
+                        </h5>
+                    </div>
+                    <div class="qr-card-body">
+                        <div class="row">
+                            <div class="col-xs-12 col-md-8 col-lg-7 qr-form-group">
+                                <label class="qr-label" for="StoneIDs">
+                                    Enter Stone IDs (Comma or new line separated) <span class="req">*</span>
+                                </label>
+                                <textarea id="StoneIDs" 
+                                          class="qr-textarea" 
+                                          rows="6" 
+                                          ng-model="StoneIDs"></textarea>
+                                
+                                <div class="qr-help-banner">
+                                    <i class="fa fa-info-circle text-primary" style="font-size: 14px;"></i>
+                                    <span>You can enter multiple Stone IDs separated by commas (<code>,</code>) or each on a new line.</span>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+
+                            <div class="col-xs-12 col-md-8 col-lg-7">
+                                <div class="qr-btn-row">
+                                    <button class="btn-qr-generate" type="button" ng-click="GenerateQRs()">
+                                        <i class="fa fa-cogs"></i> Generate QR Codes
+                                    </button>
+                                    <button class="btn-qr-clear" type="button" ng-click="ClearInput()" title="Clear Stone IDs">
+                                        <i class="fa fa-eraser"></i> Clear
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="clearfix"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var app;
+    try {
+        app = angular.module('app');
+    } catch (e) {
+        app = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    }
+
+    app.controller("QRGeneratorController", ['$scope', '$http', function ($scope, $http) {
+        $scope.StoneIDs = "";
+
+        $scope.ClearInput = function () {
+            $scope.StoneIDs = "";
+        };
+
+        $scope.GenerateQRs = function () {
+            if (!$scope.StoneIDs || $scope.StoneIDs.trim() === "") {
+                if (typeof Noty !== 'undefined') {
+                    Noty("error", "Please enter at least one Stone ID!");
+                } else {
+                    alert("Please enter at least one Stone ID!");
+                }
+                return;
+            }
+
+            if (typeof show_loader !== 'undefined') show_loader();
+            $http({
+                method: "POST",
+                url: '@Url.Action("GenerateMultipleQRs", "Master")',
+                data: { stoneIds: $scope.StoneIDs }
+            }).then(function (response) {
+                if (typeof hide_loader !== 'undefined') hide_loader();
+                if (response.data.success) {
+                    if (typeof Noty !== 'undefined') {
+                        Noty("success", "QR Codes generated successfully!");
+                    }
+                    window.open('@Url.Action("QRPrint", "Master")', '_blank');
+                } else {
+                    if (typeof Noty !== 'undefined') {
+                        Noty("error", response.data.message);
+                    } else {
+                        alert(response.data.message);
+                    }
+                }
+            }, function (error) {
+                if (typeof hide_loader !== 'undefined') hide_loader();
+                if (typeof Noty !== 'undefined') {
+                    Noty("error", "Error generating QR codes.");
+                } else {
+                    alert("Error generating QR codes.");
+                }
+            });
+        };
+
+        $scope.PrintQRs = function () {
+            window.print();
+        };
+    }]);
+</script>

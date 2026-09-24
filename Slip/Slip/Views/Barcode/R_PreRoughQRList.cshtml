@@ -1,0 +1,72 @@
+﻿
+@{
+    ViewBag.Title = "R_PreRoughQRList";
+    Layout = null;
+    var QRList = Slip.Utility.SessionFacade.QRGenerateList;
+}
+<style>
+    body {
+        background-color: white !important;
+    }
+    .container {
+        align-items: center;
+        justify-content: center;
+        width: 300px;
+        margin: 0px !important;
+        padding-left: 5px !important;
+    }
+
+    img {
+        float: left;
+    }
+
+    .text {
+        font-size: 15px;
+        padding-left: 5px;
+        /* float: left;*/
+        line-height: 0.5;
+        color: black;
+    }
+        .text p {
+            margin-top:3px !important;
+        }
+</style>
+
+<div>
+    <div class="container">
+        <div class="image">
+            <img src="@QRList[0].QRUrl" width="80" height="80">
+        </div>
+        <div class="text">
+            <br />
+            <p><b>@QRList[0].SubStoneID</b></p>
+            <p><b>@QRList[0].JangadNo</b></p>
+            <p><b>@QRList[0].Weight</b> ( <b>@QRList[0].Pcs</b> )</p>
+
+        </div>
+    </div>
+</div>
+@if (QRList != null)
+{
+    for (int i = 1; i < QRList.Count; i++)
+    {
+        <div style="page-break-after:always !important;">
+            @*<div class="container" style="page-break-after:always !important;">*@
+            <div class="image">
+                <img src="@QRList[i].QRUrl" width="80" height="80">
+            </div>
+            <div class="text">
+                <br />
+                <p><b>@QRList[i].SubStoneID</b></p>
+                <p><b>@QRList[i].JangadNo</b></p>
+                <p><b>@QRList[i].Weight</b> ( <b>@QRList[i].Pcs</b> )</p>
+
+            </div>
+            @*</div>*@
+        </div>
+    }
+}
+
+<script>
+    window.print();
+</script>

@@ -1,0 +1,506 @@
+@{
+    ViewBag.Title = "TRN Labour";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       TRN Labour - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .trnlabour-page {
+        padding: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .trnlabour-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .trnlabour-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Border) */
+    .trnlabour-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 12px 18px !important;
+        margin-bottom: 10px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .trnlabour-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .trnlabour-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .trnlabour-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .trnlabour-header-card:hover .trnlabour-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .trnlabour-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .trnlabour-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .trnlabour-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .trnlabour-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    /* Grid Card Container (Matching EmployeeDetail.cshtml & Lot.cshtml) */
+    .trnlabour-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .trnlabour-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .trnlabour-card-header {
+        background: #ffffff !important;
+        padding: 12px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    .trnlabour-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .trnlabour-card-title-left i {
+        font-size: 16px;
+        color: #0284c7;
+    }
+    .trnlabour-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .trnlabour-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-trnlabour-refresh {
+        background: #ffffff !important;
+        color: #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 7px 14px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-trnlabour-refresh:hover {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Grid Container */
+    .trnlabour-grid-body {
+        padding: 0 !important;
+    }
+
+    .trnlabour-grid-card .uigrid,
+    .trnlabour-grid-card #gridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridContainer {
+        width: 100% !important;
+    }
+
+    /* Larger Readable Font Styling for DataGrid */
+    #gridContainer .dx-datagrid-headers .dx-header-row > td {
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        padding: 8px 6px !important;
+    }
+
+    #gridContainer .dx-datagrid-rowsview .dx-row > td {
+        font-size: 13.5px !important;     /* Larger Font Size */
+        font-weight: 500 !important;
+        color: #1e293b !important;
+        padding: 7px 8px !important;      /* Comfortable Row Spacing */
+        line-height: 1.35 !important;
+    }
+
+    #gridContainer .dx-datagrid-filter-row input {
+        font-size: 12px !important;
+        height: 28px !important;
+    }
+
+    #gridContainer .dx-datagrid-total-footer td {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+    }
+
+    /* Badges */
+    .badge-status-pill {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .trnlabour-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .trnlabour-header-left {
+            width: 100%;
+        }
+
+        .trnlabour-card-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 12px 14px !important;
+        }
+
+        .trnlabour-card-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .btn-trnlabour-refresh {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+
+        .trnlabour-grid-card {
+            min-height: 480px;
+        }
+
+        .trnlabour-grid-card .uigrid,
+        .trnlabour-grid-card #gridContainer {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+    }
+</style>
+
+@if (ViewBag.IsAdmin == true || (ViewBag.CanView != null && (bool)ViewBag.CanView))
+{
+    <div ng-controller="Diamond" class="trnlabour-page">
+        <!-- Header Banner Card -->
+        <div class="trnlabour-header-card">
+            <div class="trnlabour-header-left">
+                <div class="trnlabour-header-icon">
+                    <i class="fa fa-cogs"></i>
+                </div>
+                <div>
+                    <div class="trnlabour-breadcrumb">
+                        <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                        <span>Master</span> / 
+                        <span>TRN Labour</span>
+                    </div>
+                    <h4 class="trnlabour-header-title">TRN Labour</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- DataGrid Container Card -->
+        <div class="trnlabour-grid-card">
+            <div class="trnlabour-card-header">
+                <div class="trnlabour-card-title-left">
+                    <i class="fa fa-table"></i>
+                    <h3>Labour Records ({{List.length || 0}} Total)</h3>
+                </div>
+                <div class="trnlabour-card-actions">
+                    <span class="badge-status-pill badge-pill-info">
+                        <i class="fa fa-database"></i> {{List.length || 0}} Total Records
+                    </span>
+                    <button type="button" class="btn-trnlabour-refresh" ng-click="FetchData()" title="Reload TRN Labour records">
+                        <i class="fa fa-refresh"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="trnlabour-grid-body">
+                <div class="uigrid">
+                    <div id="gridContainer" style="width:100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-lg-12">
+            <div class="card" style="padding: 20px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div class="alert alert-danger" style="margin: 0; font-size: 15px; font-weight: 500;">
+                    <i class="fa fa-ban" style="margin-right: 8px;"></i>
+                    <strong>Access Denied:</strong> You do not have permission to view this page.
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    var Paramdata = [{}];
+    let List = [];
+    let DataField = [];
+
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    }
+
+    module.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+
+    module.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$interval', function ($scope, $filter, $http, $q, $interval) {
+        $scope.Diamond = {};
+        $scope.List = [];
+
+        $scope.CanView = ('@ViewBag.CanView' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.FetchData = function () {
+            if (typeof show_loader === 'function') show_loader();
+            $http.get('@Url.Action("Getdata_TRN_Labour", "Master")')
+            .then(function (response) {
+                if (typeof hide_loader === 'function') hide_loader();
+                List = response.data.DIARoughList || [];
+                $scope.List = List;
+                DataField = response.data.DataField || [];
+
+                $scope.BuildGridColumns(DataField);
+            }, function () {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (typeof Noty === 'function') {
+                    Noty("error", "Error fetching TRN Labour data.");
+                }
+            });
+        };
+
+        // Format Grid Columns (Compact High-Density Display)
+        $scope.BuildGridColumns = function (dataFields) {
+            var gridColumns = [];
+
+            if (dataFields && dataFields.length > 0) {
+                angular.forEach(dataFields, function (field) {
+                    var col = angular.copy(field);
+                    var fieldKey = (col.dataField || '').toLowerCase();
+
+                    // Special formatting for Dates
+                    if (fieldKey.indexOf('date') !== -1) {
+                        col.dataType = 'date';
+                        col.format = 'dd-MMM-yyyy';
+                        col.alignment = 'center';
+                    }
+
+                    gridColumns.push(col);
+                });
+            }
+
+            $scope.InitGrid(gridColumns);
+        };
+
+        // DevExtreme Grid Initialization (High Density Compact Grid)
+        $scope.InitGrid = function (columns) {
+            $("#gridContainer").dxDataGrid({
+                dataSource: $scope.List,
+                columns: columns,
+                keyExpr: 'ID',
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual'
+                },
+                paging: { 
+                    enabled: false 
+                },
+                pager: { 
+                    visible: false 
+                },
+                searchPanel: { 
+                    visible: true, 
+                    width: 240, 
+                    placeholder: 'Search labour records...' 
+                },
+                filterRow: { 
+                    visible: true, 
+                    applyFilter: 'auto' 
+                },
+                headerFilter: { visible: true },
+                selection: {
+                    mode: 'single'
+                },
+                summary: {
+                    totalItems: [
+                        { column: 'ID', summaryType: 'count', displayFormat: "{0}" }
+                    ]
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlxs'],
+                    allowExportSelectedData: false
+                },
+                onExporting(e) {
+                    if (e.format == 'pdf') {
+                        if (typeof jsPDF !== 'undefined') {
+                            const doc = new jsPDF();
+                            DevExpress.pdfExporter.exportDataGrid({
+                                jsPDFDocument: doc,
+                                component: e.component,
+                                indent: 5,
+                            }).then(() => {
+                                doc.save('Labour.pdf');
+                            });
+                        }
+                    }
+                    else if (e.format == 'xlxs') {
+                        if (typeof ExcelJS !== 'undefined') {
+                            const workbook = new ExcelJS.Workbook();
+                            const worksheet = workbook.addWorksheet('Details');
+                            DevExpress.excelExporter.exportDataGrid({
+                                component: e.component,
+                                worksheet,
+                                autoFilterEnabled: true,
+                            }).then(() => {
+                                workbook.xlsx.writeBuffer().then((buffer) => {
+                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Trn Labour.xlsx');
+                                });
+                            });
+                        }
+                    }
+                }
+            });
+        };
+
+        $scope.FetchData();
+    }]);
+</script>

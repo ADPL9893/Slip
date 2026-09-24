@@ -1,0 +1,1149 @@
+@{
+    ViewBag.Title = "User File Size Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       User File Size Master - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .ufs-page {
+        padding: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .ufs-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .ufs-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Border) */
+    .ufs-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 12px 18px !important;
+        margin-bottom: 10px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .ufs-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .ufs-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .ufs-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .ufs-header-card:hover .ufs-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .ufs-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .ufs-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .ufs-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .ufs-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    .ufs-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Add New Button */
+    .btn-ufs-add-main {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 18px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-ufs-add-main:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important;
+        color: #ffffff !important;
+    }
+    .btn-ufs-add-main:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Grid Card Container */
+    .ufs-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .ufs-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .ufs-card-header {
+        background: #ffffff !important;
+        padding: 12px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    .ufs-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .ufs-card-title-left i {
+        font-size: 16px;
+        color: #0284c7;
+    }
+    .ufs-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .ufs-card-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-ufs-refresh {
+        background: #ffffff !important;
+        color: #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 7px 14px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-ufs-refresh:hover {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Grid Container */
+    .ufs-grid-body {
+        padding: 0 !important;
+    }
+
+    .ufs-grid-card .uigrid,
+    .ufs-grid-card #gridContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridContainer {
+        width: 100% !important;
+    }
+
+    /* Readable Font Styling for DataGrid */
+    #gridContainer .dx-datagrid-headers .dx-header-row > td {
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        padding: 8px 6px !important;
+    }
+
+    #gridContainer .dx-datagrid-rowsview .dx-row > td {
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        color: #1e293b !important;
+        padding: 7px 8px !important;
+        line-height: 1.35 !important;
+    }
+
+    #gridContainer .dx-datagrid-filter-row input {
+        font-size: 12px !important;
+        height: 28px !important;
+    }
+
+    #gridContainer .dx-datagrid-total-footer td {
+        font-size: 13px !important;
+        font-weight: 700 !important;
+    }
+
+    /* Badges */
+    .badge-status-pill {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-pill-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+
+    /* ==========================================================================
+       DevExtreme dxPopup Custom Modal & Responsive SaaS Theming
+       ========================================================================== */
+    .ufs-popup-wrapper .dx-overlay-content {
+        border-radius: 16px !important;
+        overflow: visible !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35) !important;
+        border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important;
+    }
+
+    .ufs-popup-wrapper .dx-popup-title {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        color: #ffffff !important;
+        padding: 12px 20px !important;
+        border-bottom: 1px solid #334155 !important;
+        border-top-left-radius: 15px !important;
+        border-top-right-radius: 15px !important;
+    }
+
+    .ufs-popup-title-wrap {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+    }
+
+    .ufs-popup-title-left {
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    .ufs-popup-title-text {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        letter-spacing: 0.2px;
+    }
+
+    .ufs-popup-close-btn {
+        background: transparent !important;
+        border: none !important;
+        color: #cbd5e1 !important;
+        font-size: 26px !important;
+        font-weight: 300 !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        cursor: pointer !important;
+        opacity: 0.85 !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .ufs-popup-close-btn:hover {
+        opacity: 1 !important;
+        color: #ef4444 !important;
+        transform: scale(1.18) !important;
+    }
+
+    .ufs-popup-wrapper .dx-popup-content {
+        padding: 20px 22px 16px 22px !important;
+        background: #f8fafc !important;
+        overflow-y: auto !important;
+        border-bottom-left-radius: 15px !important;
+        border-bottom-right-radius: 15px !important;
+    }
+
+    /* Modal Form Card Section */
+    .ufs-modal-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 16px 18px 10px 18px !important;
+        border: 1.5px solid #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+        margin-bottom: 14px !important;
+    }
+
+    .ufs-popup-wrapper .dx-form {
+        background: transparent !important;
+    }
+
+    .ufs-popup-wrapper .dx-field-item-label-text {
+        font-size: 11.5px !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.4px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .ufs-popup-wrapper .dx-field-item-required-mark {
+        color: #ef4444 !important;
+        font-weight: 700 !important;
+        margin-left: 2px !important;
+    }
+
+    .ufs-popup-wrapper .dx-texteditor.dx-editor-outlined {
+        background: #ffffff !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02) !important;
+    }
+
+    .ufs-popup-wrapper .dx-texteditor.dx-editor-outlined.dx-state-focused,
+    .ufs-popup-wrapper .dx-texteditor.dx-editor-outlined.dx-state-active {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18) !important;
+        background: #ffffff !important;
+    }
+
+    .ufs-popup-wrapper .dx-texteditor-input {
+        font-size: 13px !important;
+        color: #0f172a !important;
+        font-weight: 500 !important;
+        padding: 7px 12px !important;
+    }
+
+    .ufs-popup-wrapper .dx-numberbox,
+    .ufs-popup-wrapper .dx-selectbox {
+        height: 38px !important;
+    }
+
+    .ufs-popup-wrapper .dx-textarea .dx-texteditor-input {
+        min-height: 65px !important;
+    }
+
+    .ufs-popup-wrapper .dx-checkbox-text {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #1e293b !important;
+    }
+
+    .ufs-popup-wrapper .dx-checkbox-icon {
+        border-radius: 5px !important;
+        border: 1.5px solid #cbd5e1 !important;
+    }
+
+    .ufs-popup-wrapper .dx-checkbox-checked .dx-checkbox-icon {
+        background: #0284c7 !important;
+        border-color: #0284c7 !important;
+        color: #ffffff !important;
+    }
+
+    /* ==========================================================================
+       SelectBox Dropdown Overlay List (Z-Index & SaaS Theming)
+       ========================================================================== */
+    .dx-dropdowneditor-overlay,
+    .dx-dropdownlist-popup-wrapper,
+    .dx-selectbox-popup-wrapper,
+    .dx-overlay-wrapper.dx-dropdowneditor-overlay,
+    .dx-overlay-wrapper.dx-dropdownlist-popup-wrapper,
+    .dx-overlay-wrapper.dx-selectbox-popup-wrapper {
+        z-index: 1000100 !important;
+    }
+
+    .dx-dropdowneditor-overlay .dx-overlay-content,
+    .dx-dropdownlist-popup-wrapper .dx-overlay-content,
+    .dx-selectbox-popup-wrapper .dx-overlay-content {
+        border-radius: 8px !important;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        background: #ffffff !important;
+    }
+
+    .dx-dropdownlist-popup-wrapper .dx-list-item,
+    .dx-selectbox-popup-wrapper .dx-list-item {
+        font-size: 12.5px !important;
+        color: #1e293b !important;
+        padding: 8px 12px !important;
+        border-bottom: 1px solid #f1f5f9 !important;
+    }
+
+    .dx-dropdownlist-popup-wrapper .dx-list-item.dx-state-hover,
+    .dx-selectbox-popup-wrapper .dx-list-item.dx-state-hover {
+        background-color: #e0f2fe !important;
+        color: #0369a1 !important;
+    }
+
+    .dx-dropdownlist-popup-wrapper .dx-list-item.dx-list-item-selected,
+    .dx-selectbox-popup-wrapper .dx-list-item.dx-list-item-selected {
+        background-color: #0284c7 !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+    }
+
+    /* Action Buttons in Popup Footer */
+    .ufs-popup-footer {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        padding-top: 14px !important;
+        border-top: 1.5px solid #e2e8f0 !important;
+        margin-top: 10px !important;
+    }
+
+    .btn-ufs-modal-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 22px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.28) !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        cursor: pointer !important;
+    }
+
+    .btn-ufs-modal-save:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.40) !important;
+    }
+
+    .btn-ufs-modal-cancel {
+        background: #ffffff !important;
+        color: #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 8px 18px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+
+    .btn-ufs-modal-cancel:hover {
+        background: #f1f5f9 !important;
+        color: #1e293b !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .ufs-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .ufs-header-left {
+            width: 100%;
+        }
+
+        .ufs-header-actions {
+            width: 100%;
+        }
+
+        .btn-ufs-add-main {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+
+        .ufs-card-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 12px 14px !important;
+        }
+
+        .ufs-card-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+
+        .btn-ufs-refresh {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+
+        .ufs-grid-card {
+            min-height: 480px;
+        }
+
+        .ufs-grid-card .uigrid,
+        .ufs-grid-card #gridContainer {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+
+        .ufs-popup-wrapper .dx-popup-content {
+            padding: 14px 12px !important;
+        }
+
+        .ufs-popup-footer {
+            flex-direction: column-reverse !important;
+            gap: 8px !important;
+        }
+
+        .btn-ufs-modal-save,
+        .btn-ufs-modal-cancel {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+    }
+</style>
+
+@if (ViewBag.IsAdmin == true || (ViewBag.CanView != null && (bool)ViewBag.CanView))
+{
+    <div ng-controller="UserFileSizeCtrl" class="ufs-page">
+        <!-- Header Banner Card -->
+        <div class="ufs-header-card">
+            <div class="ufs-header-left">
+                <div class="ufs-header-icon">
+                    <i class="fa fa-arrows-alt"></i>
+                </div>
+                <div>
+                    <div class="ufs-breadcrumb">
+                        <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                        <span>Master</span> / 
+                        <span>User File Size Master</span>
+                    </div>
+                    <h4 class="ufs-header-title">User File Size Master</h4>
+                </div>
+            </div>
+            <div class="ufs-header-actions">
+                <button class="btn-ufs-add-main" ng-click="OpenPopup('Insert', null)" type="button">
+                    <i class="fa fa-plus"></i> Add New
+                </button>
+            </div>
+        </div>
+
+        <!-- DataGrid Container Card -->
+        <div class="ufs-grid-card">
+            <div class="ufs-card-header">
+                <div class="ufs-card-title-left">
+                    <i class="fa fa-table"></i>
+                    <h3>File Size Records ({{List.length || 0}} Total)</h3>
+                </div>
+                <div class="ufs-card-actions">
+                    <span class="badge-status-pill badge-pill-info">
+                        <i class="fa fa-database"></i> {{List.length || 0}} Total Records
+                    </span>
+                    <button type="button" class="btn-ufs-refresh" ng-click="FatchData()" title="Reload records">
+                        <i class="fa fa-refresh"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="ufs-grid-body">
+                <div class="uigrid">
+                    <div id="gridContainer" style="width:100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Popup for Add/Edit -->
+        <div id="popupContainer"></div>
+    </div>
+}
+else
+{
+    <div class="row" style="margin-top: 20px;">
+        <div class="col-lg-12">
+            <div class="card" style="padding: 20px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                <div class="alert alert-danger" style="margin: 0; font-size: 15px; font-weight: 500;">
+                    <i class="fa fa-ban" style="margin-right: 8px;"></i>
+                    <strong>Access Denied:</strong> You do not have permission to view this page.
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    // Ensure the app module uses existing dependencies as seen in other views
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['frapontillo.bootstrap-duallistbox', 'ngTouch', 'angularjs-dropdown-multiselect']);
+    }
+
+    module.controller("UserFileSizeCtrl", function ($scope, $http) {
+        $scope.List = [];
+        $scope.popupVisible = false;
+        $scope.popupMode = 'Insert'; // Insert or Update
+        $scope.GetDIAShapeList = [];
+        let DIASizeList = [];
+        $scope.GetDIASizeList = [];
+
+        $scope.CanView = ('@ViewBag.CanView' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.GetSize = function (Shape, GradType) {
+            if (!Shape || !GradType) {
+                $scope.GetDIASizeList = [];
+                return;
+            }
+            let shapeObjs = $scope.GetDIAShapeList.filter(x => x.id == Shape);
+            if (shapeObjs.length === 0) {
+                $scope.GetDIASizeList = [];
+                return;
+            }
+            let ShapeType = shapeObjs[0].ShapeType;
+
+            $scope.GetDIASizeList = [];
+
+            if (GradType == "GR") {
+                $scope.GetDIASizeList = DIASizeList.filter(x => x.ShapeType == ShapeType && x.Type == 'CT UP');
+            }
+            else {
+                $scope.GetDIASizeList = DIASizeList.filter(x => x.ShapeType == ShapeType && x.Type == 'CT DOWN');
+            }
+        };
+
+        var promise = $http.get('@Url.Action("Get_DataList_DIAMaster", "Pricing")').then(function (response) {
+            var DIAShapeList = [];
+            if (response.data && response.data.DIAShapeList) {
+                for (var i = 0; i < response.data.DIAShapeList.length; i++) {
+                    var obj = { id: response.data.DIAShapeList[i]["ShapeName"], value: response.data.DIAShapeList[i]["ShapeName"], ShapeType: response.data.DIAShapeList[i]["ShapeType"] };
+                    DIAShapeList.push(obj);
+                }
+            }
+            $scope.GetDIAShapeList = DIAShapeList;
+
+            for (var i = 0; i < response.data.DIASizeList.length; i++) {
+                // Keep all properties from backend (filters need Shape)
+                var obj = response.data.DIASizeList[i];
+                obj.id = response.data.DIASizeList[i]["SizeID"];
+                obj.value = response.data.DIASizeList[i]["FromSize"] + ' - ' + response.data.DIASizeList[i]["ToSize"];
+                Shape = response.data.DIASizeList[i]["Shape"];
+                ShapeType = response.data.DIASizeList[i]["ShapeType"];
+                DIASizeList.push(obj);
+            }
+        });
+
+        $scope.formData = {
+            SizeID: 0,
+            UserFileSizeID: null,
+            PrcSizeID: null,
+            SizeName: '',
+            FromSize: null,
+            ToSize: null,
+            Shape: '',
+            Cut: '',
+            Type: '',
+            LabourType: '',
+            IsActive: true,
+            Remarks: ''
+        };
+
+        $scope.FatchData = function () {
+            if(typeof show_loader === 'function') show_loader();
+            $http({
+                method: "GET",
+                url: '@Url.Action("GetUserFileSizeList", "Master")',
+            }).then(function (response) {
+                if(typeof hide_loader === 'function') hide_loader();
+                $scope.List = response.data.List || [];
+
+                // Convert string "True"/"False" to real booleans for the grid
+                for (var i = 0; i < $scope.List.length; i++) {
+                    var activeVal = $scope.List[i].IsActive;
+                    $scope.List[i].IsActive = (activeVal === 'True' || activeVal === 'true' || activeVal === true || activeVal === '1');
+                }
+
+                GridData();
+            });
+        };
+
+        $scope.FatchData();
+
+        function GridData() {
+            $("#gridContainer").dxDataGrid({
+                dataSource: $scope.List,
+                keyExpr: 'SizeID',
+                columns: [
+                    { dataField: 'SizeID', caption: 'ID', width: 70, allowEditing: false, alignment: 'center' },
+                    { dataField: 'SizeName', caption: 'Size Name', minWidth: 110 },
+                    { dataField: 'FromSize', caption: 'From Size', dataType: 'number', format: '#,##0.000', alignment: 'right' },
+                    { dataField: 'ToSize', caption: 'To Size', dataType: 'number', format: '#,##0.000', alignment: 'right' },
+                    { dataField: 'Shape', caption: 'Shape', alignment: 'center' },
+                    { dataField: 'Cut', caption: 'Cut', alignment: 'center' },
+                    { dataField: 'Type', caption: 'Type', alignment: 'center' },
+                    { dataField: 'LabourType', caption: 'Labour Type', alignment: 'center' },
+                    { dataField: 'UserFileSizeID', caption: 'User File Size ID', dataType: 'number', alignment: 'center' },
+                    { dataField: 'PrcSize', caption: 'Prc Size', alignment: 'center' },
+                    {
+                        dataField: 'IsActive',
+                        caption: 'Active',
+                        dataType: 'boolean',
+                        width: 95,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    { dataField: 'Remarks', caption: 'Remarks', minWidth: 140 },
+                    { dataField: 'EntryBy', caption: 'Entry By', alignment: 'center' },
+                    { dataField: 'EntryDate', caption: 'Entry Date', dataType: 'datetime', format: 'dd-MMM-yyyy', alignment: 'center' },
+                    { dataField: 'UpdateBy', caption: 'Update By', alignment: 'center' },
+                    { dataField: 'UpdateDate', caption: 'Update Date', dataType: 'datetime', format: 'dd-MMM-yyyy', alignment: 'center' },
+                    {
+                        type: "buttons",
+                        caption: "Action",
+                        width: 80,
+                        alignment: 'center',
+                        buttons: [
+                            {
+                                hint: "Edit Record",
+                                icon: "edit",
+                                onClick: function (e) {
+                                    $scope.OpenPopup('Update', e.row.data);
+                                }
+                            }
+                        ]
+                    }
+                ],
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                showBorders: true,
+                height: 'calc(100vh - 210px)',
+                paging: { enabled: false, pageSize: 15 },
+                sorting: { mode: "multiple" },
+                filterRow: { visible: true, applyFilter: 'auto' },
+                filterPanel: { visible: true },
+                searchPanel: { visible: true, width: 240, placeholder: 'Search...' },
+                headerFilter: { visible: true },
+                columnChooser: { enabled: true, mode: "select" },
+                export: {
+                    enabled: true,
+                    formats: ['xlsx'],
+                    allowExportSelectedData: false
+                },
+                onExporting: function(e) {
+                    if (typeof ExcelJS !== 'undefined') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('UserFileSize');
+
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet: worksheet
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then(buffer => {
+                                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'UserFileSizeMaster.xlsx');
+                            });
+                        });
+                    }
+                }
+            });
+        }
+
+        $scope.OpenPopup = function (mode, data) {
+            $scope.popupMode = mode; // Insert or Update
+            if (mode === 'Update' && data) {
+                $scope.formData = angular.copy(data);
+                $scope.formData.FromSize = parseFloat($scope.formData.FromSize);
+                $scope.formData.ToSize = parseFloat($scope.formData.ToSize);
+                $scope.formData.IsActive = ($scope.formData.IsActive === 'True' || $scope.formData.IsActive === 'true' || $scope.formData.IsActive === true || $scope.formData.IsActive === '1');
+
+                $scope.GetSize($scope.formData.Shape, $scope.formData.Type);
+            } else {
+                $scope.formData = {
+                    SizeID: 0,
+                    SizeName: '',
+                    FromSize: null,
+                    ToSize: null,
+                    Shape: '',
+                    Cut: '',
+                    Type: '',
+                    LabourType: '',
+                    UserFileSizeID: null,
+                    PrcSizeID: null,
+                    IsActive: true,
+                    Remarks: ''
+                };
+                $scope.GetDIASizeList = [];
+            }
+
+            var isMobile = $(window).width() <= 768;
+            var popupWidth = isMobile ? '95%' : 700;
+            var popupHeight = isMobile ? '90%' : 'auto';
+            var formColCount = isMobile ? 1 : 2;
+
+            if (!$("#popupContainer").data("dxPopup")) {
+                $("#popupContainer").dxPopup({
+                    wrapperAttr: { class: "ufs-popup-wrapper" },
+                    width: popupWidth,
+                    maxHeight: '92vh',
+                    height: popupHeight,
+                    showTitle: true,
+                    dragEnabled: !isMobile,
+                    closeOnOutsideClick: false,
+                    titleTemplate: function (titleElement) {
+                        var titleText = ($scope.popupMode === 'Insert' ? 'Add' : 'Edit') + ' User File Size';
+                        var $titleWrap = $("<div class='ufs-popup-title-wrap'></div>");
+                        var $leftWrap = $("<div class='ufs-popup-title-left'></div>");
+                        $leftWrap.append("<i class='fa fa-arrows-alt' style='color:#38bdf8; font-size:16px; margin-right:8px;'></i>");
+                        $leftWrap.append("<span class='ufs-popup-title-text'>" + titleText + "</span>");
+                        
+                        var $closeBtn = $("<button type='button' class='ufs-popup-close-btn' title='Close'>&times;</button>");
+                        $closeBtn.on("click", function (e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            $("#popupContainer").dxPopup("instance").hide();
+                        });
+
+                        $titleWrap.append($leftWrap);
+                        $titleWrap.append($closeBtn);
+                        titleElement.append($titleWrap);
+                    },
+                    contentTemplate: function (contentElement) {
+                        var $wrapper = $("<div class='ufs-modal-content-wrap'></div>");
+                        var formCard = $("<div class='ufs-modal-card'></div>");
+                        var formContainer = $("<div id='formContainer'></div>");
+                        formCard.append(formContainer);
+                        $wrapper.append(formCard);
+
+                        // Common dropDownOptions for all SelectBoxes to keep them compact & properly positioned
+                        var standardDropDownOptions = {
+                            maxHeight: 220
+                        };
+
+                        formContainer.dxForm({
+                            formData: $scope.formData,
+                            colCount: formColCount,
+                            onFieldDataChanged: function(e) {
+                                if (e.dataField === "Shape" || e.dataField === "Type") {
+                                    var shape = e.component.option("formData").Shape;
+                                    var type = e.component.option("formData").Type;
+                                    $scope.GetSize(shape, type);
+                                    var editor = e.component.getEditor("PrcSizeID");
+                                    if (editor) {
+                                        editor.option("dataSource", $scope.GetDIASizeList);
+                                    }
+                                }
+                            },
+                            items: [
+                                {
+                                    dataField: "FromSize",
+                                    label: { text: "From Size" },
+                                    editorType: "dxNumberBox",
+                                    editorOptions: { format: "#,##0.000", showClearButton: true, placeholder: "0.000" },
+                                    validationRules: [{ type: "required", message: "From Size is required" }]
+                                },
+                                {
+                                    dataField: "ToSize",
+                                    label: { text: "To Size" },
+                                    editorType: "dxNumberBox",
+                                    editorOptions: { format: "#,##0.000", showClearButton: true, placeholder: "0.000" },
+                                    validationRules: [{ type: "required", message: "To Size is required" }]
+                                },
+                                {
+                                    dataField: "Shape",
+                                    label: { text: "Shape" },
+                                    editorType: "dxSelectBox",
+                                    editorOptions: { 
+                                        dataSource: $scope.GetDIAShapeList, 
+                                        displayExpr: "value", 
+                                        valueExpr: "id", 
+                                        searchEnabled: true, 
+                                        showClearButton: true, 
+                                        placeholder: "Select Shape...",
+                                        dropDownOptions: standardDropDownOptions
+                                    },
+                                    validationRules: [{ type: "required", message: "Shape is required" }]
+                                },
+                                {
+                                    dataField: "Cut",
+                                    label: { text: "Cut" },
+                                    editorType: "dxSelectBox",
+                                    editorOptions: { 
+                                        items: ["EX", "VG"], 
+                                        showClearButton: true, 
+                                        placeholder: "Select Cut...",
+                                        dropDownOptions: standardDropDownOptions
+                                    },
+                                    validationRules: [{ type: "required", message: "Cut is required" }]
+                                },
+                                {
+                                    dataField: "Type",
+                                    label: { text: "Type" },
+                                    editorType: "dxSelectBox",
+                                    editorOptions: { 
+                                        items: ["GR", "NGR", "BLGR"], 
+                                        showClearButton: true, 
+                                        placeholder: "Select Type...",
+                                        dropDownOptions: standardDropDownOptions
+                                    },
+                                    validationRules: [{ type: "required", message: "Type is required" }]
+                                },
+                                {
+                                    dataField: "LabourType",
+                                    label: { text: "Labour Type" },
+                                    editorType: "dxSelectBox",
+                                    editorOptions: { 
+                                        items: ["AUTO", "MANUAL"], 
+                                        showClearButton: true, 
+                                        placeholder: "Select Labour Type...",
+                                        dropDownOptions: standardDropDownOptions
+                                    },
+                                    validationRules: [{ type: "required", message: "Labour Type is required" }]
+                                },
+                                {
+                                    dataField: "UserFileSizeID",
+                                    label: { text: "User File Size ID" },
+                                    editorType: "dxNumberBox",
+                                    editorOptions: { showClearButton: true, placeholder: "Enter ID" },
+                                    validationRules: [{ type: "required", message: "User File Size ID is required" }]
+                                },
+                                {
+                                    dataField: "PrcSizeID",
+                                    label: { text: "Prc Size" },
+                                    editorType: "dxSelectBox",
+                                    editorOptions: {
+                                        dataSource: $scope.GetDIASizeList,
+                                        displayExpr: "value",
+                                        valueExpr: "id",
+                                        showClearButton: true,
+                                        searchEnabled: true,
+                                        placeholder: "Select Prc Size...",
+                                        dropDownOptions: standardDropDownOptions
+                                    },
+                                    validationRules: [{ type: "required", message: "Prc Size is required" }]
+                                },
+                                {
+                                    dataField: "Remarks",
+                                    label: { text: "Remarks" },
+                                    colSpan: formColCount,
+                                    editorType: "dxTextArea",
+                                    editorOptions: { height: 75, placeholder: "Enter remarks (optional)..." }
+                                },
+                                {
+                                    dataField: "IsActive",
+                                    label: { text: "Status" },
+                                    editorType: "dxCheckBox",
+                                    editorOptions: { text: "Active" }
+                                }
+                            ]
+                        });
+
+                        var buttonContainer = $("<div class='ufs-popup-footer'></div>");
+                        var btnSave = $("<button type='button' class='btn-ufs-modal-save'><i class='fa fa-save'></i> Save</button>");
+                        var btnCancel = $("<button type='button' class='btn-ufs-modal-cancel'><i class='fa fa-times'></i> Cancel</button>");
+                        
+                        buttonContainer.append(btnSave);
+                        buttonContainer.append(btnCancel);
+                        $wrapper.append(buttonContainer);
+
+                        contentElement.append($wrapper);
+
+                        btnSave.on("click", function () {
+                            var formInstance = $("#formContainer").dxForm("instance");
+                            var res = formInstance.validate();
+                            if (res.isValid) {
+                                var data = formInstance.option("formData");
+                                if (parseFloat(data.FromSize) >= parseFloat(data.ToSize)) {
+                                    if (typeof Noty !== "undefined") {
+                                        Noty("error", "From Size must be less than To Size.");
+                                    } else {
+                                        DevExpress.ui.notify("From Size must be less than To Size.", "error", 3000);
+                                    }
+                                    return;
+                                }
+                                $scope.SaveRecord(data);
+                            }
+                        });
+
+                        btnCancel.on("click", function () {
+                            $("#popupContainer").dxPopup("instance").hide();
+                        });
+                    }
+                });
+            }
+
+            var popupInstance = $("#popupContainer").dxPopup("instance");
+            var currentIsMobile = $(window).width() <= 768;
+            popupInstance.option("width", currentIsMobile ? '95%' : 700);
+            popupInstance.option("height", currentIsMobile ? '90%' : 'auto');
+            popupInstance.option("dragEnabled", !currentIsMobile);
+
+            var titleText = (mode === 'Insert' ? 'Add' : 'Edit') + ' User File Size';
+            $(".ufs-popup-title-text").text(titleText);
+
+            // Re-bind form data and dynamic select sources
+            if ($("#formContainer").length) {
+                var formInst = $("#formContainer").dxForm("instance");
+                formInst.option("formData", $scope.formData);
+                formInst.option("colCount", currentIsMobile ? 1 : 2);
+                
+                var prcSizeEditor = formInst.getEditor("PrcSizeID");
+                if (prcSizeEditor) {
+                    prcSizeEditor.option("dataSource", $scope.GetDIASizeList);
+                }
+                var shapeEditor = formInst.getEditor("Shape");
+                if (shapeEditor) {
+                    shapeEditor.option("dataSource", $scope.GetDIAShapeList);
+                }
+            }
+
+            popupInstance.show();
+        };
+
+        $scope.SaveRecord = function (data) {
+            if(typeof show_loader === 'function') show_loader();
+            $http({
+                method: "POST",
+                url: '@Url.Action("UserFileSize_Insert_Update_Delete", "Master")',
+                data: { model: data, Action: $scope.popupMode }
+            }).then(function (response) {
+                if(typeof hide_loader === 'function') hide_loader();
+                if (response.data.success) {
+                    if (typeof Noty !== "undefined") {
+                        Noty("success", response.data.message);
+                    } else {
+                        DevExpress.ui.notify(response.data.message, "success", 3000);
+                    }
+                    $("#popupContainer").dxPopup("instance").hide();
+                    $scope.FatchData();
+                } else {
+                    if (typeof Noty !== "undefined") {
+                        Noty("error", response.data.message || "An error occurred.");
+                    } else {
+                        DevExpress.ui.notify(response.data.message || "An error occurred.", "error", 4000);
+                    }
+                }
+            });
+        };
+
+        $scope.DeleteRecord = function (SizeID) {
+            var deleteModel = { SizeID: SizeID };
+            if(typeof show_loader === 'function') show_loader();
+            $http({
+                method: "POST",
+                url: '@Url.Action("UserFileSize_Insert_Update_Delete", "Master")',
+                data: { model: deleteModel, Action: 'Delete' }
+            }).then(function (response) {
+                if(typeof hide_loader === 'function') hide_loader();
+                if (response.data.success) {
+                    if (typeof Noty !== "undefined") {
+                        Noty("success", response.data.message);
+                    } else {
+                        DevExpress.ui.notify(response.data.message, "success", 3000);
+                    }
+                    $scope.FatchData();
+                } else {
+                    if (typeof Noty !== "undefined") {
+                        Noty("error", response.data.message || "An error occurred.");
+                    } else {
+                        DevExpress.ui.notify(response.data.message || "An error occurred.", "error", 4000);
+                    }
+                }
+            });
+        };
+
+        // Window resize responsive adjustment
+        $(window).on('resize', function () {
+            var popupInst = $("#popupContainer").data("dxPopup");
+            if (popupInst && popupInst.option("visible")) {
+                var mob = $(window).width() <= 768;
+                popupInst.option("width", mob ? '95%' : 700);
+                popupInst.option("height", mob ? '90%' : 'auto');
+                popupInst.option("dragEnabled", !mob);
+
+                var formInst = $("#formContainer").data("dxForm");
+                if (formInst) {
+                    formInst.option("colCount", mob ? 1 : 2);
+                }
+            }
+        });
+    });
+</script>

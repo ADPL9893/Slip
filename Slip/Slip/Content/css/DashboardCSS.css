@@ -1,0 +1,272 @@
+.fixed .content-wrapper {
+    margin-top: 0 !important;
+}
+
+.card {
+    min-height: 92vh !important;
+}
+
+.Heading {
+    margin-bottom: 10px;
+    white-space: pre;
+    font-size: 28px;
+    font-family: "Segoe UI";
+    font-weight: 700;
+    fill: rgb(0, 0, 0);
+    cursor: default;
+    text-align: center;
+    text-decoration: none;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(to right,red, blue,yellow);
+    border-image-slice: 1;
+    animation: move-gradient 5s linear infinite;
+}
+
+.mainContainer {
+    display: flex;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(to right,red, blue,yellow);
+    border-image-slice: 1;
+    animation: move-gradient 5s linear infinite;
+}
+
+.chartContainer {
+    width: 50% !important;
+}
+
+.DailyContainer {
+    width: 100% !important;
+    margin: 10px 0 !important;
+    /*    border-bottom: 3px solid black;*/
+}
+
+.subContainer1 {
+    width: 35% !important;
+    padding-right: 10px;
+    /*    border-right: 3px solid transparent;
+    border-image: linear-gradient(to right, yellow, blue);
+    border-image-slice: 1;
+    animation: move-vertical-gradient 3s linear infinite;*/
+}
+
+.subContainer2 {
+    width: 65% !important;
+}
+
+.RoughTo4POkgrid {
+    height: 15vh !important
+}
+
+.AutoPolishgrid {
+    height: 10vh !important;
+    margin-top: 10px;
+}
+
+
+/*================================================ PrcDaysGrid ================================================*/
+#PrcDaysGrid .dx-datagrid-headers .dx-header-row > td, #PrcDaysGrid .dx-treelist-table .dx-header-row > td, #PrcDaysGrid .dx-pivotgrid-horizontal-headers > tr > td {
+    font-size: 14px !important;
+    background-color: #4eab65cf !important;
+    color: white !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+#PrcDaysGrid .dx-scrollable-scroll-content {
+    background-color: #4eab65cf !important;
+}
+
+#PrcDaysGrid .dx-row td, #PrcDaysGrid .dx-datagrid-borders > .dx-datagrid-filter-panel {
+    border: 1px solid #4eab65cf !important;
+}
+
+#PrcDaysGrid .dx-datagrid-total-footer > .dx-datagrid-content .dx-row > td {
+    font-size: 14px !important;
+    color: black !important;
+    background-color: #4eab6554 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-size: 15px;
+}
+
+#PrcDaysGrid .dx-datagrid-filter-panel .dx-datagrid-filter-panel-clear-filter, #PrcDaysGrid .dx-datagrid-filter-panel .dx-icon-filter, #PrcDaysGrid .dx-datagrid-filter-panel .dx-datagrid-filter-panel-text {
+    color: #4eab65cf !important;
+    font-size: 15px !important;
+    line-height: 13px;
+    font-weight: bold;
+}
+
+#PrcDaysGrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td .dx-sort,
+#PrcDaysGrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td:hover .dx-sort,
+#PrcDaysGrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td .dx-sort-indicator,
+#PrcDaysGrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td:hover .dx-datagrid-text-content,
+#PrcDaysGrid .dx-datagrid .dx-header-filter-empty {
+    color: rgb(255 255 255) !important;
+}
+/*================================================ PrcDaysGrid ================================================*/
+
+/*================================================ After4POkgrid ================================================*/
+#After4POkgrid .dx-datagrid-headers .dx-header-row > td, #After4POkgrid .dx-treelist-table .dx-header-row > td, #After4POkgrid .dx-pivotgrid-horizontal-headers > tr > td {
+    font-size: 14px !important;
+    background-color: #F2DCDB !important;
+    color: black !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+#After4POkgrid .dx-scrollable-scroll-content {
+    background-color: #F2DCDB !important;
+}
+
+#After4POkgrid .dx-row td, #After4POkgrid .dx-datagrid-borders > .dx-datagrid-filter-panel {
+    border: 1px solid #efb4b1 !important;
+}
+
+#After4POkgrid .dx-datagrid-total-footer > .dx-datagrid-content .dx-row > td {
+    font-size: 14px !important;
+    color: black !important;
+    background-color: #F2DCDB !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-size: 15px;
+}
+
+#After4POkgrid .dx-datagrid-filter-panel .dx-datagrid-filter-panel-clear-filter, #After4POkgrid .dx-datagrid-filter-panel .dx-icon-filter, #After4POkgrid .dx-datagrid-filter-panel .dx-datagrid-filter-panel-text {
+    color: black !important;
+    font-size: 15px !important;
+    line-height: 13px;
+    font-weight: bold;
+}
+
+#After4POkgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td .dx-sort,
+#After4POkgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td:hover .dx-sort,
+#After4POkgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td .dx-sort-indicator,
+#After4POkgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td:hover .dx-datagrid-text-content,
+#After4POkgrid .dx-datagrid .dx-header-filter-empty {
+    color: rgb(0 0 0) !important;
+}
+/*================================================ After4POkgrid ================================================*/
+
+/*================================================ Gradgrid ================================================*/
+#Gradgrid .dx-datagrid-headers .dx-header-row > td, #Gradgrid .dx-treelist-table .dx-header-row > td, #Gradgrid .dx-pivotgrid-horizontal-headers > tr > td {
+    font-size: 14px !important;
+    background-color: #eff7f6 !important;
+    color: black !important;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+#Gradgrid .dx-scrollable-scroll-content {
+    background-color: #eff7f6 !important;
+}
+
+#Gradgrid .dx-row td, #Gradgrid .dx-datagrid-borders > .dx-datagrid-filter-panel {
+    border: 1px solid #000 !important;
+}
+
+#Gradgrid .dx-datagrid-total-footer > .dx-datagrid-content .dx-row > td {
+    font-size: 14px !important;
+    color: black !important;
+    background-color: #eff7f6 !important;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    font-size: 15px;
+}
+
+#Gradgrid .dx-datagrid-filter-panel .dx-datagrid-filter-panel-clear-filter, #Gradgrid .dx-datagrid-filter-panel .dx-icon-filter, #Gradgrid .dx-datagrid-filter-panel .dx-datagrid-filter-panel-text {
+    color: black !important;
+    font-size: 15px !important;
+    line-height: 13px;
+    font-weight: bold;
+}
+
+#Gradgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td .dx-sort,
+#Gradgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td:hover .dx-sort,
+#Gradgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td .dx-sort-indicator,
+#Gradgrid .dx-datagrid-headers .dx-datagrid-table .dx-row > td:hover .dx-datagrid-text-content,
+#Gradgrid .dx-datagrid .dx-header-filter-empty {
+    color: rgb(0 0 0) !important;
+}
+/*================================================ Gradgrid ================================================*/
+
+.T1 {
+    background-color: #FFEB9C;
+}
+
+.T2 {
+    background-color: #e7c1c1;
+}
+
+.T3 {
+    background-color: #ff93bb;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+th {
+    border: 1px solid #000;
+    padding: 6px;
+    text-align: center;
+}
+
+td {
+    border: 1px solid #000;
+    padding: 4px;
+    text-align: center;
+}
+
+th {
+    background-color: #1c8f7fc4;
+    color: white;
+    font-weight: bold;
+    font-size: 14px !important;
+}
+
+.processTable tbody tr:hover {
+    background-color: #e2e8f0;
+}
+
+.total-row {
+    background-color: #26ab9852 !important;
+    font-weight: bold;
+}
+
+.controls {
+    margin-bottom: 20px;
+}
+
+
+
+@keyframes move-gradient {
+    0% {
+        border-image: linear-gradient(90deg, red, blue,yellow) 1;
+    }
+
+    50% {
+        border-image: linear-gradient(450deg, blue,yellow,red) 1;
+    }
+
+    100% {
+        border-image: linear-gradient(450deg,yellow,red, blue) 1;
+    }
+}
+
+@keyframes move-vertical-gradient {
+    0% {
+        border-image: linear-gradient(90deg, yellow, blue) 1;
+    }
+
+    50% {
+        border-image: linear-gradient(450deg, blue,yellow) 1;
+    }
+
+    100% {
+        border-image: linear-gradient(450deg,yellow, blue) 1;
+    }
+}

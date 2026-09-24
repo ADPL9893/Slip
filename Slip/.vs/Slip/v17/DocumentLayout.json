@@ -1,0 +1,680 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Slip\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\master\\masterbook.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\masterbook.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\mastercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\mastercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\master\\roughdistributionlist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\roughdistributionlist.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\slip\\vipulbhai.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\slip\\vipulbhai.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\master\\userfilesizemaster.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\userfilesizemaster.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\diamxdata\\salesstock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\diamxdata\\salesstock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\models\\r_rough_add.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\models\\r_rough_add.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\master\\trnlabour.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\trnlabour.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\master\\qrprint.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\qrprint.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\master\\qrgenerator.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\qrgenerator.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\master\\kapanimg.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\kapanimg.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\master\\prerough.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\prerough.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\master\\roughdistribution.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\roughdistribution.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\login\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\login\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\utility\\excelexport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\utility\\excelexport.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\user\\userpermissiondetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\user\\userpermissiondetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\basecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\basecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\user\\userdetail.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\user\\userdetail.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\printcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\printcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|d:\\slip\\slip\\views\\employees\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\employees\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\pricing\\approvepricing.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\pricing\\approvepricing.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\pricing\\pricingdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\pricing\\pricingdetails.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\reportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\reportcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\slipcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\slipcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\user\\userpermission.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\user\\userpermission.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\dashboardcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\dashboard\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\dashboard\\dashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\pricing\\pricecomparison.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\pricing\\pricecomparison.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\pricingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\pricingcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\master\\roughcodemaster.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\master\\roughcodemaster.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\pricing\\pricing.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\pricing\\pricing.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\diamxdata\\memostock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\diamxdata\\memostock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\diamxdata\\holdstock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\diamxdata\\holdstock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\diamxdatacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\diamxdatacontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\views\\diamxdata\\availablestock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\views\\diamxdata\\availablestock.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\models\\mst_roughdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\models\\mst_roughdistribution.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|D:\\Slip\\slip\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7D7FC110-4100-4236-9136-DF7C34F1F69F}|Slip\\Slip.csproj|solutionrelative:slip\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 17,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "UserPermission.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\User\\UserPermission.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\User\\UserPermission.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\User\\UserPermission.cshtml",
+              "RelativeToolTip": "Slip\\Views\\User\\UserPermission.cshtml",
+              "ViewState": "AgIAADUCAAAAAAAAAAAEwEgCAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-01T05:15:05.407Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 37,
+              "Title": "UserController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\UserController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\UserController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\UserController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\UserController.cs",
+              "ViewState": "AgIAAF4CAAAAAAAAAABRwGECAABOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-01T04:26:44.643Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "UserDetail.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\User\\UserDetail.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\User\\UserDetail.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\User\\UserDetail.cshtml",
+              "RelativeToolTip": "Slip\\Views\\User\\UserDetail.cshtml",
+              "ViewState": "AgIAAJMDAAAAAAAAAAASwJMDAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-01T04:26:40.334Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "MasterController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\MasterController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\MasterController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\MasterController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\MasterController.cs",
+              "ViewState": "AgIAAJkDAAAAAAAAAAAewK8DAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-01T04:20:39.662Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "PreRough.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\PreRough.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\PreRough.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\PreRough.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\PreRough.cshtml",
+              "ViewState": "AgIAAFsEAAAAAAAAAAD4v3MEAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-01T10:10:47.674Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "BaseController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\BaseController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\BaseController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\BaseController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\BaseController.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAApwDkAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-01T10:49:44.573Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "R_Rough_Add.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Models\\R_Rough_Add.cs",
+              "RelativeDocumentMoniker": "Slip\\Models\\R_Rough_Add.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Models\\R_Rough_Add.cs",
+              "RelativeToolTip": "Slip\\Models\\R_Rough_Add.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-02T05:35:45.836Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "RoughDistribution.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\RoughDistribution.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\RoughDistribution.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\RoughDistribution.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\RoughDistribution.cshtml",
+              "ViewState": "AgIAAMwFAAAAAAAAAAASwOUFAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-02T10:04:06.253Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "RoughDistributionList.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\RoughDistributionList.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\RoughDistributionList.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\RoughDistributionList.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\RoughDistributionList.cshtml",
+              "ViewState": "AgIAAKYCAAAAAAAAAAAAALACAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-02T11:01:54.853Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "RoughCodeMaster.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\RoughCodeMaster.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\RoughCodeMaster.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\RoughCodeMaster.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\RoughCodeMaster.cshtml",
+              "ViewState": "AgIAAOkDAAAAAAAAAAAAAAcEAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-03T11:44:29.348Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "Pricing.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Pricing\\Pricing.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Pricing\\Pricing.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Pricing\\Pricing.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Pricing\\Pricing.cshtml",
+              "ViewState": "AgIAANsAAAAAAAAAAAAmwPcAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-02T05:21:32.667Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "PricingDetails.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Pricing\\PricingDetails.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Pricing\\PricingDetails.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Pricing\\PricingDetails.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Pricing\\PricingDetails.cshtml",
+              "ViewState": "AgIAAI4BAAAAAAAAAAAAAPUBAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-07T06:50:54.31Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "ApprovePricing.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Pricing\\ApprovePricing.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Pricing\\ApprovePricing.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Pricing\\ApprovePricing.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Pricing\\ApprovePricing.cshtml",
+              "ViewState": "AgIAAEgDAAAAAAAAAAAAAF0DAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-07T07:50:11.103Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "PriceComparison.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Pricing\\PriceComparison.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Pricing\\PriceComparison.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Pricing\\PriceComparison.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Pricing\\PriceComparison.cshtml",
+              "ViewState": "AgIAABcBAAAAAAAAAAAAABMBAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-07T08:00:55.431Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
+              "Title": "HOLDStock.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\DiamxData\\HOLDStock.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\DiamxData\\HOLDStock.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\DiamxData\\HOLDStock.cshtml",
+              "RelativeToolTip": "Slip\\Views\\DiamxData\\HOLDStock.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-07T09:19:23.448Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "MEMOStock.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\DiamxData\\MEMOStock.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\DiamxData\\MEMOStock.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\DiamxData\\MEMOStock.cshtml",
+              "RelativeToolTip": "Slip\\Views\\DiamxData\\MEMOStock.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-07T09:25:18.15Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "SALESStock.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\DiamxData\\SALESStock.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\DiamxData\\SALESStock.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\DiamxData\\SALESStock.cshtml",
+              "RelativeToolTip": "Slip\\Views\\DiamxData\\SALESStock.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-07T09:46:14.851Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MasterBook.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\MasterBook.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\MasterBook.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\MasterBook.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\MasterBook.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-09T06:02:00.313Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "KapanImg.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\KapanImg.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\KapanImg.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\KapanImg.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\KapanImg.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-14T06:07:31.547Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "QRPrint.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\QRPrint.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\QRPrint.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\QRPrint.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\QRPrint.cshtml",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAAADkAAAASAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-14T11:49:23.079Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "QRGenerator.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\QRGenerator.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\QRGenerator.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\QRGenerator.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\QRGenerator.cshtml",
+              "ViewState": "AgIAAIMBAAAAAAAAAAAAAJgBAABhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-12T05:06:38.556Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "TRNLabour.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\TRNLabour.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\TRNLabour.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\TRNLabour.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\TRNLabour.cshtml",
+              "ViewState": "AgIAAEoBAAAAAAAAAAAAAF4BAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-15T04:24:23.691Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "UserFileSizeMaster.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Master\\UserFileSizeMaster.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Master\\UserFileSizeMaster.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Master\\UserFileSizeMaster.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Master\\UserFileSizeMaster.cshtml",
+              "ViewState": "AgIAANkDAAAAAAAAAAAAAPIDAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-15T04:41:56.332Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ExcelExport.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Utility\\ExcelExport.cs",
+              "RelativeDocumentMoniker": "Slip\\Utility\\ExcelExport.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Utility\\ExcelExport.cs",
+              "RelativeToolTip": "Slip\\Utility\\ExcelExport.cs",
+              "ViewState": "AgIAAFgVAAAAAAAAAAAqwIQVAABjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-12T05:03:04.96Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "UserPermissionDetails.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\User\\UserPermissionDetails.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\User\\UserPermissionDetails.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\User\\UserPermissionDetails.cshtml",
+              "RelativeToolTip": "Slip\\Views\\User\\UserPermissionDetails.cshtml",
+              "ViewState": "AgIAAFsCAAAAAAAAAAASwHgCAAAmAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-12T04:23:22.147Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Employees\\Index.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Employees\\Index.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Employees\\Index.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Employees\\Index.cshtml",
+              "ViewState": "AgIAAKwCAAAAAAAAAAAAANACAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-10T04:24:47.687Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "PrintController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\PrintController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\PrintController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\PrintController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\PrintController.cs",
+              "ViewState": "AgIAAEoAAAAAAAAAAAAnwGMAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-08T08:58:06.891Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "ReportController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\ReportController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\ReportController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\ReportController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\ReportController.cs",
+              "ViewState": "AgIAAB4AAAAAAAAAAAAowB8AAAA9AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-08T07:32:29.314Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Vipulbhai.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Slip\\Vipulbhai.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Slip\\Vipulbhai.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Slip\\Vipulbhai.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Slip\\Vipulbhai.cshtml",
+              "ViewState": "AgIAAIECAAAAAAAAAAASwJkCAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-08T05:07:20.302Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "DashboardController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\DashboardController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\DashboardController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\DashboardController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\DashboardController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-08T04:23:07.472Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "Dashboard.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Dashboard\\Dashboard.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Dashboard\\Dashboard.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Dashboard\\Dashboard.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Dashboard\\Dashboard.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-08T04:22:36.66Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 35,
+              "Title": "AvailableStock.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\DiamxData\\AvailableStock.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\DiamxData\\AvailableStock.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\DiamxData\\AvailableStock.cshtml",
+              "RelativeToolTip": "Slip\\Views\\DiamxData\\AvailableStock.cshtml",
+              "ViewState": "AgIAAEAAAAAAAAAAAAAAAE0AAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-07T08:13:10.913Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "SlipController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\SlipController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\SlipController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\SlipController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\SlipController.cs",
+              "ViewState": "AgIAAJUDAAAAAAAAAAAiwLADAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-03T11:20:38.478Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAE8JAAAAAAAAAAAAAGQJAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-03T06:41:49.164Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Views\\Login\\Index.cshtml",
+              "RelativeDocumentMoniker": "Slip\\Views\\Login\\Index.cshtml",
+              "ToolTip": "D:\\Slip\\Slip\\Views\\Login\\Index.cshtml",
+              "RelativeToolTip": "Slip\\Views\\Login\\Index.cshtml",
+              "ViewState": "AgIAACoAAAAAAAAAAAAAAEYAAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2026-09-12T07:04:13.421Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "PricingController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\PricingController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\PricingController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\PricingController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\PricingController.cs",
+              "ViewState": "AgIAAGcBAAAAAAAAAAAewEABAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-03T11:20:38.582Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 34,
+              "Title": "DiamxDataController.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Controllers\\DiamxDataController.cs",
+              "RelativeDocumentMoniker": "Slip\\Controllers\\DiamxDataController.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Controllers\\DiamxDataController.cs",
+              "RelativeToolTip": "Slip\\Controllers\\DiamxDataController.cs",
+              "ViewState": "AgIAANwDAAAAAAAAAAAgwPIDAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-03T11:20:38.628Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 36,
+              "Title": "MST_RoughDistribution.cs",
+              "DocumentMoniker": "D:\\Slip\\Slip\\Models\\MST_RoughDistribution.cs",
+              "RelativeDocumentMoniker": "Slip\\Models\\MST_RoughDistribution.cs",
+              "ToolTip": "D:\\Slip\\Slip\\Models\\MST_RoughDistribution.cs",
+              "RelativeToolTip": "Slip\\Models\\MST_RoughDistribution.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-09-02T10:03:20.731Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

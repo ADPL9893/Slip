@@ -1,0 +1,1521 @@
+
+@{
+    ViewBag.Title = "ApprovePricing";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* -------------------------------------------------------------------------- */
+    /*                               Core Typography & Colors                     */
+    /* -------------------------------------------------------------------------- */
+    :root {
+        --primary: #328cbd; /* User requested */
+        --primary-dark: #206da0; /* Darker version for hover */
+        --primary-light: #e6f2fa; /* Light tint for backgrounds */
+        --success: #10b981; /* Emerald 500 */
+        --success-dark: #059669; /* Emerald 600 */
+        --bg-body: #f3f4f6; /* Gray 100 */
+        --bg-card: #ffffff;
+        --text-app: #111827; /* Gray 900 */
+        --text-muted: #6b7280; /* Gray 500 */
+        --border: #e5e7eb; /* Gray 200 */
+        --radius: 12px;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+        background-color: var(--bg-body);
+        font-family: var(--font-main);
+        color: var(--text-app);
+        margin: 0;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .content-wrapper {
+        padding: 0 !important;
+        background: transparent !important;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               Layout Containers                            */
+    /* -------------------------------------------------------------------------- */
+    .app-container {
+        display: flex;
+        gap: 15px;
+        padding: 15px;
+        height: calc(100vh - 55px);
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    .ApprovePending {
+        background-color: #ff424229 !important;
+        border-color: red !important;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+        flex: 0 0 280px;
+        background: var(--bg-card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden; /* Contains scroll inside */
+        border: 1px solid var(--border);
+        height: 100%;
+    }
+
+    .sidebar-header {
+        background: var(--bg-card);
+        color: var(--text-app);
+        padding: 16px 20px;
+        font-weight: 700;
+        font-size: 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .sidebar-header i {
+            color: var(--primary);
+            margin-right: 8px;
+        }
+
+    .date-list-container {
+        flex: 1;
+        overflow-y: auto; /* Enables vertical scrolling */
+        padding: 12px;
+    }
+
+    .date-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+        .date-item:hover {
+            border-color: var(--primary-light);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .date-item.active {
+            border-color: var(--primary);
+            background-color: #f8fafc;
+        }
+
+    .date-text {
+        font-weight: 600;
+        color: var(--text-app);
+        font-size: 14px;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        overflow: hidden;
+        min-width: 0; /* Prevent flexchild overflow */
+        height: 100%;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               Filter Section                               */
+    /* -------------------------------------------------------------------------- */
+    .filter-card {
+        background: var(--bg-card);
+        padding: 20px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 16px;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+        .filter-group label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            margin: 0;
+        }
+
+    /* RESTORED: Original Input Styles (Bootstrap Default) */
+    /* REMOVED: Custom .form-control styles to keep original look */
+
+    /* RESTORED: Original Chosen Dropdown Fix */
+    .chosen-container-single .chosen-single {
+        height: 30px;
+        line-height: 28px;
+        border-radius: 2px;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               Buttons                                      */
+    /* -------------------------------------------------------------------------- */
+    .btn-action {
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+    }
+
+    .btn-details {
+        background-color: var(--primary-light);
+        color: var(--primary-dark);
+    }
+
+        .btn-details:hover {
+            background-color: #c7d2fe;
+            color: var(--primary);
+        }
+
+    .btn-approve {
+        background-color: #d1fae5;
+        color: var(--success-dark);
+    }
+
+        .btn-approve:hover {
+            background-color: #a7f3d0;
+            color: #047857;
+        }
+
+    .btn-primary-custom {
+        background-color: var(--primary);
+        color: #fff;
+        padding: 0 24px;
+        border-radius: 6px;
+        border: none;
+        font-weight: 600;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 36px;
+        cursor: pointer;
+        transition: background 0.2s;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .btn-primary-custom:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary-custom i {
+            font-size: 14px;
+        }
+
+    .btn-secondary-custom {
+        background-color: #fff;
+        color: var(--text-muted);
+        border: 1px solid var(--border);
+        padding: 0 20px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 14px;
+        height: 36px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .btn-secondary-custom:hover {
+            background-color: #f9fafb;
+            color: var(--text-app);
+            border-color: #d1d5db;
+        }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               Grid & Data                                  */
+    /* -------------------------------------------------------------------------- */
+    .grid-container {
+        flex: 1;
+        background: var(--bg-card);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border);
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .grid-header-bar {
+        padding: 16px 24px;
+        background: #fff;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-app);
+        margin: 0;
+    }
+
+    .grid-content {
+        flex: 1;
+        overflow: auto;
+        padding: 24px;
+        background: #fafafa;
+    }
+
+    /* Custom Table Styling */
+    .pricing-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 13px;
+        background: #fff;
+        border: 1px solid rgba(50, 140, 189, 0.2);
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+    }
+
+        .pricing-table th {
+            background-color: var(--primary-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(50, 140, 189, 0.2);
+            border-right: 1px solid rgba(50, 140, 189, 0.2);
+            text-align: center;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .pricing-table td {
+            padding: 3px;
+            border-bottom: 1px solid rgba(50, 140, 189, 0.15);
+            border-right: 1px solid rgba(50, 140, 189, 0.15);
+            text-align: center;
+            color: var(--text-app);
+            transition: background 0.1s;
+        }
+
+        .pricing-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .pricing-table th:last-child, .pricing-table td:last-child {
+            border-right: none;
+        }
+
+        .pricing-table tr:hover td {
+            background-color: #f0f9ff;
+        }
+
+        .pricing-table .row-header {
+            background-color: #fff;
+            font-weight: 600;
+            color: var(--primary-dark);
+            width: 80px;
+            position: sticky;
+            left: 0;
+            z-index: 3;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+        }
+
+        .pricing-table .group-row-header {
+            background-color: var(--bg-card);
+            font-weight: 700;
+            color: var(--primary);
+            vertical-align: middle;
+            text-align: center;
+            width: 60px;
+            border-right: 2px solid var(--primary-light) !important;
+        }
+
+        /* Fixed Sticky Column Classes to prevent transparency on scroll */
+        .sticky-col-1 {
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 50 !important;
+        }
+        th.sticky-col-1 {
+            z-index: 60 !important;
+            background-color: var(--primary-light) !important;
+            background-clip: padding-box;
+            border-right: 1px solid rgba(50, 140, 189, 0.2) !important;
+        }
+        td.sticky-col-1 {
+            background-color: var(--bg-card) !important;
+            background-clip: padding-box;
+            border-right: 2px solid var(--primary-light) !important;
+        }
+
+        .sticky-col-2 {
+            position: sticky !important;
+            left: 40px !important;
+            z-index: 49 !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05) !important;
+        }
+        th.sticky-col-2 {
+            z-index: 59 !important;
+            background-color: var(--primary-light) !important;
+            background-clip: padding-box;
+            border-right: 1px solid rgba(50, 140, 189, 0.2) !important;
+        }
+        td.sticky-col-2 {
+            background-color: #fff !important;
+            background-clip: padding-box;
+            border-right: 1px solid rgba(50, 140, 189, 0.15) !important;
+        }
+
+        .sticky-col-single {
+            position: sticky !important;
+            left: 0 !important;
+            z-index: 50 !important;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05) !important;
+        }
+        th.sticky-col-single {
+            z-index: 60 !important;
+            background-color: var(--primary-light) !important;
+            background-clip: padding-box;
+        }
+        td.sticky-col-single {
+            background-color: #fff !important;
+            background-clip: padding-box;
+        }
+
+    /* Grid Group Collapsible Header */
+    .grid-group-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        /*        margin-bottom: 24px;*/
+        overflow: hidden;
+        border: 1px solid rgba(50, 140, 189, 0.2);
+    }
+
+    .grid-group-header {
+        background-color: var(--primary-light);
+        padding: 8px 20px;
+        cursor: pointer;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(50, 140, 189, 0.2);
+        transition: background 0.2s;
+    }
+
+        .grid-group-header:hover {
+            background-color: #dcebf7;
+        }
+
+        .grid-group-header span {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-dark);
+        }
+
+        .grid-group-header small {
+            color: var(--primary-dark);
+            opacity: 0.7;
+            font-weight: 500;
+        }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               Responsive Design                            */
+    /* -------------------------------------------------------------------------- */
+    .size-group-wrapper {
+        display: flex;
+        gap: 17px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    
+    .size-group-item {
+        width: calc(33.333% - 12px);
+    }
+
+    @@media (max-width: 1199px) {
+        .size-group-item {
+            width: calc(50% - 9px);
+        }
+    }
+
+    @@media (max-width: 991px) {
+        .app-container {
+            flex-direction: column;
+            height: auto;
+            min-height: calc(100vh - 55px);
+        }
+
+        .sidebar-card {
+            flex: none;
+            width: 100%;
+            height: 250px;
+        }
+
+        .main-content {
+            flex: none;
+            height: auto;
+        }
+
+        .grid-container {
+            height: 65vh;
+            min-height: 500px;
+        }
+
+        .size-group-item {
+            width: calc(50% - 9px);
+        }
+    }
+
+    @@media (max-width: 767px) {
+        .app-container {
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .sidebar-card {
+            height: 200px;
+        }
+
+        .filter-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+
+        .filter-group,
+        .filter-group > div {
+            width: 100% !important;
+        }
+
+        .filter-group[style*="flex-direction: row"] {
+            flex-direction: column !important;
+        }
+
+        .filter-group .btn-primary-custom,
+        .filter-group .btn-secondary-custom {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .size-group-item {
+            width: 100%;
+        }
+
+        .grid-header-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .grid-header-bar div:last-child {
+            width: 100%;
+        }
+
+        .grid-header-bar .btn {
+            width: 100%;
+        }
+
+        .grid-content {
+            padding: 15px;
+        }
+        
+        .filter-card > div[style*="flex: 1"] {
+            display: none;
+        }
+    }
+</style>
+
+@if (ViewBag.IsAdmin == true || ViewBag.CanView == true || ViewBag.CanAdd == true || ViewBag.CanEdit == true)
+{
+<div ng-controller="Diamond" class="app-container">
+    <!-- Sidebar: Date List -->
+    <aside class="sidebar-card">
+        <div class="sidebar-header">
+            <span><i class="fa fa-calendar-check-o"></i> Pricing Approval</span>
+        </div>
+        <div class="date-list-container">
+            <div ng-repeat="item in DateList" class="date-item" ng-class="{'active': Diamond.Date == item.Date,'ApprovePending': item.Editable == 'False' && item.Approve == 'False'}">
+                <div class="date-text">{{item.Date}}</div>
+                <div class="date-actions">
+                    <!-- Approve Button -->
+                    @if (ViewBag.IsAdmin == true || (ViewBag.CanAdd != null && (bool)ViewBag.CanAdd))
+                    {
+                        <button class="btn-action btn-approve"
+                                ng-if="item.Editable === 'True'"
+                                ng-click="ApprovePrice(item.Date)"
+                                title="Approve Price">
+                            <i class="fa fa-check"></i>
+                        </button>
+                    }
+                    <!-- Details Button -->
+                    <button class="btn-action btn-details"
+                            @*ng-if="item.Editable === 'False'"*@
+                            ng-click="ShowDetails(item.Date,item.Editable,item.Approve)"
+                            title="View Details">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Exact Empty State -->
+            <div ng-if="DateList.length === 0" style="padding: 40px 20px; text-align: center; color: var(--text-muted);">
+                <i class="fa fa-calendar-times-o" style="font-size: 24px; margin-bottom: 10px; opacity: 0.5;"></i>
+                <p style="margin:0; font-size: 13px;">No dates found.</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content hide3">
+
+        <!-- Top Controls: Filters & Actions -->
+        <div class="filter-card">
+            <!-- Grading Filter -->
+            <div class="filter-group">
+                <label>Grading</label>
+                <div style="width: 110px;">
+                    <select id="GradType" chosen="GetGradType" class="form-control input-sm"
+                            ng-change="GetType(Diamond.GradType);removeGrid()"
+                            ng-model="Diamond.GradType">
+                        <option value="">Select</option>
+                        <option value="GR">GR</option>
+                        <option value="NGR">NGR</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Shape Filter -->
+            <div class="filter-group">
+                <label>Shape</label>
+                <div style="width: 150px;">
+                    <select id="Shape" chosen="GetDIAShapeList" class="form-control input-sm"
+                            ng-change="removeGrid()"
+                            ng-options="item.id as item.value for item in GetDIAShapeList"
+                            ng-model="Diamond.Shape">
+                        <option value="">Select</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Type Filter -->
+            <div class="filter-group">
+                <label>Type</label>
+                <div style="width: 130px;">
+                    <select id="Type" chosen="GetSizeTypeList" class="form-control input-sm"
+                            ng-change="removeGrid()"
+                            ng-model="Diamond.Type" disabled>
+                        <option value="CT UP">CT UP</option>
+                        <option value="CT DOWN">CT DOWN</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- View By Filter -->
+            <div class="filter-group">
+                <label>View Mode</label>
+                <div style="width: 140px;">
+                    <select id="GridType" chosen="GetGridType" class="form-control input-sm"
+                            ng-change="removeGrid()"
+                            ng-model="Diamond.GridType">
+                        <option value="Size">Size Matrix</option>
+                        <option value="Color">Color Matrix</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Date Display (Disabled) -->
+            <div class="filter-group">
+                <label>Date</label>
+                <div style="width: 150px;">
+                    <input id="Date" type="text" class="form-control input-sm"
+                           placeholder="dd-MMM-yyyy" autocomplete="off"
+                           ng-model="Diamond.Date" disabled />
+                </div>
+            </div>
+
+            <!-- Spacer -->
+            <div style="flex: 1;"></div>
+
+            <!-- Action Buttons -->
+            <div class="filter-group" style="flex-direction: row; gap: 12px;">
+                <button class="btn-primary-custom" ng-click="GetdataTRNRap()">
+                    <i class="fa fa-search"></i> Search
+                </button>
+                <button class="btn-secondary-custom" ng-click="Clear()">
+                    <i class="fa fa-refresh"></i> Reset
+                </button>
+                <button class="btn-primary-custom" ng-show="ExcelExport" ng-click="ExcelExports()">
+                    <i class="fa fa-file-excel-o"></i> Export
+                </button>
+                <button class="btn-primary-custom" ng-show="ExcelExport" ng-click="MatrixExport()">
+                    <i class="fa fa-file-excel-o"></i> Print
+                </button>
+            </div>
+        </div>
+
+        <!-- Data Grid Container -->
+        <div class="grid-container">
+            <div class="grid-header-bar">
+                <div>
+                    <h3 class="section-title">Pricing Matrix</h3>
+                </div>
+                <div>
+                    @if (ViewBag.IsAdmin == true || (ViewBag.CanEdit != null && (bool)ViewBag.CanEdit))
+                    {
+                        <button class="btn btn-primary" ng-show="priceEdit" ng-click="EnableEditing()">Edit</button>
+                    }
+                </div>
+            </div>
+
+            <div class="grid-content">
+                <!-- Loading / Empty State -->
+                <div ng-if="GridGroups.length == 0" style="text-align:center; padding: 60px; color: var(--text-muted);">
+                    <div style="background: #f3f4f6; width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                        <i class="fa fa-table" style="font-size: 32px; color: #9ca3af;"></i>
+                    </div>
+                    <h4 style="margin: 0 0 8px 0; color: var(--text-app);">No Data Loaded</h4>
+                    <p style="margin: 0; font-size: 14px;">Select filters above and click <strong>Search</strong> to view pricing.</p>
+                </div>
+
+                <!-- View Mode 1: Group by Color (Legacy .hide1) -->
+                <div class="hide1">
+                    <div ng-if="GridGroups.length > 0">
+                        <div class="grid-group-card" ng-repeat="group in GridGroups" ng-init="grpIndex = $index">
+
+                            <div class="grid-group-header" style="cursor: default;" ng-click="toggleGroup(group)">
+                                <span><i class="fa" ng-class="{'fa-chevron-down': group.Expanded, 'fa-chevron-right': !group.Expanded}" style="font-size: 12px; width: 16px;"></i><i class="fa fa-tint" style="color: var(--primary);"></i> {{group.ColorName}} Color</span>
+                            </div>
+
+                            <div ng-show="group.Expanded" style="overflow-x: auto; padding: 0;">
+                                <table class="pricing-table" style="border: none; border-radius: 0;">
+                                    <thead>
+                                        <tr>
+                                            <!-- Header Row -->
+                                            <th class="sticky-col-1" style="min-width: 40px; max-width: 40px; box-sizing: border-box;"></th> <!-- Placeholder for Rowspan -->
+                                            <th class="sticky-col-2" style="width: 100px; text-align: left; box-sizing: border-box;">CLARITY</th>
+                                            <th ng-repeat="size in group.Columns">
+                                                {{size.value}}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="clarity in group.Rows" ng-init="rowIndex = $index">
+                                            <!-- Color Column (Rowspan) -->
+                                            <td ng-if="$index == 0" rowspan="{{group.Rows.length}}" class="group-row-header sticky-col-1" style="min-width: 40px; max-width: 40px; box-sizing: border-box;">
+                                                {{group.ColorName}}
+                                            </td>
+
+                                            <!-- Clarity Label -->
+                                            <td class="row-header sticky-col-2" style="box-sizing: border-box;">{{clarity.value}}</td>
+
+                                            <!-- Data Cells -->
+                                            <td contenteditable='false'
+                                                ng-repeat="size in group.Columns"
+                                                id="cell-{{grpIndex}}-{{rowIndex}}-{{colIndex}}"
+                                                data-grp="{{grpIndex}}" data-row="{{rowIndex}}" data-col="{{colIndex}}"
+                                                ng-init="rate = GetMatrixRate(group, clarity.id, size.id)">
+                                                <span ng-if="rate" style="font-weight: 600;">{{rate}}</span>
+                                                @*<span ng-if="!rate" style="color: #d1d5db;">-</span>*@
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Mode 2: Group by Size (Legacy .hide2) -->
+                <div class="hide2">
+                    <div ng-if="GridGroups.length > 0" class="size-group-wrapper">
+
+                        <div class="grid-group-card size-group-item" ng-repeat="group in GridGroups">
+                            <!-- Toggle Header -->
+                            <div class="grid-group-header" ng-click="toggleGroup(group)">
+                                <span>
+                                    <i class="fa" ng-class="{'fa-chevron-down': group.Expanded, 'fa-chevron-right': !group.Expanded}" style="font-size: 12px; width: 16px;"></i>
+                                    {{group.Name}}
+                                </span>
+                                <small>{{group.ShapeName}}</small>
+                            </div>
+
+                            <!-- Collapsible Table -->
+                            <div ng-show="group.Expanded" style="overflow-x: auto; padding: 0;">
+                                <table class="pricing-table" style="border: none; border-radius: 0; box-shadow: none;">
+                                    <thead>
+                                        <tr>
+                                            <th class="sticky-col-single" style="width: 70px; box-sizing: border-box;">Color</th>
+                                            <th ng-repeat="item in GetMSTClarityWithClarityList">
+                                                {{item.value}}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="row in group.Rows">
+                                            <td class="row-header sticky-col-single" style="font-weight: 700; box-sizing: border-box;">{{row.ColorName}}</td>
+                                            <!-- Clarity Columns -->
+                                            <td contenteditable='{{Editable}}'
+                                                ng-repeat="clarityCol in GetMSTClarityWithClarityList"
+                                                id="cell-{{$parent.$index}}-{{$index}}"
+                                                ng-keydown="HandleKeydown($event, $parent.$index, $index, group, row.id, clarityCol.id)"
+                                                ng-blur="UpdateRate(group, row.id, clarityCol.id, $event)"
+                                                ng-focus="SelectAllText($event)"
+                                                ng-init="rate = GetMatrixRate(group, row.id, clarityCol.id)">
+                                                <span ng-if="rate">{{rate}}</span>
+                                                @*<span ng-if="!rate" style="color: #e5e7eb;">-</span>*@
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div> <!-- End Grid Content -->
+        </div> <!-- End Grid Container -->
+    </main>
+</div>
+}
+else
+{
+<div class="app-container" style="padding: 20px;">
+    <div class="alert alert-danger" style="margin: 20px 0; font-size: 15px; font-weight: 500; width: 100%;">
+        <i class="fa fa-ban" style="margin-right: 8px;"></i>
+        <strong>Access Denied:</strong> You do not have permission to view this page.
+    </div>
+</div>
+}
+
+<!--
+    ============================================================================
+    LOGIS SCRIPT - UNCHANGED
+    ============================================================================
+-->
+<script>
+    var Paramdata = [{}];
+
+    var app = angular.module('app', ['ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    app.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+    app.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$interval','$timeout', 'uiGridConstants', function ($scope, $filter, $http, $q, $interval, $timeout, uiGridConstants, $window) {
+        $scope.CanView = ('@ViewBag.CanView' === 'True');
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True');
+        $scope.CanExport = ('@ViewBag.CanExport' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+        $scope.CanModify = $scope.IsAdmin || ($scope.CanAdd && $scope.CanEdit);
+        $scope.Diamond = {};
+        $scope.GridGroups = []; // Stores the groups of data
+        $scope.Diamond.GridType = "Size";
+        let DataList = [];
+        //let ViewAction = 'View';
+        $scope.Editable = false;
+
+        $('#Date').datepicker({
+            format: "dd-M-yyyy",
+            autoclose: true,
+            todayHighlight: true,
+        });
+
+        debugger
+        //$('#Date').datepicker('setDate', '1d');
+
+        //$scope.Diamond.Date = $('#Date').val();
+
+        //$('#Date').on('changeDate', function (e) {
+        //    debugger
+        //    $scope.$apply(function () {
+        //        $scope.Diamond.Date = $('#Date').val();
+        //    });
+        //});
+
+        $(".hide3").hide();
+
+        // ***************************** GetData ******************************************//
+        var loopPromises = [];
+        var DIASizeList = [];
+        var promise = $http.get('@Url.Action("Get_DataList_DIAMaster", "Pricing")').then(function (response) {
+            var DIAShapeList = [];
+            for (var i = 0; i < response.data.DIAShapeList.length; i++) {
+                var obj = { id: response.data.DIAShapeList[i]["ShapeName"], value: response.data.DIAShapeList[i]["ShapeName"], ShapeType: response.data.DIAShapeList[i]["ShapeType"] };
+                DIAShapeList.push(obj);
+            }
+
+            $scope.GetDIAShapeList = DIAShapeList;
+
+
+            for (var i = 0; i < response.data.DIASizeList.length; i++) {
+                // Keep all properties from backend
+                var obj = response.data.DIASizeList[i];
+                obj.id = response.data.DIASizeList[i]["SizeID"];
+                obj.value = response.data.DIASizeList[i]["FromSize"] + ' - ' + response.data.DIASizeList[i]["ToSize"];
+                // Assuming backend returns 'Type'. User said "Type" column exists.
+                // Property name likely "Type" based on user description, or maybe "SizeType"
+                // User said "Type" in Image 1.
+                obj.Type = response.data.DIASizeList[i]["Type"];
+                obj.Shape = response.data.DIASizeList[i]["Shape"];
+                DIASizeList.push(obj);
+            }
+
+            $scope.GetDIASizeList = DIASizeList; // We don't show full list directly anymore
+            // We store it globally/locally to filter later
+
+            // ... (rest of master lists) ...
+
+
+            var DIAClarityList = [];
+            for (var i = 0; i < response.data.DIAClarityList.length; i++) {
+                var obj = { id: response.data.DIAClarityList[i]["ClarityID"], value: response.data.DIAClarityList[i]["ClarityName"], Amount: response.data.DIAClarityList[i]["Amount"] };
+                DIAClarityList.push(obj);
+            }
+
+            $scope.GetDIAClarityList = DIAClarityList;
+
+            var DIAColorList = [];
+            for (var i = 0; i < response.data.DIAColorList.length; i++) {
+                var obj = { id: response.data.DIAColorList[i]["ColorID"], value: response.data.DIAColorList[i]["ColorName"], ColorType: response.data.DIAColorList[i]["ColorName"], ColorName: response.data.DIAColorList[i]["ColorName"] };
+                DIAColorList.push(obj);
+            }
+
+            $scope.GetDIAColorList = DIAColorList;
+
+            var DIACutList = [];
+            for (var i = 0; i < response.data.DIACutList.length; i++) {
+                var obj = { id: response.data.DIACutList[i]["CutID"], value: response.data.DIACutList[i]["CutName"] };
+                DIACutList.push(obj);
+            }
+
+            $scope.GetDIACutList = DIACutList;
+
+            var DIAShapeTypeList = [];
+            for (var i = 0; i < response.data.DIAShapeTypeList.length; i++) {
+                var obj = { id: response.data.DIAShapeTypeList[i]["ShapeTypeID"], value: response.data.DIAShapeTypeList[i]["ShapeType"] };
+                DIAShapeTypeList.push(obj);
+            }
+
+            $scope.GetDIAShapeTypeList = DIAShapeTypeList;
+
+            var MSTClarityWithColorList = [];
+            for (var i = 0; i < response.data.MSTClarityWithColorList.length; i++) {
+                var obj = { id: response.data.MSTClarityWithColorList[i]["ID"], value: response.data.MSTClarityWithColorList[i]["MasterName"], MasterType: response.data.MSTClarityWithColorList[i]["MasterType"], Amount: response.data.MSTClarityWithColorList[i]["Amount"], ColorTmp: response.data.MSTClarityWithColorList[i]["ColorTmp"] };
+                MSTClarityWithColorList.push(obj);
+            }
+
+            $scope.GetMSTClarityWithColorList = MSTClarityWithColorList;
+
+            $scope.GetMSTClarityWithClarityList = $filter('filter')(MSTClarityWithColorList, function (e) { return e.MasterType == "Clarity" });
+        });
+        loopPromises.push(promise);
+        // ***************************** EndGetData ***************************************//
+
+        $scope.FatchData = function () {
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("GetData_Price_Approved_Date_List", "Pricing")',
+                data: {},
+                dataType: "json"
+            }).then(function (ret) {
+                hide_loader();
+                debugger
+
+                $scope.DateList = ret.data.List;
+
+                let check = $scope.DateList.filter(x => x.SrNo == "1");
+
+                if (check.length > 0) {
+                    //ViewAction = 'onLoad';
+
+                    if (check[0].Editable == "True") {
+                        $scope.priceEdit = true;
+                        $scope.ExcelExport = false;
+                    }
+
+                    $scope.Diamond.GradType = "GR"
+                    $scope.Diamond.Shape = "Round"
+                    $scope.Diamond.Type = "CT UP"
+                    $scope.Diamond.Date = check[0].Date;
+
+                    $timeout(function () {
+                        $scope.GetdataTRNRap();
+                    }, 500); // 3000ms = 3 seconds
+
+                    $(".hide3").show();
+                }
+                else {
+                    $scope.priceEdit = false;
+                    $scope.ExcelExport = true;
+                    $(".hide3").hide();
+                }
+            });
+        }
+
+        $scope.FatchData();
+
+        $scope.EnableEditing = function () {
+            if ($scope.Editable) {
+                $scope.Editable = false;
+            }
+            else {
+                $scope.Editable = true;
+            }
+        };
+
+        $scope.ShowDetails = function (Date, Editable, Approve) {
+            debugger
+            $scope.Clear();
+
+            if (Editable == "False") {
+                if (Approve == "False") {
+                    $scope.Editable = false;
+                    $scope.priceEdit = false;
+                    $scope.ExcelExport = false;
+                }
+                else {
+                    $scope.Editable = false;
+                    $scope.priceEdit = false;
+                    $scope.ExcelExport = true;
+                }
+            }
+            else {
+                $scope.Editable = false;
+                $scope.priceEdit = true;
+                $scope.ExcelExport = false;
+            }
+
+
+            $(".hide3").show();
+
+            //ViewAction = "View";
+
+            $scope.Diamond.GradType = "GR"
+            $scope.Diamond.Shape = "Round"
+            $scope.Diamond.Type = "CT UP"
+            $scope.Diamond.Date = Date;
+
+            $timeout(function () {
+                $scope.GetdataTRNRap();
+            }, 100); // 3000ms = 3 seconds
+        }
+
+        $scope.removeGrid = function () {
+            $scope.GridGroups = [];
+        }
+
+        $scope.GetSizeTypeList = [];
+
+        $scope.GetType = function (GradType) {
+            debugger
+            if (GradType == "GR") {
+                $scope.Diamond.Type = "CT UP"; // Reset selection
+            }
+            else {
+                $scope.Diamond.Type = "CT DOWN"; // Reset selection
+            }
+
+        }
+
+        $scope.PricingDetails = []; // To store changes to be saved
+
+        $scope.GetdataTRNRap = function () {
+            // Validation: Shape and Cut are mandatory
+            if ($scope.Diamond.Shape == undefined || $scope.Diamond.Shape == "") {
+                Noty("error", "Please Select Shape !");
+                return;
+            }
+            if ($scope.Diamond.Type == undefined || $scope.Diamond.Type == "") {
+                Noty("error", "Please Select Type !");
+                return;
+            }
+            if ($scope.Diamond.GradType == undefined || $scope.Diamond.GradType == "") {
+                Noty("error", "Please Select GradType !");
+                return;
+            }
+            if ($scope.Diamond.Date == undefined || $scope.Diamond.Date == "") {
+                Noty("error", "Please Select Date !");
+                return;
+            }
+
+            let Action = "ApproveView";
+
+            //if (ViewAction == "onLoad") {
+            //    Action = "View";
+            //}
+            //else {
+            //    Action = "ApproveView";
+            //}
+
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("Getdata_TRN_Pricing", "Pricing")',
+                data: { Date: $scope.Diamond.Date, SizeType: $scope.Diamond.Type, SizeList: [], Shape: $scope.Diamond.Shape, GradType: $scope.Diamond.GradType, Action: Action },
+                dataType: "json"
+            }).then(function (ret) {
+                hide_loader();
+                debugger
+                $scope.GridGroups = [];
+                $scope.PricingDetails = [];
+                DataList = ret.data.List;
+
+                if ($scope.Diamond.GridType == "Size") {
+                    $(".hide1").hide();
+                    $(".hide2").show();
+
+                    // 1. Determine which sizes we want to show
+                    var targetSizeObjects = [];
+                    if ($scope.Diamond.Shape) {
+                        // Filter sizes that belong to this shape
+                        // Assuming Shape property exists on the Size object (DIASizeList)
+                        let ShapeType = $scope.GetDIAShapeList.filter(x => x.id == $scope.Diamond.Shape)[0].ShapeType;
+                        targetSizeObjects = $filter('filter')($scope.GetDIASizeList, { ShapeType: ShapeType, Type: $scope.Diamond.Type }, true);
+                    } else {
+                        targetSizeObjects = $scope.GetDIASizeList;
+                    }
+
+                    // 2. Prepare Data Lookups
+                    var groupedData = {};
+                    if (ret.data.List && ret.data.List.length > 0) {
+                        angular.forEach(ret.data.List, function (item) {
+                            if (!groupedData[item.SizeID]) {
+                                groupedData[item.SizeID] = [];
+                            }
+                            groupedData[item.SizeID].push(item);
+                        });
+                    }
+
+                    // 3. Generate Groups for ALL Target Sizes (whether data exists or not)
+                    console.log("Target Sizes:", targetSizeObjects.length); // Debug (invisible)
+
+                    var shapeObj = $filter('filter')($scope.GetDIAShapeList, { id: $scope.Diamond.Shape }, true)[0];
+                    var shapeName = shapeObj ? shapeObj.value : "Unknown";
+
+                    angular.forEach(targetSizeObjects, function (sizeObj) {
+                        var sId = sizeObj.id;
+                        var sName = sizeObj.value;
+
+                        var existingData = groupedData[sId] || [];
+
+                        var group = {
+                            SizeID: sId,
+                            Shape: $scope.Diamond.Shape,
+                            GradType: $scope.Diamond.GradType,
+                            Name: sName,
+                            ShapeName: shapeName,
+                            Rows: angular.copy($scope.GetDIAColorList), // Header rows
+                            Data: existingData, // Data to populate cells
+                            Expanded: true // Default expanded
+                        };
+                        $scope.GridGroups.push(group);
+                    });
+                }
+                else if ($scope.Diamond.GridType == "Color") {
+                    $(".hide1").show();
+                    $(".hide2").hide();
+                    // 1. Determine which sizes we want to show
+                    var targetSizeObjects = [];
+                    if ($scope.Diamond.Shape) {
+                        let ShapeType = $scope.GetDIAShapeList.filter(x => x.id == $scope.Diamond.Shape)[0].ShapeType;
+                        targetSizeObjects = $filter('filter')($scope.GetDIASizeList, { ShapeType: ShapeType, Type: $scope.Diamond.Type }, true);
+                    } else {
+                        targetSizeObjects = $scope.GetDIASizeList;
+                    }
+
+                    // Sort Target Sizes: Descending by FromSize
+                    targetSizeObjects.sort(function (a, b) {
+                        return parseFloat(b.FromSize) - parseFloat(a.FromSize);
+                    });
+
+                    // 2. Prepare Data Lookups (Group by Color)
+                    var groupedByColor = {};
+                    if (ret.data.List && ret.data.List.length > 0) {
+                        angular.forEach(ret.data.List, function (item) {
+                            if (!groupedByColor[item.ColorName]) {
+                                groupedByColor[item.ColorName] = [];
+                            }
+                            groupedByColor[item.ColorName].push(item);
+                        });
+                    }
+
+                    // 3. Generate Groups for ALL Colors
+                    angular.forEach($scope.GetDIAColorList, function (colorObj) {
+                        var cName = colorObj.ColorName;
+                        var colorData = groupedByColor[cName] || [];
+
+                        var group = {
+                            ColorID: colorObj.id,
+                            ColorName: cName,
+                            Columns: targetSizeObjects, // The Sizes (Headers)
+                            Rows: $scope.GetMSTClarityWithClarityList, // The Clarities (Rows)
+                            Data: colorData, // Flat data for this color
+                            Expanded: true
+                        };
+                        $scope.GridGroups.push(group);
+                    });
+                }
+
+                // Sort GridGroups so groups with actual data appear first
+                $scope.GridGroups.sort(function(a, b) {
+                    var aHasData = (a.Data && a.Data.length > 0) ? 1 : 0;
+                    var bHasData = (b.Data && b.Data.length > 0) ? 1 : 0;
+                    return bHasData - aHasData;
+                });
+
+                if ($scope.GridGroups.length == 0) {
+                    Noty("error", "No colors found.");
+                }
+            });
+        }
+
+        // Helper: Get Rate by looping (Efficiency could be improved with map but list implies small dataset per group)
+        $scope.GetMatrixRate = function (group, clarityId, sizeId) {
+            debugger
+            if ($scope.Diamond.GridType == "Size") {
+                if (group.Data && group.Data.length > 0) {
+                    var found = $filter('filter')(group.Data, { ColorID: clarityId, ClarityID: sizeId }, true);
+                    if (found && found.length > 0) {
+                        return found[0].Rate;
+                    }
+                }
+                return ''; // Default
+            }
+            else if ($scope.Diamond.GridType == "Color") {
+                if (group.Data && group.Data.length > 0) {
+                    // Use manual loop with loose equality (==) for robust type comparison
+                    for (var i = 0; i < group.Data.length; i++) {
+                        if (group.Data[i].ClarityID == clarityId && group.Data[i].SizeID == sizeId) {
+                            return group.Data[i].Rate;
+                        }
+                    }
+                }
+                return '';
+            }
+        };
+
+        // Keyboard Navigation Logic
+        $scope.SelectAllText = function (event) {
+            if (!$scope.Editable) return;
+            $timeout(function() {
+                var range = document.createRange();
+                var sel = window.getSelection();
+                range.selectNodeContents(event.target);
+                sel.removeAllRanges(); // Clear previous selection
+                sel.addRange(range);   // Fully highlight cell content
+            }, 10);
+        };
+
+        $scope.HandleKeydown = function (event, rowIndex, colIndex, group, colorId, clarityId) {
+            if (!$scope.Editable) return;
+
+            // Save on Enter
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                event.target.blur(); // Blur triggers UpdateRate naturally
+
+                // Focus the cell below automatically on Enter
+                var nextRowCell = document.getElementById('cell-' + (rowIndex + 1) + '-' + colIndex);
+                if (nextRowCell) {
+                    $timeout(function() {
+                        nextRowCell.focus(); // will trigger SelectAllText
+                    }, 10);
+                }
+                return;
+            }
+
+            // Arrow Keys Navigation
+            var nextId = null;
+            if (event.keyCode === 37) { // Left arrow
+                nextId = 'cell-' + rowIndex + '-' + (colIndex - 1);
+            } else if (event.keyCode === 39) { // Right arrow
+                nextId = 'cell-' + rowIndex + '-' + (colIndex + 1);
+            } else if (event.keyCode === 38) { // Up arrow
+                nextId = 'cell-' + (rowIndex - 1) + '-' + colIndex;
+            } else if (event.keyCode === 40) { // Down arrow
+                nextId = 'cell-' + (rowIndex + 1) + '-' + colIndex;
+            }
+
+            if (nextId) {
+                var nextElement = document.getElementById(nextId);
+                if (nextElement) {
+                    event.preventDefault();
+                    nextElement.focus(); // will trigger SelectAllText
+                }
+            }
+        };
+
+        $scope.UpdateRate = function (group, colorId, clarityId, event) {
+            debugger
+            var newRate = event.target.textContent;
+
+            // Basic validation
+            if (isNaN(parseFloat(newRate))) return; // Optional: Enforce numeric
+
+            //if (parseFloat(newRate) == 0) return; // Optional: Enforce numeric
+
+            var SamePrice = $filter('filter')(DataList, {
+                SizeID: group.SizeID,
+                Shape: group.Shape,
+                GradType: group.GradType,
+                ColorID: colorId,
+                ClarityID: clarityId
+            }, true);
+
+            var existing = $filter('filter')($scope.PricingDetails, {
+                SizeID: group.SizeID,
+                Shape: group.Shape,
+                GradType: group.GradType,
+                ColorID: colorId,
+                ClarityID: clarityId
+            }, true);
+
+            let PriceInsert = [];
+            let List = [];
+            if (SamePrice.length > 0) {
+                if (parseFloat(SamePrice[0].Rate) != parseFloat(newRate)) {
+
+                    List = {
+                        'SrNo': $scope.PricingDetails.length,
+                        'ColorID': colorId,
+                        'ClarityID': clarityId,
+                        'Shape': group.Shape,
+                        'GradType': group.GradType,
+                        'SizeID': group.SizeID,
+                        'Rate': parseFloat(newRate)
+                    };
+
+                    PriceInsert.push(List)
+                }
+                else {
+                    return;
+                }
+            }
+            else {
+                List = {
+                    'SrNo': $scope.PricingDetails.length,
+                    'ColorID': colorId,
+                    'ClarityID': clarityId,
+                    'Shape': group.Shape,
+                    'GradType': group.GradType,
+                    'SizeID': group.SizeID,
+                    'Rate': parseFloat(newRate)
+                };
+
+                PriceInsert.push(List)
+            }
+
+            if ($scope.Diamond.Date == undefined || $scope.Diamond.Date == "") {
+                Noty("error", "Please Select Date !");
+                return;
+            }
+
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("TRN_Approve_Pricing_Insert", "Pricing")',
+                data: { PricingDetails: PriceInsert, ApproveDate: $scope.Diamond.Date, Action: "Update" },
+                dataType: "json"
+            }).then(function (ret) {
+                hide_loader();
+                if (ret.data == "Record Is Updated") { // Message from backend
+                    // Noty("success", "Stock Pricing Updated Successfully!");
+                    Noty("success","Stock Pricing Updated Successfully!");
+                }
+                else {
+                    // Noty("error", "Error saving data: " + ret.data);
+                    alert("Error saving data: " + ret.data);
+                }
+            });
+
+            var foundInData = $filter('filter')(group.Data, { ColorID: colorId, ClarityID: clarityId }, true);
+            if (foundInData && foundInData.length > 0) {
+                foundInData[0].Rate = newRate;
+            } else {
+                group.Data.push({
+                    ColorID: colorId,
+                    ClarityID: clarityId,
+                    Rate: newRate
+                });
+            }
+
+        };
+
+        $scope.ApprovePrice = function (Date) {
+            if (confirm("Are You Sure Want to Approve Pricing ?")) {
+                show_loader();
+                var response = $http({
+                    method: "post",
+                    async: true,
+                    url: '@Url.Action("TRN_Approve_Pricing_Insert", "Pricing")',
+                    data: { ApproveDate: Date, Action: "Approve" },
+                    dataType: "json"
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data == "Price Approve Successfuly!") { // Message from backend
+                        Noty("success", "Price Approve Successfuly!");
+                        // Reload or stay
+                        window.location.reload();
+                    }
+                    else {
+                        // Noty("error", "Error saving data: " + ret.data);
+                        alert("Error saving data: " + ret.data);
+                    }
+                });
+            }
+        }
+
+        $scope.Clear = function () {
+            //$scope.Diamond = {};
+            //$scope.Diamond.GridType = "Size";
+            $scope.GridGroups = [];
+            $scope.PricingDetails = [];
+        };
+
+        $scope.toggleGroup = function (group) {
+            group.Expanded = !group.Expanded;
+        };
+        // Initialize datepicker
+
+        $scope.ExcelExports = function () {
+            debugger
+            if ($scope.Diamond.Date == undefined || $scope.Diamond.Date == "") {
+                Noty("error", "Please Select Date !");
+                return;
+            }
+            //if ($scope.Diamond.GradType == undefined || $scope.Diamond.GradType == "") {
+            //    Noty("error", "Please Select GradType !");
+            //    return;
+            //}
+
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("Getdata_TRN_Approve_Pricing_Export", "Pricing")',
+                data: { Date: $scope.Diamond.Date, GradType: $scope.Diamond.GradType },
+                dataType: "json"
+            }).then(function (response) {
+                hide_loader();
+                debugger
+                if (response.data && response.data.Data) {
+                    $scope.DownloadExcel(response.data);
+                }
+            }, function (error) {
+                hide_loader();
+                showError('Error generating Excel: ' + error.message);
+            });
+        };
+
+        $scope.MatrixExport = function () {
+            if ($scope.Diamond.Shape == undefined || $scope.Diamond.Shape == "") {
+                Noty("error", "Please Select Shape !");
+                return;
+            }
+            if ($scope.Diamond.Type == undefined || $scope.Diamond.Type == "") {
+                Noty("error", "Please Select Type !");
+                return;
+            }
+            if ($scope.Diamond.GradType == undefined || $scope.Diamond.GradType == "") {
+                Noty("error", "Please Select GradType !");
+                return;
+            }
+            if ($scope.Diamond.Date == undefined || $scope.Diamond.Date == "") {
+                Noty("error", "Please Select Date !");
+                return;
+            }
+
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("Getdata_TRN_Approve_Pricing_Export_V2", "Pricing")',
+                data: { Date: $scope.Diamond.Date, SizeType: $scope.Diamond.Type, Shape: $scope.Diamond.Shape, GradType: $scope.Diamond.GradType, GridType:$scope.Diamond.GridType },
+                dataType: "json"
+            }).then(function (response) {
+                hide_loader();
+                debugger
+                if (response.data && response.data.Data) {
+                    $scope.DownloadExcel(response.data);
+                }
+            }, function (error) {
+                hide_loader();
+                showError('Error generating Excel: ' + error.message);
+            });
+        };
+
+        $scope.DownloadExcel = function (path) {
+            var url = '@Url.Action("DownloadExcel", "Home")/?filepath=' + path.Data;
+            var hiddenIFrameID = 'hiddenDownloaderReportResult';
+            var iframe = document.getElementById(hiddenIFrameID);
+            if (iframe === null) {
+                iframe = document.createElement('iframe');
+                iframe.id = hiddenIFrameID;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
+        };
+
+    }]);
+</script>

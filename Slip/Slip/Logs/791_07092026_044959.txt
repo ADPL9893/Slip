@@ -1,0 +1,26 @@
+Time: 07-09-2026 16:49:59
+--------------------------------------------------------------------------------------------
+Column 'Shape' does not belong to table Table6.
+--------------------------------------------------------------------------------------------
+   at System.Data.DataRow.GetDataColumn(String columnName)
+   at System.Data.DataRow.get_Item(String columnName)
+   at System.Data.DataRowExtensions.Field[T](DataRow row, String columnName)
+   at Slip.Controllers.PricingController.<>c__DisplayClass8_3.<CreateXMLFromDataSet>b__14(DataRow g)
+   at System.Linq.Enumerable.Count[TSource](IEnumerable`1 source, Func`2 predicate)
+   at Slip.Controllers.PricingController.<>c__DisplayClass8_3.<CreateXMLFromDataSet>b__13(DataRow grd)
+   at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+   at System.Xml.Linq.XContainer.AddContentSkipNotify(Object content)
+   at System.Xml.Linq.XContainer.AddContentSkipNotify(Object content)
+   at System.Xml.Linq.XElement..ctor(XName name, Object[] content)
+   at Slip.Controllers.PricingController.<>c__DisplayClass8_3.<CreateXMLFromDataSet>b__10(DataRow inst)
+   at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+   at System.Xml.Linq.XContainer.AddContentSkipNotify(Object content)
+   at System.Xml.Linq.XContainer.AddContentSkipNotify(Object content)
+   at System.Xml.Linq.XElement..ctor(XName name, Object[] content)
+   at Slip.Controllers.PricingController.<>c__DisplayClass8_0.<CreateXMLFromDataSet>b__1(DataRow shape)
+   at System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+   at System.Xml.Linq.XContainer.AddContentSkipNotify(Object content)
+   at System.Xml.Linq.XContainer.AddContentSkipNotify(Object content)
+   at System.Xml.Linq.XElement..ctor(XName name, Object[] content)
+   at Slip.Controllers.PricingController.CreateXMLFromDataSet(DataSet ds)
+   at Slip.Controllers.PricingController.Create_XML()

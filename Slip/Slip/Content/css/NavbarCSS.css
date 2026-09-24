@@ -1,0 +1,864 @@
+/* ==========================================================================
+   OBSIDIAN SLATE / DIAMOND SAAS - GLOBAL NAVBAR & HEADER STYLES
+   ========================================================================== */
+
+/* Aggressive Header & Navbar Color Replacement */
+header, 
+.header, 
+.main-header,
+.main-header .navbar,
+.main-header .logo,
+.page-header.navbar, 
+.navbar.navbar-default, 
+.navbar.navbar-inverse, 
+.navbar.navbar-static-top,
+.top-menu, 
+.navbar-top {
+    background: #0f172a !important; /* Deep Obsidian Slate */
+    background-color: #0f172a !important;
+    background-image: none !important;
+    border-bottom: 1px solid #1e293b !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+}
+
+.main-header,
+header.main-header {
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    min-height: 48px !important;
+    height: 48px !important;
+    max-height: 48px !important;
+    z-index: 99999 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    background: #0f172a !important;
+    border-bottom: 1px solid #1e293b !important;
+}
+
+.main-header .navbar,
+.main-header .logo {
+    background: #0f172a !important;
+    border: none !important;
+}
+
+.main-header .logo,
+.main-header .logo,
+.main-header > .logo,
+header.main-header > a.logo {
+    height: 48px !important;
+    line-height: 48px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 16px !important;
+    color: #f8fafc !important;
+    text-decoration: none !important;
+    transition: all 0.25s ease;
+    border-right: 1px solid #1e293b !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    margin: 0 !important;
+    float: none !important;
+}
+
+.main-header .logo:hover,
+header.main-header > a.logo:hover {
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%), #0f172a !important;
+    text-decoration: none !important;
+}
+
+.main-header > .navbar,
+.main-header .navbar,
+header.main-header nav.navbar,
+nav.navbar.navbar-static-top,
+.navbar {
+    min-height: 48px !important;
+    height: 48px !important;
+    max-height: 48px !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 16px 0 6px !important;
+    float: none !important;
+}
+
+/* Modern Trending ADPL Brand Logo */
+.adpl-brand-wrap {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    text-decoration: none !important;
+}
+
+.adpl-brand-gem {
+    position: relative !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.18) 0%, rgba(37, 99, 235, 0.12) 100%) !important;
+    border: 1px solid rgba(56, 189, 248, 0.35) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 8px rgba(2, 132, 199, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    flex-shrink: 0 !important;
+}
+
+.main-header .logo:hover .adpl-brand-gem,
+header.main-header > a.logo:hover .adpl-brand-gem {
+    transform: scale(1.1) rotate(6deg) !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.5), inset 0 1px 0 #ffffff !important;
+}
+
+.adpl-gem-svg {
+    display: block !important;
+    filter: drop-shadow(0 1px 3px rgba(2, 132, 199, 0.4)) !important;
+}
+
+.adpl-brand-text {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+}
+
+.adpl-title {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    letter-spacing: 2px !important;
+    line-height: 1 !important;
+    background: linear-gradient(135deg, #ffffff 15%, #bae6fd 60%, #38bdf8 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 6px rgba(56, 189, 248, 0.35)) !important;
+    transition: all 0.25s ease !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.main-header .logo:hover .adpl-title,
+header.main-header > a.logo:hover .adpl-title {
+    background: linear-gradient(135deg, #ffffff 0%, #e0f2fe 40%, #67e8f9 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    filter: drop-shadow(0 2px 10px rgba(56, 189, 248, 0.6)) !important;
+    letter-spacing: 2.5px !important;
+}
+
+/* Navbar Header - Hidden on Desktop to remove phantom gap */
+@media (min-width: 768px) {
+    .navbar-header,
+    .main-header .navbar-header {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Desktop Full Width Flex Container */
+    .collapse.navbar-collapse,
+    .navbar-collapse.collapse,
+    .navbar-collapse,
+    .main-header .navbar-collapse,
+    .main-header .navbar-collapse.collapse,
+    header.main-header .navbar-collapse {
+        flex: 1 1 auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 48px !important;
+        float: none !important;
+        overflow: visible !important;
+    }
+
+    /* Top Navbar Navigation Items - Pinned to Left beside ADPL Logo */
+    .collapse.navbar-collapse > .navbar-nav,
+    .navbar-collapse .navbar-nav,
+    .navbar-nav,
+    .main-header .navbar-nav {
+        margin: 0 !important;
+        margin-left: 0 !important;
+        margin-right: auto !important; /* CRITICAL: Pushes left side menu beside ADPL Logo */
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        flex-wrap: nowrap !important;
+        float: none !important;
+        list-style: none !important;
+    }
+
+    /* Right Menu Container (Admin Badge + Logout Button) */
+    .collapse.navbar-collapse > .navbar-custom-menu,
+    .navbar-collapse .navbar-custom-menu,
+    .navbar-custom-menu,
+    .main-header .navbar-custom-menu {
+        margin-left: auto !important; /* CRITICAL: Pins Admin and Logout to the FAR RIGHT */
+        margin-right: 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        flex-shrink: 0 !important;
+        float: none !important;
+        height: 48px !important;
+        padding: 0 !important;
+    }
+
+    .main-header .top-nav,
+    .navbar-custom-menu .top-nav,
+    .top-nav {
+        margin: 0 !important;
+        margin-right: 0 !important; /* CRITICAL: Override main.css margin-right: 50px */
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 8px !important;
+        list-style: none !important;
+        float: none !important;
+    }
+}
+
+.navbar-nav > li {
+    position: relative;
+}
+
+.navbar-nav > li > a,
+.main-header .top-nav > li > a {
+    color: #cbd5e1 !important;
+    font-size: 13.5px !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.2px;
+    padding: 6px 13px !important;
+    margin: 2px 2px !important;
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    line-height: normal !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+/* Top Nav Link Hover & Active */
+.navbar-nav > li > a:hover,
+.navbar-nav > li > a:focus,
+.main-header .top-nav > li > a:hover,
+.main-header .top-nav > li > a:focus {
+    color: #38bdf8 !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.nav .open > a,
+.nav .open > a:hover,
+.nav .open > a:focus {
+    background: #1e293b !important;
+    color: #38bdf8 !important;
+    border-color: transparent !important;
+    border-radius: 6px;
+}
+
+/* Dropdown Menus (Dark Elevated Cards) */
+.dropdown-menu {
+    background-color: #1e293b !important;
+    border: 1px solid #334155 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+    padding: 6px !important;
+    min-width: 200px;
+    margin-top: 4px !important;
+    animation: dropdownSlideFade 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    transform-origin: top center;
+}
+
+@keyframes dropdownSlideFade {
+    0% {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.97);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.dropdown-menu > li > a {
+    color: #cbd5e1 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    padding: 8px 14px !important;
+    margin: 2px 0 !important;
+    border-radius: 6px;
+    display: flex !important;
+    align-items: center;
+    transition: all 0.18s ease !important;
+    text-decoration: none !important;
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+    background-color: rgba(56, 189, 248, 0.12) !important;
+    color: #38bdf8 !important;
+    padding-left: 18px !important;
+    transform: translateX(2px);
+}
+
+.dropdown-menu .divider {
+    background-color: #334155 !important;
+    height: 1px;
+    margin: 5px 0;
+}
+
+/* Multi-level Submenu flyouts (Desktop) */
+@media (min-width: 992px) {
+    .dropdown-menu li {
+        position: relative !important;
+    }
+
+    .submenu {
+        display: none !important;
+        position: absolute !important;
+        left: 100% !important;
+        top: -6px !important;
+        background-color: #1e293b !important;
+        border: 1px solid #334155 !important;
+        border-radius: 10px !important;
+        box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.5) !important;
+        padding: 6px !important;
+        min-width: 200px;
+    }
+
+    .dropdown-menu > li:hover > .submenu {
+        display: block !important;
+        animation: submenuSlideRight 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes submenuSlideRight {
+        0% {
+            opacity: 0;
+            transform: translateX(-8px) scale(0.97);
+        }
+        100% {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+    }
+}
+
+/* User Profile & Right-aligned Top Nav Menu */
+.navbar-custom-menu {
+    float: none !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    height: auto !important;
+    padding: 0 !important;
+}
+
+.main-header .top-nav {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    list-style: none !important;
+}
+
+.main-header .top-nav > li {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+.main-header .top-nav .user-badge {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 9999px !important;
+    padding: 4px 14px !important;
+    height: 30px !important;
+    min-width: 64px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    margin: 0 !important;
+    line-height: normal !important;
+    box-sizing: border-box !important;
+}
+
+.main-header .top-nav .user-badge .user-badge-name,
+.main-header .top-nav .user-badge span,
+.main-header .top-nav .user-badge label {
+    color: #f8fafc !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.3px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    cursor: default !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+.main-header .top-nav .logout-link a {
+    color: #f87171 !important;
+    font-weight: 600 !important;
+    font-size: 12.5px !important;
+    padding: 5px 12px !important;
+    border-radius: 6px !important;
+    background: rgba(239, 68, 68, 0.12) !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    transition: all 0.2s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    line-height: normal !important;
+    text-decoration: none !important;
+}
+
+.main-header .top-nav .logout-link a:hover {
+    color: #ffffff !important;
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Hamburger Toggle Button */
+.navbar-toggle {
+    margin: 7px 12px 7px 0 !important;
+    padding: 6px 10px !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    border: 1px solid #334155 !important;
+    border-radius: 6px !important;
+    color: #cbd5e1 !important;
+    transition: all 0.2s ease;
+}
+
+.navbar-toggle:hover,
+.navbar-toggle:focus {
+    background: rgba(255, 255, 255, 0.12) !important;
+    color: #38bdf8 !important;
+    border-color: #475569 !important;
+    transform: scale(1.04);
+}
+
+.navbar-toggle .fa-bars {
+    font-size: 16px;
+    color: inherit;
+}
+
+/* ==========================================================================
+   MOBILE VIEWPORT & SCROLLER DRAWER (max-width: 767px)
+   ========================================================================== */
+@media (max-width: 767px) {
+    /* 1. Mobile Header Bar - Fixed 48px Height, Logo Left, Hamburger Far Right */
+    .main-header,
+    header.main-header {
+        position: -webkit-sticky !important;
+        position: sticky !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 48px !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        z-index: 99999 !important;
+        background: #0f172a !important;
+        border-bottom: 1px solid #1e293b !important;
+        box-sizing: border-box !important;
+    }
+
+    /* ADPL Logo - Left side */
+    .main-header .logo,
+    .main-header > .logo,
+    header.main-header > a.logo {
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        height: 48px !important;
+        line-height: 48px !important;
+        padding: 0 16px !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        float: none !important;
+        flex: 0 0 auto !important;
+        background: transparent !important;
+    }
+
+    .main-header .logo > span {
+        font-size: 19px !important;
+        letter-spacing: 1.5px !important;
+    }
+
+    /* Navbar container spanning remaining space to the right */
+    .main-header > .navbar,
+    .main-header .navbar,
+    header.main-header nav.navbar,
+    nav.navbar.navbar-static-top,
+    .navbar {
+        position: static !important; /* Allows child navbar-collapse to span full viewport */
+        height: 48px !important;
+        min-height: 48px !important;
+        max-height: 48px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        flex: 1 1 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Navbar Header holding toggle button on far right */
+    .navbar-header,
+    .main-header .navbar-header {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+        height: 48px !important;
+        margin: 0 !important;
+        padding: 0 12px 0 0 !important;
+        float: none !important;
+    }
+
+    /* Modern, High-Visibility Hamburger Toggle Button (3 Clean Cyan Bars) */
+    .navbar-toggle,
+    .main-header .navbar-toggle {
+        display: inline-flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 40px !important;
+        height: 34px !important;
+        min-width: 40px !important;
+        margin: 0 !important;
+        padding: 6px 8px !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        border: 1.5px solid #334155 !important;
+        border-radius: 7px !important;
+        color: #38bdf8 !important;
+        cursor: pointer !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+        transition: all 0.2s ease !important;
+        float: none !important;
+    }
+
+    .navbar-toggle:hover,
+    .navbar-toggle:focus,
+    .navbar-toggle:active {
+        background: rgba(56, 189, 248, 0.18) !important;
+        border-color: #38bdf8 !important;
+        color: #ffffff !important;
+        transform: scale(1.04) !important;
+    }
+
+    .navbar-toggle .fa-bars,
+    .navbar-toggle i {
+        font-size: 17px !important;
+        color: #38bdf8 !important;
+        display: block !important;
+        line-height: 1 !important;
+        margin: 0 auto !important;
+    }
+
+    .navbar-toggle .icon-bar {
+        display: block !important;
+        width: 20px !important;
+        height: 2.5px !important;
+        background-color: #38bdf8 !important;
+        border-radius: 2px !important;
+        margin: 2px auto !important;
+        transition: all 0.2s ease !important;
+    }
+
+    /* 2. Mobile Drawer Menu: Full-Width Accordion Overlay */
+    .collapse.navbar-collapse,
+    .navbar-collapse.collapse,
+    .navbar-collapse,
+    .main-header .navbar-collapse {
+        position: absolute !important;
+        top: 48px !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: auto !important;
+        max-height: calc(100vh - 52px) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        background: #0f172a !important; /* Deep Obsidian Slate */
+        border-top: 1px solid #1e293b !important;
+        border-bottom: 3px solid #0e8acb !important;
+        box-shadow: 0 25px 40px rgba(0, 0, 0, 0.75) !important;
+        padding: 10px 14px 20px 14px !important;
+        margin: 0 !important;
+        z-index: 99999 !important;
+        box-sizing: border-box !important;
+        float: none !important;
+    }
+
+    /* Hide when collapsed */
+    .collapse.navbar-collapse:not(.in),
+    .navbar-collapse.collapse:not(.in) {
+        display: none !important;
+    }
+
+    /* Show when opened */
+    .collapse.navbar-collapse.in,
+    .navbar-collapse.in,
+    .navbar-collapse.collapsing {
+        display: block !important;
+        animation: mobileMenuSlideDown 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+    }
+
+    /* Custom Mobile Scroller Scrollbar */
+    .navbar-collapse::-webkit-scrollbar {
+        width: 5px !important;
+    }
+    .navbar-collapse::-webkit-scrollbar-track {
+        background: #0f172a !important;
+    }
+    .navbar-collapse::-webkit-scrollbar-thumb {
+        background: #334155 !important;
+        border-radius: 4px !important;
+    }
+
+    /* 3. Mobile Navigation Items (Full-Width Rows) */
+    .navbar-nav,
+    .main-header .navbar-nav,
+    .collapse.navbar-collapse > .navbar-nav {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+        list-style: none !important;
+    }
+
+    .navbar-nav > li,
+    .main-header .navbar-nav > li {
+        display: block !important;
+        width: 100% !important;
+        float: none !important;
+        margin: 0 0 4px 0 !important;
+        position: relative !important;
+    }
+
+    .navbar-nav > li > a,
+    .main-header .navbar-nav > li > a {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        padding: 11px 16px !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+        font-size: 14.5px !important;
+        font-weight: 600 !important;
+        color: #f1f5f9 !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        text-decoration: none !important;
+        box-sizing: border-box !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .navbar-nav > li > a:hover,
+    .navbar-nav > li > a:focus,
+    .navbar-nav > li.open > a,
+    .navbar-nav > li.active > a {
+        background: rgba(56, 189, 248, 0.12) !important;
+        color: #38bdf8 !important;
+        border-color: rgba(56, 189, 248, 0.3) !important;
+        padding-left: 18px !important;
+    }
+
+    .navbar-nav > li > a .caret {
+        margin-left: auto !important;
+        border-top-color: #38bdf8 !important;
+        border-bottom-color: #38bdf8 !important;
+        transition: transform 0.2s ease !important;
+    }
+
+    .navbar-nav > li.open > a .caret {
+        transform: rotate(180deg) !important;
+    }
+
+    /* 4. Mobile Dropdown Submenus (Full Width Accordion Inset, Zero Clip) */
+    .dropdown-menu,
+    .dropdown.open > .dropdown-menu,
+    .navbar-nav .dropdown-menu,
+    .navbar-nav .open .dropdown-menu {
+        position: static !important;
+        float: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background-color: #162032 !important; /* Inset dark tone */
+        border: 1px solid #283548 !important;
+        border-radius: 8px !important;
+        box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+        margin: 4px 0 8px 0 !important;
+        padding: 6px 6px !important;
+        transform: none !important;
+        animation: none !important;
+        box-sizing: border-box !important;
+    }
+
+    .dropdown-menu > li {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .dropdown-menu > li > a {
+        display: block !important;
+        width: 100% !important;
+        padding: 10px 16px !important;
+        margin: 2px 0 !important;
+        color: #cbd5e1 !important;
+        font-size: 13.5px !important;
+        font-weight: 500 !important;
+        border-radius: 6px !important;
+        text-decoration: none !important;
+        box-sizing: border-box !important;
+        transition: all 0.18s ease !important;
+    }
+
+    .dropdown-menu > li > a:hover,
+    .dropdown-menu > li > a:focus {
+        background-color: rgba(56, 189, 248, 0.14) !important;
+        color: #38bdf8 !important;
+        padding-left: 22px !important;
+    }
+
+    /* 5. Mobile User Info & Logout (At Bottom of Menu) */
+    .navbar-custom-menu,
+    .main-header .navbar-custom-menu,
+    .collapse.navbar-collapse > .navbar-custom-menu {
+        display: block !important;
+        width: 100% !important;
+        float: none !important;
+        height: auto !important;
+        margin: 14px 0 0 0 !important;
+        padding: 12px 0 0 0 !important;
+        border-top: 1px solid #1e293b !important;
+        box-sizing: border-box !important;
+    }
+
+    .main-header .top-nav,
+    .navbar-custom-menu .top-nav {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+        list-style: none !important;
+    }
+
+    .main-header .top-nav > li,
+    .navbar-custom-menu .top-nav > li {
+        display: block !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    .main-header .top-nav .user-badge {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        padding: 10px 16px !important;
+        margin: 0 !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid #334155 !important;
+        border-radius: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    .main-header .top-nav .user-badge label {
+        color: #f1f5f9 !important;
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+    }
+
+    .main-header .top-nav .logout-link a {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        width: 100% !important;
+        padding: 10px 16px !important;
+        margin: 0 !important;
+        border-radius: 8px !important;
+        background: rgba(239, 68, 68, 0.15) !important;
+        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+        color: #fca5a5 !important;
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+        box-sizing: border-box !important;
+        text-decoration: none !important;
+    }
+
+    .main-header .top-nav .logout-link a:hover {
+        background: rgba(239, 68, 68, 0.3) !important;
+        color: #ffffff !important;
+    }
+}
+
+@keyframes mobileMenuSlideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

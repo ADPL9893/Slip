@@ -1,0 +1,716 @@
+﻿
+@{
+    ViewBag.Title = "Pricing_Old";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* General Layout */
+    /*.page-title {
+        display: none;*/ /* Hide default title if not needed or style it */
+    /*}*/
+
+    .pricing-container {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f6f9;
+        padding: 15px;
+        min-height: 75vh;
+    }
+
+    /* Top Filter Bar */
+    .filter-bar {
+        background-color: #fff;
+        padding: 10px 15px;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-bottom: 10px;
+    }
+
+    .filter-row {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+
+    .filter-group {
+        display: flex;
+        align-items: center;
+    }
+
+        .filter-group label {
+            font-weight: bold;
+            margin-right: 8px;
+            margin-bottom: 0;
+            color: #333;
+        }
+
+    .form-control-sm {
+        height: 30px;
+        padding: 2px 5px;
+        font-size: 13px;
+        min-width: 120px;
+    }
+
+
+
+    /* Buttons */
+    .btn-custom {
+        border: 1px solid #ced4da;
+        background-color: #fff;
+        color: #333;
+        font-size: 12px;
+        padding: 4px 10px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .btn-custom:hover {
+            background-color: #e9ecef;
+        }
+
+
+
+    .btn-icon-text {
+        color: #0056b3;
+    }
+
+    /* Toolbar Row */
+    .toolbar-row {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+
+    .btn-tool {
+        border: 1px solid #007bff;
+        background-color: #eef6ff;
+        color: #0056b3;
+        padding: 4px 12px;
+        font-size: 13px;
+        border-radius: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+        .btn-tool:hover {
+            background-color: #dceeff;
+        }
+
+        .btn-tool i {
+            font-size: 14px;
+        }
+
+    .section-header-red {
+        color: red;
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    /* Table/Grid */
+    .grid-group {
+        background-color: #fff;
+        border: 1px solid #cbd5e0;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .group-header {
+        background-color: #f1f5f9;
+        padding: 6px 10px;
+        font-weight: bold;
+        font-size: 13px;
+        border-bottom: 1px solid #cbd5e0;
+        color: #333;
+        display: flex;
+        align-items: center;
+    }
+
+    .group-toggle {
+        margin-right: 5px;
+        cursor: pointer;
+        color: #666;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+    }
+
+        .custom-table th {
+            background-color: #e2eaf4;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+            padding: 6px;
+            border: 1px solid #cbd5e0;
+        }
+
+        .custom-table td {
+            padding: 5px;
+            border: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+            .custom-table td.editable {
+                background-color: #fff;
+                cursor: text;
+            }
+
+                .custom-table td.editable:focus {
+                    outline: 2px solid #007bff;
+                    background-color: #fff;
+                }
+
+    .col-header-color {
+        width: 60px;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    /* Fix for Chosen Dropdown to match height */
+    .chosen-container-single .chosen-single {
+        height: 30px;
+        line-height: 28px;
+        border-radius: 2px;
+    }
+</style>
+
+<div ng-controller="Diamond">
+    <div class="pricing-container">
+
+        <!-- Header & Filters -->
+        <h4 style="margin-top:0; margin-bottom: 15px; font-weight:600;">Stock Pricing</h4>
+        <button ng-click="CreateXML()">XML</button>
+        <div class="filter-bar">
+
+            <div class="filter-row">
+                <!-- Shape -->
+                <div class="filter-group">
+                    <label>Shape</label>
+                    <div style="width: 150px;">
+                        <select id="ShapeID" tabindex="2" chosen="GetDIAShapeList" class="form-control input-sm" ng-change="GetType(Diamond.ShapeID);GetdataTRNRap()" ng-options="item.id as item.value for item in GetDIAShapeList" ng-model="Diamond.ShapeID">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Size Type -->
+                <div class="filter-group">
+                    <label>Type</label>
+                    <div style="width: 150px;">
+                        <select id="Type" tabindex="1" chosen="GetSizeTypeList" class="form-control input-sm" ng-options="item.id as item.value for item in GetSizeTypeList" ng-change="GetdataTRNRap()" ng-model="Diamond.Type">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Cut (Hidden from direct view in screenshot but needed for logic, kept visible for functionality) -->
+                <div class="filter-group">
+                    <label>Cut</label>
+                    <div style="width: 120px;">
+                        <select id="CutID" tabindex="3" chosen="GetDIACutList" class="form-control input-sm" ng-change="GetdataTRNRap()" ng-options="item.id as item.value for item in GetDIACutList" ng-model="Diamond.CutID">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar Buttons -->
+            <div class="toolbar-row">
+                <button class="btn-tool" ng-click="GetdataTRNRap()">
+                    <i class="fa fa-search"></i> Search
+                </button>
+                <button class="btn-custom" ng-click="DataSave()" style="background-color: #eef6ff; border-color: #007bff; color: #0056b3;">
+                    <i class="fa fa-upload btn-icon-text"></i> Stock Pricing (Save)
+                </button>
+                <button class="btn-tool" ng-click="Clear()">
+                    Reset
+                </button>
+            </div>
+
+        </div>
+
+        <div class="section-header-red">Pricing</div>
+
+        <!-- Dynamic Grid Groups -->
+        <div ng-if="GridGroups.length > 0">
+            <div class="grid-group" ng-repeat="group in GridGroups" ng-init="grpIndex = $index" style="margin-bottom: 30px;">
+                <table class="custom-table" border="1" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <!-- Empty Header for Color Column -->
+                            <th style="width: 50px; background-color: #fff; border: none;"></th>
+                            <!-- Clarity Header -->
+                            <th style="width: 80px; text-align: left;">POINTER</th>
+                            <!-- Size Headers -->
+                            <th ng-repeat="size in group.Columns" style="text-align: center;">
+                                {{size.value}}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="clarity in group.Rows" ng-init="rowIndex = $index">
+                            <!-- Color Column (Rowspan) -->
+                            <td ng-if="$index == 0" rowspan="{{group.Rows.length}}" style="vertical-align: middle; text-align: center; font-weight: bold; background-color: #fff; font-size: 16px;">
+                                {{group.ColorName}}
+                            </td>
+
+                            <!-- Clarity Label -->
+                            <td style="font-weight:bold;">{{clarity.value}}</td>
+
+                            <!-- Matrix Cells -->
+                            <td contenteditable='true'
+                                ng-repeat="size in group.Columns"
+                                id="cell-{{grpIndex}}-{{rowIndex}}-{{colIndex}}"
+                                data-grp="{{grpIndex}}" data-row="{{rowIndex}}" data-col="{{colIndex}}"
+                                ng-blur="UpdateMatrixRate(group, clarity.id, size.id, $event)"
+                                ng-init="rate = GetMatrixRate(group, clarity.id, size.id)">
+                                {{rate}}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div ng-if="GridGroups.length == 0" style="text-align:center; padding: 20px; color:#777;">
+            No data loaded. Select Shape, Size, and Cut then click Search.
+        </div>
+
+    </div>
+</div>
+
+<script>
+    var Paramdata = [{}];
+
+    module = angular.module('app', ['ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    module.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+
+    module.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$interval', 'uiGridConstants', function ($scope, $filter, $http, $q, $interval, uiGridConstants, $window) {
+        $scope.Diamond = {};
+        $scope.GridGroups = []; // Stores the groups of data
+
+        // ***************************** GetData ******************************************//
+        var loopPromises = [];
+        var DIASizeList = [];
+        var promise = $http.get('@Url.Action("Get_DataList_DIAMaster", "Pricing")').then(function (response) {
+            var DIAShapeList = [];
+            for (var i = 0; i < response.data.DIAShapeList.length; i++) {
+                var obj = { id: response.data.DIAShapeList[i]["ShapeID"], value: response.data.DIAShapeList[i]["ShapeName"], ShapeType: response.data.DIAShapeList[i]["ShapeGroup"] };
+                DIAShapeList.push(obj);
+            }
+
+            $scope.GetDIAShapeList = DIAShapeList;
+
+
+            for (var i = 0; i < response.data.DIASizeList.length; i++) {
+                // Keep all properties from backend
+                var obj = response.data.DIASizeList[i];
+                obj.id = response.data.DIASizeList[i]["SizeID"];
+                obj.value = response.data.DIASizeList[i]["FromSize"] + ' - ' + response.data.DIASizeList[i]["ToSize"];
+                // Assuming backend returns 'Type'. User said "Type" column exists.
+                // Property name likely "Type" based on user description, or maybe "SizeType"
+                // User said "Type" in Image 1.
+                obj.Type = response.data.DIASizeList[i]["Type"];
+                obj.ShapeID = response.data.DIASizeList[i]["ShapeID"];
+                DIASizeList.push(obj);
+            }
+
+            $scope.GetDIASizeList = DIASizeList; // We don't show full list directly anymore
+            // We store it globally/locally to filter later
+
+            // ... (rest of master lists) ...
+
+
+            var DIAClarityList = [];
+            for (var i = 0; i < response.data.DIAClarityList.length; i++) {
+                var obj = { id: response.data.DIAClarityList[i]["ClarityID"], value: response.data.DIAClarityList[i]["ClarityName"], Amount: response.data.DIAClarityList[i]["Amount"]};
+                DIAClarityList.push(obj);
+            }
+
+            $scope.GetDIAClarityList = DIAClarityList;
+
+            var DIAColorList = [];
+            for (var i = 0; i < response.data.DIAColorList.length; i++) {
+                var obj = { id: response.data.DIAColorList[i]["ColorID"], value: response.data.DIAColorList[i]["ColorName"], ColorType: response.data.DIAColorList[i]["ColorName"], ColorName: response.data.DIAColorList[i]["ColorName"] };
+                DIAColorList.push(obj);
+            }
+
+            $scope.GetDIAColorList = DIAColorList;
+
+            var DIACutList = [];
+            for (var i = 0; i < response.data.DIACutList.length; i++) {
+                var obj = { id: response.data.DIACutList[i]["CutID"], value: response.data.DIACutList[i]["CutName"]};
+                DIACutList.push(obj);
+            }
+
+            $scope.GetDIACutList = DIACutList;
+
+            var DIAShapeTypeList = [];
+            for (var i = 0; i < response.data.DIAShapeTypeList.length; i++) {
+                var obj = { id: response.data.DIAShapeTypeList[i]["ShapeTypeID"], value: response.data.DIAShapeTypeList[i]["ShapeType"]};
+                DIAShapeTypeList.push(obj);
+            }
+
+            $scope.GetDIAShapeTypeList = DIAShapeTypeList;
+
+            var MSTClarityWithColorList = [];
+            for (var i = 0; i < response.data.MSTClarityWithColorList.length; i++) {
+                var obj = { id: response.data.MSTClarityWithColorList[i]["ID"], value: response.data.MSTClarityWithColorList[i]["MasterName"], MasterType: response.data.MSTClarityWithColorList[i]["MasterType"], Amount: response.data.MSTClarityWithColorList[i]["Amount"], ColorTmp: response.data.MSTClarityWithColorList[i]["ColorTmp"]};
+                MSTClarityWithColorList.push(obj);
+            }
+
+            $scope.GetMSTClarityWithColorList = MSTClarityWithColorList;
+
+            $scope.GetMSTClarityWithClarityList = $filter('filter')(MSTClarityWithColorList, function (e) { return e.MasterType == "Clarity" });
+        });
+        loopPromises.push(promise);
+        // ***************************** EndGetData ***************************************//
+
+        // ***************************** EndGetData ***************************************//
+
+        $scope.GetSizeTypeList = [];
+
+        $scope.GetType = function (ShapeID) {
+            $scope.GetSizeTypeList = [];
+            $scope.Diamond.Type = ""; // Reset selection
+
+            if (!ShapeID) return;
+
+            // Filter sizes by Shape
+            var shapeSizes = DIASizeList.filter(x => x.ShapeID == ShapeID);
+
+            // Get Unique Types
+            var uniqueTypes = [];
+            var seen = {}
+
+            angular.forEach(shapeSizes, function(item) {
+                if (item.Type && !seen[item.Type]) {
+                    seen[item.Type] = true;
+                    uniqueTypes.push({ id: item.Type, value: item.Type });
+                }
+            });
+
+            $scope.GetSizeTypeList = uniqueTypes;
+            // If only one type, maybe auto-select?
+            // if (uniqueTypes.length == 1) $scope.Diamond.Type = uniqueTypes[0].id;
+        }
+
+        $scope.PricingDetails = []; // To store changes to be saved
+
+        $scope.GetdataTRNRap = function () {
+            // Validation: Shape and Cut are mandatory
+            if ($scope.Diamond.ShapeID == undefined || $scope.Diamond.ShapeID == "") {
+                Noty("error", "Please Select Shape !");
+                return;
+            }
+            if ($scope.Diamond.Type == undefined || $scope.Diamond.Type == "") {
+                Noty("error", "Please Select Type !");
+                return;
+            }
+            if ($scope.Diamond.CutID == undefined || $scope.Diamond.CutID == "") {
+                Noty("error", "Please Select Cut !");
+                return;
+            }
+
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("Getdata_TRN_Pricing", "Pricing")',
+                data: { SizeType: $scope.Diamond.Type, ShapeID: $scope.Diamond.ShapeID, CutID: $scope.Diamond.CutID },
+                dataType: "json"
+            }).then(function (ret) {
+                hide_loader();
+                debugger
+                $scope.GridGroups = [];
+                $scope.PricingDetails = [];
+
+                // 1. Determine which sizes we want to show
+                var targetSizeObjects = [];
+                if ($scope.Diamond.ShapeID) {
+                    targetSizeObjects = $filter('filter')($scope.GetDIASizeList, { ShapeID: $scope.Diamond.ShapeID, Type: $scope.Diamond.Type }, true);
+                } else {
+                    targetSizeObjects = $scope.GetDIASizeList;
+                }
+
+                // Sort Target Sizes: Descending by FromSize
+                targetSizeObjects.sort(function(a, b) {
+                    return parseFloat(b.FromSize) - parseFloat(a.FromSize);
+                });
+
+                // 2. Prepare Data Lookups (Group by Color)
+                var groupedByColor = {};
+                if (ret.data.List && ret.data.List.length > 0) {
+                     angular.forEach(ret.data.List, function(item) {
+                        if (!groupedByColor[item.ColorName]) {
+                            groupedByColor[item.ColorName] = [];
+                        }
+                        groupedByColor[item.ColorName].push(item);
+                    });
+                }
+
+                // 3. Generate Groups for ALL Colors
+                angular.forEach($scope.GetDIAColorList, function(colorObj) {
+                    var cName = colorObj.ColorName;
+                    var colorData = groupedByColor[cName] || [];
+
+                    var group = {
+                        ColorID: colorObj.id,
+                        ColorName: cName,
+                        Columns: targetSizeObjects, // The Sizes (Headers)
+                        Rows: $scope.GetMSTClarityWithClarityList, // The Clarities (Rows)
+                        Data: colorData, // Flat data for this color
+                        Expanded: true
+                    };
+                    $scope.GridGroups.push(group);
+                });
+
+                if ($scope.GridGroups.length == 0) {
+                     Noty("error", "No colors found.");
+                }
+            });
+        }
+
+        // Helper: Get Rate by looping (Efficiency could be improved with map but list implies small dataset per group)
+        $scope.GetMatrixRate = function (group, clarityId, sizeId) {
+            debugger
+            if (group.Data && group.Data.length > 0) {
+                // Use manual loop with loose equality (==) for robust type comparison
+                for (var i = 0; i < group.Data.length; i++) {
+                    if (group.Data[i].ClarityID == clarityId && group.Data[i].SizeID == sizeId) {
+                        return group.Data[i].Rate;
+                    }
+                }
+            }
+            return 0;
+        };
+
+        // Update Rate Matrix
+        $scope.UpdateMatrixRate = function(group, clarityId, sizeId, event) {
+             var newRate = event.target.textContent;
+
+             // Check PricingDetails (Global save list)
+             var existing = $filter('filter')($scope.PricingDetails, {
+                 SizeType: $scope.Diamond.Type,
+                 ShapeID: $scope.Diamond.ShapeID,
+                 CutID: $scope.Diamond.CutID,
+                 ColorID: group.ColorID,
+                 ClarityID: clarityId,
+                 SizeID: sizeId
+             }, true);
+
+             if (existing && existing.length > 0) {
+                 existing[0].Rate = newRate;
+             } else {
+                 $scope.PricingDetails.push({
+                     'ColorID': group.ColorID,
+                     'ClarityID': clarityId,
+                     'SizeID': sizeId,
+                     'ShapeID': $scope.Diamond.ShapeID,
+                     'CutID': $scope.Diamond.CutID,
+                     'SizeType': $scope.Diamond.Type,
+                     'Rate': newRate
+                 });
+             }
+
+             // Update Local Data for display persistence
+             var found = $filter('filter')(group.Data, { ClarityID: clarityId, SizeID: sizeId }, true);
+             if (found && found.length > 0) {
+                 found[0].Rate = newRate;
+             } else {
+                 group.Data.push({
+                     ClarityID: clarityId,
+                     SizeID: sizeId,
+                     Rate: newRate
+                 });
+             }
+        };
+
+        $scope.DataSave = function () {
+            if ($scope.PricingDetails.length == 0) {
+                Noty("error", "No changes to save!");
+                return;
+            }
+
+            // Filter to ensure we are sending meaningful data
+            var detailsToSend = $scope.PricingDetails;
+
+            if (detailsToSend.length > 0) {
+                show_loader();
+                var response = $http({
+                    method: "post",
+                    async: true,
+                    url: '@Url.Action("TRN_Pricing_Insert_Update_Delete", "Pricing")',
+                    data: { PricingDetails: detailsToSend },
+                    dataType: "json"
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data == "Record Is Inserted") { // Message from backend
+                        // Noty("success", "Stock Pricing Updated Successfully!");
+                        alert("Stock Pricing Updated Successfully!");
+                        $scope.PricingDetails = [];
+                        // Reload or stay
+                        window.location.reload();
+                    }
+                    else {
+                        // Noty("error", "Error saving data: " + ret.data);
+                        alert("Error saving data: " + ret.data);
+                    }
+                });
+            }
+        }
+
+        $scope.Clear = function () {
+            $scope.Diamond = {};
+            $scope.GridGroups = [];
+            $scope.PricingDetails = [];
+        };
+
+        $scope.toggleGroup = function(group) {
+            group.Expanded = !group.Expanded;
+        };
+
+        $scope.CreateXML = function() {
+            show_loader();
+            var url = '@Url.Action("Create_XML", "Pricing")';
+
+            $http({
+                method: "post",
+                url: url,
+                responseType: 'arraybuffer' // receive raw bytes
+            }).then(function (response) {
+                hide_loader();
+
+                // Determine filename from Content-Disposition (if present)
+                var headers = response.headers();
+                var contentDisposition = headers['content-disposition'] || headers['Content-Disposition'] || '';
+                var filename = 'PriceLists.xml';
+                var matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                if (matches != null && matches[1]) {
+                    filename = matches[1].replace(/['"]/g, '');
+                }
+
+                // Create blob and trigger download
+                var contentType = headers['content-type'] || 'application/xml';
+                var blob = new Blob([response.data], { type: contentType });
+
+                // IE / Edge support
+                if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+                    window.navigator.msSaveOrOpenBlob(blob, filename);
+                    return;
+                }
+
+                // Other browsers
+                var objectUrl = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = objectUrl;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                // release memory
+                setTimeout(function() { URL.revokeObjectURL(objectUrl); }, 1000);
+            }, function (err) {
+                hide_loader();
+                var msg = 'Error generating XML.';
+                try {
+                    if (err && err.data) {
+                        msg += ' ' + (err.statusText || err.data);
+                    }
+                } catch (e) { }
+                alert(msg);
+            });
+        };
+
+    }]).directive('contenteditable', function ($timeout) {
+        return {
+            restrict: "A",
+            priority: 1000,
+            scope: false, // Use shared scope, not isolated!
+            link: function (scope, element, attrs) {
+                element.on('blur keyup paste input', function () {
+                   // Logic handled in ng-blur
+                });
+
+                element.bind("keydown keypress", function (event) {
+                    var keyCode = event.which || event.keyCode;
+
+                    // Enter (13), Left(37), Up(38), Right(39), Down(40)
+                    if ([13, 37, 38, 39, 40].indexOf(keyCode) !== -1) {
+
+                        var grp = parseInt(attrs.grp);
+                        var row = parseInt(attrs.row);
+                        var col = parseInt(attrs.col);
+
+                        // Fallback if attrs are not interpolated yet? usually they are.
+                        // Can use element[0].getAttribute('data-grp')
+                        if (isNaN(grp)) grp = parseInt(element.attr('data-grp'));
+                        if (isNaN(row)) row = parseInt(element.attr('data-row'));
+                        if (isNaN(col)) col = parseInt(element.attr('data-col'));
+
+                        var nextGrp = grp;
+                        var nextRow = row;
+                        var nextCol = col;
+
+                        if (keyCode === 13) { // Enter -> Move Right (Tab behavior)
+                            event.preventDefault(); // Prevent new line first
+                            nextCol++;
+                            // Check if next cell exists
+                            var checkId = "cell-" + nextGrp + "-" + nextRow + "-" + nextCol;
+                            if (!document.getElementById(checkId)) {
+                                nextCol = 0;
+                                nextRow++;
+                            }
+                        } else if (keyCode === 37) { // Left
+                            nextCol--;
+                        } else if (keyCode === 38) { // Up
+                            nextRow--;
+                        } else if (keyCode === 39) { // Right
+                            nextCol++;
+                        } else if (keyCode === 40) { // Down
+                            nextRow++;
+                        }
+
+                        // Construct ID
+                        var targetId = "cell-" + nextGrp + "-" + nextRow + "-" + nextCol;
+                        var targetElement = document.getElementById(targetId);
+
+                        if (targetElement) {
+                            event.preventDefault();
+                            targetElement.focus();
+                        }
+                    }
+                });
+            }
+        };
+    });
+</script>

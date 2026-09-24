@@ -1,0 +1,25 @@
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="row" ng-controller="DashboardCtrl">
+    <div class="col-lg-12">
+        <div class="card">
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngTouch', 'ui.grid']);
+    }
+
+    module.controller('DashboardCtrl', ['$scope', '$http', '$filter', function ($scope, $http, $filter) {
+        // Blank slate initialized - ready for manual Excel maintenance logic
+    }]);
+</script>

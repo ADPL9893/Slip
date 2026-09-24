@@ -1,0 +1,727 @@
+@{
+    ViewBag.Title = "Available Stock";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Available Stock - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .availablestock-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .stock-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .stock-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card */
+    .stock-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .stock-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .stock-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .stock-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .stock-header-card:hover .stock-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .stock-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .stock-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .stock-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .stock-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    /* Header Actions Toolbar */
+    .stock-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .stock-date-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .stock-date-input {
+        height: 36px;
+        padding: 5px 10px;
+        font-size: 12.5px;
+        color: #1e293b;
+        background-color: #f8fafc;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 8px;
+        outline: none;
+        transition: all 0.2s ease;
+        font-weight: 600;
+    }
+    .stock-date-input:focus {
+        border-color: #0284c7;
+        background-color: #ffffff;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    /* Action Buttons */
+    .btn-stock-get {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3) !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+    }
+    .btn-stock-get:hover {
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-stock-export {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.28) !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+    }
+    .btn-stock-export:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-stock-sales {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.28) !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+    }
+    .btn-stock-sales:hover {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-stock-sync {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 2px 8px rgba(29, 78, 216, 0.3) !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+    }
+    .btn-stock-sync:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    /* Grid Card Container */
+    .stock-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .stock-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .stock-card-header {
+        background: #ffffff !important;
+        padding: 12px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    .stock-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .stock-card-title-left i {
+        font-size: 16px;
+        color: #0284c7;
+    }
+    .stock-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .stock-grid-body {
+        padding: 0 !important;
+    }
+
+    .stock-grid-card .uigrid,
+    .stock-grid-card #gridAvailableStock {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gridAvailableStock {
+        width: 100% !important;
+    }
+
+    /* DevExtreme DataGrid Styling */
+    #gridAvailableStock .dx-datagrid {
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+    }
+    #gridAvailableStock .dx-datagrid-headers {
+        background: #f8fafc !important;
+        color: #334155 !important;
+        font-weight: 700 !important;
+        font-size: 12.5px !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+    #gridAvailableStock .dx-datagrid-headers .dx-header-row > td {
+        padding: 11px 10px !important;
+        color: #1e293b !important;
+        font-weight: 700 !important;
+    }
+    #gridAvailableStock .dx-data-row {
+        font-size: 12.5px;
+        transition: background-color 0.15s ease;
+    }
+    #gridAvailableStock .dx-data-row:hover {
+        background-color: #f1f8fe !important;
+    }
+    #gridAvailableStock .dx-row-alt {
+        background-color: #fafbfc;
+    }
+
+    /* Access Denied Card */
+    .access-denied-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 24px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #fecaca !important;
+        border-left: 5px solid #ef4444 !important;
+    }
+    .access-denied-alert {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #991b1b;
+        font-size: 14px;
+        font-weight: 600;
+    }
+    .access-denied-alert i {
+        font-size: 22px;
+        color: #ef4444;
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .stock-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .stock-header-left {
+            width: 100%;
+        }
+
+        .stock-header-actions {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stock-date-wrap,
+        .stock-date-input,
+        .btn-stock-get,
+        .btn-stock-export,
+        .btn-stock-sales,
+        .btn-stock-sync {
+            width: 100% !important;
+            justify-content: center !important;
+            text-align: center !important;
+        }
+
+        .stock-card-header {
+            padding: 12px 14px !important;
+        }
+
+        .stock-grid-card {
+            min-height: 480px;
+        }
+
+        .stock-grid-card .uigrid,
+        .stock-grid-card #gridAvailableStock {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+    }
+</style>
+
+<div class="availablestock-page">
+@if (ViewBag.IsAdmin == true || (ViewBag.CanView != null && (bool)ViewBag.CanView))
+{
+    <!-- Top Header Card (SaaS Ice-Blue Theme with Action Toolbar) -->
+    <div class="stock-header-card">
+        <div class="stock-header-left">
+            <div class="stock-header-icon">
+                <i class="fa fa-diamond"></i>
+            </div>
+            <div>
+                <div class="stock-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>Diamx Data</span> / 
+                    <span>Available Stock</span>
+                </div>
+                <h4 class="stock-header-title">Available Stock - Diamx</h4>
+            </div>
+        </div>
+
+        <!-- Header Actions Toolbar (Date, Get, Export Summary, Sales Export, Sync) -->
+        <div class="stock-header-actions">
+            <div class="stock-date-wrap">
+                <input type="date" id="dateCreated" class="stock-date-input" />
+            </div>
+            <button type="button" class="btn-stock-get" id="btnGetData" onclick="LoadStockData()">
+                <i class="fa fa-search"></i> Get
+            </button>
+            @if (ViewBag.IsAdmin == true || (ViewBag.CanExport != null && (bool)ViewBag.CanExport))
+            {
+                <button type="button" class="btn-stock-export" id="btnExportExcel" onclick="ExportExcel()">
+                    <i class="fa fa-file-excel-o"></i> Export Summary
+                </button>
+            }
+            @if (ViewBag.IsAdmin == true || (ViewBag.CanAdd != null && (bool)ViewBag.CanAdd))
+            {
+                <button type="button" class="btn-stock-sales" id="btnExportSellerWise" onclick="AVLStockWithSales()">
+                    <i class="fa fa-file-excel-o"></i> AVL Stock with SALES
+                </button>
+                <button type="button" class="btn-stock-sync" id="btnSyncStock" onclick="SyncStock()">
+                    <i class="fa fa-refresh"></i> Sync Stock from Diamx
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- DevExtreme DataGrid Card -->
+    <div class="stock-grid-card">
+        <div class="stock-card-header">
+            <div class="stock-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Available Stock Records</h3>
+            </div>
+        </div>
+
+        <div class="stock-grid-body">
+            <div class="uigrid">
+                <div id="gridAvailableStock" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Access Denied Card -->
+    <div class="access-denied-card">
+        <div class="access-denied-alert">
+            <i class="fa fa-ban"></i>
+            <div>
+                <strong>Access Denied:</strong> You do not have permission to view this page.
+            </div>
+        </div>
+    </div>
+}
+</div>
+
+<script>
+    var StockList = [];
+
+    $(document).ready(function () {
+        var today = new Date();
+        var dd = String(today.getDate()).padStart(2, '0');
+        var mm = String(today.getMonth() + 1).padStart(2, '0');
+        var yyyy = today.getFullYear();
+        $("#dateCreated").val(yyyy + '-' + mm + '-' + dd);
+
+        LoadStockData();
+    });
+
+    function ExportExcel() {
+        var dateVal = $("#dateCreated").val();
+        if (!dateVal) {
+            noty({ text: 'Please select a date first.', type: 'warning', timeout: 3000 });
+            return;
+        }
+        window.location.href = '/DiamxData/ExportAvailableStockSummary?date=' + dateVal;
+    }
+
+    function AVLStockWithSales() {
+        var dateVal = $("#dateCreated").val();
+        if (!dateVal) {
+            noty({ text: 'Please select a date first.', type: 'warning', timeout: 3000 });
+            return;
+        }
+        window.location.href = '/DiamxData/ExportAVLStockWithSales?date=' + dateVal;
+    }
+
+    function LoadStockData() {
+        show_loader();
+        $.ajax({
+            type: "POST",
+            url: "/DiamxData/GetData_For_DMX_AvailableStock",
+            data: JSON.stringify({ date: $("#dateCreated").val() }),
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                hide_loader();
+                StockList = data.List || [];
+                BindGrid();
+            },
+            error: function () {
+                hide_loader();
+                noty({ text: 'Error loading stock data.', type: 'error', timeout: 3000 });
+            }
+        });
+    }
+
+    function SyncStock() {
+        if (!confirm("This will refresh all stock data from Diamx API. Continue?")) return;
+
+        show_loader();
+        $("#btnSyncStock").prop("disabled", true).html('<i class="fa fa-spinner fa-spin"></i> Syncing...');
+
+        $.ajax({
+            type: "POST",
+            url: "/DiamxData/SyncAvailableStock",
+            data: JSON.stringify({}),
+            dataType: "json",
+            contentType: 'application/json; charset=utf-8',
+            timeout: 600000,
+            success: function (data) {
+                hide_loader();
+                $("#btnSyncStock").prop("disabled", false).html('<i class="fa fa-refresh"></i> Sync Stock from Diamx');
+
+                if (data.Message && data.Message.indexOf("SUCCESS") >= 0) {
+                    noty({ text: data.Message, type: 'success', timeout: 4000 });
+                    LoadStockData();
+                } else {
+                    noty({ text: data.Message || 'Sync failed.', type: 'error', timeout: 5000 });
+                }
+            },
+            error: function () {
+                hide_loader();
+                $("#btnSyncStock").prop("disabled", false).html('<i class="fa fa-refresh"></i> Sync Stock from Diamx');
+                noty({ text: 'Sync request failed. Please try again.', type: 'error', timeout: 5000 });
+            }
+        });
+    }
+
+    function BindGrid() {
+        try {
+            var gridInstance = $("#gridAvailableStock").dxDataGrid("instance");
+            if (gridInstance) {
+                gridInstance.option("dataSource", StockList);
+                return;
+            }
+        } catch (e) {
+            // Grid not initialized yet, proceed to initialize
+        }
+
+        $("#gridAvailableStock").dxDataGrid({
+            dataSource: StockList,
+            keyExpr: "ID",
+            showBorders: true,
+            showRowLines: true,
+            rowAlternationEnabled: true,
+            allowColumnResizing: true,
+            columnAutoWidth: true,
+            wordWrapEnabled: false,
+            filterRow: { visible: true },
+            headerFilter: { visible: true },
+            searchPanel: { visible: true, width: 240, placeholder: "Search..." },
+            paging: { pageSize: 50 },
+            pager: {
+                showPageSizeSelector: true,
+                allowedPageSizes: [25, 50, 100, 200],
+                showInfo: true
+            },
+            groupPanel: { visible: true },
+            columnChooser: { enabled: true },
+            scrolling: { mode: "virtual" },
+            height: 'calc(100vh - 210px)',
+            summary: {
+                totalItems: [
+                    { column: "Stone_NO", summaryType: "count", displayFormat: "Total: {0}" },
+                    { column: "Weight", summaryType: "sum", valueFormat: { type: "fixedPoint", precision: 3 }, displayFormat: "Wt: {0}" },
+                    { column: "SaleAmt", summaryType: "sum", valueFormat: { type: "fixedPoint", precision: 2 }, displayFormat: "Amt: {0}" }
+                ]
+            },
+            columns: [
+                { dataField: "Stone_NO", caption: "Stone No", width: 110, fixed: true },
+                { dataField: "Shape", caption: "Shape", width: 80 },
+                { dataField: "Weight", caption: "Weight", width: 70, dataType: "number", format: { type: "fixedPoint", precision: 3 } },
+                { dataField: "Color", caption: "Color", width: 60 },
+                { dataField: "Clarity", caption: "Clarity", width: 65 },
+                { dataField: "Cut", caption: "Cut", width: 50 },
+                { dataField: "Polish", caption: "Pol", width: 50 },
+                { dataField: "Symm", caption: "Sym", width: 50 },
+                { dataField: "FlrIntens", caption: "Flr", width: 60 },
+                { dataField: "Lab", caption: "Lab", width: 50 },
+                { dataField: "Lab_Report_No", caption: "Report No", width: 110 },
+                { dataField: "Location", caption: "Location", width: 80 },
+                { dataField: "LiveRAP", caption: "Rap", width: 80, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "SaleDis", caption: "Dis%", width: 70, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "SaleRate", caption: "Rate", width: 90, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "SaleAmt", caption: "Amount", width: 100, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "Measurement", caption: "Measurement", width: 130 },
+                { dataField: "Total_Depth_Per", caption: "Depth%", width: 70, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "Table_Diameter_Per", caption: "Table%", width: 70, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "CrownHeight", caption: "Cr.Ht", width: 65, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "CrownAngle", caption: "Cr.Ag", width: 65, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "PavillionHeight", caption: "Pv.Ht", width: 65, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "PavillionAngle", caption: "Pv.Ag", width: 65, dataType: "number", format: { type: "fixedPoint", precision: 2 } },
+                { dataField: "GirdleName", caption: "Girdle", width: 100 },
+                { dataField: "CuletSize", caption: "Culet", width: 75 },
+                { dataField: "Ratio", caption: "Ratio", width: 60, dataType: "number", format: { type: "fixedPoint", precision: 3 } },
+                { dataField: "FlrColor", caption: "Flr Color", width: 75, visible: false },
+                { dataField: "FColor", caption: "FColor", width: 65, visible: false },
+                { dataField: "FCIntens", caption: "FC Intens", width: 75, visible: false },
+                { dataField: "FCOverton", caption: "FC Overton", width: 80, visible: false },
+                { dataField: "Diameter_Min", caption: "Dia Min", width: 70, visible: false },
+                { dataField: "Diameter_Max", caption: "Dia Max", width: 70, visible: false },
+                { dataField: "Total_Depth", caption: "Depth", width: 65, visible: false },
+                { dataField: "LabLocation", caption: "Lab Location", width: 90, visible: false },
+                {
+                    dataField: "LabLink", caption: "Lab Link", width: 80, visible: false,
+                    cellTemplate: function (container, options) {
+                        if (options.value) {
+                            $("<a>").attr("href", options.value).attr("target", "_blank").text("View").appendTo(container);
+                        }
+                    }
+                },
+                { dataField: "Lab_Report_Date", caption: "Report Date", width: 90, visible: false },
+                { dataField: "Laser_Inscription", caption: "Laser Insc.", width: 100, visible: false },
+                { dataField: "Treatment", caption: "Treatment", width: 80, visible: false },
+                { dataField: "Girdle_Per", caption: "Girdle%", width: 70, visible: false },
+                { dataField: "GirdleCon", caption: "Girdle Con", width: 80, visible: false },
+                { dataField: "CuletCon", caption: "Culet Con", width: 80, visible: false },
+                { dataField: "PairStock_No", caption: "Pair No", width: 80, visible: false },
+                { dataField: "Parcels_Stone", caption: "Parcels", width: 70, visible: false },
+                { dataField: "KeyToSymbols", caption: "Key Symbols", width: 100, visible: false },
+                { dataField: "Shade", caption: "Shade", width: 60, visible: false },
+                { dataField: "StarLength", caption: "Star Len", width: 70, visible: false },
+                { dataField: "LowerHalve", caption: "Lower Halve", width: 80, visible: false },
+                { dataField: "Table_Inclusion", caption: "Table Inc.", width: 80, visible: false },
+                { dataField: "Black_Inclusion", caption: "Black Inc.", width: 80, visible: false },
+                { dataField: "Side_Inclusion", caption: "Side Inc.", width: 80, visible: false },
+                { dataField: "Open_Inclusion", caption: "Open Inc.", width: 80, visible: false },
+                { dataField: "Brand", caption: "Brand", width: 70, visible: false },
+                { dataField: "HnA", caption: "H&A", width: 50, visible: false },
+                { dataField: "Eyeclean", caption: "Eye Clean", width: 75, visible: false },
+                { dataField: "Tinge", caption: "Tinge", width: 60, visible: false },
+                { dataField: "Feather_Inclusion", caption: "Feather Inc.", width: 90, visible: false },
+                { dataField: "Milkey", caption: "Milky", width: 60, visible: false },
+                { dataField: "Luster", caption: "Luster", width: 60, visible: false },
+                { dataField: "BIS", caption: "BIS", width: 50, visible: false },
+                { dataField: "BIC", caption: "BIC", width: 50, visible: false },
+                { dataField: "WIS", caption: "WIS", width: 50, visible: false },
+                { dataField: "WIC", caption: "WIC", width: 50, visible: false },
+                { dataField: "Internal_Graining", caption: "Int. Grain", width: 80, visible: false },
+                { dataField: "Surface_Graining", caption: "Surf. Grain", width: 80, visible: false },
+                { dataField: "Natural_Type", caption: "Natural Type", width: 90, visible: false },
+                { dataField: "ExtraFacet", caption: "Extra Facet", width: 80, visible: false },
+                { dataField: "Fancy_Color_Description", caption: "Fancy Desc.", width: 100, visible: false },
+                { dataField: "Stone_Comment", caption: "Stone Comment", width: 110, visible: false },
+                { dataField: "Comment", caption: "Comment", width: 100, visible: false },
+                { dataField: "CVD_HPHT", caption: "CVD/HPHT", width: 80 },
+                { dataField: "Diamond_Type", caption: "Diamond Type", width: 100 },
+                { dataField: "Rough_Origin", caption: "Origin", width: 70, visible: false },
+                { dataField: "COP", caption: "COP", width: 60, visible: false },
+                { dataField: "Lab_Assortment_Result", caption: "Assortment", width: 90, visible: false },
+                { dataField: "Country", caption: "Country", width: 70, visible: false },
+                { dataField: "State", caption: "State", width: 70, visible: false },
+                { dataField: "City", caption: "City", width: 70, visible: false },
+                { dataField: "StockStatus", caption: "Status", width: 70, visible: false },
+                { dataField: "NewArrival", caption: "New Arrival", width: 90, visible: false },
+                { dataField: "Remarks", caption: "Remarks", width: 90, visible: false },
+                { dataField: "Control_No", caption: "Control No", width: 90, visible: false },
+                {
+                    dataField: "Certificate_file_url", caption: "Certificate", width: 80, visible: false,
+                    cellTemplate: function (container, options) {
+                        if (options.value) {
+                            $("<a>").attr("href", options.value).attr("target", "_blank").text("View").appendTo(container);
+                        }
+                    }
+                },
+                {
+                    dataField: "Video_url", caption: "Video", width: 70, visible: false,
+                    cellTemplate: function (container, options) {
+                        if (options.value) {
+                            $("<a>").attr("href", options.value).attr("target", "_blank").text("Play").appendTo(container);
+                        }
+                    }
+                }
+            ],
+            export: {
+                enabled: @(ViewBag.IsAdmin == true || (ViewBag.CanExport != null && (bool)ViewBag.CanExport) ? "true" : "false"),
+                formats: ['xlxs'],
+                allowExportSelectedData: false,
+            },
+            onExporting(e) {
+                if (e.format == 'pdf') {
+                    const doc = new jsPDF();
+
+                    DevExpress.pdfExporter.exportDataGrid({
+                        jsPDFDocument: doc,
+                        component: e.component,
+                        indent: 5,
+                    }).then(() => {
+                        doc.save('AvailableStock.pdf');
+                    });
+                }
+                else if (e.format == 'xlxs') {
+                    const workbook = new ExcelJS.Workbook();
+                    const worksheet = workbook.addWorksheet('AvailableStock');
+
+                    DevExpress.excelExporter.exportDataGrid({
+                        component: e.component,
+                        worksheet,
+                        autoFilterEnabled: true,
+                    }).then(() => {
+                        workbook.xlsx.writeBuffer().then((buffer) => {
+                            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'AvailableStock.xlsx');
+                        });
+                    });
+                }
+            }
+        });
+    }
+</script>

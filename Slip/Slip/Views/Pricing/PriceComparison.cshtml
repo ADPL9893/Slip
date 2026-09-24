@@ -1,0 +1,336 @@
+
+@{
+    ViewBag.Title = "PriceComparison";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .matrix-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .matrix-item {
+        flex: 1 1 calc(33.333% - 20px);
+        min-width: 400px;
+    }
+
+    @@media (max-width: 1400px) {
+        .matrix-item {
+            flex: 1 1 calc(50% - 20px);
+        }
+    }
+
+    @@media (max-width: 900px) {
+        .matrix-item {
+            flex: 1 1 100%;
+            min-width: auto;
+        }
+    }
+
+    .matrix-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        padding: 15px;
+        overflow: hidden;
+    }
+
+    .matrix-header {
+        background: #f5f8fa;
+        color: #333;
+        padding: 8px 15px;
+        font-weight: bold;
+        text-align: left;
+        border-bottom: 1px solid #e7ecf1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        user-select: none;
+    }
+
+        .matrix-header:hover {
+            background: #eef1f5;
+        }
+
+        .matrix-header i {
+            margin-right: 10px;
+            font-size: 0.8rem;
+            transition: transform 0.2s;
+        }
+
+        .matrix-header.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+    .table-comparison {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 1.4rem;
+    }
+
+        .table-comparison th, .table-comparison td {
+            border: 1px solid #dee2e6;
+            padding: 3px;
+            text-align: center;
+            min-width: 60px;
+        }
+
+        .table-comparison th {
+            background-color: #f8f9fa;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+    .color-col {
+        background-color: #f1f1f1;
+        font-weight: bold;
+        position: sticky;
+        left: 0;
+        z-index: 25 !important;
+    }
+
+    .price-old {
+        color: #888;
+        font-size: 1.2rem;
+        display: block;
+    }
+
+    .price-new {
+        font-size: 1.3rem;
+        font-weight: bold;
+        display: block;
+    }
+
+    .price-diff {
+        font-size: 1.2rem;
+        display: block;
+    }
+
+    .diff-pos {
+        color: #28a745;
+    }
+
+    .diff-neg {
+        color: #dc3545;
+    }
+
+    .table-responsive {
+        max-height: 500px;
+        overflow: auto;
+    }
+    /* Responsive adjustment */
+    @@media (max-width: 768px) {
+        .matrix-card {
+            padding: 5px;
+        }
+
+        .table-comparison th, .table-comparison td {
+            padding: 4px;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+@if (ViewBag.IsAdmin == true || ViewBag.CanView == true || ViewBag.CanAdd == true || ViewBag.CanEdit == true)
+{
+<div ng-controller="PriceComparisonController">
+    <div class="page-title">
+        <h3 style="color: red; font-weight: bold; margin-bottom: 20px;">Pricing</h3>
+    </div>
+
+    <div class="card">
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="form-group">
+                    <label>Shape Category</label>
+                    <select chosen="MSTShapeList" class="form-control input-sm" ng-options="item.ShapeName as item.ShapeName for item in MSTShapeList" ng-model="Filter.Shape">
+                        <option value="">Select Shape</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12">
+                <div class="form-group">
+                    <label>Grad Type</label>
+                    <select chosen="GradType" class="form-control" ng-model="Filter.GradType">
+                        <option value="GR">GR</option>
+                        <option value="NGR">NGR</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12" style="margin-top: 25px;">
+                <button class="btn btn-primary" ng-click="FetchData()">
+                    <i class="fa fa-search"></i> Search
+                </button>
+                @if (ViewBag.IsAdmin == true || (ViewBag.CanExport != null && (bool)ViewBag.CanExport))
+                {
+                    <button class="btn btn-success" ng-click="ExportExcel()" ng-disabled="!SizeGroups.length">
+                        <i class="fa fa-file-excel-o"></i> Export Excel
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="matrix-container">
+            <div ng-repeat="sg in SizeGroups" class="matrix-item">
+                <div class="matrix-card" style="padding: 0; border: 1px solid #e7ecf1;">
+                    <div class="matrix-header" ng-click="toggleGroup(sg)" ng-class="{'collapsed': collapsedGroups[sg]}">
+                        <i class="fa" ng-class="collapsedGroups[sg] ? 'fa-caret-right' : 'fa-caret-down'"></i>
+                        GroupName: {{sg}} - Shape: {{Filter.ShapeCategory}}
+                    </div>
+                    <div class="table-responsive" ng-show="!collapsedGroups[sg]">
+                        <table class="table-comparison">
+                            <thead>
+                                <tr>
+                                    <th class="color-col">Color</th>
+                                    <th ng-repeat="cl in Clarities">{{cl.Name}}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="co in Colors">
+                                    <td class="color-col">{{co.Name}}</td>
+                                    <td ng-repeat="cl in Clarities">
+                                        <div ng-init="val = GetValue(sg, co.Name, cl.Name)">
+                                            <span class="price-old" title="Old Price">{{val.OldPrice || ''}}</span>
+                                            <span class="price-new" ng-class="{'diff-pos': val.NewPrice > val.OldPrice, 'diff-neg': val.NewPrice < val.OldPrice}" title="New Price">{{val.OldPrice > 0 ? val.NewPrice : val.NewPrice || ''}}</span>
+                                            <span class="price-diff" ng-class="{'diff-pos': val.NewPrice > val.OldPrice, 'diff-neg': val.NewPrice < val.OldPrice}" title="Difference">
+                                                {{val.DiffAmt ? (val.NewPrice > val.OldPrice ? '+' : '') + (val.NewPrice - val.OldPrice) : ''}}
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div ng-if="IsLoading" class="text-center" style="padding: 50px;">
+            <i class="fa fa-spinner fa-spin fa-3x"></i>
+            <p>Loading Comparison Data...</p>
+        </div>
+
+        <div ng-if="!IsLoading && SizeGroups.length == 0" class="text-center" style="padding: 50px; color: #888;">
+            <i class="fa fa-info-circle fa-3x"></i>
+            <p>No data found for the selected criteria.</p>
+        </div>
+    </div>
+</div>
+}
+else
+{
+<div class="card" style="padding: 20px; margin: 20px 0;">
+    <div class="alert alert-danger" style="margin: 0; font-size: 15px; font-weight: 500;">
+        <i class="fa fa-ban" style="margin-right: 8px;"></i>
+        <strong>Access Denied:</strong> You do not have permission to view this page.
+    </div>
+</div>
+}
+
+<script>
+    var app = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+    app.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+    app.controller('PriceComparisonController', function ($scope, $http, $timeout) {
+        $scope.CanView = ('@ViewBag.CanView' === 'True');
+        $scope.CanExport = ('@ViewBag.CanExport' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.Filter = {
+            Shape: 'Round',
+            GradType: 'GR'
+        };
+
+        $scope.GetMasterData = async function () {
+            try {
+                var response = await $http.get('@Url.Action("Get_DataList_DIAMaster", "Pricing")');
+                $timeout(function () {
+                    $scope.MSTShapeList = response.data.DIAShapeList;
+                });
+            } catch (error) {
+                console.error("Error fetching master data:", error);
+            }
+        };
+        $scope.GetMasterData();
+
+        $scope.Colors = [];
+        $scope.Clarities = [];
+        $scope.SizeGroups = [];
+        $scope.ComparisonData = [];
+        $scope.IsLoading = false;
+        $scope.collapsedGroups = {};
+
+        $scope.toggleGroup = function (sg) {
+            $scope.collapsedGroups[sg] = !$scope.collapsedGroups[sg];
+        };
+
+        $scope.FetchData = function () {
+            $scope.IsLoading = true;
+            $scope.SizeGroups = [];
+
+            $http.post('/Pricing/GetPriceComparisonData', $scope.Filter).then(function (response) {
+                if (response.data.Status === "Error") {
+                    noty({ text: response.data.Message, type: 'error', layout: 'topCenter', timeout: 3000 });
+                } else {
+                    $scope.Colors = response.data.Colors;
+                    $scope.Clarities = response.data.Clarities;
+                    $scope.SizeGroups = response.data.SizeGroups;
+                    $scope.ComparisonData = response.data.ComparisonData;
+                }
+                $scope.IsLoading = false;
+            }, function (error) {
+                $scope.IsLoading = false;
+                noty({ text: 'Error fetching data', type: 'error', layout: 'topCenter', timeout: 3000 });
+            });
+        };
+
+        $scope.GetValue = function (sizeGroup, color, clarity) {
+            if (!$scope.ComparisonData) return null;
+            return $scope.ComparisonData.find(function (item) {
+                return item.SizeGroup === sizeGroup && item.Color === color && item.Clarity === clarity;
+            });
+        };
+
+        $scope.ExportExcel = function () {
+            $scope.IsLoading = true;
+            $http.post('/Pricing/ExportPriceComparisonExcel', $scope.Filter).then(function (response) {
+                debugger
+                if (response.data.Status === "Success") {
+                    window.location.href = '/Upload/ExportExcel/' + response.data.FileName;
+                } else {
+                    noty({ text: response.data.Message, type: 'error', layout: 'topCenter', timeout: 3000 });
+                }
+                $scope.IsLoading = false;
+            }, function (error) {
+                $scope.IsLoading = false;
+                noty({ text: 'Error exporting excel', type: 'error', layout: 'topCenter', timeout: 3000 });
+            });
+        };
+
+        // Initial Load
+        //$scope.FetchData();
+    });
+</script>

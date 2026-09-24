@@ -1,0 +1,9 @@
+Time: 10-09-2026 14:23:36
+--------------------------------------------------------------------------------------------
+Input string was not in a correct format.
+--------------------------------------------------------------------------------------------
+   at System.Number.StringToNumber(String str, NumberStyles options, NumberBuffer& number, NumberFormatInfo info, Boolean parseDecimal)
+   at System.Number.ParseInt32(String s, NumberStyles style, NumberFormatInfo info)
+   at System.String.System.IConvertible.ToInt32(IFormatProvider provider)
+   at Slip.Utility.CommonMethods.ToNullableInt(Object val) in d:\Slip\Slip\Utility\CommonMethods.cs:line 1389
+   at Slip.Controllers.SlipController.Jumbo_Date_Wise_Loss_Summary_Insert_Using_Excel(HttpPostedFileBase excelFile) in d:\Slip\Slip\Controllers\SlipController.cs:line 1403

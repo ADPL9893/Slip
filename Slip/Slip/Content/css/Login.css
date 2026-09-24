@@ -1,0 +1,519 @@
+/* ==========================================================================
+   ADPL - Modern SaaS Enterprise Login Portal Theming & Animations
+   ========================================================================== */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Deep Midnight Luxury SaaS Gradient Background */
+body.adpl-login-page-body, body {
+    margin: 0 !important;
+    padding: 20px !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+    background: radial-gradient(circle at 12% 18%, rgba(2, 132, 199, 0.32) 0%, transparent 42%),
+                radial-gradient(circle at 88% 82%, rgba(99, 102, 241, 0.26) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 60%),
+                linear-gradient(135deg, #070e1b 0%, #0b192e 38%, #0f2b48 72%, #081628 100%) !important;
+    background-color: #0b192e !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+}
+
+/* Ambient Floating Decorative Orbs */
+.ambient-glow-orb {
+    position: fixed !important;
+    border-radius: 50% !important;
+    filter: blur(95px) !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+    animation: orbFloat 14s ease-in-out infinite alternate !important;
+}
+
+.orb-left {
+    width: 440px !important;
+    height: 440px !important;
+    background: rgba(56, 189, 248, 0.25) !important;
+    top: -80px !important;
+    left: -80px !important;
+}
+
+.orb-right {
+    width: 500px !important;
+    height: 500px !important;
+    background: rgba(99, 102, 241, 0.22) !important;
+    bottom: -100px !important;
+    right: -100px !important;
+    animation-delay: -7s !important;
+}
+
+/* Fullscreen Background Floating Diamond Canvas */
+.diamond-particles-canvas {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+}
+
+@keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(45px, 35px) scale(1.08); }
+    100% { transform: translate(-35px, 45px) scale(0.94); }
+}
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(28px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes floatLogo {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-7px); }
+}
+
+@keyframes sparkleShineBright {
+    0%, 100% {
+        transform: scale(0.35) rotate(0deg);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.25) rotate(90deg);
+        opacity: 1.0;
+        filter: drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
+    }
+}
+
+@keyframes sparkleShineCyan {
+    0%, 100% {
+        transform: scale(0.35) rotate(0deg);
+        opacity: 0.3;
+    }
+    50% {
+        transform: scale(1.25) rotate(90deg);
+        opacity: 1.0;
+        filter: drop-shadow(0 0 10px #0284c7) drop-shadow(0 0 4px #38bdf8);
+    }
+}
+
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-7px); }
+    40%, 80% { transform: translateX(7px); }
+}
+
+/* Master Wrapper - High z-index to stay above background floating diamonds */
+.adpl-login-container {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    position: relative !important;
+    z-index: 10 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Master Two-Column Card Box */
+.adpl-login-card {
+    width: 100% !important;
+    max-width: 880px !important;
+    min-height: 480px !important;
+    background: #ffffff !important;
+    border-radius: 28px !important;
+    box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(255, 255, 255, 0.18),
+                0 8px 24px -4px rgba(2, 132, 199, 0.15) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    overflow: hidden !important;
+    position: relative !important;
+    z-index: 10 !important;
+    animation: cardEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+/* Left Brand Logo Panel (Harmonious Richer Mid-Tone Sky-Blue Gradient matching page background with sharp Black logo contrast) */
+.adpl-brand-panel {
+    width: 48% !important;
+    background: linear-gradient(145deg, #7dd3fc 0%, #38bdf8 45%, #0284c7 100%) !important;
+    background-color: #38bdf8 !important;
+    border-radius: 28px 30% 30% 28px !important;
+    box-shadow: 0 10px 30px rgba(2, 132, 199, 0.25) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 40px 32px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* High-Visibility Diamond Sparkle Stars in Brand Panel */
+.brand-sparkle {
+    position: absolute !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+}
+
+/* Sparkle 1: Top-Right Deep Cyan/Blue */
+.sparkle-1 {
+    top: 18% !important;
+    right: 16% !important;
+    width: 24px !important;
+    height: 24px !important;
+    color: #0369a1 !important;
+    animation: sparkleShineCyan 3.2s ease-in-out infinite !important;
+}
+
+/* Sparkle 2: Top-Left Solid Bright White */
+.sparkle-2 {
+    top: 20% !important;
+    left: 15% !important;
+    width: 24px !important;
+    height: 24px !important;
+    color: #ffffff !important;
+    animation: sparkleShineBright 2.8s ease-in-out infinite 0.4s !important;
+}
+
+/* Sparkle 3: Bottom-Left Solid Bright White (Upper line) */
+.sparkle-3 {
+    bottom: 25% !important;
+    left: 14% !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #ffffff !important;
+    animation: sparkleShineBright 3.4s ease-in-out infinite 1.2s !important;
+}
+
+/* Sparkle 4: Bottom-Left Deep Cyan/Blue */
+.sparkle-4 {
+    bottom: 16% !important;
+    left: 22% !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: #0369a1 !important;
+    animation: sparkleShineCyan 3.6s ease-in-out infinite 0.8s !important;
+}
+
+/* Sparkle 5: Bottom-Right Solid Bright White */
+.sparkle-5 {
+    bottom: 20% !important;
+    right: 16% !important;
+    width: 22px !important;
+    height: 22px !important;
+    color: #ffffff !important;
+    animation: sparkleShineBright 3.0s ease-in-out infinite 1.6s !important;
+}
+
+.adpl-brand-logo-wrap {
+    text-align: center !important;
+    position: relative !important;
+    z-index: 3 !important;
+    animation: floatLogo 4.5s ease-in-out infinite !important;
+}
+
+.adpl-brand-logo-wrap img {
+    max-width: 100% !important;
+    width: 320px !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 auto !important;
+    filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.12)) !important;
+    transition: transform 0.3s ease !important;
+}
+
+.adpl-brand-logo-wrap img:hover {
+    transform: scale(1.04) !important;
+}
+
+/* Right Login Form Panel */
+.adpl-form-panel {
+    width: 52% !important;
+    padding: 48px 44px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    background: #ffffff !important;
+    position: relative !important;
+}
+
+.adpl-header-group {
+    text-align: center !important;
+    margin-bottom: 26px !important;
+}
+
+.adpl-login-title {
+    font-size: 32px !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    letter-spacing: -0.5px !important;
+    margin: 0 0 6px 0 !important;
+    line-height: 1.2 !important;
+}
+
+.adpl-login-subtitle {
+    font-size: 13.5px !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+}
+
+/* Custom Input Field Groups */
+.adpl-input-group {
+    position: relative !important;
+    width: 100% !important;
+    margin-bottom: 18px !important;
+}
+
+.adpl-input-field {
+    width: 100% !important;
+    height: 48px !important;
+    padding: 0 46px 0 16px !important;
+    background-color: #f1f5f9 !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #0f172a !important;
+    outline: none !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+    transition: all 0.22s ease !important;
+}
+
+.adpl-input-field:focus {
+    background-color: #ffffff !important;
+    border-color: #0284c7 !important;
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.16) !important;
+}
+
+/* Vector SVG Icons */
+.adpl-input-icon {
+    position: absolute !important;
+    right: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+}
+
+.input-svg-icon {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #64748b !important;
+    transition: stroke 0.2s ease !important;
+}
+
+.adpl-input-field:focus ~ .adpl-input-icon .input-svg-icon {
+    stroke: #0284c7 !important;
+}
+
+/* Password Toggle Button */
+.adpl-pwd-toggle-btn {
+    position: absolute !important;
+    right: 10px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    outline: none !important;
+}
+
+.toggle-svg-icon {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: #64748b !important;
+    transition: stroke 0.2s ease !important;
+}
+
+.adpl-pwd-toggle-btn:hover .toggle-svg-icon {
+    stroke: #0284c7 !important;
+}
+
+/* Error Alert Card */
+.adpl-error-card {
+    background: #fef2f2 !important;
+    border: 1.5px solid #fecaca !important;
+    border-left: 4px solid #ef4444 !important;
+    border-radius: 9px !important;
+    padding: 10px 14px !important;
+    margin-bottom: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    color: #991b1b !important;
+    animation: shakeError 0.4s ease-in-out both !important;
+}
+
+.alert-svg-icon {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #ef4444 !important;
+    flex-shrink: 0 !important;
+}
+
+/* High-Impact Login Button */
+.adpl-btn-submit {
+    width: 100% !important;
+    height: 48px !important;
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 9px !important;
+    box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    margin-top: 4px !important;
+}
+
+.btn-svg-icon {
+    width: 18px !important;
+    height: 18px !important;
+    stroke: #ffffff !important;
+}
+
+.adpl-btn-submit:hover:not(:disabled) {
+    background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 22px rgba(2, 132, 199, 0.45) !important;
+}
+
+.adpl-btn-submit:active:not(:disabled) {
+    transform: translateY(0) scale(0.99) !important;
+}
+
+.adpl-btn-submit:disabled {
+    background: #94a3b8 !important;
+    color: #e2e8f0 !important;
+    opacity: 0.7 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.adpl-form-footer {
+    margin-top: 22px !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    color: #94a3b8 !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+}
+
+.shield-svg-icon {
+    width: 14px !important;
+    height: 14px !important;
+    stroke: #0284c7 !important;
+    flex-shrink: 0 !important;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints for Mobile & Tablet
+   ========================================================================== */
+@media (max-width: 991px) {
+    .adpl-login-card {
+        max-width: 740px !important;
+        min-height: auto !important;
+    }
+    .adpl-brand-panel {
+        padding: 30px 24px !important;
+    }
+    .adpl-brand-logo-wrap img {
+        width: 260px !important;
+    }
+    .adpl-form-panel {
+        padding: 40px 32px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    body.adpl-login-page-body, body {
+        padding: 15px !important;
+        align-items: center !important;
+    }
+    .adpl-login-card {
+        flex-direction: column !important;
+        max-width: 440px !important;
+        border-radius: 20px !important;
+    }
+    .adpl-brand-panel {
+        width: 100% !important;
+        height: 180px !important;
+        border-radius: 20px 20px 0 0 !important;
+        box-shadow: none !important;
+        padding: 24px 20px !important;
+    }
+    .adpl-brand-logo-wrap img {
+        width: 220px !important;
+    }
+    .adpl-form-panel {
+        width: 100% !important;
+        padding: 30px 22px 34px !important;
+    }
+    .adpl-login-title {
+        font-size: 26px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    body.adpl-login-page-body, body {
+        padding: 10px !important;
+    }
+    .adpl-login-card {
+        border-radius: 16px !important;
+    }
+    .adpl-brand-panel {
+        height: 150px !important;
+        padding: 18px !important;
+    }
+    .adpl-brand-logo-wrap img {
+        width: 190px !important;
+    }
+    .adpl-form-panel {
+        padding: 24px 18px 28px !important;
+    }
+    .adpl-login-title {
+        font-size: 24px !important;
+    }
+    .adpl-input-field {
+        height: 44px !important;
+        font-size: 13.5px !important;
+    }
+    .adpl-btn-submit {
+        height: 44px !important;
+        font-size: 14px !important;
+    }
+}

@@ -1,0 +1,16 @@
+@media print and (width: 30mm) and (height: 18mm) {
+    @page {
+        size: 297mm 210mm; /* landscape */
+        /* you can also specify margins here: */
+        margin: 25mm;
+        margin-right: 45mm; /* for compatibility with both A4 and Letter */
+       
+    }
+}
+
+
+/* A4 Landscape*/
+/*@page {
+    size: 30mm 30mm portrait;
+    margin:0;
+}*/

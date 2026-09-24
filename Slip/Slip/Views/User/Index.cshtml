@@ -1,0 +1,697 @@
+@{
+    ViewBag.Title = "User Account";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       User Account Update / Create - Modern Scoped Card View & SaaS Styling
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .user-account-wrapper {
+        padding: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .user-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .user-form-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
+    .user-perm-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Top Card */
+    .user-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 12px 18px !important;
+        margin-bottom: 12px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .user-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .user-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .user-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .user-header-card:hover .user-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .user-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .user-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .user-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    .user-title-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .user-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .user-mode-pill {
+        background: #e0f2fe;
+        color: #0369a1;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 10px;
+        border-radius: 20px;
+        border: 1px solid #bae6fd;
+    }
+
+    .user-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Action Buttons */
+    .btn-user-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 8px 20px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+        transition: all 0.22s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-user-save:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4) !important;
+        color: #ffffff !important;
+    }
+
+    .btn-user-clear {
+        background: #f8fafc !important;
+        color: #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-user-clear:hover {
+        background: #e2e8f0 !important;
+        color: #1e293b !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    .btn-user-back {
+        background: #ffffff !important;
+        color: #0284c7 !important;
+        border: 1.5px solid #0284c7 !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-user-back:hover {
+        background: #e0f2fe !important;
+        color: #0369a1 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Section Cards */
+    .user-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        margin-bottom: 12px !important;
+        overflow: hidden !important;
+        transition: all 0.25s ease !important;
+    }
+    .user-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .user-card-header {
+        padding: 12px 18px !important;
+        background: #f8fafc !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+    }
+
+    .user-card-title {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .user-card-body {
+        padding: 18px 20px !important;
+    }
+
+    /* Form Fields Grid */
+    .user-form-grid-top {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 14px;
+    }
+
+    .user-form-grid-flags {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+    }
+
+    .user-form-grid-bottom {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .form-group-custom {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .form-group-custom label {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #475569 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        margin: 0 !important;
+    }
+
+    .form-control-custom {
+        height: 38px;
+        border-radius: 8px;
+        border: 1.5px solid #cbd5e1 !important;
+        padding: 6px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #0f172a;
+        background-color: #ffffff !important;
+        outline: none;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        transition: all 0.2s ease;
+        width: 100%;
+    }
+    .form-control-custom:focus {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18) !important;
+    }
+
+    /* Checkbox Badge Container */
+    .checkbox-pill-wrap {
+        height: 38px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1.5px solid #cbd5e1;
+        background: #f8fafc;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s ease;
+    }
+    .checkbox-pill-wrap:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+    .checkbox-pill-wrap input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: #0284c7;
+        margin: 0;
+    }
+    .checkbox-pill-wrap span {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    /* Module Group Grid Layout */
+    .module-group-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .module-group-card {
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.2s ease;
+    }
+    .module-group-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    }
+
+    .module-group-header {
+        padding: 8px 12px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .module-group-body {
+        padding: 10px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 280px;
+        overflow-y: auto;
+    }
+
+    .module-item-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .module-item-row:hover {
+        background: #f0f9ff;
+        border-color: #7dd3fc;
+    }
+    .module-item-row input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        cursor: pointer;
+        accent-color: #0284c7;
+        margin: 0;
+    }
+    .module-item-row .label-text {
+        font-size: 12px;
+        font-weight: 600;
+        color: #1e293b;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .user-footer-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-top: 6px;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        .user-header-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .user-header-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .user-form-grid-top {
+            grid-template-columns: 1fr;
+        }
+        .module-group-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div ng-controller="UserMaster" class="user-account-wrapper">
+    <a id="lnkGoogle" style="display:none;" href="@Url.Action("Index", "INV_StockHistory")"></a>
+
+    <!-- Top Page Header Card -->
+    <div class="user-header-card">
+        <div class="user-header-left">
+            <div class="user-header-icon">
+                <i class="fa fa-user"></i>
+            </div>
+            <div class="user-header-title-wrap">
+                <div class="user-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / <a href="@Url.Action("UserDetail", "User")">User Detail</a> / <span>{{BtnName === 'UPDATE' ? 'Edit User' : 'Create User'}}</span>
+                </div>
+                <div class="user-title-row">
+                    <h4 class="user-header-title">{{BtnName === 'UPDATE' ? 'Edit User Account' : 'Create User Account'}}</h4>
+                    <span class="user-mode-pill">{{BtnName}} MODE</span>
+                </div>
+            </div>
+        </div>
+        <div class="user-header-actions">
+            <button class="btn-user-save" ng-click="InsertUpdateSECUser()" type="button">
+                <i class="fa fa-check-circle"></i> {{BtnName}}
+            </button>
+            <button class="btn-user-clear" ng-click="Clear()" type="button">
+                <i class="fa fa-eraser"></i> Clear
+            </button>
+            <a class="btn-user-back" href="@Url.Action("UserDetail", "User")">
+                <i class="fa fa-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Section 1: User Account Details Card -->
+    <div class="user-card user-form-card">
+        <div class="user-card-header">
+            <h5 class="user-card-title">
+                <i class="fa fa-info-circle text-primary"></i> User Account Details
+            </h5>
+        </div>
+        <div class="user-card-body">
+            <!-- Hidden User ID -->
+            <input type="hidden" ng-model="UserMaster.UserID" />
+
+            <!-- Row 1: Username & Password -->
+            <div class="user-form-grid-top">
+                <div class="form-group-custom">
+                    <label for="UserName">User Name <span class="text-danger">*</span></label>
+                    <input type="text" id="UserName" class="form-control-custom" ng-model="UserMaster.UserName" placeholder="Enter User Name" autocomplete="off" />
+                </div>
+                <div class="form-group-custom">
+                    <label for="Password">Password <span class="text-danger">*</span></label>
+                    <input type="password" id="Password" class="form-control-custom" ng-model="UserMaster.Password" placeholder="Enter Password" autocomplete="new-password" />
+                </div>
+            </div>
+
+            <!-- Row 2: Status & Flag Checkboxes -->
+            <div class="user-form-grid-flags">
+                <label class="checkbox-pill-wrap">
+                    <input type="checkbox" ng-model="UserMaster.IsAdmin" ng-click="HideShowIsActive(UserMaster.IsAdmin);" />
+                    <span>Administrator (IsAdmin)</span>
+                </label>
+                <label class="checkbox-pill-wrap">
+                    <input type="checkbox" ng-model="UserMaster.IsActive" />
+                    <span>Active Account (IsActive)</span>
+                </label>
+                <label class="checkbox-pill-wrap">
+                    <input type="checkbox" ng-model="UserMaster.IsDashBoardShow" />
+                    <span>Show Dashboard (IsDashBoardShow)</span>
+                </label>
+            </div>
+
+            <!-- Row 3: Remarks -->
+            <div class="user-form-grid-bottom">
+                <div class="form-group-custom">
+                    <label for="Remarks">Remarks</label>
+                    <input type="text" id="Remarks" class="form-control-custom" ng-model="UserMaster.Remarks" placeholder="Enter Remarks / Description" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Module Permissions Card (Conditional via IsActiveShow) -->
+    <div class="user-card user-perm-card" ng-show="IsActiveShow">
+        <div class="user-card-header">
+            <h5 class="user-card-title">
+                <i class="fa fa-th-large text-primary"></i> Module Access Permissions
+            </h5>
+        </div>
+        <div class="user-card-body">
+            <div class="module-group-grid">
+                <div class="module-group-card" ng-repeat="items in GetSYSModuleGroupList">
+                    <div class="module-group-header">
+                        <i class="fa fa-folder-open-o"></i> {{items.GroupName}}
+                    </div>
+                    <div class="module-group-body">
+                        <label class="module-item-row" ng-repeat="item in GetSYSModuleList" ng-if="item.GroupName==items.GroupName">
+                            <input type="checkbox" ng-model="item.id" ng-change="CheckBoxList(item.id,item.ModuleID);" />
+                            <span class="label-text">{{item.value}}</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="user-footer-actions" style="margin-top: 18px; border-top: 1px solid #e2e8f0; padding-top: 14px;">
+                <button class="btn-user-save" ng-click="InsertUpdateSECUser()" type="button">
+                    <i class="fa fa-check-circle"></i> {{BtnName}}
+                </button>
+                <button class="btn-user-clear" ng-click="Clear()" type="button">
+                    <i class="fa fa-eraser"></i> Clear
+                </button>
+                <a class="btn-user-back" href="@Url.Action("UserDetail", "User")">
+                    <i class="fa fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var Paramdata = [{ UserID: 0 }];
+    var Action = "INSERT";
+    var UserID = 0;
+    if ('@ViewBag.UserID' != 0) {
+        UserID = '@ViewBag.UserID';
+    }
+
+    module = angular.module('app', []);
+    module.controller("UserMaster", ['$scope', '$filter', '$http', '$q', '$interval', function ($scope, $filter, $http, $q, $interval, $window) {
+
+        $scope.UserMaster = {};
+        var ImportTerms = [];
+        $scope.DaytermsDetails = [];
+        $scope.GetSYSModuleList = [];
+        $scope.BtnName = "SAVE";
+        $scope.IsActiveShow = true;
+
+        // ***************************** GetData ******************************************//
+        var loopPromises = [];
+        var promise = $http.get('@Url.Action("Get_SYS_ModuleDataList", "User")').then(function (response) {
+            var SYSModuleList = [];
+            for (var i = 0; i < response.data.SYSModuleList.length; i++) {
+                var obj = { id: response.data.SYSModuleList[i]["ModuleID"], value: response.data.SYSModuleList[i]["ModuleName"], ModuleID: response.data.SYSModuleList[i]["ModuleID"], GroupName: response.data.SYSModuleList[i]["GroupName"] };
+                SYSModuleList.push(obj);
+            }
+
+            $scope.GetSYSModuleList = SYSModuleList;
+            var SYSModuleGroupList = [];
+            for (var i = 0; i < response.data.SYSModuleGroupList.length; i++) {
+                var obj = { id: response.data.SYSModuleGroupList[i]["GroupID"], value: response.data.SYSModuleGroupList[i]["GroupName"], GroupName: response.data.SYSModuleGroupList[i]["GroupName"] };
+                SYSModuleGroupList.push(obj);
+            }
+
+            $scope.GetSYSModuleGroupList = SYSModuleGroupList;
+        });
+        loopPromises.push(promise);
+        // ***************************** EndGetData ***************************************//
+
+        $scope.HideShowIsActive = function (IsAdmin) {
+            if (IsAdmin == true) {
+                $scope.IsActiveShow = false;
+                $scope.GetSYSModuleList.forEach(function (item) {
+                    item.id = false;
+                });
+                ImportTerms = [];
+                $scope.DaytermsDetails = [];
+            }
+            else {
+                $scope.IsActiveShow = true;
+            }
+        };
+
+        $scope.SetEditData = function () {
+            if (UserID != 0) {
+                $scope.BtnName = "UPDATE";
+                Action = "UPDATE";
+                show_loader();
+                $http({
+                    method: "POST",
+                    dataType: "json",
+                    data: JSON.stringify({ "UserID": UserID }),
+                    url: '@Url.Action("Get_SEC_UserPrivileges_Edit", "User")',
+                    contentType: "application/json; charset=utf-8"
+                }).then(function (ret) {
+                    hide_loader();
+                    debugger;
+                    $scope.UserMaster = ret.data.List[0];
+                    $scope.UserMaster.IsAdmin = ret.data.List[0].IsAdmin == "True" ? true : false;
+                    $scope.UserMaster.IsActive = ret.data.List[0].IsActive == "True" ? true : false;
+                    $scope.UserMaster.IsDashBoardShow = ret.data.List[0].IsDashBoardShow == "True" ? true : false;
+                    if ($scope.UserMaster.IsAdmin == true) {
+                        $scope.IsActiveShow = false;
+                    }
+                    $scope.GetSYSModuleList.forEach(function (itm) {
+                        ret.data.SEC_UserPrivileges.forEach(function (item) {
+                            if (itm.id == item.ModuleID) {
+                                itm.id = true;
+                                ImportTerms.push({
+                                    'ModuleID': parseInt(itm.ModuleID),
+                                });
+                            }
+                        });
+                    });
+                    debugger;
+                });
+            }
+        };
+
+        $q.all(loopPromises).then(function (data) {
+            $scope.SetEditData();
+        });
+
+        $scope.CheckBoxList = function (id, ModuleID) {
+            if (id == true) {
+                ImportTerms.push({
+                    'ModuleID': parseInt(ModuleID),
+                    'Remarks': $scope.UserMaster.Remarks
+                });
+            }
+            else if (id == false) {
+                var DTArr = eval(ImportTerms);
+                var index = -1;
+                for (var i = 0; i < DTArr.length; i++) {
+                    if (DTArr[i].ModuleID === parseInt(ModuleID)) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index === -1) {
+                    Noty("error", "Something gone wrong");
+                }
+                ImportTerms.splice(index, 1);
+            }
+            $scope.DaytermsDetails = ImportTerms;
+        };
+
+        $scope.InsertUpdateSECUser = function () {
+            if ($scope.UserMaster.EmployeeID == undefined || $scope.UserMaster.EmployeeID == "") {
+                Noty("error", "Please Select Employee");
+                return;
+            }
+            if (Action == "UPDATE") {
+                if ($scope.UserMaster.Remarks == undefined || $scope.UserMaster.Remarks == "") {
+                    Noty("error", "Please Enter Remark");
+                    return;
+                }
+            }
+            show_loader();
+            var response = $http({
+                method: "post",
+                async: true,
+                url: '@Url.Action("SEC_UserPrivileges_Insert_Update_Delete", "User")',
+                data: { model: $scope.UserMaster, ImportTerms: ImportTerms, Action: Action },
+                dataType: "json"
+            }).then(function (ret) {
+                hide_loader();
+                if (ret.data == "Record Is Inserted") {
+                    $scope.Clear();
+                    Noty("success", "Data Save Success Fully!");
+                }
+                else if (ret.data == "Record Is Updated") {
+                    $scope.Clear();
+                    Noty("success", "Data Update Success Fully!");
+                }
+                else {
+                    Noty("error", "!!!data not save");
+                }
+            });
+        };
+
+        $scope.Clear = function () {
+            $scope.UserMaster = {};
+            $scope.BtnName = "SAVE";
+            window.location.href = '@Url.Action("UserDetail", "User")';
+        };
+    }]);
+</script>
+<script type="text/javascript">
+    $('#birthdate').datepicker({
+        format: "dd/mm/yyyy",
+        autoclose: true,
+        todayHighlight: true
+    });
+</script>

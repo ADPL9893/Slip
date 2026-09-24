@@ -1,0 +1,675 @@
+﻿@{
+    ViewBag.Title = "DailyReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    /* ========== COLOR SCHEME ========== */
+    /* Color 1: Main Headers - Orange/Peach */
+    /* Color 2: Column Headers - Light Yellow */
+    /* Color 3: Alternate Rows - Light Blue */
+    /* Color 4: Total Rows - Light Green */
+
+    #reportContent {
+        width: 75%;
+        margin:auto;
+    }
+
+    #reportContent table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 15px;
+        background-color: white;
+    }
+
+        #reportContent table th,
+        #reportContent table td {
+            border: 1px solid #000;
+            padding: 2px 5px;
+            text-align: center;
+        }
+
+        /* Color 2: Column Headers - Light Yellow/Gold */
+        #reportContent table th {
+            background-color: #FFE4B5;
+            font-weight: bold;
+            color: #000;
+            border: 1px solid #000;
+        }
+
+    /* Color 1: Section Headers - Orange/Peach */
+    .section-header {
+        background-color: #FDB777;
+        font-weight: bold;
+        text-align: center;
+        padding: 8px;
+        margin-top: 15px;
+        margin-bottom: 0px;
+        border: 1px solid #000;
+        color: #000;
+    }
+
+    .section-header-inline {
+        background-color: #FDB777 !important;
+        font-weight: bold;
+        text-align: center;
+        padding: 8px;
+        border: 1px solid #000;
+        color: #000;
+    }
+
+    /* Color 4: Total Rows - Light Green */
+    .total-row {
+        font-weight: 800 !important;
+/*        background-color: #C8E6C9 !important;*/
+    }
+    #jumboTable .total-row, #smallTable .total-row, #processReceiveTable .total-row, #underProcessTable .total-row {
+        font-weight: 800 !important;
+        background-color: #E3F2FD;
+    }
+
+    /* Color 3: Alternate Rows - Light Blue */
+    .alternate-row {
+        background-color: #E3F2FD;
+    }
+
+    /* Regular white rows */
+    .regular-row {
+        background-color: #FFFFFF;
+    }
+
+    /* Special highlight for pending/important rows */
+    .highlight-row {
+        background-color: #FFF9C4;
+        font-weight: bold;
+    }
+
+    .text-right {
+        text-align: right !important;
+        padding-right: 8px !important;
+    }
+
+    .text-left {
+        text-align: left !important;
+        padding-left: 10px !important;
+    }
+
+    .text-center {
+        text-align: center !important;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+    }
+
+        .loading:after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+    @@keyframes dots {
+        0%, 20% {
+            content: '.';
+        }
+
+        40% {
+            content: '..';
+        }
+
+        60%, 100% {
+            content: '...';
+        }
+    }
+
+    .error {
+        color: #721c24;
+        padding: 12px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    .success {
+        color: #155724;
+        padding: 12px;
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    .report-date-display {
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+        color: #333;
+        padding: 10px;
+        background: linear-gradient(135deg, #FDB777 0%, #FFE4B5 100%);
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    /* Top section layout */
+    .top-section-table {
+        width: 100%;
+        margin-bottom: 15px;
+        border:none;
+        display:flex;
+        flex-direction:row;
+        gap:10px;
+    }
+
+
+        .top-section-table td {
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .top-section-table table {
+            margin-bottom: 0;
+        }
+
+    /* Print Styles */
+    @@media print {
+        body {
+            background-color: white;
+            padding: 0;
+        }
+
+        .page-title, .btn, legend {
+            display: none !important;
+        }
+
+        #reportContent table {
+            page-break-inside: avoid;
+            font-size: 10px;
+        }
+
+        .report-date-display {
+            background: #FDB777 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        #reportContent table {
+            font-size: 9px;
+        }
+
+            #reportContent table th,
+            #reportContent table td {
+                padding: 3px 5px;
+            }
+
+        .top-section-table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+
+    /* Hover effect */
+    tbody tr:hover:not(.total-row,.top-section-table) {
+        background-color: #FFF3E0 !important;
+        cursor: pointer;
+    }
+
+</style>
+
+<div ng-controller="Diamond">
+    <div class="page-title">
+        <div class="col-lg-12">
+            <div class="col-lg-2 col-lg-offset-1">
+                <input id="reportDate" type="text" class="form-control input-sm" placeholder="dd-MMM-yyyy" autocomplete="off" ng-model="Diamond.reportDate" readonly />
+            </div>
+            <div class="col-lg-1">
+                <button class="btn btn-primary" ng-click="loadReport()">Fetch</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <legend class="font-green-sharp">
+                    <b style="position:absolute">📊 Daily Production Report</b>
+                    <div align="right">
+                        @*<button class="btn btn-secondary" ng-click="printReport()">🖨️ Print</button>*@
+                        <button class="btn btn-info" ng-click="ExcelExport()">📥 Export Excel</button>
+                    </div>
+                </legend>
+
+                <div id="errorMessage" class="error" style="display:none;"></div>
+                <div id="successMessage" class="success" style="display:none;"></div>
+                <div id="loadingMessage" class="loading" style="display:none;">Loading report</div>
+
+                <div id="reportContent" style="display:none;">
+                    <div class="report-date-display">
+                        📅 Report Date: <span id="displayDate"></span>
+                    </div>
+
+                    <!-- Top Section: Polish, Daily Report, Rough -->
+                    <div class="top-section-table">
+                        <div style="width: 35%;">
+                            <!-- POLISH Section -->
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th colspan="3" class="section-header-inline">POLISH</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="width: 40%;"></th>
+                                        <th style="width: 30%;">POLISH</th>
+                                        <th style="width: 30%;">MUMBAI SUBMIT</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="polishBody"></tbody>
+                            </table>
+                        </div>
+                        <div style="width: 15%;">
+                            <!-- DAILY REPORT Section -->
+                            <table>
+                            </table>
+                        </div>
+                        <div style="width: 30%;">
+                            <!-- ROUGH Section -->
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th colspan="3" class="section-header-inline">ROUGH</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="width: 50%;"></th>
+                                        <th style="width: 50%;">ROUGH</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="roughBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Under Process JUMBO -->
+                    <div class="section-header">📦 VIPULBHAI</div>
+                    <table id="VipulbhaiTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Staus</th>
+                                <th style="width: 16%">JW</th>
+                                <th style="width: 16%">JC</th>
+                                <th style="width: 16%">SW</th>
+                                <th style="width: 16%">SC</th>
+                                <th style="width: 16%">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="VipulbhaiBody"></tbody>
+                    </table>
+
+                    <!-- Under Process JUMBO White-->
+                    <div class="section-header">📦 Under Process (Jumbo) (White)</div>
+                    <table id="jwTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Process</th>
+                                <th style="width: 16%">RPartWeight</th>
+                                <th style="width: 16%">POLISH PRD CT</th>
+                                <th style="width: 16%">%</th>
+                                <th style="width: 16%">POLISH CT</th>
+                                <th style="width: 16%">%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jwBody"></tbody>
+                    </table>
+
+                    <!-- Under Process SMALL White-->
+                    <div class="section-header">📦 Under Process (Small) (White)</div>
+                    <table id="swTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Process</th>
+                                <th style="width: 16%">RPartWeight</th>
+                                <th style="width: 16%">POLISH PRD CT</th>
+                                <th style="width: 16%">%</th>
+                                <th style="width: 16%">POLISH CT</th>
+                                <th style="width: 16%">%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="swBody"></tbody>
+                    </table>
+
+                    <!-- Under Process Color -->
+                    <div class="section-header">📦 Under Process Color</div>
+                    <table id="ColorTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Process</th>
+                                <th style="width: 16%">RPartWeight</th>
+                                <th style="width: 16%">POLISH PRD CT</th>
+                                <th style="width: 16%">%</th>
+                                <th style="width: 16%">POLISH CT</th>
+                                <th style="width: 16%">%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ColorBody"></tbody>
+                    </table>
+
+                    <!-- UnderProcess -->
+                    <div class="section-header">📥 Under Process</div>
+                    <table id="UnderProcessTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">Process</th>
+                                <th style="width: 16%">RPartWeight</th>
+                                <th style="width: 16%">POLISH PRD CT</th>
+                                <th style="width: 16%">Prd %</th>
+                                <th style="width: 16%">PolishWeight</th>
+                                <th style="width: 16%">Polish %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="UnderProcessBody"></tbody>
+                    </table>
+
+                    <!-- Transfer -->
+                    <div class="section-header">📥 Transfer</div>
+                    <table id="TransferTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 20%">SizeCode</th>
+                                <th style="width: 16%">RPartWeight</th>
+                                <th style="width: 16%">POLISH PRD CT</th>
+                                <th style="width: 16%">Prd %</th>
+                                <th style="width: 16%">PolishWeight</th>
+                                <th style="width: 16%">Polish %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TransferBody"></tbody>
+                    </table>
+
+                    <!-- Under Process Details -->
+                    <div class="section-header">⚙️ Process Wise UnderProcess</div>
+                    <table id="prcWiseUnderProcessTable">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">SrNo</th>
+                                <th style="width: 18%">Process</th>
+                                <th style="width: 8%">Pcs</th>
+                                <th style="width: 11%">Cur_Polish_Ct.</th>
+                                <th style="width: 11%">Polish Ct.</th>
+                                <th style="width: 11%">Cur Polish Ct.</th>
+                                <th style="width: 11%">DiffPer</th>
+                                <th style="width: 11%">Ideal Ct.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prcWiseUnderProcessBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    module = angular.module('app', ['ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
+
+    module.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            var list = attrs['chosen'];
+            scope.$watch(list, function () {
+                element.trigger('chosen:updated');
+            });
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+            element.chosen();
+        };
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+
+    module.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$interval', 'uiGridConstants', function ($scope, $filter, $http, $q, $interval, uiGridConstants, $window) {
+
+        $scope.loadReport = function () {
+            var date = $('#reportDate').val();
+            if (!date) {
+                Noty('error','Please select a date');
+                return;
+            }
+
+            $('#errorMessage').hide();
+            $('#successMessage').hide();
+            $('#reportContent').hide();
+            $('#loadingMessage').show();
+
+            $.ajax({
+                url: '@Url.Action("GetDailyReport", "Report")',
+                type: 'GET',
+                data: { date: $("#reportDate").val() },
+                success: function (response) {
+                    $('#loadingMessage').hide();
+
+                    if (response.success) {
+                        populateReport(response.data);
+                        $('#displayDate').text($("#reportDate").val());
+                        $('#reportContent').fadeIn(300);
+                        showSuccess('Report loaded successfully!');
+                        setTimeout(function () {
+                            $('#successMessage').fadeOut();
+                        }, 3000);
+                    } else {
+                        showError('Error: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    $('#loadingMessage').hide();
+                    showError('Error loading report: ' + error);
+                }
+            });
+        }
+
+        function populateReport(data) {
+            // Populate Polish Table with alternating colors
+            var polishHtml = '';
+            $.each(data.PolishData, function (index, item) {
+                var rowClass = '';
+                if (item.Status === 'TOTAL') {
+                    rowClass = 'total-row';
+                }
+
+                polishHtml += '<tr class="' + rowClass + '">';
+                polishHtml += '<td class="text-left"><strong>' + item.Status + '</strong></td>';
+                polishHtml += '<td class="text-right">' + formatNumber(item.PolishWeight) + '</td>';
+                polishHtml += '<td class="text-right">' + formatNumber(item.MumbaiSubmit) + '</td>';
+                polishHtml += '</tr>';
+
+                // Store the daily report value
+                if (item.Status === 'TODAY' && item.MumbaiSubmit) {
+                    $('#dailyReportValue').text(formatNumber(item.MumbaiSubmit));
+                }
+            });
+            $('#polishBody').html(polishHtml);
+
+            // Populate Rough Table with alternating colors
+            var roughHtml = '';
+            $.each(data.RoughData, function (index, item) {
+                var rowClass = '';
+                if (item.Status === 'TOTAL') {
+                    rowClass = 'total-row';
+                }
+
+                roughHtml += '<tr class="' + rowClass + '">';
+                roughHtml += '<td class="text-left"><strong>' + item.Status + '</strong></td>';
+                roughHtml += '<td class="text-right">' + formatNumber(item.RoughWeight) + '</td>';
+                roughHtml += '</tr>';
+            });
+            $('#roughBody').html(roughHtml);
+
+            // Vipulbhai Table
+            var Vipulbhaihtml = '';
+            $.each(data.VipulbhaiData, function (index, item) {
+                var rowClass = '';
+
+                if (item.Status === 'TOTAL') {
+                    rowClass = 'total-row';
+                }
+
+                Vipulbhaihtml += '<tr class="' + rowClass + '">';
+                Vipulbhaihtml += '<td class="text-left">' + item.Status + '</td>';
+                Vipulbhaihtml += '<td class="text-right">' + formatNumber(item.JW) + '</td>';
+                Vipulbhaihtml += '<td class="text-right">' + formatNumber(item.JC) + '</td>';
+                Vipulbhaihtml += '<td class="text-right">' + formatNumber(item.SW) + '</td>';
+                Vipulbhaihtml += '<td class="text-right">' + formatNumber(item.SC) + '</td>';
+                Vipulbhaihtml += '<td class="text-right">' + formatNumber(item.Total) + '</td>';
+                Vipulbhaihtml += '</tr>';
+            });
+            $('#VipulbhaiBody').html(Vipulbhaihtml);
+
+            // Populate Jumbo White Table
+            populateProcessTable(data.JumboWhiteData, '#jwBody');
+
+            // Populate Small White Table
+            populateProcessTable(data.SmallWhiteData, '#swBody');
+
+            // Populate Color Table
+            populateProcessTable(data.ColorData, '#ColorBody');
+
+            // Populate UnderProcessData Table
+            populateProcessTable(data.UnderProcessData, '#UnderProcessBody');
+
+            // Populate Transfer Table
+            var Tranhtml = '';
+            $.each(data.TransferData, function (index, item) {
+                var rowClass = '';
+
+                if (item.SizeCode === 'TOTAL') {
+                    rowClass = 'total-row';
+                }
+
+               Tranhtml += '<tr class="' + rowClass + '">';
+               Tranhtml += '<td class="text-left">' + item.SizeCode + '</td>';
+               Tranhtml += '<td class="text-right">' + formatNumber(item.RPartWeight) + '</td>';
+               Tranhtml += '<td class="text-right">' + formatNumber(item.PolishPrd) + '</td>';
+               Tranhtml += '<td class="text-right">' + formatNumber(item.PrdPer) + '</td>';
+               Tranhtml += '<td class="text-right">' + formatNumber(item.PolishWeight) + '</td>';
+               Tranhtml += '<td class="text-right">' + formatNumber(item.PolishPer) + '</td>';
+               Tranhtml += '</tr>';
+            });
+            $('#TransferBody').html(Tranhtml);
+
+            // Populate Under Process Details Table
+            var prcWiseUnderProcessHtml = '';
+            $.each(data.PrcWiseUnderProcessData, function (index, item) {
+                var rowClass = '';
+
+                if (item.Process === "Issue Pending" || item.Process === "4P MIX" || item.Process === "TOTAL") {
+                    rowClass = 'total-row';
+                }
+
+                prcWiseUnderProcessHtml += '<tr class="' + rowClass + '">';
+                prcWiseUnderProcessHtml += '<td class="text-center">' + (item.SrNo || '') + '</td>';
+                prcWiseUnderProcessHtml += '<td class="text-left">' + item.Process + '</td>';
+                prcWiseUnderProcessHtml += '<td class="text-right">' + formatNumber(item.Pcs) + '</td>';
+                prcWiseUnderProcessHtml += '<td class="text-right">' + formatNumber(item.RPartWeight) + '</td>';
+                prcWiseUnderProcessHtml += '<td class="text-right">' + formatNumber(item.Cur_Polish_Ct) + '</td>';
+                prcWiseUnderProcessHtml += '<td class="text-right">' + formatNumber(item.Cur_Polish_Ct) + '</td>';
+                prcWiseUnderProcessHtml += '<td class="text-right">' + formatNumber(item.DiffPer) + '</td>';
+                prcWiseUnderProcessHtml += '<td class="text-right">' + formatNumber(item.Ideal_Ct) + '</td>';
+                prcWiseUnderProcessHtml += '</tr>';
+            });
+            $('#prcWiseUnderProcessBody').html(prcWiseUnderProcessHtml);
+        }
+
+        function populateProcessTable(data, tableBodySelector) {
+            var html = '';
+            $.each(data, function (index, item) {
+                var rowClass = '';
+
+                if (item.Process === 'Total_Rough_Stocks') {
+                    rowClass = 'total-row';
+                }
+
+                html += '<tr class="' + rowClass + '">';
+                html += '<td class="text-left">' + item.Process + '</td>';
+                html += '<td class="text-right">' + formatNumber(item.RPartWeight) + '</td>';
+                html += '<td class="text-right">' + formatNumber(item.PolishPrd) + '</td>';
+                html += '<td class="text-right">' + formatNumber(item.PrdPer) + '</td>';
+                html += '<td class="text-right">' + formatNumber(item.PolishWeight) + '</td>';
+                html += '<td class="text-right">' + formatNumber(item.PolishPer) + '</td>';
+                html += '</tr>';
+            });
+            $(tableBodySelector).html(html);
+        }
+
+        function formatNumber(value) {
+            if (value === null || value === undefined || value === '' || value === 0) {
+                return '0';
+            }
+            return parseFloat(value).toFixed(3);
+        }
+
+        function showError(message) {
+            $('#errorMessage').html('<strong>Error!</strong> ' + message).fadeIn();
+        }
+
+        function showSuccess(message) {
+            $('#successMessage').html('<strong>Success!</strong> ' + message).fadeIn();
+        }
+
+        $scope.printReport = function () {
+            if ($('#reportContent').is(':visible')) {
+                window.print();
+            } else {
+                showError('Please load a report first');
+            }
+        }
+
+        $scope.ExcelExport = function () {
+            if (typeof show_loader === 'function') {
+                show_loader();
+            }
+
+            var response = $http({
+                method: 'GET',
+                url: '@Url.Action("GetDailyReport_Excel", "Report")',
+                params: { date: $("#reportDate").val() }
+            }).then(function (response) {
+                if (typeof hide_loader === 'function') {
+                    hide_loader();
+                }
+
+                if (response.data && response.data.Data) {
+                    $scope.DownloadExcel(response.data);
+                }
+            }, function (error) {
+                if (typeof hide_loader === 'function') {
+                    hide_loader();
+                }
+                showError('Error generating Excel: ' + error.message);
+            });
+        };
+
+        $scope.DownloadExcel = function (path) {
+            var url = '@Url.Action("DownloadExcel", "Home")/?filepath=' + path.Data;
+            var hiddenIFrameID = 'hiddenDownloaderReportResult';
+            var iframe = document.getElementById(hiddenIFrameID);
+            if (iframe === null) {
+                iframe = document.createElement('iframe');
+                iframe.id = hiddenIFrameID;
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+            }
+            iframe.src = url;
+        };
+
+        // Initialize datepicker
+        $('#reportDate').datepicker({
+            format: "dd-M-yyyy",
+            autoclose: true,
+            todayHighlight: true
+        });
+    }]);
+</script>

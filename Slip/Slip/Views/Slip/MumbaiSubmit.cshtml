@@ -1,0 +1,1014 @@
+@{
+    ViewBag.Title = "Mumbai Submit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Mumbai Submit - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .mumbaisubmit-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .mumbai-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .mumbai-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    /* Page Header Card */
+    .mumbai-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .mumbai-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .mumbai-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .mumbai-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        flex-shrink: 0;
+    }
+    .mumbai-header-card:hover .mumbai-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .mumbai-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .mumbai-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .mumbai-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .mumbai-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    /* Add New Button */
+    .btn-mumbai-add {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 18px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-mumbai-add:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important;
+        color: #ffffff !important;
+    }
+    .btn-mumbai-add:active {
+        transform: translateY(0) !important;
+    }
+
+    /* Grid Card Container */
+    .mumbai-grid-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px);
+        overflow: hidden !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .mumbai-grid-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+    }
+
+    .mumbai-card-header {
+        background: #ffffff !important;
+        padding: 12px 18px !important;
+        border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    .mumbai-card-title-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .mumbai-card-title-left i {
+        font-size: 16px;
+        color: #0284c7;
+    }
+    .mumbai-card-title-left h3 {
+        margin: 0 !important;
+        font-size: 15px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.1px;
+    }
+
+    .mumbai-grid-body {
+        padding: 0 !important;
+    }
+
+    .mumbai-grid-card .uigrid,
+    .mumbai-grid-card #gIDContainer {
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        min-height: calc(100vh - 210px);
+    }
+
+    #gIDContainer {
+        width: 100% !important;
+    }
+
+    /* DevExtreme DataGrid Styling */
+    #gIDContainer .dx-datagrid {
+        border: none;
+        border-radius: 0;
+        font-family: inherit;
+    }
+    #gIDContainer .dx-datagrid-headers {
+        background: #f8fafc !important;
+        color: #334155 !important;
+        font-weight: 700 !important;
+        font-size: 12.5px !important;
+        border-bottom: 2px solid #e2e8f0 !important;
+    }
+    #gIDContainer .dx-datagrid-headers .dx-header-row > td {
+        padding: 11px 10px !important;
+        color: #1e293b !important;
+        font-weight: 700 !important;
+    }
+    #gIDContainer .dx-data-row {
+        font-size: 12.5px;
+        transition: background-color 0.15s ease;
+    }
+    #gIDContainer .dx-data-row:hover {
+        background-color: #f1f8fe !important;
+    }
+    #gIDContainer .dx-row-alt {
+        background-color: #fafbfc;
+    }
+
+    /* Modal Styling */
+    #FetchFilterPopUp .modal-dialog {
+        max-width: 900px;
+        width: 92%;
+        margin: 30px auto;
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none !important;
+    }
+
+    #FetchFilterPopUp .modal-content {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    /* Sleek Dark Slate Header: Strict Left Title & Right X Button */
+    #FetchFilterPopUp .modal-header:before,
+    #FetchFilterPopUp .modal-header:after {
+        display: none !important;
+    }
+
+    #FetchFilterPopUp .modal-header {
+        background: #111827 !important;
+        color: #ffffff;
+        padding: 14px 20px !important;
+        border-bottom: 1px solid #1f2937;
+        position: relative;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .modal-header-flex {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+
+    .modal-header-title-left {
+        display: flex !important;
+        align-items: center !important;
+        gap: 9px !important;
+    }
+
+    #FetchFilterPopUp .modal-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0;
+        letter-spacing: 0.3px;
+        line-height: 1.3;
+    }
+
+    #FetchFilterPopUp .btn-close-header {
+        color: #94a3b8 !important;
+        opacity: 1 !important;
+        font-size: 24px !important;
+        font-weight: 300 !important;
+        text-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 4px !important;
+        transition: color 0.15s ease !important;
+        line-height: 1 !important;
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        cursor: pointer !important;
+    }
+    #FetchFilterPopUp .btn-close-header:hover {
+        color: #ffffff !important;
+    }
+
+    #FetchFilterPopUp .modal-body {
+        padding: 18px 22px 10px 22px;
+        background: #f8fafc;
+    }
+
+    .mumbai-modal-section {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .mumbai-form-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #334155;
+        margin-bottom: 5px;
+        display: block;
+    }
+    .mumbai-form-label .req {
+        color: #ef4444;
+        margin-left: 2px;
+        font-weight: bold;
+    }
+
+    .mumbai-input {
+        width: 100%;
+        height: 38px;
+        padding: 6px 12px;
+        font-size: 12.5px;
+        color: #1e293b;
+        background-color: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+        outline: none;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .mumbai-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    #Date {
+        cursor: pointer !important;
+        background-color: #ffffff !important;
+    }
+
+    .btn-mumbai-add-row {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 6px !important;
+        height: 38px;
+        padding: 0 18px;
+        font-size: 12.5px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.3);
+    }
+    .btn-mumbai-add-row:hover {
+        background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
+    }
+
+    .mumbai-modal-grid-wrap {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 10px;
+    }
+
+    #gridContainer {
+        width: 100%;
+        min-height: 180px;
+    }
+
+    #FetchFilterPopUp .modal-footer {
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        padding: 12px 22px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-mumbai-reset {
+        background: #ffffff;
+        color: #334155 !important;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        height: 36px;
+        padding: 0 16px;
+        font-size: 12.5px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .btn-mumbai-reset:hover {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .btn-mumbai-save {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 6px;
+        height: 36px;
+        padding: 0 24px;
+        font-size: 12.5px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(29, 78, 216, 0.3);
+        transition: all 0.15s ease;
+    }
+    .btn-mumbai-save:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        box-shadow: 0 4px 12px rgba(29, 78, 216, 0.4);
+    }
+
+    /* Responsive Design */
+    @@media (max-width: 768px) {
+        .mumbai-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .mumbai-header-left {
+            width: 100%;
+        }
+
+        .btn-mumbai-add {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+
+        .mumbai-card-header {
+            padding: 12px 14px !important;
+        }
+
+        .mumbai-grid-card {
+            min-height: 480px;
+        }
+
+        .mumbai-grid-card .uigrid,
+        .mumbai-grid-card #gIDContainer {
+            min-height: 440px !important;
+            height: calc(100vh - 240px) !important;
+        }
+    }
+
+    /* Ensure Bootstrap DatePicker renders above modal and backdrop */
+    .datepicker,
+    .datepicker.dropdown-menu,
+    .datepicker.datepicker-dropdown,
+    div.datepicker {
+        z-index: 2000000 !important;
+    }
+</style>
+
+<div ng-controller="Diamond" class="mumbaisubmit-page">
+    <!-- Top Header Card (SaaS Ice-Blue Theme) -->
+    <div class="mumbai-header-card">
+        <div class="mumbai-header-left">
+            <div class="mumbai-header-icon">
+                <i class="fa fa-paper-plane-o"></i>
+            </div>
+            <div>
+                <div class="mumbai-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <span>Slip</span> / 
+                    <span>Mumbai Submit</span>
+                </div>
+                <h4 class="mumbai-header-title">Mumbai Submit</h4>
+            </div>
+        </div>
+        <div>
+            <!-- Add New Record Button -->
+            <button class="btn-mumbai-add" type="button" ng-click="OpenPopUpMenu()">
+                <i class="fa fa-plus"></i> NEW ENTRY
+            </button>
+        </div>
+    </div>
+
+    <!-- DevExtreme DataGrid Card -->
+    <div class="mumbai-grid-card">
+        <div class="mumbai-card-header">
+            <div class="mumbai-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Mumbai Submit Records</h3>
+            </div>
+        </div>
+
+        <div class="mumbai-grid-body">
+            <div class="uigrid">
+                <div id="gIDContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Popup for Add / Edit (Clean SaaS Dialog Style) -->
+    <div class="modal fade" id="FetchFilterPopUp" role="dialog" aria-labelledby="exampleModalCenterTitle" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <!-- Sleek Header (Strict Left Title & Right X Button) -->
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-paper-plane-o" style="color: #38bdf8; font-size: 16px;"></i>
+                            <h4 class="modal-title">Mumbai Submit Entry</h4>
+                        </div>
+                        <button type="button" ng-click="ClosePopupFilterDetails();" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <!-- Form Controls Section -->
+                    <div class="mumbai-modal-section">
+                        <div class="row">
+                            <!-- Date -->
+                            <div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom: 12px;">
+                                <label class="mumbai-form-label" for="Date">Date <span class="req">*</span></label>
+                                <input id="Date" type="text" tabindex="1" class="mumbai-input" placeholder="dd-M-yyyy" autocomplete="off" ng-model="Diamond.Date" readonly />
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-3 col-sm-6 col-xs-12" style="margin-bottom: 12px;">
+                                <label class="mumbai-form-label" for="Status">Status <span class="req">*</span></label>
+                                <select id="Status" tabindex="2" class="mumbai-input" ng-model="Diamond.Status">
+                                    <option value="">Select Status</option>
+                                    <option value="TODAY">TODAY</option>
+                                    <option value="TOTAL">TOTAL</option>
+                                </select>
+                            </div>
+
+                            <!-- Mumbai Submit -->
+                            <div class="col-md-4 col-sm-6 col-xs-12" style="margin-bottom: 12px;">
+                                <label class="mumbai-form-label" for="MumbaiSubmit">Mumbai Submit <span class="req">*</span></label>
+                                <input type="number" step="0.001" id="MumbaiSubmit" ng-model="Diamond.MumbaiSubmit" placeholder="Enter MumbaiSubmit" tabindex="3" class="mumbai-input" />
+                            </div>
+
+                            <!-- Add Button -->
+                            <div class="col-md-2 col-sm-6 col-xs-12" style="margin-bottom: 12px; display: flex; align-items: flex-end;">
+                                <button class="btn-mumbai-add-row" tabindex="4" type="button" ng-click="AddRowData()" style="width: 100%; justify-content: center;">
+                                    <i class="fa fa-plus"></i> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Inner DataGrid Section -->
+                    <div class="mumbai-modal-grid-wrap">
+                        <div class="uigrid3">
+                            <div id="gridContainer"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clean Actions Footer -->
+                <div class="modal-footer">
+                    <button class="btn-mumbai-reset" tabindex="6" ng-click="Clear()" type="button">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-mumbai-save" tabindex="5" type="button" ng-click="DataSave()">
+                        <i class="fa fa-check"></i> {{BtnName}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var Action = "INSERT";
+    var List = [];
+    var DataField = [];
+    var DataSummary = [];
+    var IssueList = [];
+
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngTouch']);
+    }
+    module.directive('chosen', function () {
+        var linker = function (scope, element, attrs) {
+            scope.$watch('GetProcessList', function () {
+                element.trigger('chosen:updated');
+            });
+
+            scope.$watch(attrs['ngModel'], function () {
+                element.trigger('chosen:updated');
+            });
+
+            element.chosen();
+        };
+
+        return {
+            restrict: 'A',
+            link: linker
+        };
+    });
+
+    module.controller("Diamond", ['$scope', '$filter', '$http', '$q', '$interval', function ($scope, $filter, $http, $q, $interval) {
+        $scope.Diamond = {
+            Date: "",
+            Status: "",
+            MumbaiSubmit: "",
+            DeleteButton: false
+        };
+
+        $scope.BtnName = "SAVE";
+
+        $scope.ClosePopupFilterDetails = function () {
+            $("#FetchFilterPopUp").modal("hide");
+        }
+
+        window.onkeyup = function (event) {
+            if (event.keyCode == 27) {
+                $("#FetchFilterPopUp").modal("hide");
+                $("#FetchDeleteFilterPopUp").modal("hide");
+            }
+        }
+
+        $scope.OpenPopUpMenu = function () {
+            $scope.Clear();
+            $("#FetchFilterPopUp").modal("show");
+            setTimeout(function () {
+                if (typeof initModalDatePicker === 'function') {
+                    initModalDatePicker();
+                }
+            }, 120);
+        };
+
+        $scope.FetchData = function () {
+            show_loader();
+            $http.post('@Url.Action("Daily_RP_Rough_Polish_GetData", "Slip")', JSON.stringify({ Type : 'POLISH' }))
+                .then(function (response) {
+                    hide_loader();
+
+                    if (!response.data) {
+                        console.error('No data received from server');
+                        Noty("error", "No data received from server");
+                        return;
+                    }
+
+                    List = response.data.List || [];
+                    DataSummary = response.data.DataSummary || [];
+                    DataField = response.data.DataField || [];
+
+                    GIDData();
+                })
+                .catch(function (error) {
+                    hide_loader();
+                    console.error('Error fetching data:', error);
+                    Noty("error", "Error loading data. Please try again.");
+                });
+        };
+
+        $scope.FetchData();
+
+        const GIDData = () => {
+            $("#gIDContainer").dxDataGrid({
+                dataSource: new DevExpress.data.CustomStore({
+                    load: function () {
+                        return List;
+                    },
+                    remove: function (key) {
+                        return $scope.deleteEntry(key);
+                    },
+                }),
+                columns: DataField,
+                editing: {
+                    allowUpdating: false,
+                    allowDeleting: true,
+                    useIcons: true,
+                },
+                keyExpr: 'ID',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                height: 'calc(100vh - 210px)',
+                paging: { enabled: false },
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual',
+                },
+                filterRow: {
+                    visible: true,
+                    applyFilter: 'auto',
+                },
+                filterPanel: { visible: true },
+                searchPanel: {
+                    visible: true,
+                    width: 240,
+                    placeholder: 'Search...',
+                },
+                loadPanel: {
+                    enabled: true,
+                    showPane: false,
+                    indicatorSrc: '/Content/icons/Loader.gif',
+                },
+                headerFilter: {
+                    visible: true,
+                },
+                pager: {
+                    visible: false,
+                },
+                selection: {
+                    mode: 'single',
+                },
+                keyboardNavigation: {
+                    enterKeyAction: 'moveFocus',
+                    enterKeyDirection: 'column',
+                    editOnKeyPress: true,
+                },
+                summary: {
+                    totalItems: DataSummary
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlsx'],
+                    allowExportSelectedData: false,
+                },
+                onExporting(e) {
+                    if (e.format == 'xlsx') {
+                        const workbook = new ExcelJS.Workbook();
+                        const worksheet = workbook.addWorksheet('Mumbai Submit');
+
+                        DevExpress.excelExporter.exportDataGrid({
+                            component: e.component,
+                            worksheet,
+                            autoFilterEnabled: true,
+                        }).then(() => {
+                            workbook.xlsx.writeBuffer().then((buffer) => {
+                                saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Mumbai Submit.xlsx');
+                            });
+                        });
+                    }
+                },
+            });
+        }
+
+        $scope.AddRowData = function () {
+            if ($scope.Diamond.Date === "" || $scope.Diamond.Date === null || $scope.Diamond.Date === undefined) {
+                Noty("error", "Please Select Date!");
+                return false;
+            }
+            if ($scope.Diamond.Status === "" || $scope.Diamond.Status === null || $scope.Diamond.Status === undefined) {
+                Noty("error", "Please Enter Valid Status!");
+                return false;
+            }
+            if ($scope.Diamond.MumbaiSubmit === "" || $scope.Diamond.MumbaiSubmit === null || $scope.Diamond.MumbaiSubmit === undefined) {
+                Noty("error", "Please Enter MumbaiSubmit!");
+                return false;
+            }
+
+            document.getElementById('Status').focus();
+
+            var StatusCheck = IssueList.filter(x => x.Status == $scope.Diamond.Status).length;
+            if (StatusCheck > 0) {
+                Noty("error", "Status Data Already Exists!");
+                return false;
+            }
+
+            IssueList.push({
+                'Key': Math.random(),
+                'ReportDate': $scope.Diamond.Date,
+                'Status': $scope.Diamond.Status,
+                'MumbaiSubmit': $scope.Diamond.MumbaiSubmit
+            })
+
+            document.getElementById('Date').disabled = true;
+
+            GridData();
+
+            $scope.Diamond.Status = "";
+            $scope.Diamond.MumbaiSubmit = "";
+        }
+
+        const GridData = () => {
+            $("#gridContainer").dxDataGrid({
+                dataSource: new DevExpress.data.CustomStore({
+                    load: function () {
+                        return IssueList;
+                    },
+                    remove: function (key) {
+                        return $scope.deleteData(key);
+                    },
+                }),
+                columns: [{
+                    type: "buttons",
+                    buttons: [{
+                        name: "delete",
+                    }]
+                }, 'ReportDate', 'Status', 'MumbaiSubmit'],
+                editing: {
+                    allowDeleting: true,
+                    useIcons: true,
+                },
+                columnAutoWidth: true,
+                columnResizingMode: 'widget',
+                allowColumnResizing: true,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                showBorders: true,
+                height: 200,
+                paging: { enabled: false },
+                sorting: { mode: "multiple" },
+                scrolling: {
+                    mode: 'virtual',
+                },
+                loadPanel: {
+                    enabled: true,
+                    showPane: false,
+                    indicatorSrc: '/Content/icons/Loader.gif',
+                },
+                headerFilter: {
+                    visible: true,
+                },
+                pager: {
+                    visible: false,
+                },
+                selection: {
+                    mode: 'single',
+                },
+                keyboardNavigation: {
+                    enterKeyAction: 'moveFocus',
+                    enterKeyDirection: 'column',
+                    editOnKeyPress: true,
+                },
+                summary: {
+                    totalItems: [
+                        { column: 'Status', summaryType: 'count', },
+                        { column: 'MumbaiSubmit', valueFormat: '#0.000', summaryType: 'sum', },
+                    ]
+                },
+            });
+        }
+
+        GridData();
+
+        $scope.deleteData = function (key) {
+            IssueList = IssueList.filter(item => item.Key !== key.Key);
+
+            if (IssueList.length == 0) {
+                $scope.Diamond.Date = "";
+                document.getElementById('Date').disabled = false;
+            }
+        }
+
+        $scope.DataSave = function () {
+            try {
+                if (IssueList.length == 0) {
+                    Noty("error", "Please Enter Some Entry!");
+                    return false;
+                }
+
+                show_loader();
+
+                $http({
+                    method: "post",
+                    url: '@Url.Action("Daily_RP_Rough_Polish_Insert_Update_Delete", "Slip")',
+                    data: { IssueList: IssueList, Action: Action, Type :"POLISH" },
+                    headers: { 'Content-Type': 'application/json' }
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data.Message == "Record Is Inserted" || ret.data.Message == "Record Is Updated") {
+                        Noty("success", "Data Saved Successfully!");
+                        $scope.FetchData();
+
+                        setTimeout(() => {
+                            $scope.Clear();
+                            $("#FetchFilterPopUp").modal("hide");
+                        }, 100);
+                    }
+                    else {
+                        Noty("error", ret.data.Message);
+                    }
+                })
+                .catch(function (error) {
+                    hide_loader();
+                    console.error('Error saving data:', error);
+                    Noty("error", "Error saving data. Please try again.");
+                });
+            } catch (ex) {
+                hide_loader();
+                console.error('Exception in DataSave:', ex);
+                Noty("error", "An error occurred. Please try again.");
+                return false;
+            }
+        }
+
+        $scope.deleteEntry = function (key) {
+             try {
+                show_loader();
+
+                let deleteList = [];
+                deleteList.push(key);
+
+                $http({
+                    method: "post",
+                    url: '@Url.Action("Daily_RP_Rough_Polish_Insert_Update_Delete", "Slip")',
+                    data: { IssueList: deleteList, Action: 'DELETE', Type :"POLISH" },
+                    headers: { 'Content-Type': 'application/json' }
+                }).then(function (ret) {
+                    hide_loader();
+                    if (ret.data.Message == "Record Is Deleted") {
+                        Noty("success", "Data Deleted Successfully!");
+                        $scope.FetchData();
+                    }
+                    else {
+                        Noty("error", ret.data.Message);
+                    }
+                })
+                .catch(function (error) {
+                    hide_loader();
+                    console.error('Error saving data:', error);
+                    Noty("error", "Error saving data. Please try again.");
+                });
+            } catch (ex) {
+                hide_loader();
+                console.error('Exception in DataSave:', ex);
+                Noty("error", "An error occurred. Please try again.");
+                return false;
+            }
+        }
+
+        $scope.Clear = function () {
+            $scope.BtnName = "SAVE";
+            Action = "INSERT";
+
+            IssueList = [];
+            GridData();
+
+            $scope.Diamond = {
+                Date: "",
+                Status: "",
+                MumbaiSubmit: "",
+            };
+            document.getElementById('Date').disabled = false;
+
+            setTimeout(() => {
+                $("#Process").val("").trigger("chosen:updated");
+            }, 50);
+        };
+    }]);
+</script>
+<script>
+    function initModalDatePicker() {
+        try {
+            $('#Date').datepicker('destroy');
+        } catch (e) { }
+
+        $('#Date').datepicker({
+            format: "dd-M-yyyy",
+            autoclose: true,
+            todayHighlight: true,
+            container: 'body',
+            orientation: "bottom auto"
+        }).on('changeDate', function (e) {
+            var val = $(this).val();
+            var scope = angular.element(document.querySelector('[ng-controller="Diamond"]')).scope();
+            if (scope && scope.Diamond) {
+                scope.$apply(function () {
+                    scope.Diamond.Date = val;
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        initModalDatePicker();
+
+        $('#FetchFilterPopUp').on('shown.bs.modal', function () {
+            initModalDatePicker();
+        });
+
+        $('#FetchFilterPopUp').on('hidden.bs.modal', function () {
+            try {
+                $('#Date').datepicker('hide');
+            } catch (e) { }
+        });
+
+        // Ensure clicking or tapping immediately opens the datepicker
+        $(document).on('click focus touchstart', '#Date', function (e) {
+            if (!$(this).prop('disabled')) {
+                $(this).datepicker('show');
+            }
+        });
+    });
+</script>

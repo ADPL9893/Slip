@@ -1,0 +1,6 @@
+Time: 09-06-2026 10:10:06 AM
+--------------------------------------------------------------------------------------------
+Object reference not set to an instance of an object.
+--------------------------------------------------------------------------------------------
+   at Slip.Utility.SessionFacade.get_UserSession()
+   at Slip.Controllers.PricingController.TRN_Approve_Pricing_Insert(List`1 PricingDetails, String ApproveDate, String Action)

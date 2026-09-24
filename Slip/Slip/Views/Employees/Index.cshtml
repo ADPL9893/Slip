@@ -1,0 +1,1467 @@
+@{
+    ViewBag.Title = "Employee Registration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Employee Entry & Registration - Distinct Themed SaaS Card Styling
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .emp-entry-page {
+        padding: 0 0 25px 0;
+        margin-top: -10px; /* Removes extra spacing below navbar */
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Staggered Card Entrance Animations */
+    .emp-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .emp-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+
+    /* Page Header Card (Clean Neutral White Background with Distinct Border) */
+    .emp-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-top: 0 !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .emp-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .emp-header-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .emp-header-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .emp-header-card:hover .emp-header-icon {
+        transform: scale(1.08) rotate(4deg);
+    }
+
+    .emp-header-title {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        line-height: 1.2 !important;
+        letter-spacing: -0.2px;
+    }
+
+    .emp-breadcrumb {
+        font-size: 11.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        font-weight: 500;
+    }
+    .emp-breadcrumb a {
+        color: #0284c7;
+        text-decoration: none;
+        transition: color 0.15s ease;
+        font-weight: 500;
+    }
+    .emp-breadcrumb a:hover {
+        color: #0369a1;
+        text-decoration: underline;
+    }
+
+    .emp-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    /* Action Buttons */
+    .btn-emp-save {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 9px 20px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3) !important;
+        transition: all 0.22s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-emp-save:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4) !important;
+        color: #ffffff !important;
+    }
+    .btn-emp-save:active {
+        transform: translateY(0) !important;
+    }
+
+    .btn-emp-secondary {
+        background: #f1f5f9 !important;
+        color: #475569 !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+        text-decoration: none !important;
+    }
+    .btn-emp-secondary:hover {
+        background: #e2e8f0 !important;
+        color: #1e293b !important;
+        border-color: #94a3b8 !important;
+        transform: translateY(-1px) !important;
+        text-decoration: none !important;
+    }
+
+    .btn-emp-reset {
+        background: #ffffff !important;
+        color: #64748b !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-radius: 8px !important;
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+        cursor: pointer !important;
+    }
+    .btn-emp-reset:hover {
+        background: #fee2e2 !important;
+        color: #b91c1c !important;
+        border-color: #fca5a5 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Base Section Card Container (overflow: visible ensures Chosen dropdowns like JobWork & Role are never clipped) */
+    .emp-card {
+        border-radius: 12px !important;
+        padding: 0 !important;
+        margin-bottom: 16px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+        overflow: visible !important;
+        position: relative !important;
+        transition: all 0.25s ease !important;
+    }
+    .emp-card:hover,
+    .emp-card:focus-within,
+    .emp-card:has(.chosen-with-drop) {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        z-index: 50 !important;
+    }
+
+    .emp-card-header {
+        padding: 12px 18px !important;
+        border-top-left-radius: 11px !important;
+        border-top-right-radius: 11px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+    .emp-card-title {
+        margin: 0 !important;
+        font-size: 14.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: -0.1px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .emp-card-title i {
+        font-size: 15px;
+    }
+
+    .emp-card-body {
+        padding: 18px 20px 10px !important;
+        background: transparent !important;
+    }
+
+    /* ==========================================================================
+       Distinct Themed Pastel Backgrounds Across Every Entire Card
+       ========================================================================== */
+    /* 1. Personal Information (Mid-Tone Soft Ice Blue Theme) */
+    .emp-card-personal {
+        background: #e0f2fe !important;
+        border: 1.5px solid #7dd3fc !important;
+        z-index: 20 !important;
+    }
+    .emp-card-personal:hover {
+        border-color: #38bdf8 !important;
+    }
+    .emp-card-personal .emp-card-header {
+        background: #bae6fd !important;
+        border-bottom: 1.5px solid #7dd3fc !important;
+    }
+    .emp-card-personal .emp-card-title {
+        color: #0369a1 !important;
+    }
+    .emp-card-personal .emp-card-title i {
+        color: #0284c7 !important;
+    }
+    .emp-card-personal .emp-label {
+        color: #0c4a6e !important;
+    }
+    .emp-card-personal .emp-form-control {
+        background: #ffffff !important;
+        border: 1.5px solid #7dd3fc !important;
+        color: #0f172a !important;
+    }
+    .emp-card-personal .emp-form-control:focus {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.20) !important;
+    }
+
+    /* 2. Employment & System Details (Soft Periwinkle / Royal Indigo Theme - Harmonizes with Card 1 Sky Blue & Card 3 Mint Green) */
+    .emp-card-employment {
+        background: #e0e7ff !important;
+        border: 1.5px solid #a5b4fc !important;
+        z-index: 18 !important;
+    }
+    .emp-card-employment:hover {
+        border-color: #818cf8 !important;
+    }
+    .emp-card-employment .emp-card-header {
+        background: #c7d2fe !important;
+        border-bottom: 1.5px solid #a5b4fc !important;
+    }
+    .emp-card-employment .emp-card-title {
+        color: #312e81 !important;
+    }
+    .emp-card-employment .emp-card-title i {
+        color: #4f46e5 !important;
+    }
+    .emp-card-employment .emp-label {
+        color: #3730a3 !important;
+    }
+    .emp-card-employment .emp-form-control {
+        background: #ffffff !important;
+        border: 1.5px solid #a5b4fc !important;
+        color: #0f172a !important;
+    }
+    .emp-card-employment .emp-form-control:focus {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.20) !important;
+    }
+    .emp-card-employment .chosen-container-single .chosen-single {
+        background: #ffffff !important;
+        border: 1.5px solid #a5b4fc !important;
+    }
+    .emp-card-employment .chosen-container-active.chosen-with-drop .chosen-single,
+    .emp-card-employment .chosen-container-active .chosen-single {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.20) !important;
+    }
+
+    /* 3. Account Credentials (Soft Ice Blue Theme - Same as Personal Information) */
+    .emp-card-account {
+        background: #e0f2fe !important;
+        border: 1.5px solid #7dd3fc !important;
+        z-index: 16 !important;
+    }
+    .emp-card-account:hover {
+        border-color: #38bdf8 !important;
+    }
+    .emp-card-account .emp-card-header {
+        background: #bae6fd !important;
+        border-bottom: 1.5px solid #7dd3fc !important;
+    }
+    .emp-card-account .emp-card-title {
+        color: #0369a1 !important;
+    }
+    .emp-card-account .emp-card-title i {
+        color: #0284c7 !important;
+    }
+    .emp-card-account .emp-label {
+        color: #0c4a6e !important;
+    }
+    .emp-card-account .emp-form-control {
+        background: #ffffff !important;
+        border: 1.5px solid #7dd3fc !important;
+        color: #0f172a !important;
+    }
+    .emp-card-account .emp-form-control:focus {
+        border-color: #0284c7 !important;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.20) !important;
+    }
+
+    /* 4. Identity & Address (Soft Periwinkle / Royal Indigo Theme - Same as Employment & System Details) */
+    .emp-card-identity {
+        background: #e0e7ff !important;
+        border: 1.5px solid #a5b4fc !important;
+        z-index: 14 !important;
+    }
+    .emp-card-identity:hover {
+        border-color: #818cf8 !important;
+    }
+    .emp-card-identity .emp-card-header {
+        background: #c7d2fe !important;
+        border-bottom: 1.5px solid #a5b4fc !important;
+    }
+    .emp-card-identity .emp-card-title {
+        color: #312e81 !important;
+    }
+    .emp-card-identity .emp-card-title i {
+        color: #4f46e5 !important;
+    }
+    .emp-card-identity .emp-label {
+        color: #3730a3 !important;
+    }
+    .emp-card-identity .emp-form-control {
+        background: #ffffff !important;
+        border: 1.5px solid #a5b4fc !important;
+        color: #0f172a !important;
+    }
+    .emp-card-identity .emp-form-control:focus {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.20) !important;
+    }
+    .emp-card-identity .chosen-container-single .chosen-single {
+        background: #ffffff !important;
+        border: 1.5px solid #a5b4fc !important;
+    }
+    .emp-card-identity .chosen-container-active.chosen-with-drop .chosen-single,
+    .emp-card-identity .chosen-container-active .chosen-single {
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.20) !important;
+    }
+
+    /* 5. Documents & Photos Uploads (Soft Ice Blue Theme - Same as Personal Information) */
+    .emp-card-documents {
+        background: #e0f2fe !important;
+        border: 1.5px solid #7dd3fc !important;
+        z-index: 12 !important;
+    }
+    .emp-card-documents:hover {
+        border-color: #38bdf8 !important;
+    }
+    .emp-card-documents .emp-card-header {
+        background: #bae6fd !important;
+        border-bottom: 1.5px solid #7dd3fc !important;
+    }
+    .emp-card-documents .emp-card-title {
+        color: #0369a1 !important;
+    }
+    .emp-card-documents .emp-card-title i {
+        color: #0284c7 !important;
+    }
+    .emp-card-documents .upload-box-card {
+        background: #ffffff !important;
+        border: 1.5px dashed #0284c7 !important;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.08) !important;
+    }
+    .emp-card-documents .upload-box-card:hover {
+        background: #f0f9ff !important;
+        border-color: #0369a1 !important;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.18) !important;
+    }
+    .emp-card-documents .upload-preview-wrapper {
+        background: #f0f9ff !important;
+        border: 1px solid #bae6fd !important;
+    }
+    .emp-card-documents .btn-emp-upload {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35) !important;
+    }
+    .emp-card-documents .btn-emp-upload:hover {
+        background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45) !important;
+    }
+    .emp-card-documents .upload-filename-tag {
+        background: #f0f9ff !important;
+        border: 1px solid #bae6fd !important;
+        color: #0284c7 !important;
+        font-weight: 600 !important;
+    }
+
+    /* Form Fields Grid & Controls */
+    .emp-form-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-left: -9px;
+        margin-right: -9px;
+    }
+
+    .emp-form-col {
+        padding-left: 9px;
+        padding-right: 9px;
+        margin-bottom: 14px;
+        position: relative;
+    }
+    .emp-form-col:has(.chosen-with-drop),
+    .emp-form-col:focus-within {
+        z-index: 100 !important;
+    }
+
+    .emp-form-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        position: relative;
+    }
+
+    .emp-label {
+        font-size: 12.5px !important;
+        font-weight: 600 !important;
+        margin-bottom: 5px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+    .emp-label .req {
+        color: #ef4444;
+        font-weight: 700;
+    }
+
+    .emp-form-control {
+        height: 38px !important;
+        border-radius: 8px !important;
+        padding: 6px 12px !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        width: 100% !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+        transition: all 0.2s ease !important;
+        outline: none !important;
+    }
+    .emp-form-control::placeholder {
+        color: #94a3b8 !important;
+        font-weight: 400 !important;
+    }
+
+    textarea.emp-form-control {
+        height: auto !important;
+        min-height: 70px !important;
+        resize: vertical;
+    }
+
+    /* Chosen Customization */
+    .chosen-container {
+        width: 100% !important;
+        font-size: 13px !important;
+        position: relative !important;
+    }
+    .chosen-container-active,
+    .chosen-container.chosen-with-drop {
+        z-index: 1050 !important;
+    }
+    .chosen-container-single .chosen-single {
+        height: 38px !important;
+        line-height: 36px !important;
+        border-radius: 8px !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+        padding: 0 12px !important;
+        color: #0f172a !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+    }
+    .chosen-container-single .chosen-single div b {
+        background-position: 0 8px !important;
+    }
+    .chosen-container .chosen-drop {
+        border-radius: 8px !important;
+        border: 1.5px solid #0284c7 !important;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
+        margin-top: 2px !important;
+        position: absolute !important;
+        z-index: 1060 !important;
+        background: #ffffff !important;
+    }
+    .chosen-container .chosen-search {
+        padding: 6px 8px !important;
+    }
+    .chosen-container .chosen-search input[type="text"] {
+        border-radius: 6px !important;
+        border: 1.5px solid #cbd5e1 !important;
+        padding: 6px 10px 6px 24px !important;
+        font-size: 12.5px !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    .chosen-container .chosen-results {
+        max-height: 200px !important;
+        padding: 4px !important;
+        margin: 0 !important;
+        font-size: 13px !important;
+    }
+    .chosen-container .chosen-results li {
+        padding: 7px 10px !important;
+        border-radius: 6px !important;
+        line-height: 1.4 !important;
+        color: #1e293b !important;
+    }
+    .chosen-container .chosen-results li.highlighted {
+        background: #0284c7 !important;
+        background-image: none !important;
+        color: #ffffff !important;
+    }
+    .chosen-container .chosen-results li.no-results {
+        background: #f8fafc !important;
+        color: #64748b !important;
+        font-style: italic !important;
+    }
+
+    /* Specific Chosen Theme overrides for Employment & Identity cards */
+    .emp-card-employment .chosen-container .chosen-drop,
+    .emp-card-identity .chosen-container .chosen-drop {
+        border: 1.5px solid #a5b4fc !important;
+    }
+    .emp-card-employment .chosen-container .chosen-results li.highlighted,
+    .emp-card-identity .chosen-container .chosen-results li.highlighted {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+    }
+    .emp-card-employment .chosen-container .chosen-search input[type="text"]:focus,
+    .emp-card-identity .chosen-container .chosen-search input[type="text"]:focus {
+        border-color: #4f46e5 !important;
+    }
+
+    /* Upload Cards Inside Documents & Photos */
+    .upload-box-card {
+        border-radius: 10px;
+        padding: 14px;
+        text-align: center;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 240px;
+    }
+
+    .upload-preview-wrapper {
+        width: 100%;
+        height: 130px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .upload-preview-img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+    }
+    .upload-preview-placeholder {
+        color: #0284c7;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+    }
+    .upload-preview-placeholder i {
+        font-size: 32px;
+        color: #38bdf8;
+    }
+    .upload-preview-placeholder span {
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #0369a1;
+    }
+
+    .btn-emp-upload {
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 7px !important;
+        padding: 7px 14px !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        cursor: pointer !important;
+        transition: all 0.2s ease !important;
+        margin-bottom: 6px !important;
+    }
+    .btn-emp-upload:hover {
+        transform: translateY(-1px) !important;
+        color: #ffffff !important;
+    }
+
+    .upload-filename-tag {
+        font-size: 11px;
+        max-width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+
+    /* Responsive Breakpoints */
+    @@media (max-width: 768px) {
+        .emp-entry-page {
+            padding: 0 0 20px 0;
+            margin-top: -6px;
+        }
+
+        .emp-header-card {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            padding: 12px 14px !important;
+            gap: 12px !important;
+        }
+
+        .emp-header-left {
+            width: 100%;
+        }
+
+        .emp-header-actions {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn-emp-save,
+        .btn-emp-secondary,
+        .btn-emp-reset {
+            width: 100% !important;
+            justify-content: center !important;
+            padding: 10px 16px !important;
+        }
+
+        .emp-card-body {
+            padding: 14px 14px 6px !important;
+        }
+
+        .upload-box-card {
+            margin-bottom: 12px;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        .emp-header-icon {
+            width: 38px;
+            height: 38px;
+            font-size: 17px;
+        }
+
+        .emp-header-title {
+            font-size: 16px !important;
+        }
+    }
+</style>
+
+<div ng-controller="EmployeeMaster" class="emp-entry-page">
+    <input type="hidden" ng-model="EmployeeMaster.EmployeeID" />
+
+    <!-- Top Header Banner Card (Actions Only Here) -->
+    <div class="emp-header-card">
+        <div class="emp-header-left">
+            <div class="emp-header-icon">
+                <i class="fa fa-user-plus" ng-if="BtnName != 'UPDATE'"></i>
+                <i class="fa fa-user" ng-if="BtnName == 'UPDATE'"></i>
+            </div>
+            <div>
+                <div class="emp-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
+                    <a href="@Url.Action("EmployeeDetail", "Employees")">Employee List</a> / 
+                    <span>{{BtnName == 'UPDATE' ? 'Edit Employee' : 'Registration'}}</span>
+                </div>
+                <h4 class="emp-header-title">{{BtnName == 'UPDATE' ? 'Edit Employee: ' + (EmployeeMaster.EmployeeName || 'ID #' + EmployeeMaster.EmployeeID) : 'New Employee Registration'}}</h4>
+            </div>
+        </div>
+        <div class="emp-header-actions">
+            <a href="@Url.Action("EmployeeDetail", "Employees")" class="btn-emp-secondary" title="Return to Employee List">
+                <i class="fa fa-arrow-left"></i> Back to List
+            </a>
+            <button class="btn-emp-reset" ng-click="Clear()" type="button" title="Reset Form Values">
+                <i class="fa fa-refresh"></i> Clear Form
+            </button>
+            <button class="btn-emp-save" ng-click="Save()" type="button" title="Save Employee Record">
+                <i class="fa fa-check-circle"></i> {{BtnName}}
+            </button>
+        </div>
+    </div>
+
+    <!-- Section 1: Personal Information Card (Soft Ice Blue) -->
+    <div class="emp-card emp-card-personal">
+        <div class="emp-card-header">
+            <h3 class="emp-card-title">
+                <i class="fa fa-user"></i> Personal Information
+            </h3>
+        </div>
+        <div class="emp-card-body">
+            <div class="emp-form-row">
+                <!-- Employee Name -->
+                <div class="emp-form-col col-lg-4 col-md-6 col-sm-12 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Full Name <span class="req">*</span></label>
+                        <input type="text" ng-model="EmployeeMaster.EmployeeName" class="emp-form-control" placeholder="Enter Full Name" />
+                    </div>
+                </div>
+                <!-- DOB -->
+                <div class="emp-form-col col-lg-2 col-md-3 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Date of Birth</label>
+                        <input type="text" id="FromDATE" class="emp-form-control" ng-model="EmployeeMaster.DOB" ng-change="GetDueDays()" placeholder="dd/mm/yyyy" />
+                    </div>
+                </div>
+                <!-- Age -->
+                <div class="emp-form-col col-lg-2 col-md-3 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Age</label>
+                        <input type="number" ng-model="EmployeeMaster.Age" ng-blur="agemanage(EmployeeMaster.Age);" class="emp-form-control" placeholder="Age" min="1" />
+                    </div>
+                </div>
+                <!-- Gender -->
+                <div class="emp-form-col col-lg-2 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Gender</label>
+                        <select ng-model="EmployeeMaster.Gender" class="emp-form-control">
+                            <option value="">Please Select</option>
+                            <option value="MALE">Male</option>
+                            <option value="FEMALE">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Mobile No -->
+                <div class="emp-form-col col-lg-2 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Mobile Number <span class="req">*</span></label>
+                        <input type="text" ng-model="EmployeeMaster.MobileNo" class="emp-form-control allownumericwithoutdecimal" placeholder="Mobile Number" maxlength="15" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Employment & System Details Card (Soft Periwinkle / Royal Indigo) -->
+    <div class="emp-card emp-card-employment">
+        <div class="emp-card-header">
+            <h3 class="emp-card-title">
+                <i class="fa fa-briefcase"></i> Employment & System Details
+            </h3>
+        </div>
+        <div class="emp-card-body">
+            <div class="emp-form-row">
+                <!-- Employee Type -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Employee Type <span class="req">*</span></label>
+                        <select ng-model="EmployeeMaster.EmployeeType" class="emp-form-control" ng-change="ShowGST(EmployeeMaster.EmployeeType)">
+                            <option value="">Please Select</option>
+                            <option value="EMPLOYEE">Employee</option>
+                            <option value="PARTY">Party</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Designation -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Designation <span class="req">*</span></label>
+                        <select ng-model="EmployeeMaster.Designation" class="emp-form-control">
+                            <option value="">Please Select</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="EMPLOYEE">Employee</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Emp Code -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Emp. Code</label>
+                        <input type="text" ng-model="EmployeeMaster.EmpCode" class="emp-form-control" placeholder="Employee Code" />
+                    </div>
+                </div>
+                <!-- Table Selection -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Table <span class="req">*</span></label>
+                        <select id="TableNo" tabindex="1" chosen="GetTableList" class="emp-form-control" ng-options="item.id as item.value for item in GetTableList" ng-model="EmployeeMaster.TableNo">
+                            <option value="">Table Select</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- JobWork -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">JobWork <span class="req">*</span></label>
+                        <select id="JobWork" tabindex="1" chosen="JobWork" class="emp-form-control" ng-model="EmployeeMaster.JobWork">
+                            <option value="">Please Select</option>
+                            <option value="INSIDE">INSIDE</option>
+                            <option value="OUTSIDE">OUTSIDE</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Role -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Role</label>
+                        <select id="RoleID" tabindex="1" chosen="GetRoleList" class="emp-form-control" ng-options="item.id as item.value for item in GetRoleList" ng-model="EmployeeMaster.RoleID">
+                            <option value="">Role Select</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Reference Name -->
+                <div class="emp-form-col col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Reference Name <span class="req">*</span></label>
+                        <input type="text" ng-model="EmployeeMaster.ReferenceName" class="emp-form-control" placeholder="Reference Person Name" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 3: Account Credentials Card (Soft Ice Blue - Same as Personal Information) -->
+    <div class="emp-card emp-card-account">
+        <div class="emp-card-header">
+            <h3 class="emp-card-title">
+                <i class="fa fa-lock"></i> Account Credentials
+            </h3>
+        </div>
+        <div class="emp-card-body">
+            <div class="emp-form-row">
+                <!-- Username -->
+                <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Username <span class="req">*</span></label>
+                        <input type="text" ng-model="EmployeeMaster.UserName" class="emp-form-control" placeholder="Enter Login Username" autocomplete="off" />
+                    </div>
+                </div>
+                <!-- Password -->
+                <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Password <span class="req">*</span></label>
+                        <input type="text" ng-model="EmployeeMaster.Password" class="emp-form-control" placeholder="Enter Password" autocomplete="new-password" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Identity & Address Information Card (Soft Periwinkle / Royal Indigo - Same as Employment Details) -->
+    <div class="emp-card emp-card-identity">
+        <div class="emp-card-header">
+            <h3 class="emp-card-title">
+                <i class="fa fa-id-card-o"></i> Identity & Address Information
+            </h3>
+        </div>
+        <div class="emp-card-body">
+            <div class="emp-form-row">
+                <!-- ID Proof Doc Name -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">ID Proof Doc Name</label>
+                        <input type="text" class="emp-form-control" ng-model="EmployeeMaster.IDProofDocName" placeholder="e.g. Aadhaar, PAN, Voter ID" />
+                    </div>
+                </div>
+                <!-- ID Proof Number -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">ID Proof Number</label>
+                        <input type="text" class="emp-form-control" ng-model="EmployeeMaster.IDProofNumber" placeholder="Document ID Number" />
+                    </div>
+                </div>
+                <!-- Address -->
+                <div class="emp-form-col col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Address</label>
+                        <input type="text" class="emp-form-control" ng-model="EmployeeMaster.Address" placeholder="Enter Address Details" />
+                    </div>
+                </div>
+
+                <!-- Conditional GST / PAN (For Party) -->
+                <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12" ng-show="GSTShow">
+                    <div class="emp-form-group">
+                        <label class="emp-label">GST No</label>
+                        <input type="text" ng-model="EmployeeMaster.GSTNo" class="emp-form-control" placeholder="GST Number" />
+                    </div>
+                </div>
+                <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12" ng-show="GSTShow">
+                    <div class="emp-form-group">
+                        <label class="emp-label">PAN No</label>
+                        <input type="text" ng-model="EmployeeMaster.PanNo" class="emp-form-control" placeholder="PAN Card Number" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 5: Documents & Photos Upload Card (Soft Ice Blue - Same as Personal Information) -->
+    <div class="emp-card emp-card-documents">
+        <div class="emp-card-header">
+            <h3 class="emp-card-title">
+                <i class="fa fa-cloud-upload"></i> Documents & Photos
+            </h3>
+        </div>
+        <div class="emp-card-body">
+            <div class="emp-form-row">
+                <!-- Card 1: Profile Photo -->
+                <div class="emp-form-col col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="upload-box-card">
+                        <div class="upload-preview-wrapper">
+                            <img id="image_source" ng-src="{{image_source}}" class="upload-preview-img" ng-show="image_source" />
+                            <div class="upload-preview-placeholder" ng-hide="image_source">
+                                <i class="fa fa-user-circle-o"></i>
+                                <span>Profile Photo Preview</span>
+                            </div>
+                        </div>
+                        <label for="firlogo" class="btn-emp-upload" tabindex="32">
+                            <i class="fa fa-camera"></i> Choose Profile Photo
+                        </label>
+                        <input id="firlogo" ng-model="EmployeeMaster.PhotoPath" file-model="EmployeeMaster.PhotoPath" type="file" style="display: none;" accept=".jpeg,.jpg,.png" onchange="angular.element(this).scope().uploadedFile(this)">
+                        <span id="filename" class="upload-filename-tag">Select File !</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: ID Proof Document -->
+                <div class="emp-form-col col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="upload-box-card">
+                        <div class="upload-preview-wrapper">
+                            <img id="Proofimage_source" ng-src="{{Proofimage_source}}" class="upload-preview-img" ng-show="Proofimage_source" />
+                            <div class="upload-preview-placeholder" ng-hide="Proofimage_source">
+                                <i class="fa fa-file-image-o"></i>
+                                <span>ID Proof Preview</span>
+                            </div>
+                        </div>
+                        <label for="Prooffirlogo" class="btn-emp-upload" tabindex="33">
+                            <i class="fa fa-id-card"></i> Choose ID Proof Doc
+                        </label>
+                        <input id="Prooffirlogo" ng-model="EmployeeMaster.IDProofPhotoPath" file-model="EmployeeMaster.IDProofPhotoPath" type="file" style="display: none;" accept=".jpeg,.jpg,.png" onchange="angular.element(this).scope().proofuploadedFile(this)">
+                        <span id="Prooffilename" class="upload-filename-tag">Select File !</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Additional Photo (Optional) -->
+                <div class="emp-form-col col-lg-4 col-md-4 col-sm-12 col-xs-12">
+                    <div class="upload-box-card">
+                        <div class="upload-preview-wrapper">
+                            <img id="Path2image_source2" ng-src="{{Path2image_source2}}" class="upload-preview-img" ng-show="Path2image_source2" />
+                            <div class="upload-preview-placeholder" ng-hide="Path2image_source2">
+                                <i class="fa fa-picture-o"></i>
+                                <span>Optional Photo Preview</span>
+                            </div>
+                        </div>
+                        <label for="Path2logo" class="btn-emp-upload" tabindex="34">
+                            <i class="fa fa-image"></i> Choose Photo 2 (Optional)
+                        </label>
+                        <input id="Path2logo" ng-model="EmployeeMaster.PhotoPath2" file-model="EmployeeMaster.PhotoPath2" type="file" style="display: none;" accept=".jpeg,.jpg,.png" onchange="angular.element(this).scope().path2uploadedFile(this)">
+                        <span id="Path2" class="upload-filename-tag">Select File !</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var Paramdata = [{}];
+    var Action = "INSERT";
+    var EmployeeID = 0;
+    if ('@ViewBag.EmployeeID' != 0) {
+        EmployeeID = '@ViewBag.EmployeeID';
+    }
+
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['frapontillo.bootstrap-duallistbox', 'ngTouch', 'angularjs-dropdown-multiselect']);
+    }
+
+    module.directive('chosen', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var updateChosen = function () {
+                    $timeout(function () {
+                        element.trigger('chosen:updated');
+                    }, 50);
+                };
+
+                var list = attrs['chosen'];
+                if (list) {
+                    scope.$watchCollection(list, function () {
+                        updateChosen();
+                    });
+                }
+
+                if (attrs['ngModel']) {
+                    scope.$watch(attrs['ngModel'], function () {
+                        updateChosen();
+                    });
+                }
+
+                if (attrs['ngDisabled']) {
+                    scope.$watch(attrs['ngDisabled'], function (newVal) {
+                        $timeout(function () {
+                            element.prop('disabled', !!newVal).trigger('chosen:updated');
+                        }, 50);
+                    });
+                }
+
+                $timeout(function () {
+                    element.chosen({
+                        width: '100%',
+                        search_contains: true,
+                        allow_single_deselect: true
+                    });
+                    updateChosen();
+                }, 0);
+            }
+        };
+    }]);
+
+    module.controller("EmployeeMaster", ['$scope', '$filter', '$http', '$q', '$interval', '$timeout', function ($scope, $filter, $http, $q, $interval, $timeout) {
+        $scope.EmployeeMaster = {};
+        $scope.BtnName = "SAVE";
+        $scope.DaytermsDetails = [];
+        $scope.Tablemodel = [];
+        $scope.GSTShow = false;
+        $scope.EmployeeMaster.JoiningDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
+        $scope.EmployeeMaster.EndingDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
+        $scope.dateformte = "dd/mm/yyyy";
+        $scope.MonthName = [
+            { No: 1, Name: "Jan" },
+            { No: 2, Name: "Feb" },
+            { No: 3, Name: "Mar" },
+            { No: 4, Name: "Apr" },
+            { No: 5, Name: "May" },
+            { No: 6, Name: "Jun" },
+            { No: 7, Name: "Jul" },
+            { No: 8, Name: "Aug" },
+            { No: 9, Name: "Sep" },
+            { No: 10, Name: "Oct" },
+            { No: 11, Name: "Nov" },
+            { No: 12, Name: "Dec" }
+        ];
+
+        $(function () {
+            $("#FromDATE").keyup(function (e) {
+                var currentValue = $(e.target).val();
+                var newValue = autocompleteMMDDYYYYDateFormat(currentValue);
+                if (newValue != currentValue) {
+                    $(e.target).val(newValue);
+                }
+            });
+        });
+
+        var autocompleteMMDDYYYYDateFormat = function (str) {
+            str = str.trim();
+            var matches, year,
+                looksLike_MM_slash_DD = /^(\d\d\/)?\d\d$/,
+                looksLike_MM_slash_D_slash = /^(\d\d\/)?(\d\/)$/,
+                looksLike_MM_slash_DD_slash_DD = /^(\d\d\/\d\d\/)(\d\d)$/;
+            if (looksLike_MM_slash_DD.test(str)) {
+                str += "/";
+            } else if (looksLike_MM_slash_D_slash.test(str)) {
+                str = str.replace(looksLike_MM_slash_D_slash, "$10$2");
+            } else if (looksLike_MM_slash_DD_slash_DD.test(str)) {
+                matches = str.match(looksLike_MM_slash_DD_slash_DD);
+                year = "";
+                str = String(matches[1]) + year + String(matches[2]);
+            }
+            return str;
+        };
+
+        $scope.agemanage = function (Age) {
+            if (parseInt(Age) < 0) {
+                $scope.EmployeeMaster.Age = 0;
+                if (typeof Noty === 'function') Noty("error", "Please Enter valid age");
+            }
+        };
+
+        $scope.ShowGST = function (EmployeeType) {
+            if (EmployeeType == "PARTY") {
+                $scope.GSTShow = true;
+            } else {
+                $scope.GSTShow = false;
+            }
+        };
+
+        $scope.Clear = function () {
+            $scope.EmployeeMaster = {};
+            $scope.BtnName = "SAVE";
+            $scope.EmployeeMaster.JoiningDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
+            $scope.EmployeeMaster.EndingDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
+            $scope.dateformte = "dd/mm/yyyy";
+            $scope.image_source = null;
+            $scope.Proofimage_source = null;
+            $scope.Path2image_source2 = null;
+
+            $("#filename").text("Select File !");
+            $('#image_source').prop('src', '');
+
+            $("#Prooffilename").text("Select File !");
+            $('#Proofimage_source').prop('src', '');
+
+            $("#Path2").text("Select File !");
+            $('#Path2image_source2').prop('src', '');
+        };
+
+        // GetData Dropdowns with robust key resolution and role fallback
+        var loopPromises = [];
+        var promise = $http.get('@Url.Action("Get_DataList_For_Using_Common", "Employees")').then(function (response) {
+            var data = (typeof response.data === 'string') ? JSON.parse(response.data) : (response.data || {});
+
+            var TableList = [];
+            if (data.TableList && data.TableList.length > 0) {
+                for (var i = 0; i < data.TableList.length; i++) {
+                    var item = data.TableList[i];
+                    var tVal = item["TableName"] || item["TableNo"] || item["TableID"] || item["TABLE_NAME"] || item["name"] || item["value"] || item["Table"] || Object.values(item)[0];
+                    var tId = item["TableNo"] || item["TableName"] || item["TableID"] || item["id"] || tVal;
+                    TableList.push({ id: tId, value: tVal });
+                }
+            }
+            $scope.GetTableList = TableList;
+
+            var RoleList = [];
+            if (data.RoleList && data.RoleList.length > 0) {
+                for (var j = 0; j < data.RoleList.length; j++) {
+                    var rItem = data.RoleList[j];
+                    var rId = rItem["RoleID"] || rItem["RoleId"] || rItem["roleid"] || rItem["ID"] || rItem["id"];
+                    var rName = rItem["RoleName"] || rItem["Rolename"] || rItem["rolename"] || rItem["Name"] || rItem["value"] || rItem["Role"];
+                    RoleList.push({ id: rId, value: rName });
+                }
+                $scope.GetRoleList = RoleList;
+            } else {
+                // Fallback to User/Getdata_Role if RoleList not present in common dataset
+                $http.get('@Url.Action("Getdata_Role", "User")').then(function (userRoleRes) {
+                    var rData = (typeof userRoleRes.data === 'string') ? JSON.parse(userRoleRes.data) : (userRoleRes.data || {});
+                    if (rData.RoleList && rData.RoleList.length > 0) {
+                        var fallbackRoles = [];
+                        for (var k = 0; k < rData.RoleList.length; k++) {
+                            var roleItem = rData.RoleList[k];
+                            var id = roleItem["RoleID"] || roleItem["RoleId"] || roleItem["roleid"] || roleItem["id"];
+                            var name = roleItem["RoleName"] || roleItem["Rolename"] || roleItem["rolename"] || roleItem["name"] || roleItem["value"];
+                            fallbackRoles.push({ id: id, value: name });
+                        }
+                        $scope.GetRoleList = fallbackRoles;
+                        $timeout(function () {
+                            $('select[chosen]').trigger('chosen:updated');
+                        }, 50);
+                    }
+                });
+            }
+
+            $timeout(function () {
+                $('select[chosen]').trigger('chosen:updated');
+            }, 50);
+        });
+        loopPromises.push(promise);
+        $scope.TableSettings = { enableSearch: true, externalIdProp: '' };
+
+        $scope.SetEditData = function () {
+            if (EmployeeID != 0) {
+                $scope.BtnName = "UPDATE";
+                Action = "UPDATE";
+                if (typeof show_loader === 'function') show_loader();
+
+                $http({
+                    method: "POST",
+                    dataType: "json",
+                    data: JSON.stringify({ "EmployeeID": EmployeeID }),
+                    url: '@Url.Action("EMP_Employee_GetdataEdit", "Employees")',
+                    contentType: "application/json; charset=utf-8"
+                }).then(function (ret) {
+                    if (typeof hide_loader === 'function') hide_loader();
+                    if (ret.data && ret.data.List && ret.data.List.length > 0) {
+                        var empData = ret.data.List[0];
+                        $scope.EmployeeMaster = empData;
+                        $scope.EmployeeMaster.Age = parseInt(empData.Age) || 0;
+                        $scope.EmployeeMaster.IsActive = (empData.IsActive == "True" || empData.IsActive === true);
+                        $scope.EmployeeMaster.PhotoPath = empData.PhotoPath;
+                        $scope.EmployeeMaster.IDProofPhotoPath = empData.IDProofPhotoPath;
+                        $scope.EmployeeMaster.PhotoPath2 = empData.PhotoPath2;
+
+                        if (empData.EmployeeType == "PARTY") {
+                            $scope.GSTShow = true;
+                        } else {
+                            $scope.GSTShow = false;
+                        }
+
+                        if (empData.PhotoPath) {
+                            $("#filename").text(empData.PhotoPath);
+                            $scope.image_source = "..\\Images\\PhotoPath\\" + empData.PhotoPath;
+                            $("#image_source").attr('src', $scope.image_source);
+                        }
+                        if (empData.IDProofPhotoPath) {
+                            $("#Prooffilename").text(empData.IDProofPhotoPath);
+                            $scope.Proofimage_source = "..\\Images\\ProofPhotoPath\\" + empData.IDProofPhotoPath;
+                            $("#Proofimage_source").attr('src', $scope.Proofimage_source);
+                        }
+                        if (empData.PhotoPath2) {
+                            $("#Path2").text(empData.PhotoPath2);
+                            $scope.Path2image_source2 = "..\\Images\\PhotoPath2\\" + empData.PhotoPath2;
+                            $("#Path2image_source2").attr('src', $scope.Path2image_source2);
+                        }
+
+                        $timeout(function () {
+                            $('select[chosen]').trigger('chosen:updated');
+                        }, 100);
+                    }
+                }, function () {
+                    if (typeof hide_loader === 'function') hide_loader();
+                });
+            }
+        }; 
+        $scope.SetEditData();
+
+        // Upload Profile Image
+        $scope.Save = function () {
+            if ($scope.EmployeeMaster.EmployeeName == undefined || $scope.EmployeeMaster.EmployeeName == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter Employee Name !");
+                return;
+            }
+
+            if ($scope.EmployeeMaster.MobileNo == undefined || $scope.EmployeeMaster.MobileNo == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter Mobile Number !");
+                return;
+            }
+
+            if ($scope.EmployeeMaster.EmployeeType == undefined || $scope.EmployeeMaster.EmployeeType == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Select Employee Type !");
+                return;
+            }
+
+            if ($scope.EmployeeMaster.Designation == undefined || $scope.EmployeeMaster.Designation == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Select Designation !");
+                return;
+            }
+
+            if ($scope.EmployeeMaster.UserName == undefined || $scope.EmployeeMaster.UserName == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter Username !");
+                return;
+            }
+
+            if ($scope.EmployeeMaster.Password == undefined || $scope.EmployeeMaster.Password == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter Password !");
+                return;
+            }
+
+            if ($scope.EmployeeMaster.TableNo == undefined || $scope.EmployeeMaster.TableNo == "") {
+                $scope.EmployeeMaster.TableNo = "0";
+            }
+
+            if ($scope.EmployeeMaster.TableNo == undefined || $scope.EmployeeMaster.TableNo == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Select Table !");
+                return;
+            }
+
+            if ($scope.EmployeeMaster.JobWork == undefined || $scope.EmployeeMaster.JobWork == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Select JobWork !");
+                return;
+            }
+            if ($scope.EmployeeMaster.ReferenceName == undefined || $scope.EmployeeMaster.ReferenceName == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter Reference Name !");
+                return;
+            }
+
+            if (typeof show_loader === 'function') show_loader();
+
+            if ($('#firlogo').val() && $('#firlogo').val().split('.').pop().toLowerCase() != "") {
+                var formData = new FormData();
+                formData.append("firlogo", document.getElementById('firlogo').files[0]);
+                var ext = $('#firlogo').val().split('.').pop().toLowerCase();
+                if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                    if (typeof hide_loader === 'function') hide_loader();
+                    if (typeof Noty === 'function') Noty("error", "Please Select Valid Profile Image !");
+                    return;
+                }
+                formData.append("party_code", $scope.EmployeeMaster.EmployeeID == undefined ? "0" : $scope.EmployeeMaster.EmployeeID);
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("CustomerImageUpload", "Employees")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData
+                }).then(function (data) {
+                    $scope.EmployeeMaster.PhotoPath = data.data;
+                    $scope.ProofUploadImage();
+                }, function () {
+                    $scope.ProofUploadImage();
+                });
+            } else {
+                $scope.ProofUploadImage();
+            }
+        };
+
+        $scope.ProofUploadImage = function () {
+            if ($('#Prooffirlogo').val() && $('#Prooffirlogo').val().split('.').pop().toLowerCase() != "") {
+                var formData = new FormData();
+                formData.append("Prooffirlogo", document.getElementById('Prooffirlogo').files[0]);
+                var ext = $('#Prooffirlogo').val().split('.').pop().toLowerCase();
+                if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                    if (typeof hide_loader === 'function') hide_loader();
+                    if (typeof Noty === 'function') Noty("error", "Please Select Valid ID Proof Image !");
+                    return;
+                }
+                formData.append("Emp_ID", $scope.EmployeeMaster.EmployeeID == undefined ? "0" : $scope.EmployeeMaster.EmployeeID);
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("CustomerProofImageUpload", "Employees")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData
+                }).then(function (data) {
+                    $scope.EmployeeMaster.IDProofPhotoPath = data.data;
+                    $scope.Path2UploadImage();
+                }, function () {
+                    $scope.Path2UploadImage();
+                });
+            } else {
+                $scope.Path2UploadImage();
+            }
+        };
+
+        $scope.Path2UploadImage = function () {
+            if ($('#Path2logo').val() && $('#Path2logo').val().split('.').pop().toLowerCase() != "") {
+                var formData = new FormData();
+                formData.append("Path2logo", document.getElementById('Path2logo').files[0]);
+                var ext = $('#Path2logo').val().split('.').pop().toLowerCase();
+                if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                    if (typeof hide_loader === 'function') hide_loader();
+                    if (typeof Noty === 'function') Noty("error", "Please Select Valid Secondary Photo !");
+                    return;
+                }
+                formData.append("Emp_ID", $scope.EmployeeMaster.EmployeeID == undefined ? "0" : $scope.EmployeeMaster.EmployeeID);
+                $http({
+                    method: 'POST',
+                    url: '@Url.Action("CustomerPath2ImageUpload", "Employees")',
+                    headers: { 'Content-Type': undefined },
+                    data: formData
+                }).then(function (data) {
+                    $scope.EmployeeMaster.PhotoPath2 = data.data;
+                    $scope.InsertUpdateEmployee();
+                }, function () {
+                    $scope.InsertUpdateEmployee();
+                });
+            } else {
+                $scope.InsertUpdateEmployee();
+            }
+        };
+
+        // Save Employee record to database
+        $scope.InsertUpdateEmployee = function () {
+            $scope.EmployeeMaster.JoiningDate = $('#JoiningDate').val() || $scope.EmployeeMaster.JoiningDate;
+            $scope.EmployeeMaster.EndingDate = $('#EndingDate').val() || $scope.EmployeeMaster.EndingDate;
+
+            $http({
+                method: "post",
+                url: '@Url.Action("InsertUpdateEmployee", "Employees")',
+                data: { model: $scope.EmployeeMaster, Action: Action },
+                dataType: "json"
+            }).then(function (ret) {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (ret.data == "Record Is Inserted") {
+                    if (typeof Noty === 'function') Noty("success", "Employee Record Saved Successfully!");
+                    $scope.Clear();
+                } else if (ret.data == "Record Is Updated") {
+                    if (typeof Noty === 'function') Noty("success", "Employee Record Updated Successfully!");
+                    window.location.reload();
+                } else if (ret.data == "Employee Name already Exists") {
+                    if (typeof Noty === 'function') Noty("error", "Employee Name already exists!");
+                } else {
+                    if (typeof Noty === 'function') Noty("error", ret.data || "Failed to save record.");
+                }
+            }, function () {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (typeof Noty === 'function') Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // File upload event handlers
+        $scope.uploadedFile = function (element) {
+            if (element.files && element.files[0]) {
+                $scope.currentFile = element.files[0];
+                $("#filename").text(element.files[0].name);
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    $scope.$apply(function () {
+                        $scope.image_source = event.target.result;
+                    });
+                };
+                reader.readAsDataURL(element.files[0]);
+            }
+        };
+
+        $scope.proofuploadedFile = function (element) {
+            if (element.files && element.files[0]) {
+                $scope.currentFile = element.files[0];
+                $("#Prooffilename").text(element.files[0].name);
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    $scope.$apply(function () {
+                        $scope.Proofimage_source = event.target.result;
+                    });
+                };
+                reader.readAsDataURL(element.files[0]);
+            }
+        };
+
+        $scope.path2uploadedFile = function (element) {
+            if (element.files && element.files[0]) {
+                $scope.currentFile = element.files[0];
+                $("#Path2").text(element.files[0].name);
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    $scope.$apply(function () {
+                        $scope.Path2image_source2 = event.target.result;
+                    });
+                };
+                reader.readAsDataURL(element.files[0]);
+            }
+        };
+
+        $scope.GetDueDays = function () {
+            if (!$scope.EmployeeMaster.DOB) return;
+            var oneDay = 365.25 * 24 * 60 * 60 * 1000;
+            var firstDate = new Date($scope.EmployeeMaster.DOB.replace(/\-/g, "/"));
+            var secondDate = new Date();
+            if (!isNaN(firstDate.getTime())) {
+                $scope.EmployeeMaster.Age = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / (oneDay)));
+            }
+        };
+    }]);
+</script>
