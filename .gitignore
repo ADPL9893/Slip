@@ -1,0 +1,32 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+*.BAK
+# Visual Studio / .NET
+.vs/
+bin/
+obj/
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Executables
+*.exe
+*.dll
+*.pdb
+*.mdb
+
+# Temporary files
+*.cache
+*.tmp
+*.log
+
+# Sensitive Files / Configuration
+appsettings.*.json
+secrets.json
+.env
+*.publishxml
+*.pubxml
