@@ -2815,22 +2815,23 @@ namespace Slip.Utility
                 return;
 
             // 1. Title Row
-            string dateStr = DateTime.Today.ToString("dd-MM-yyyy");
-            if (!string.IsNullOrEmpty(date))
-            {
-                if (DateTime.TryParse(date, out DateTime parsedDt))
-                {
-                    dateStr = parsedDt.ToString("dd-MM-yyyy");
-                }
-                else
-                {
-                    dateStr = date;
-                }
-            }
+            //string dateStr = DateTime.Today.ToString("dd-MM-yyyy");
+            //if (!string.IsNullOrEmpty(date))
+            //{
+            //    if (DateTime.TryParse(date, out DateTime parsedDt))
+            //    {
+            //        dateStr = parsedDt.ToString("dd-MM-yyyy");
+            //    }
+            //    else
+            //    {
+            //        dateStr = date;
+            //    }
+            //}
 
             ws.Cells[2, 1, 2, 29].Merge = true;
             var titleCell = ws.Cells[2, 1];
-            titleCell.Value = $"{dateStr} IGI STOCK ANALYSIS REPORT";
+            //titleCell.Value = $"{dateStr} IGI STOCK ANALYSIS REPORT";
+            titleCell.Value = $"{date} IGI STOCK ANALYSIS REPORT";
             ws.Row(2).Height = 40;
 
             var titleRange = ws.Cells[2, 1, 2, 29];
