@@ -1,4 +1,4 @@
-﻿using OfficeOpenXml;
+using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using Slip.Models;
 using System;
@@ -2815,77 +2815,33 @@ namespace Slip.Utility
                 return;
 
             // 1. Title Row
-            ws.Cells[2, 1, 2, 17].Merge = true;
+            string dateStr = DateTime.Today.ToString("dd-MM-yyyy");
+            if (!string.IsNullOrEmpty(date))
+            {
+                if (DateTime.TryParse(date, out DateTime parsedDt))
+                {
+                    dateStr = parsedDt.ToString("dd-MM-yyyy");
+                }
+                else
+                {
+                    dateStr = date;
+                }
+            }
+
+            ws.Cells[2, 1, 2, 29].Merge = true;
             var titleCell = ws.Cells[2, 1];
-            titleCell.IsRichText = true;
+            titleCell.Value = $"{dateStr} IGI STOCK ANALYSIS REPORT";
             ws.Row(2).Height = 40;
-            
-            var rt = titleCell.RichText;
-            
-            string dateStr = string.IsNullOrEmpty(date) ? DateTime.Today.ToString("dd-MM-yyyy") : date;
-            
-            var tDate = rt.Add(dateStr + " ");
-            tDate.Color = Color.Black;
-            tDate.Bold = true;
-            
-            var tSize = rt.Add(" (IGI) SIZE");
-            tSize.Color = ColorTranslator.FromHtml("#70AD47");
-            tSize.Bold = true;
-            
-            var tComma1 = rt.Add(",");
-            tComma1.Color = Color.Black;
-            tComma1.Bold = true;
-            
-            var tColor = rt.Add("COLOR");
-            tColor.Color = Color.Red;
-            tColor.Bold = true;
-            
-            var tComma2 = rt.Add(",");
-            tComma2.Color = Color.Black;
-            tComma2.Bold = true;
-            
-            var tClarity = rt.Add("CLARITY");
-            tClarity.Color = ColorTranslator.FromHtml("#FFC000");
-            tClarity.Bold = true;
-            
-            var tComma3 = rt.Add(",");
-            tComma3.Color = Color.Black;
-            tComma3.Bold = true;
-            
-            var tCut = rt.Add("CUT");
-            tCut.Color = ColorTranslator.FromHtml("#70AD47");
-            tCut.Bold = true;
-            
-            var tComma4 = rt.Add(",");
-            tComma4.Color = Color.Black;
-            tComma4.Bold = true;
-            
-            var tPcsWt = rt.Add("PCS-WEIGHT");
-            tPcsWt.Color = ColorTranslator.FromHtml("#0070C0");
-            tPcsWt.Bold = true;
-            
-            var tComma5 = rt.Add(",");
-            tComma5.Color = Color.Black;
-            tComma5.Bold = true;
-            
-            var tLocReport = rt.Add("LOCATION");
-            tLocReport.Color = Color.Red;
-            tLocReport.Bold = true;
 
-            var tRdReport = rt.Add("REPORT DAYS");
-            tRdReport.Color = ColorTranslator.FromHtml("#FFC000");
-            tRdReport.Bold = true;
-
-            var tStReport = rt.Add("STATUS  WISE REPORT");
-            tStReport.Color = ColorTranslator.FromHtml("#70AD47");
-            tStReport.Bold = true;
-
-            // Apply size/style to the entire merged title range
-            var titleRange = ws.Cells[2, 1, 2, 17];
+            var titleRange = ws.Cells[2, 1, 2, 29];
             titleRange.Style.Font.Size = 16;
+            titleRange.Style.Font.Bold = true;
+            titleRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            titleRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
             titleRange.Style.Fill.PatternType = ExcelFillStyle.Solid;
             titleRange.Style.Fill.BackgroundColor.SetColor(Color.White);
-            titleRange.Style.Border.BorderAround(ExcelBorderStyle.Medium, ColorTranslator.FromHtml("#C00000"));
+            titleRange.Style.Border.BorderAround(ExcelBorderStyle.Thin, Color.Black);
+            SetBorders(ws, 2, 1, 2, 29);
 
             // 2. Prepare Data for Each Table
             
@@ -2971,38 +2927,42 @@ namespace Slip.Utility
 
             // 3. Draw tables
             
-            // Column Group 1 (Cols 1-5): SIZE
+            // Column Group 1 (Cols 1-6): SIZE
             DrawSummaryTable(ws, 4, 1, "SIZE", sizeItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
 
-            // Column Group 2 (Cols 7-11): SHAPE & CLARITY
-            int shapeLastRow = DrawSummaryTable(ws, 4, 7, "SHAPE", shapeItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
-            DrawSummaryTable(ws, shapeLastRow + 2, 7, "CLARITY", clarityItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
+            // Column Group 2 (Cols 8-13): SHAPE & CLARITY
+            int shapeLastRow = DrawSummaryTable(ws, 4, 8, "SHAPE", shapeItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
+            DrawSummaryTable(ws, shapeLastRow + 2, 8, "CLARITY", clarityItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
 
-            // Column Group 3 (Cols 13-17): Color, LOCATION & CUT
-            int colorLastRow = DrawSummaryTable(ws, 4, 13, "Color", colorItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
-            int locLastRow = DrawSummaryTable(ws, colorLastRow + 2, 13, "LOCATION", locationItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
-            DrawSummaryTable(ws, locLastRow + 2, 13, "CUT", cutItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
+            // Column Group 3 (Cols 15-20): Color, LOCATION & CUT
+            int colorLastRow = DrawSummaryTable(ws, 4, 15, "Color", colorItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
+            int locLastRow = DrawSummaryTable(ws, colorLastRow + 2, 15, "LOCATION", locationItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
+            DrawSummaryTable(ws, locLastRow + 2, 15, "CUT", cutItemsList, x => x.Name, x => x.Pcs, x => x.Weight, x => x.TotalAmt);
 
             // Set Column Widths
             ws.Column(1).Width = 12; // SIZE name
             ws.Column(2).Width = 8;  // Pcs
             ws.Column(3).Width = 10; // Weight
             ws.Column(4).Width = 12; // Total $
-            ws.Column(5).Width = 8;  // %
-            ws.Column(6).Width = 4;  // spacer
+            ws.Column(5).Width = 10; // Per Ct $
+            ws.Column(6).Width = 8;  // %
+            ws.Column(7).Width = 4;  // spacer
 
-            ws.Column(7).Width = 24; // SHAPE name
-            ws.Column(8).Width = 8;  // Pcs
-            ws.Column(9).Width = 10; // Weight
-            ws.Column(10).Width = 12;// Total $
-            ws.Column(11).Width = 8; // %
-            ws.Column(12).Width = 4; // spacer
+            ws.Column(8).Width = 24; // SHAPE name
+            ws.Column(9).Width = 8;  // Pcs
+            ws.Column(10).Width = 10; // Weight
+            ws.Column(11).Width = 12;// Total $
+            ws.Column(12).Width = 10;// Per Ct $
+            ws.Column(13).Width = 8; // %
+            ws.Column(14).Width = 4; // spacer
 
-            ws.Column(13).Width = 15;// Color / Location / Cut name
-            ws.Column(14).Width = 8; // Pcs
-            ws.Column(15).Width = 10;// Weight
-            ws.Column(16).Width = 12;// Total $
-            ws.Column(17).Width = 8; // %
+            ws.Column(15).Width = 15;// Color / Location / Cut name
+            ws.Column(16).Width = 8; // Pcs
+            ws.Column(17).Width = 10;// Weight
+            ws.Column(18).Width = 12;// Total $
+            ws.Column(19).Width = 10;// Per Ct $
+            ws.Column(20).Width = 8; // %
+            ws.Column(21).Width = 4; // spacer
 
             // === NEW: REPORT DAYS & STATUS TABLES ===
             if (dtReportDays == null) dtReportDays = new System.Data.DataTable();
@@ -3017,7 +2977,15 @@ namespace Slip.Utility
             System.Drawing.Color colLightGray = System.Drawing.ColorTranslator.FromHtml("#F2F2F2");
 
             int rDays = 4;
-            int startColDays = 19;
+            int startColDays = 22;
+
+            string colAvailable = ExcelCellAddress.GetColumnLetter(startColDays + 1); // W (23)
+            string colOnHold = ExcelCellAddress.GetColumnLetter(startColDays + 2);    // X (24)
+            string colOnMemo = ExcelCellAddress.GetColumnLetter(startColDays + 3);    // Y (25)
+            string colTotPcs = ExcelCellAddress.GetColumnLetter(startColDays + 4);    // Z (26)
+            string colTotWt = ExcelCellAddress.GetColumnLetter(startColDays + 5);     // AA (27)
+            string colTotAmt = ExcelCellAddress.GetColumnLetter(startColDays + 6);    // AB (28)
+            string colTotPct = ExcelCellAddress.GetColumnLetter(startColDays + 7);    // AC (29)
 
             // Headers row 4
             ws.Row(rDays).Height = 25;
@@ -3060,13 +3028,13 @@ namespace Slip.Utility
             ws.Cells[rDays, startColDays, rDays, startColDays + 7].Style.Fill.BackgroundColor.SetColor(colLightGreen);
 
             // Set MUMBAI formulas
-            ws.Cells[rDays, startColDays + 1].Formula = "SUM(T6:T11)"; // AVAILABLE
-            ws.Cells[rDays, startColDays + 2].Formula = "SUM(U6:U11)"; // ONHOLD
-            ws.Cells[rDays, startColDays + 3].Formula = "SUM(V6:V11)"; // ONMEMO
-            ws.Cells[rDays, startColDays + 4].Formula = "SUM(W6:W11)"; // Total Pcs
-            ws.Cells[rDays, startColDays + 5].Formula = "SUM(X6:X11)"; // Total Weight
-            ws.Cells[rDays, startColDays + 6].Formula = "SUM(Y6:Y11)"; // Total $
-            ws.Cells[rDays, startColDays + 7].Formula = "IF(Y$26>0,(Y5/Y$26)*100,0)"; // %
+            ws.Cells[rDays, startColDays + 1].Formula = $"SUM({colAvailable}6:{colAvailable}11)"; // AVAILABLE
+            ws.Cells[rDays, startColDays + 2].Formula = $"SUM({colOnHold}6:{colOnHold}11)"; // ONHOLD
+            ws.Cells[rDays, startColDays + 3].Formula = $"SUM({colOnMemo}6:{colOnMemo}11)"; // ONMEMO
+            ws.Cells[rDays, startColDays + 4].Formula = $"SUM({colTotPcs}6:{colTotPcs}11)"; // Total Pcs
+            ws.Cells[rDays, startColDays + 5].Formula = $"SUM({colTotWt}6:{colTotWt}11)"; // Total Weight
+            ws.Cells[rDays, startColDays + 6].Formula = $"SUM({colTotAmt}6:{colTotAmt}11)"; // Total $
+            ws.Cells[rDays, startColDays + 7].Formula = $"IF({colTotAmt}$26>0,({colTotAmt}5/{colTotAmt}$26)*100,0)"; // %
 
             rDays++;
 
@@ -3099,8 +3067,8 @@ namespace Slip.Utility
                 }
 
                 // Total Pcs and % formulas
-                ws.Cells[rDays, startColDays + 4].Formula = "SUM(T" + rDays + ":V" + rDays + ")";
-                ws.Cells[rDays, startColDays + 7].Formula = "IF(Y$26>0,(Y" + rDays + "/Y$26)*100,0)";
+                ws.Cells[rDays, startColDays + 4].Formula = $"SUM({colAvailable}{rDays}:{colOnMemo}{rDays})";
+                ws.Cells[rDays, startColDays + 7].Formula = $"IF({colTotAmt}$26>0,({colTotAmt}{rDays}/{colTotAmt}$26)*100,0)";
 
                 rDays++;
             }
@@ -3114,13 +3082,13 @@ namespace Slip.Utility
             ws.Cells[rDays, startColDays, rDays, startColDays + 7].Style.Fill.BackgroundColor.SetColor(colLightGreen);
 
             // Set NY formulas
-            ws.Cells[rDays, startColDays + 1].Formula = "SUM(T13:T18)"; // AVAILABLE
-            ws.Cells[rDays, startColDays + 2].Formula = "SUM(U13:U18)"; // ONHOLD
-            ws.Cells[rDays, startColDays + 3].Formula = "SUM(V13:V18)"; // ONMEMO
-            ws.Cells[rDays, startColDays + 4].Formula = "SUM(W13:W18)"; // Total Pcs
-            ws.Cells[rDays, startColDays + 5].Formula = "SUM(X13:X18)"; // Total Weight
-            ws.Cells[rDays, startColDays + 6].Formula = "SUM(Y13:Y18)"; // Total $
-            ws.Cells[rDays, startColDays + 7].Formula = "IF(Y$26>0,(Y12/Y$26)*100,0)"; // %
+            ws.Cells[rDays, startColDays + 1].Formula = $"SUM({colAvailable}13:{colAvailable}18)"; // AVAILABLE
+            ws.Cells[rDays, startColDays + 2].Formula = $"SUM({colOnHold}13:{colOnHold}18)"; // ONHOLD
+            ws.Cells[rDays, startColDays + 3].Formula = $"SUM({colOnMemo}13:{colOnMemo}18)"; // ONMEMO
+            ws.Cells[rDays, startColDays + 4].Formula = $"SUM({colTotPcs}13:{colTotPcs}18)"; // Total Pcs
+            ws.Cells[rDays, startColDays + 5].Formula = $"SUM({colTotWt}13:{colTotWt}18)"; // Total Weight
+            ws.Cells[rDays, startColDays + 6].Formula = $"SUM({colTotAmt}13:{colTotAmt}18)"; // Total $
+            ws.Cells[rDays, startColDays + 7].Formula = $"IF({colTotAmt}$26>0,({colTotAmt}12/{colTotAmt}$26)*100,0)"; // %
 
             rDays++;
 
@@ -3152,8 +3120,8 @@ namespace Slip.Utility
                 }
 
                 // Total Pcs and % formulas
-                ws.Cells[rDays, startColDays + 4].Formula = "SUM(T" + rDays + ":V" + rDays + ")";
-                ws.Cells[rDays, startColDays + 7].Formula = "IF(Y$26>0,(Y" + rDays + "/Y$26)*100,0)";
+                ws.Cells[rDays, startColDays + 4].Formula = $"SUM({colAvailable}{rDays}:{colOnMemo}{rDays})";
+                ws.Cells[rDays, startColDays + 7].Formula = $"IF({colTotAmt}$26>0,({colTotAmt}{rDays}/{colTotAmt}$26)*100,0)";
 
                 rDays++;
             }
@@ -3167,13 +3135,13 @@ namespace Slip.Utility
             ws.Cells[rDays, startColDays, rDays, startColDays + 7].Style.Fill.BackgroundColor.SetColor(colLightGreen);
 
             // Set SURAT formulas
-            ws.Cells[rDays, startColDays + 1].Formula = "SUM(T20:T25)"; // AVAILABLE
-            ws.Cells[rDays, startColDays + 2].Formula = "SUM(U20:U25)"; // ONHOLD
-            ws.Cells[rDays, startColDays + 3].Formula = "SUM(V20:V25)"; // ONMEMO
-            ws.Cells[rDays, startColDays + 4].Formula = "SUM(W20:W25)"; // Total Pcs
-            ws.Cells[rDays, startColDays + 5].Formula = "SUM(X20:X25)"; // Total Weight
-            ws.Cells[rDays, startColDays + 6].Formula = "SUM(Y20:Y25)"; // Total $
-            ws.Cells[rDays, startColDays + 7].Formula = "IF(Y$26>0,(Y19/Y$26)*100,0)"; // %
+            ws.Cells[rDays, startColDays + 1].Formula = $"SUM({colAvailable}20:{colAvailable}25)"; // AVAILABLE
+            ws.Cells[rDays, startColDays + 2].Formula = $"SUM({colOnHold}20:{colOnHold}25)"; // ONHOLD
+            ws.Cells[rDays, startColDays + 3].Formula = $"SUM({colOnMemo}20:{colOnMemo}25)"; // ONMEMO
+            ws.Cells[rDays, startColDays + 4].Formula = $"SUM({colTotPcs}20:{colTotPcs}25)"; // Total Pcs
+            ws.Cells[rDays, startColDays + 5].Formula = $"SUM({colTotWt}20:{colTotWt}25)"; // Total Weight
+            ws.Cells[rDays, startColDays + 6].Formula = $"SUM({colTotAmt}20:{colTotAmt}25)"; // Total $
+            ws.Cells[rDays, startColDays + 7].Formula = $"IF({colTotAmt}$26>0,({colTotAmt}19/{colTotAmt}$26)*100,0)"; // %
 
             rDays++;
 
@@ -3205,8 +3173,8 @@ namespace Slip.Utility
                 }
 
                 // Total Pcs and % formulas
-                ws.Cells[rDays, startColDays + 4].Formula = "SUM(T" + rDays + ":V" + rDays + ")";
-                ws.Cells[rDays, startColDays + 7].Formula = "IF(Y$26>0,(Y" + rDays + "/Y$26)*100,0)";
+                ws.Cells[rDays, startColDays + 4].Formula = $"SUM({colAvailable}{rDays}:{colOnMemo}{rDays})";
+                ws.Cells[rDays, startColDays + 7].Formula = $"IF({colTotAmt}$26>0,({colTotAmt}{rDays}/{colTotAmt}$26)*100,0)";
 
                 rDays++;
             }
@@ -3220,12 +3188,12 @@ namespace Slip.Utility
             ws.Cells[rDays, startColDays, rDays, startColDays + 7].Style.Fill.BackgroundColor.SetColor(colLightBlue);
 
             // Sum totals from Mumbai, NY and SURAT headers
-            ws.Cells[rDays, startColDays + 1].Formula = "T5+T12+T19"; // AVAILABLE Total
-            ws.Cells[rDays, startColDays + 2].Formula = "U5+U12+U19"; // ONHOLD Total
-            ws.Cells[rDays, startColDays + 3].Formula = "V5+V12+V19"; // ONMEMO Total
-            ws.Cells[rDays, startColDays + 4].Formula = "W5+W12+W19"; // Total Pcs Total
-            ws.Cells[rDays, startColDays + 5].Formula = "X5+X12+X19"; // Total Weight Total
-            ws.Cells[rDays, startColDays + 6].Formula = "Y5+Y12+Y19"; // Total $ Total
+            ws.Cells[rDays, startColDays + 1].Formula = $"{colAvailable}5+{colAvailable}12+{colAvailable}19"; // AVAILABLE Total
+            ws.Cells[rDays, startColDays + 2].Formula = $"{colOnHold}5+{colOnHold}12+{colOnHold}19"; // ONHOLD Total
+            ws.Cells[rDays, startColDays + 3].Formula = $"{colOnMemo}5+{colOnMemo}12+{colOnMemo}19"; // ONMEMO Total
+            ws.Cells[rDays, startColDays + 4].Formula = $"{colTotPcs}5+{colTotPcs}12+{colTotPcs}19"; // Total Pcs Total
+            ws.Cells[rDays, startColDays + 5].Formula = $"{colTotWt}5+{colTotWt}12+{colTotWt}19"; // Total Weight Total
+            ws.Cells[rDays, startColDays + 6].Formula = $"{colTotAmt}5+{colTotAmt}12+{colTotAmt}19"; // Total $ Total
             ws.Cells[rDays, startColDays + 7].Value = 100; // % Total is 100
 
             // Apply number formatting and borders to REPORT DAYS table
@@ -3242,10 +3210,15 @@ namespace Slip.Utility
             SetBorders(ws, 4, startColDays, totalRowDays, startColDays + 7);
 
             // === DRAW STATUS TABLE ===
-            int rStatus = totalRowDays + 3; // 22
-            int startColStatus = 19;
+            int rStatus = totalRowDays + 3; // 29
+            int startColStatus = 22;
 
-            // Headers row 22
+            string colStatusPcs = ExcelCellAddress.GetColumnLetter(startColStatus + 2); // X (24)
+            string colStatusWt = ExcelCellAddress.GetColumnLetter(startColStatus + 3);  // Y (25)
+            string colStatusAmt = ExcelCellAddress.GetColumnLetter(startColStatus + 4); // Z (26)
+            string colStatusPct = ExcelCellAddress.GetColumnLetter(startColStatus + 5); // AA (27)
+
+            // Headers
             ws.Row(rStatus).Height = 25;
             ws.Cells[rStatus, startColStatus].Value = "STATUS";
             ws.Cells[rStatus, startColStatus].Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -3314,7 +3287,7 @@ namespace Slip.Utility
 
                     // % formula: TOTAL $ / Grand Total $ * 100
                     int totalRowIndex = dataStartRowStatus + (statuses.Length * locations.Length);
-                    ws.Cells[rStatus, startColStatus + 5].Formula = "IF(W$" + totalRowIndex + ">0,(W" + rStatus + "/W$" + totalRowIndex + ")*100,0)";
+                    ws.Cells[rStatus, startColStatus + 5].Formula = $"IF({colStatusAmt}${totalRowIndex}>0,({colStatusAmt}{rStatus}/{colStatusAmt}${totalRowIndex})*100,0)";
 
                     rStatus++;
                 }
@@ -3336,9 +3309,9 @@ namespace Slip.Utility
             ws.Cells[rStatus, startColStatus, rStatus, startColStatus + 5].Style.Fill.BackgroundColor.SetColor(colLightGray);
 
             // Sum formulas
-            ws.Cells[rStatus, startColStatus + 2].Formula = "SUM(U" + dataStartRowStatus + ":U" + (rStatus - 1) + ")";
-            ws.Cells[rStatus, startColStatus + 3].Formula = "SUM(V" + dataStartRowStatus + ":V" + (rStatus - 1) + ")";
-            ws.Cells[rStatus, startColStatus + 4].Formula = "SUM(W" + dataStartRowStatus + ":W" + (rStatus - 1) + ")";
+            ws.Cells[rStatus, startColStatus + 2].Formula = $"SUM({colStatusPcs}{dataStartRowStatus}:{colStatusPcs}{rStatus - 1})";
+            ws.Cells[rStatus, startColStatus + 3].Formula = $"SUM({colStatusWt}{dataStartRowStatus}:{colStatusWt}{rStatus - 1})";
+            ws.Cells[rStatus, startColStatus + 4].Formula = $"SUM({colStatusAmt}{dataStartRowStatus}:{colStatusAmt}{rStatus - 1})";
             ws.Cells[rStatus, startColStatus + 5].Value = 100; // % Total is 100
 
             // Apply formats and borders
@@ -3351,16 +3324,16 @@ namespace Slip.Utility
             }
             SetBorders(ws, dataStartRowStatus - 1, startColStatus, totalRowStatus, startColStatus + 5);
 
-            // Set Column Widths for Columns 18-26
-            ws.Column(18).Width = 4;  // spacer
-            ws.Column(19).Width = 20; // REPORT DAYS / STATUS
-            ws.Column(20).Width = 15; // AVAILABLE / LOCATION
-            ws.Column(21).Width = 12; // ONHOLD / PCS
-            ws.Column(22).Width = 12; // ONMEMO / WEIGHT
-            ws.Column(23).Width = 12; // Total Pcs / TOTAL $
-            ws.Column(24).Width = 15; // Total Weight / %
-            ws.Column(25).Width = 15; // Total $
-            ws.Column(26).Width = 10; // %
+            // Set Column Widths for Columns 21-29
+            ws.Column(21).Width = 4;  // spacer
+            ws.Column(22).Width = 20; // REPORT DAYS / STATUS
+            ws.Column(23).Width = 15; // AVAILABLE / LOCATION
+            ws.Column(24).Width = 12; // ONHOLD / PCS
+            ws.Column(25).Width = 12; // ONMEMO / WEIGHT
+            ws.Column(26).Width = 12; // Total Pcs / TOTAL $
+            ws.Column(27).Width = 15; // Total Weight / %
+            ws.Column(28).Width = 15; // Total $
+            ws.Column(29).Width = 10; // %
         }
 
         private static int DrawSummaryTable<T>(
@@ -3413,18 +3386,31 @@ namespace Slip.Utility
             c4.Style.Fill.PatternType = ExcelFillStyle.Solid;
             c4.Style.Fill.BackgroundColor.SetColor(colBlack);
 
-            // Column 5: %
+            // Column 5: Per Ct $
             var c5 = ws.Cells[r, startCol + 4];
-            c5.Value = "%";
+            c5.Value = "Per Ct $";
             c5.Style.Font.Bold = true;
             c5.Style.Font.Color.SetColor(colWhite);
             c5.Style.Fill.PatternType = ExcelFillStyle.Solid;
             c5.Style.Fill.BackgroundColor.SetColor(colBlack);
 
+            // Column 6: %
+            var c6 = ws.Cells[r, startCol + 5];
+            c6.Value = "%";
+            c6.Style.Font.Bold = true;
+            c6.Style.Font.Color.SetColor(colWhite);
+            c6.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            c6.Style.Fill.BackgroundColor.SetColor(colBlack);
+
             r++;
 
             // 2. Data Rows
             int dataStartRow = r;
+            string wtColLetter = ExcelCellAddress.GetColumnLetter(startCol + 2);
+            string amtColLetter = ExcelCellAddress.GetColumnLetter(startCol + 3);
+            string perCtColLetter = ExcelCellAddress.GetColumnLetter(startCol + 4);
+            string pctColLetter = ExcelCellAddress.GetColumnLetter(startCol + 5);
+
             for (int i = 0; i < items.Count; i++)
             {
                 var item = items[i];
@@ -3435,11 +3421,15 @@ namespace Slip.Utility
                 ws.Cells[r, startCol + 2].Value = weightSelector(item);
                 ws.Cells[r, startCol + 3].Value = Math.Round(amtSelector(item), 0);
 
+                // Per Ct $ formula: TotalAmt / Weight
+                ws.Cells[r, startCol + 4].Formula = $"IF({wtColLetter}{r}>0,{amtColLetter}{r}/{wtColLetter}{r},0)";
+
                 // Formatting
                 ws.Cells[r, startCol + 1].Style.Numberformat.Format = "#,##0;(#,##0);\"-\"";
                 ws.Cells[r, startCol + 2].Style.Numberformat.Format = "#,##0.00;(#,##0.00);\"-\"";
                 ws.Cells[r, startCol + 3].Style.Numberformat.Format = "#,##0;(#,##0);\"-\"";
-                ws.Cells[r, startCol + 4].Style.Numberformat.Format = "0.00";
+                ws.Cells[r, startCol + 4].Style.Numberformat.Format = "#,##0.00;(#,##0.00);\"-\"";
+                ws.Cells[r, startCol + 5].Style.Numberformat.Format = "0.00";
 
                 r++;
             }
@@ -3476,7 +3466,16 @@ namespace Slip.Utility
             tAmtCell.Style.Fill.BackgroundColor.SetColor(colBlack);
             tAmtCell.Style.Numberformat.Format = "#,##0;(#,##0);\"-\"";
 
-            var tPctCell = ws.Cells[totalRow, startCol + 4];
+            // Total Per Ct $: TotalAmt / TotalWeight
+            var tPerCtCell = ws.Cells[totalRow, startCol + 4];
+            tPerCtCell.Formula = $"IF({wtColLetter}{totalRow}>0,{amtColLetter}{totalRow}/{wtColLetter}{totalRow},0)";
+            tPerCtCell.Style.Font.Bold = true;
+            tPerCtCell.Style.Font.Color.SetColor(colWhite);
+            tPerCtCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            tPerCtCell.Style.Fill.BackgroundColor.SetColor(colBlack);
+            tPerCtCell.Style.Numberformat.Format = "#,##0.00;(#,##0.00);\"-\"";
+
+            var tPctCell = ws.Cells[totalRow, startCol + 5];
             tPctCell.Value = 100;
             tPctCell.Style.Font.Bold = true;
             tPctCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -3484,14 +3483,14 @@ namespace Slip.Utility
             tPctCell.Style.Numberformat.Format = "0.00";
 
             // 4. Fill % Formulas for Data Rows
-            string totalAmtCellAddress = $"{ExcelCellAddress.GetColumnLetter(startCol + 3)}{totalRow}";
+            string totalAmtCellAddress = $"{amtColLetter}{totalRow}";
             for (int rowIdx = dataStartRow; rowIdx < totalRow; rowIdx++)
             {
-                ws.Cells[rowIdx, startCol + 4].Formula = $"IF({totalAmtCellAddress}>0,({ExcelCellAddress.GetColumnLetter(startCol + 3)}{rowIdx}/{totalAmtCellAddress})*100,0)";
+                ws.Cells[rowIdx, startCol + 5].Formula = $"IF({totalAmtCellAddress}>0,({amtColLetter}{rowIdx}/{totalAmtCellAddress})*100,0)";
             }
 
             // 5. Borders
-            SetBorders(ws, startRow, startCol, totalRow, startCol + 4);
+            SetBorders(ws, startRow, startCol, totalRow, startCol + 5);
 
             return totalRow;
         }

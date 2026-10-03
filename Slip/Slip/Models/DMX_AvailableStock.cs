@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -123,8 +123,10 @@ namespace Slip.Models
         public string Color { get; set; }
         public int Pcs { get; set; }
         public decimal PcsPer { get; set; }
+        public decimal Weight { get; set; }
         public decimal TotalAmt { get; set; }
         public decimal TotalAmtPer { get; set; }
+        public decimal PerCt { get; set; }
     }
 
     public class DmxStockSummary_Clarity
@@ -132,8 +134,10 @@ namespace Slip.Models
         public string Clarity { get; set; }
         public int Pcs { get; set; }
         public decimal PcsPer { get; set; }
+        public decimal Weight { get; set; }
         public decimal TotalAmt { get; set; }
         public decimal TotalAmtPer { get; set; }
+        public decimal PerCt { get; set; }
     }
 
     public class DmxStockSummary_Pivot
@@ -147,6 +151,7 @@ namespace Slip.Models
         public decimal WeightPer { get; set; }
         public decimal TotalAmt { get; set; }
         public decimal TotalAmtPer { get; set; }
+        public decimal PerCt { get; set; }
     }
 
     public class DMX_HOLDStock
