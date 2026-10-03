@@ -8,6 +8,10 @@
 bin/
 obj/
 
+# Runtime-generated content
+Logs/
+Upload/
+
 *.user
 *.suo
 *.userosscache
