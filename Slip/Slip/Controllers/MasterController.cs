@@ -2132,6 +2132,264 @@ namespace Slip.Controllers
         }
         #endregion
 
+        #region Party Master (MST_PartyMaster)
+
+        public ActionResult PartyMaster()
+        {
+            SetModulePermissions("Master", "PartyMaster");
+            return View();
+        }
+
+        private static object SafeGetColumn(SqlDataReader rdr, string column)
+        {
+            for (int i = 0; i < rdr.FieldCount; i++)
+            {
+                if (string.Equals(rdr.GetName(i), column, StringComparison.OrdinalIgnoreCase))
+                {
+                    return rdr.IsDBNull(i) ? null : rdr.GetValue(i);
+                }
+            }
+            return null;
+        }
+
+        private MST_PartyMaster MapPartyMaster(SqlDataReader rdr)
+        {
+            return new MST_PartyMaster
+            {
+                PartyId = rdr["PartyId"] != DBNull.Value ? (Guid)rdr["PartyId"] : Guid.Empty,
+                PartyCode = rdr["PartyCode"] != DBNull.Value ? Convert.ToString(rdr["PartyCode"]) : "",
+                PartyName = rdr["PartyName"] != DBNull.Value ? Convert.ToString(rdr["PartyName"]) : "",
+                ContactPerson = rdr["ContactPerson"] != DBNull.Value ? Convert.ToString(rdr["ContactPerson"]) : "",
+                IsOutSide = rdr["IsOutSide"] != DBNull.Value && Convert.ToBoolean(rdr["IsOutSide"]),
+                MobileNo = rdr["MobileNo"] != DBNull.Value ? Convert.ToString(rdr["MobileNo"]) : "",
+                Email = rdr["Email"] != DBNull.Value ? Convert.ToString(rdr["Email"]) : "",
+                Address = rdr["Address"] != DBNull.Value ? Convert.ToString(rdr["Address"]) : "",
+                CityName = rdr["CityName"] != DBNull.Value ? Convert.ToString(rdr["CityName"]) : "",
+                StateName = rdr["StateName"] != DBNull.Value ? Convert.ToString(rdr["StateName"]) : "",
+                CountryName = rdr["CountryName"] != DBNull.Value ? Convert.ToString(rdr["CountryName"]) : "",
+                Pincode = rdr["Pincode"] != DBNull.Value ? Convert.ToString(rdr["Pincode"]) : "",
+                GSTNo = rdr["GSTNo"] != DBNull.Value ? Convert.ToString(rdr["GSTNo"]) : "",
+                PANNo = rdr["PANNo"] != DBNull.Value ? Convert.ToString(rdr["PANNo"]) : "",
+                IsActive = rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
+                Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                CreatedOn = rdr["CreatedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                CreatedBy = rdr["CreatedBy"] != DBNull.Value ? (Guid?)rdr["CreatedBy"] : null,
+                ModifiedOn = rdr["ModifiedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != DBNull.Value ? (Guid?)rdr["ModifiedBy"] : null
+            };
+        }
+
+        public JsonResult Get_MST_PartyMasterList(string SearchText)
+        {
+            try
+            {
+                List<MST_PartyMaster> list = new List<MST_PartyMaster>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(MapPartyMaster(rdr));
+                        }
+                    }
+                    con.Close();
+                }
+
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_PartyMaster>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_PartyMasterById(Guid PartyId)
+        {
+            try
+            {
+                MST_PartyMaster item = null;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_GetById", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            item = MapPartyMaster(rdr);
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult PartyMaster_Save(MST_PartyMaster model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.PartyId != Guid.Empty;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                {
+                    string spName = "USP_MST_PartyMaster_Save";
+                    using (SqlCommand cmd = new SqlCommand(spName, con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        if (isUpdate)
+                        {
+                            cmd.Parameters.AddWithValue("@PartyId", model.PartyId);
+                        }
+                        cmd.Parameters.AddWithValue("@PartyCode", model.PartyCode ?? "");
+                        cmd.Parameters.AddWithValue("@PartyName", model.PartyName ?? "");
+                        cmd.Parameters.AddWithValue("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@IsOutSide", model.IsOutSide);
+                        cmd.Parameters.AddWithValue("@MobileNo", (object)model.MobileNo ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Email", (object)model.Email ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Address", (object)model.Address ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@CityName", (object)model.CityName ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@StateName", (object)model.StateName ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@CountryName", (object)model.CountryName ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Pincode", (object)model.Pincode ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@GSTNo", (object)model.GSTNo ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@PANNo", (object)model.PANNo ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", DBNull.Value);
+
+                        con.Open();
+                        using (SqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            if (rdr.Read())
+                            {
+                                object successVal = SafeGetColumn(rdr, "Success");
+                                isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                                object msgVal = SafeGetColumn(rdr, "Message");
+                                message = msgVal != null ? Convert.ToString(msgVal) : "";
+                            }
+                            else
+                            {
+                                isSuccess = true;
+                            }
+                        }
+                        con.Close();
+                    }
+                }
+
+                if (isSuccess && string.IsNullOrEmpty(message))
+                {
+                    message = isUpdate ? "Party updated successfully." : "Party saved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult PartyMaster_Delete(Guid PartyId)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_Delete", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+                    cmd.Parameters.AddWithValue("@ModifiedBy", DBNull.Value);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            object successVal = SafeGetColumn(rdr, "Success");
+                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                            object msgVal = SafeGetColumn(rdr, "Message");
+                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+                        }
+                    }
+                    con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult PartyMaster_ActiveInactive(Guid PartyId, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_ActiveInactive", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+                    cmd.Parameters.AddWithValue("@IsActive", IsActive);
+                    cmd.Parameters.AddWithValue("@ModifiedBy", DBNull.Value);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            object successVal = SafeGetColumn(rdr, "Success");
+                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                            object msgVal = SafeGetColumn(rdr, "Message");
+                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+                        }
+                    }
+                    con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        #endregion
+
         #region Master Book
         public ActionResult MasterBook()
         {

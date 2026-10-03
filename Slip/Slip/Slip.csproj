@@ -341,6 +341,7 @@
     <Compile Include="Models\MainRoughSummary.cs" />
     <Compile Include="Models\MST_Lot.cs" />
     <Compile Include="Models\MST_Role.cs" />
+    <Compile Include="Models\MST_PartyMaster.cs" />
     <Compile Include="Models\MST_RoughDistribution.cs" />
     <Compile Include="Models\MST_VoucherDetails.cs" />
     <Compile Include="Models\PriceXML.cs" />
@@ -1311,6 +1312,7 @@
     <Content Include="Views\Master\RoughDistribution.cshtml" />
     <Content Include="Views\Master\RoughDistributionList.cshtml" />
     <Content Include="Views\Master\RoughCodeMaster.cshtml" />
+    <Content Include="Views\Master\PartyMaster.cshtml" />
     <Content Include="Views\Master\MasterBook.cshtml" />
     <Content Include="Views\Master\QRPrint.cshtml" />
     <Content Include="Views\Master\QRGenerator.cshtml" />

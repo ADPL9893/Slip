@@ -26,11 +26,12 @@ namespace Slip.Controllers
 
         protected void SetModulePermissions(string controllerName, string actionName)
         {
+            bool canView = false;
             bool canAdd = false;
             bool canEdit = false;
             bool canDelete = false;
             bool canExport = false;
-
+            
             try
             {
                 if (SessionFacade.UserSession != null)
@@ -41,6 +42,8 @@ namespace Slip.Controllers
                         canEdit = true;
                         canDelete = true;
                         canExport = true;
+                        canView = true;
+
                     }
                     else
                     {
@@ -84,6 +87,8 @@ namespace Slip.Controllers
             ViewBag.CanAdd = canAdd;
             ViewBag.CanEdit = canEdit;
             ViewBag.CanDelete = canDelete;
+            ViewBag.CanView = canView;
+            ViewBag.canExport = canExport;
         }
     }
 }

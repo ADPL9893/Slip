@@ -61,7 +61,7 @@ namespace Slip.Controllers
                         _SEC_User.IsAdmin = Convert.ToBoolean(dataset.Tables[0].Rows[0][4].ToString());
                         _SEC_User.IsActive = Convert.ToBoolean(dataset.Tables[0].Rows[0][5].ToString());
                         _SEC_User.TableNo = dataset.Tables[0].Rows[0][6].ToString();
-                        _SEC_User.IsDashBoardShow = Convert.ToBoolean(dataset.Tables[0].Rows[0][7].ToString());
+                        _SEC_User.IsDashBoardShow = Convert.ToBoolean(string.IsNullOrWhiteSpace(dataset.Tables[0].Rows[0][7].ToString()) ? "false": dataset.Tables[0].Rows[0][7].ToString());
                         _SEC_User.RoleID = Convert.ToInt32(dataset.Tables[0].Rows[0][8].ToString());
                         SessionFacade.UserSession = _SEC_User;
 
