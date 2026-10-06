@@ -129,7 +129,7 @@
     }
 
     /* Modal */
-    #InwardModal .modal-dialog { max-width: 1040px; width: 94%; margin: 24px auto; }
+    #InwardModal .modal-dialog { max-width: 1400px; width: 97%; margin: 20px auto; }
     #InwardModal .modal-content { border-radius: 12px; border: none; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28); overflow: hidden; background: #ffffff; }
     #InwardModal .modal-header { background: #111827 !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #1f2937; position: relative; border-top-left-radius: 12px; border-top-right-radius: 12px; }
     #InwardModal .modal-header:before, #InwardModal .modal-header:after { display: none !important; }
@@ -175,12 +175,30 @@
     .chosen-container .chosen-drop { border-radius: 6px !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important; font-size: 12.5px !important; z-index: 99999 !important; }
     .chosen-container .chosen-results li.highlighted { background: #2563eb !important; color: #ffffff !important; }
 
-    .ri-source-toggle { display: flex; gap: 8px; height: 38px; }
-    .ri-source-btn {
-        flex: 1; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; font-size: 12.5px; font-weight: 700;
-        color: #334155; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; gap: 6px;
+    .ri-radio-group { display: flex; align-items: center; gap: 18px; height: 38px; }
+    .ri-radio-option { display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer; font-size: 12.5px; font-weight: 600; color: #334155; }
+    .ri-radio-option input[type="radio"] { width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb; margin: 0; }
+    .ri-radio-option span { display: inline-flex; align-items: center; gap: 5px; }
+
+    .ri-from-to-row {
+        margin-bottom: 16px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 16px 18px 4px 18px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     }
-    .ri-source-btn.active { background: #2563eb; border-color: #1d4ed8; color: #ffffff; box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); }
+
+    .ri-fieldset {
+        border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 16px 14px 16px; margin: 0 0 12px 0; min-width: 0;
+    }
+    .ri-fieldset .row { margin-left: -8px; margin-right: -8px; }
+    .ri-fieldset .row > div { padding-left: 8px; padding-right: 8px; }
+    .ri-legend {
+        width: auto; float: none; display: inline-block; border: none; margin-bottom: 4px; padding: 0 8px;
+        font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #2563eb;
+    }
 
     /* Line items table */
     .ri-lines-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
@@ -189,9 +207,10 @@
         letter-spacing: 0.3px; padding: 8px 6px; border: 1px solid #e2e8f0; text-align: center;
     }
     .ri-lines-table td { padding: 4px; border: 1px solid #e2e8f0; text-align: center; vertical-align: middle; }
-    .ri-lines-table input { width: 100%; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; font-size: 12px; text-align: center; }
+    .ri-lines-table input, .ri-lines-table select { width: 100%; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; font-size: 12px; text-align: center; }
     .ri-lines-table input.ri-lot-input { text-align: left; }
     .ri-lines-table .ri-amount-cell { font-weight: 700; color: #0f172a; }
+    .ri-lines-table-wrap { width: 100%; overflow-x: auto; }
 
     .btn-ri-add-row {
         background: #e0f2fe; color: #0369a1 !important; border: 1px dashed #7dd3fc; border-radius: 6px; height: 32px; padding: 0 14px;
@@ -279,67 +298,99 @@
                 </div>
 
                 <div class="modal-body">
-                    <div class="ri-modal-section">
-                        <div class="ri-modal-section-title"><i class="fa fa-id-card text-primary"></i> CHALLAN DETAILS</div>
-                        <div class="row">
-                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
-                                <label class="ri-label" for="ModalChallanNo">CHALLAN NO <span class="req">*</span></label>
-                                <input type="text" id="ModalChallanNo" ng-model="FormModel.ChallanNo" placeholder="Enter Challan No" class="ri-input" />
-                            </div>
-                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
-                                <label class="ri-label" for="ModalChallanDate">CHALLAN DATE <span class="req">*</span></label>
-                                <input type="date" id="ModalChallanDate" ng-model="FormModel.ChallanDate" class="ri-input" />
-                            </div>
-                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
-                                <label class="ri-label">SOURCE <span class="req">*</span></label>
-                                <div class="ri-source-toggle">
-                                    <button type="button" class="ri-source-btn" ng-class="{active: FormModel.SourceType === 'BRANCH'}" ng-click="SetSourceType('BRANCH')">
-                                        <i class="fa fa-building"></i> Branch
-                                    </button>
-                                    <button type="button" class="ri-source-btn" ng-class="{active: FormModel.SourceType === 'PARTY'}" ng-click="SetSourceType('PARTY')">
-                                        <i class="fa fa-handshake-o"></i> Party
-                                    </button>
+                    <div class="row ri-from-to-row">
+                        <div class="col-md-5 col-sm-12">
+                            <fieldset class="ri-fieldset">
+                                <legend class="ri-legend">From</legend>
+                                <div class="row">
+                                    <div class="col-md-5 col-sm-5 col-xs-12 ri-form-group">
+                                        <label class="ri-label">SOURCE TYPE <span class="req">*</span></label>
+                                        <div class="ri-radio-group">
+                                            <label class="ri-radio-option">
+                                                <input type="radio" name="riSourceType" value="BRANCH" ng-model="FormModel.SourceType" ng-change="SetSourceType('BRANCH')" />
+                                                <span><i class="fa fa-building"></i> Branch</span>
+                                            </label>
+                                            <label class="ri-radio-option">
+                                                <input type="radio" name="riSourceType" value="PARTY" ng-model="FormModel.SourceType" ng-change="SetSourceType('PARTY')" />
+                                                <span><i class="fa fa-handshake-o"></i> Party</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-7 col-sm-7 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'BRANCH'">
+                                        <label class="ri-label" for="ModalFromBranchID">BRANCH <span class="req">*</span></label>
+                                        <select id="ModalFromBranchID" chosen="FromBranchList" class="form-control ri-input" ng-model="FormModel.FromBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in FromBranchList">
+                                            <option value="">Select Branch</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-7 col-sm-7 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'PARTY'">
+                                        <label class="ri-label" for="ModalFromPartyID">PARTY <span class="req">*</span></label>
+                                        <select id="ModalFromPartyID" chosen="PartyList" class="form-control ri-input" ng-model="FormModel.FromPartyID" ng-options="item.PartyId as item.PartyName for item in PartyList">
+                                            <option value="">Select Party</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
-                                <label class="ri-label" for="ModalPurposeID">PURPOSE <span class="req">*</span></label>
-                                <select id="ModalPurposeID" chosen="PurposeList" class="form-control ri-input" ng-model="FormModel.PurposeID" ng-options="item.PurposeID as item.PurposeName for item in PurposeList">
-                                    <option value="">Select Purpose</option>
-                                </select>
-                            </div>
+                            </fieldset>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'BRANCH'">
-                                <label class="ri-label" for="ModalFromBranchID">FROM BRANCH <span class="req">*</span></label>
-                                <select id="ModalFromBranchID" chosen="FromBranchList" class="form-control ri-input" ng-model="FormModel.FromBranchID" ng-options="item.BranchID as item.BranchName for item in FromBranchList">
-                                    <option value="">Select Branch</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'PARTY'">
-                                <label class="ri-label" for="ModalFromPartyID">FROM PARTY <span class="req">*</span></label>
-                                <select id="ModalFromPartyID" chosen="PartyList" class="form-control ri-input" ng-model="FormModel.FromPartyID" ng-options="item.PartyId as item.PartyName for item in PartyList">
-                                    <option value="">Select Party</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group">
-                                <label class="ri-label">TO BRANCH (RECEIVING)</label>
-                                <input type="text" value="{{MyBranchName || 'Not Assigned'}}" disabled class="ri-input" />
-                            </div>
-                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group">
-                                <label class="ri-label" for="ModalRemarks">REMARKS</label>
-                                <input type="text" id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Enter Remarks" class="ri-input" />
-                            </div>
+                        <div class="col-md-3 col-sm-12">
+                            <fieldset class="ri-fieldset">
+                                <legend class="ri-legend">To</legend>
+                                <div class="row">
+                                    <div class="col-md-12 ri-form-group">
+                                        <label class="ri-label" for="ModalToBranchID">COMPANY BRANCH <span class="req">*</span></label>
+                                        <select id="ModalToBranchID" chosen="ToBranchList" class="form-control ri-input" ng-model="FormModel.ToBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in ToBranchList">
+                                            <option value="">Select Branch</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="col-md-4 col-sm-12">
+                            <fieldset class="ri-fieldset">
+                                <legend class="ri-legend">Challan</legend>
+                                <div class="row">
+                                    <div class="col-md-5 col-sm-5 col-xs-6 ri-form-group">
+                                        <label class="ri-label" for="ModalChallanNo">CHALLAN NO <span class="req">*</span></label>
+                                        <input type="text" id="ModalChallanNo" ng-model="FormModel.ChallanNo" placeholder="Enter Challan No" class="ri-input" />
+                                    </div>
+                                    <div class="col-md-7 col-sm-7 col-xs-6 ri-form-group">
+                                        <label class="ri-label" for="ModalChallanDate">CHALLAN DATE <span class="req">*</span></label>
+                                        <input type="date" id="ModalChallanDate" ng-model="FormModel.ChallanDate" class="ri-input" />
+                                    </div>
+                                </div>
+                            </fieldset>
                         </div>
                     </div>
 
                     <div class="ri-modal-section" style="margin-bottom: 5px;">
                         <div class="ri-modal-section-title"><i class="fa fa-list text-primary"></i> JANGAD / LOT LINES</div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalFactoryCodeID">FACTORY CODE</label>
+                                <select id="ModalFactoryCodeID" chosen="FactoryCodeList" class="form-control ri-input" ng-model="FormModel.FactoryCodeID" ng-options="item.FactoryCodeID as item.FactoryCode for item in FactoryCodeList">
+                                    <option value="">Select Factory Code</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-sm-4 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalPurposeID">PURPOSE <span class="req">*</span></label>
+                                <select id="ModalPurposeID" chosen="PurposeList" class="form-control ri-input" ng-model="FormModel.PurposeID" ng-options="item.PurposeID as item.PurposeName for item in PurposeList">
+                                    <option value="">Select Purpose</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-sm-4 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalRemarks">REMARKS</label>
+                                <input type="text" id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Enter Remarks" class="ri-input" />
+                            </div>
+                        </div>
+                        <div class="ri-lines-table-wrap">
                         <table class="ri-lines-table">
                             <thead>
                                 <tr>
                                     <th style="width: 36px;">#</th>
-                                    <th>Lot No</th>
-                                    <th style="width: 80px;">Grade</th>
+                                    <th style="min-width: 130px;">Lot No</th>
+                                    <th style="width: 100px;">Growth Rate</th>
+                                    <th style="width: 100px;">Avg Growth Rate</th>
+                                    <th style="width: 120px;">Recipe</th>
+                                    <th style="width: 100px;">Grade</th>
                                     <th style="width: 70px;">Pcs</th>
                                     <th style="width: 90px;">Carat</th>
                                     <th style="width: 100px;">Rate</th>
@@ -351,7 +402,18 @@
                                 <tr ng-repeat="line in FormModel.Details track by $index">
                                     <td>{{$index + 1}}</td>
                                     <td><input type="text" class="ri-lot-input" ng-model="line.LotNo" placeholder="Lot No" /></td>
-                                    <td><input type="text" ng-model="line.Grade" placeholder="Grade" /></td>
+                                    <td><input type="text" ng-model="line.GrowthRate" placeholder="Growth Rate" /></td>
+                                    <td><input type="number" ng-model="line.AvgGrowthRate" min="0" step="0.01" placeholder="Avg Growth Rate" /></td>
+                                    <td>
+                                        <select ng-model="line.RecipeID" ng-options="item.ReceipeID as item.Receipe for item in RecipeList">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select ng-model="line.GradeID" ng-options="item.GradeID as item.Grade for item in GradeList">
+                                            <option value="">Select</option>
+                                        </select>
+                                    </td>
                                     <td><input type="number" ng-model="line.Pcs" min="0" /></td>
                                     <td><input type="number" ng-model="line.Carat" min="0" step="0.01" ng-change="RecalcLine(line)" /></td>
                                     <td><input type="number" ng-model="line.Rate" min="0" step="0.01" ng-change="RecalcLine(line)" /></td>
@@ -364,6 +426,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                         <button type="button" class="btn-ri-add-row" ng-click="AddLine()">
                             <i class="fa fa-plus"></i> Add Row
                         </button>
@@ -455,26 +518,46 @@
         $scope.BranchList = [];
         $scope.PartyList = [];
         $scope.FromBranchList = [];
-        $scope.MyBranchID = null;
-        $scope.MyBranchName = '';
+        $scope.ToBranchList = [];
+        $scope.RecipeList = [];
+        $scope.GradeList = [];
+        $scope.FactoryCodeList = [];
         $scope.IsLoading = false;
         $scope.IsSaving = false;
         $scope.SelectedDeleteItem = null;
 
         $scope.NewEmptyLine = function () {
-            return { LotNo: '', Grade: '', Pcs: 0, Carat: 0, Rate: 0, Amount: 0, Remarks: '' };
+            return {
+                LotNo: '', GrowthRate: '', AvgGrowthRate: null, RecipeID: null, GradeID: null,
+                Pcs: 0, Carat: 0, Rate: 0, Amount: 0, Remarks: ''
+            };
         };
 
         $scope.FormModel = {
             InwardID: 0,
             ChallanNo: '',
             ChallanDate: '',
+            FactoryCodeID: null,
             SourceType: 'BRANCH',
             FromBranchID: null,
             FromPartyID: null,
+            ToBranchID: null,
             PurposeID: null,
             Remarks: '',
             Details: [$scope.NewEmptyLine()]
+        };
+
+        $scope.UpdateBranchFilters = function () {
+            $scope.FromBranchList = $scope.BranchList.filter(function (b) {
+                return !$scope.FormModel.ToBranchID || b.BranchID !== $scope.FormModel.ToBranchID;
+            });
+            $scope.ToBranchList = $scope.BranchList.filter(function (b) {
+                return $scope.FormModel.SourceType !== 'BRANCH' || !$scope.FormModel.FromBranchID || b.BranchID !== $scope.FormModel.FromBranchID;
+            });
+            $timeout(function () {
+                $('#ModalFromBranchID').trigger('chosen:updated');
+                $('#ModalToBranchID').trigger('chosen:updated');
+            }, 50);
         };
 
         $scope.SetSourceType = function (type) {
@@ -484,6 +567,7 @@
             } else {
                 $scope.FormModel.FromBranchID = null;
             }
+            $scope.UpdateBranchFilters();
         };
 
         $scope.AddLine = function () {
@@ -527,6 +611,8 @@
                 $('#ModalPurposeID').trigger('chosen:updated');
                 $('#ModalFromBranchID').trigger('chosen:updated');
                 $('#ModalFromPartyID').trigger('chosen:updated');
+                $('#ModalFactoryCodeID').trigger('chosen:updated');
+                $('#ModalToBranchID').trigger('chosen:updated');
             }, 60);
         };
 
@@ -535,17 +621,22 @@
                 InwardID: 0,
                 ChallanNo: '',
                 ChallanDate: new Date().toISOString().substring(0, 10),
+                FactoryCodeID: null,
                 SourceType: 'BRANCH',
                 FromBranchID: null,
                 FromPartyID: null,
+                ToBranchID: null,
                 PurposeID: null,
                 Remarks: '',
                 Details: [$scope.NewEmptyLine()]
             };
+            $scope.UpdateBranchFilters();
             $timeout(function () {
                 $('#ModalPurposeID').trigger('chosen:updated');
                 $('#ModalFromBranchID').trigger('chosen:updated');
                 $('#ModalFromPartyID').trigger('chosen:updated');
+                $('#ModalFactoryCodeID').trigger('chosen:updated');
+                $('#ModalToBranchID').trigger('chosen:updated');
             }, 40);
         };
 
@@ -559,18 +650,23 @@
                             InwardID: data.InwardID,
                             ChallanNo: data.ChallanNo || '',
                             ChallanDate: data.ChallanDate ? data.ChallanDate.substring(0, 10) : '',
+                            FactoryCodeID: data.FactoryCodeID,
                             SourceType: data.SourceType || 'BRANCH',
                             FromBranchID: data.FromBranchID,
                             FromPartyID: data.FromPartyID,
+                            ToBranchID: data.ToBranchID,
                             PurposeID: data.PurposeID,
                             Remarks: data.Remarks || '',
                             Details: (data.Details && data.Details.length > 0) ? data.Details : [$scope.NewEmptyLine()]
                         };
+                        $scope.UpdateBranchFilters();
                         $("#InwardModal").modal("show");
                         $timeout(function () {
                             $('#ModalPurposeID').trigger('chosen:updated');
                             $('#ModalFromBranchID').trigger('chosen:updated');
                             $('#ModalFromPartyID').trigger('chosen:updated');
+                            $('#ModalFactoryCodeID').trigger('chosen:updated');
+                            $('#ModalToBranchID').trigger('chosen:updated');
                         }, 80);
                     } else {
                         Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward details.");
@@ -603,15 +699,6 @@
                 });
         };
 
-        $scope.LoadMyBranch = function () {
-            $http.get('@Url.Action("Get_UserBranch", "Master")').then(function (res) {
-                if (res.data) {
-                    $scope.MyBranchID = res.data.branchId;
-                    $scope.MyBranchName = res.data.branchName || '';
-                }
-            });
-        };
-
         $scope.LoadPurposes = function () {
             $http.get('@Url.Action("Get_MST_PurposeList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
@@ -625,10 +712,7 @@
             $http.get('@Url.Action("Get_MST_BranchList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
                     $scope.BranchList = res.data.list || [];
-                    $scope.FromBranchList = $scope.BranchList.filter(function (b) {
-                        return !$scope.MyBranchID || b.BranchID !== $scope.MyBranchID;
-                    });
-                    $timeout(function () { $('#ModalFromBranchID').trigger('chosen:updated'); }, 100);
+                    $scope.UpdateBranchFilters();
                 }
             });
         };
@@ -638,6 +722,31 @@
                 if (res.data && res.data.success) {
                     $scope.PartyList = res.data.list || [];
                     $timeout(function () { $('#ModalFromPartyID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadRecipes = function () {
+            $http.get('@Url.Action("Get_MST_ReceipeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.RecipeList = res.data.list || [];
+                }
+            });
+        };
+
+        $scope.LoadGrades = function () {
+            $http.get('@Url.Action("Get_MST_GradeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.GradeList = res.data.list || [];
+                }
+            });
+        };
+
+        $scope.LoadFactoryCodes = function () {
+            $http.get('@Url.Action("Get_MST_FactoryCodeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.FactoryCodeList = res.data.list || [];
+                    $timeout(function () { $('#ModalFactoryCodeID').trigger('chosen:updated'); }, 100);
                 }
             });
         };
@@ -691,6 +800,15 @@
             if ($scope.FormModel.SourceType === 'PARTY' && !$scope.FormModel.FromPartyID) {
                 Noty("error", "Please select From Party!");
                 $('#ModalFromPartyID').trigger('chosen:open');
+                return;
+            }
+            if (!$scope.FormModel.ToBranchID) {
+                Noty("error", "Please select To (Company Branch)!");
+                $('#ModalToBranchID').trigger('chosen:open');
+                return;
+            }
+            if ($scope.FormModel.SourceType === 'BRANCH' && $scope.FormModel.FromBranchID === $scope.FormModel.ToBranchID) {
+                Noty("error", "From Branch and To Branch cannot be the same!");
                 return;
             }
             var validLines = $scope.FormModel.Details.filter(function (l) { return l.LotNo && l.LotNo.trim() !== ''; });
@@ -759,6 +877,9 @@
                         caption: 'Date', dataField: 'ChallanDate', width: 110, dataType: 'date', format: 'dd-MMM-yyyy'
                     },
                     {
+                        caption: 'Factory Code', dataField: 'FactoryCodeName', width: 110
+                    },
+                    {
                         caption: 'Source', dataField: 'SourceType', width: 100, alignment: 'center',
                         cellTemplate: function (container, options) {
                             if (options.data.SourceType === 'BRANCH') {
@@ -802,10 +923,12 @@
             });
         };
 
-        $scope.LoadMyBranch();
         $scope.LoadPurposes();
         $scope.LoadBranches();
         $scope.LoadParties();
+        $scope.LoadRecipes();
+        $scope.LoadGrades();
+        $scope.LoadFactoryCodes();
         $scope.LoadInwardList();
         $scope.ResetForm();
     }]);

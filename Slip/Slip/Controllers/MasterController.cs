@@ -2405,7 +2405,7 @@ namespace Slip.Controllers
                 BranchID = rdr["BranchID"] != DBNull.Value ? Convert.ToInt32(rdr["BranchID"]) : 0,
                 BranchCode = rdr["BranchCode"] != DBNull.Value ? Convert.ToString(rdr["BranchCode"]) : "",
                 BranchName = rdr["BranchName"] != DBNull.Value ? Convert.ToString(rdr["BranchName"]) : "",
-                BranchTypeID = rdr["BranchTypeID"] != DBNull.Value ? Convert.ToInt32(rdr["BranchTypeID"]) : 0,
+                BranchTypeID = rdr["CompanyBranchTypeID"] != DBNull.Value ? Convert.ToInt32(rdr["CompanyBranchTypeID"]) : 0,
                 BranchTypeName = SafeGetColumn(rdr, "BranchTypeName") != null ? Convert.ToString(SafeGetColumn(rdr, "BranchTypeName")) : "",
                 GSTIN = rdr["GSTIN"] != DBNull.Value ? Convert.ToString(rdr["GSTIN"]) : "",
                 StateCode = rdr["StateCode"] != DBNull.Value ? Convert.ToString(rdr["StateCode"]) : "",
@@ -2428,7 +2428,7 @@ namespace Slip.Controllers
                 List<MST_BranchType> list = new List<MST_BranchType>();
 
                 using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_BranchType_GetList", con))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranchType_GetList", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     con.Open();
@@ -2438,7 +2438,7 @@ namespace Slip.Controllers
                         {
                             list.Add(new MST_BranchType
                             {
-                                BranchTypeID = Convert.ToInt32(rdr["BranchTypeID"]),
+                                BranchTypeID = Convert.ToInt32(rdr["ID"]),
                                 BranchTypeName = rdr["BranchTypeName"] != DBNull.Value ? Convert.ToString(rdr["BranchTypeName"]) : ""
                             });
                         }
@@ -2543,7 +2543,7 @@ namespace Slip.Controllers
                         }
                         cmd.Parameters.AddWithValue("@BranchCode", model.BranchCode ?? "");
                         cmd.Parameters.AddWithValue("@BranchName", model.BranchName ?? "");
-                        cmd.Parameters.AddWithValue("@BranchTypeID", model.BranchTypeID);
+                        cmd.Parameters.AddWithValue("@CompanyBranchTypeID", model.BranchTypeID);
                         cmd.Parameters.AddWithValue("@GSTIN", (object)model.GSTIN ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@StateCode", (object)model.StateCode ?? DBNull.Value);
                         cmd.Parameters.AddWithValue("@Address", (object)model.Address ?? DBNull.Value);
@@ -2704,6 +2704,108 @@ namespace Slip.Controllers
             }
         }
 
+        public JsonResult Get_MST_ReceipeList()
+        {
+            try
+            {
+                List<MST_Receipe> list = new List<MST_Receipe>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_Receipe_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new MST_Receipe
+                            {
+                                ReceipeID = Convert.ToInt32(rdr["ReceipeID"]),
+                                Receipe = rdr["Receipe"] != DBNull.Value ? Convert.ToString(rdr["Receipe"]) : ""
+                            });
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Receipe>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_GradeList()
+        {
+            try
+            {
+                List<MST_Grade> list = new List<MST_Grade>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_Grade_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new MST_Grade
+                            {
+                                GradeID = Convert.ToInt32(rdr["ID"]),
+                                Grade = rdr["Grade"] != DBNull.Value ? Convert.ToString(rdr["Grade"]) : ""
+                            });
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Grade>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_FactoryCodeList()
+        {
+            try
+            {
+                List<MST_FactoryCode> list = new List<MST_FactoryCode>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_FactoryCode_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new MST_FactoryCode
+                            {
+                                FactoryCodeID = Convert.ToInt32(rdr["ID"]),
+                                FactoryCode = rdr["FactoryCode"] != DBNull.Value ? Convert.ToString(rdr["FactoryCode"]) : ""
+                            });
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_FactoryCode>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public JsonResult Get_UserBranch()
         {
             try
@@ -2746,6 +2848,8 @@ namespace Slip.Controllers
                 InwardID = Convert.ToInt32(rdr["InwardID"]),
                 ChallanNo = rdr["ChallanNo"] != DBNull.Value ? Convert.ToString(rdr["ChallanNo"]) : "",
                 ChallanDate = rdr["ChallanDate"] != DBNull.Value ? Convert.ToDateTime(rdr["ChallanDate"]) : DateTime.MinValue,
+                FactoryCodeID = rdr["FactoryCodeID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["FactoryCodeID"]) : null,
+                FactoryCodeName = SafeGetColumn(rdr, "FactoryCodeName") != null ? Convert.ToString(SafeGetColumn(rdr, "FactoryCodeName")) : "",
                 SourceType = rdr["SourceType"] != DBNull.Value ? Convert.ToString(rdr["SourceType"]) : "",
                 FromBranchID = rdr["FromBranchID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["FromBranchID"]) : null,
                 FromBranchName = SafeGetColumn(rdr, "FromBranchName") != null ? Convert.ToString(SafeGetColumn(rdr, "FromBranchName")) : "",
@@ -2771,38 +2875,21 @@ namespace Slip.Controllers
         {
             try
             {
-                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
                 List<TRN_RoughInward> list = new List<TRN_RoughInward>();
 
                 using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_GetList", con))
                 {
-                    int? toBranchId = null;
-                    using (SqlCommand branchCmd = new SqlCommand("USP_SEC_User_GetBranch", con))
-                    {
-                        branchCmd.CommandType = CommandType.StoredProcedure;
-                        branchCmd.Parameters.AddWithValue("@UserID", currentUserId);
-                        con.Open();
-                        using (SqlDataReader rdr = branchCmd.ExecuteReader())
-                        {
-                            if (rdr.Read())
-                            {
-                                toBranchId = rdr["BranchID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["BranchID"]) : null;
-                            }
-                        }
-                    }
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
+                    cmd.Parameters.AddWithValue("@ToBranchID", DBNull.Value);
 
-                    using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_GetList", con))
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
-                        cmd.Parameters.AddWithValue("@ToBranchID", (object)toBranchId ?? DBNull.Value);
-
-                        using (SqlDataReader rdr = cmd.ExecuteReader())
+                        while (rdr.Read())
                         {
-                            while (rdr.Read())
-                            {
-                                list.Add(MapRoughInwardHeader(rdr));
-                            }
+                            list.Add(MapRoughInwardHeader(rdr));
                         }
                     }
                     con.Close();
@@ -2852,7 +2939,12 @@ namespace Slip.Controllers
                                         InwardID = Convert.ToInt32(rdr["InwardID"]),
                                         SrNo = rdr["SrNo"] != DBNull.Value ? Convert.ToInt32(rdr["SrNo"]) : 0,
                                         LotNo = rdr["LotNo"] != DBNull.Value ? Convert.ToString(rdr["LotNo"]) : "",
-                                        Grade = rdr["Grade"] != DBNull.Value ? Convert.ToString(rdr["Grade"]) : "",
+                                        GrowthRate = rdr["GrowthRate"] != DBNull.Value ? Convert.ToString(rdr["GrowthRate"]) : "",
+                                        AvgGrowthRate = rdr["AvgGrowthRate"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["AvgGrowthRate"]) : null,
+                                        RecipeID = rdr["RecipeID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["RecipeID"]) : null,
+                                        RecipeName = SafeGetColumn(rdr, "RecipeName") != null ? Convert.ToString(SafeGetColumn(rdr, "RecipeName")) : "",
+                                        GradeID = rdr["GradeID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["GradeID"]) : null,
+                                        GradeName = SafeGetColumn(rdr, "GradeName") != null ? Convert.ToString(SafeGetColumn(rdr, "GradeName")) : "",
                                         Pcs = rdr["Pcs"] != DBNull.Value ? Convert.ToInt32(rdr["Pcs"]) : 0,
                                         Carat = rdr["Carat"] != DBNull.Value ? Convert.ToDecimal(rdr["Carat"]) : 0,
                                         Rate = rdr["Rate"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["Rate"]) : null,
@@ -2885,6 +2977,12 @@ namespace Slip.Controllers
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
                 bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.InwardID > 0;
 
+                if (string.Equals(model.SourceType, "BRANCH", StringComparison.OrdinalIgnoreCase)
+                    && model.FromBranchID.HasValue && model.FromBranchID.Value == model.ToBranchID)
+                {
+                    return Json(new { success = false, message = "From Branch and To Branch cannot be the same." });
+                }
+
                 using (SqlConnection con = new SqlConnection(conn))
                 {
                     con.Open();
@@ -2904,9 +3002,11 @@ namespace Slip.Controllers
                                 }
                                 cmd.Parameters.AddWithValue("@ChallanNo", model.ChallanNo ?? "");
                                 cmd.Parameters.AddWithValue("@ChallanDate", model.ChallanDate);
+                                cmd.Parameters.AddWithValue("@FactoryCodeID", (object)model.FactoryCodeID ?? DBNull.Value);
                                 cmd.Parameters.AddWithValue("@SourceType", model.SourceType ?? "");
                                 cmd.Parameters.AddWithValue("@FromBranchID", (object)model.FromBranchID ?? DBNull.Value);
                                 cmd.Parameters.AddWithValue("@FromPartyID", (object)model.FromPartyID ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue("@ToBranchID", model.ToBranchID);
                                 cmd.Parameters.AddWithValue("@PurposeID", model.PurposeID);
                                 cmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
                                 cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId);
@@ -2955,7 +3055,10 @@ namespace Slip.Controllers
                                         lineCmd.Parameters.AddWithValue("@InwardID", inwardId);
                                         lineCmd.Parameters.AddWithValue("@SrNo", srNo);
                                         lineCmd.Parameters.AddWithValue("@LotNo", line.LotNo ?? "");
-                                        lineCmd.Parameters.AddWithValue("@Grade", (object)line.Grade ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@GrowthRate", (object)line.GrowthRate ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@AvgGrowthRate", (object)line.AvgGrowthRate ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@RecipeID", (object)line.RecipeID ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@GradeID", (object)line.GradeID ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@Pcs", line.Pcs);
                                         lineCmd.Parameters.AddWithValue("@Carat", line.Carat);
                                         lineCmd.Parameters.AddWithValue("@Rate", (object)line.Rate ?? DBNull.Value);

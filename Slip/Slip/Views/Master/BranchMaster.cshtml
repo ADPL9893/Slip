@@ -504,6 +504,7 @@
         };
 
         $scope.LoadBranchTypes = function () {
+            debugger
             $http.get('@Url.Action("Get_MST_BranchTypeList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
                     $scope.BranchTypeList = res.data.list || [];

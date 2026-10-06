@@ -341,7 +341,15 @@
     <Compile Include="Models\MainRoughSummary.cs" />
     <Compile Include="Models\MST_Lot.cs" />
     <Compile Include="Models\MST_Role.cs" />
+    <Compile Include="Models\MST_CompanyBranch.cs" />
+    <Compile Include="Models\MST_BranchType.cs" />
+    <Compile Include="Models\MST_FactoryCode.cs" />
+    <Compile Include="Models\MST_Grade.cs" />
     <Compile Include="Models\MST_PartyMaster.cs" />
+    <Compile Include="Models\MST_Purpose.cs" />
+    <Compile Include="Models\MST_Receipe.cs" />
+    <Compile Include="Models\TRN_RoughInward.cs" />
+    <Compile Include="Models\TRN_RoughInwardDetail.cs" />
     <Compile Include="Models\MST_RoughDistribution.cs" />
     <Compile Include="Models\MST_VoucherDetails.cs" />
     <Compile Include="Models\PriceXML.cs" />
@@ -1313,6 +1321,8 @@
     <Content Include="Views\Master\RoughDistributionList.cshtml" />
     <Content Include="Views\Master\RoughCodeMaster.cshtml" />
     <Content Include="Views\Master\PartyMaster.cshtml" />
+    <Content Include="Views\Master\BranchMaster.cshtml" />
+    <Content Include="Views\Master\RoughInward.cshtml" />
     <Content Include="Views\Master\MasterBook.cshtml" />
     <Content Include="Views\Master\QRPrint.cshtml" />
     <Content Include="Views\Master\QRGenerator.cshtml" />

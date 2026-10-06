@@ -8,6 +8,8 @@ namespace Slip.Models
         public int InwardID { get; set; }
         public string ChallanNo { get; set; }
         public DateTime ChallanDate { get; set; }
+        public int? FactoryCodeID { get; set; }
+        public string FactoryCodeName { get; set; }
         public string SourceType { get; set; }
         public int? FromBranchID { get; set; }
         public string FromBranchName { get; set; }

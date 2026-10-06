@@ -6,7 +6,12 @@ namespace Slip.Models
         public int InwardID { get; set; }
         public int SrNo { get; set; }
         public string LotNo { get; set; }
-        public string Grade { get; set; }
+        public string GrowthRate { get; set; }
+        public decimal? AvgGrowthRate { get; set; }
+        public int? RecipeID { get; set; }
+        public string RecipeName { get; set; }
+        public int? GradeID { get; set; }
+        public string GradeName { get; set; }
         public int Pcs { get; set; }
         public decimal Carat { get; set; }
         public decimal? Rate { get; set; }
