@@ -2390,6 +2390,655 @@ namespace Slip.Controllers
 
         #endregion
 
+        #region Branch Master (MST_CompanyBranch)
+
+        public ActionResult BranchMaster()
+        {
+            SetModulePermissions("Master", "BranchMaster");
+            return View();
+        }
+
+        private MST_CompanyBranch MapBranch(SqlDataReader rdr)
+        {
+            return new MST_CompanyBranch
+            {
+                BranchID = rdr["BranchID"] != DBNull.Value ? Convert.ToInt32(rdr["BranchID"]) : 0,
+                BranchCode = rdr["BranchCode"] != DBNull.Value ? Convert.ToString(rdr["BranchCode"]) : "",
+                BranchName = rdr["BranchName"] != DBNull.Value ? Convert.ToString(rdr["BranchName"]) : "",
+                BranchTypeID = rdr["BranchTypeID"] != DBNull.Value ? Convert.ToInt32(rdr["BranchTypeID"]) : 0,
+                BranchTypeName = SafeGetColumn(rdr, "BranchTypeName") != null ? Convert.ToString(SafeGetColumn(rdr, "BranchTypeName")) : "",
+                GSTIN = rdr["GSTIN"] != DBNull.Value ? Convert.ToString(rdr["GSTIN"]) : "",
+                StateCode = rdr["StateCode"] != DBNull.Value ? Convert.ToString(rdr["StateCode"]) : "",
+                Address = rdr["Address"] != DBNull.Value ? Convert.ToString(rdr["Address"]) : "",
+                City = rdr["City"] != DBNull.Value ? Convert.ToString(rdr["City"]) : "",
+                ContactPerson = rdr["ContactPerson"] != DBNull.Value ? Convert.ToString(rdr["ContactPerson"]) : "",
+                Phone = rdr["Phone"] != DBNull.Value ? Convert.ToString(rdr["Phone"]) : "",
+                IsActive = rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr["CreatedBy"] != DBNull.Value ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
+                CreatedOn = rdr["CreatedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["ModifiedBy"]) : null,
+                ModifiedOn = rdr["ModifiedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null
+            };
+        }
+
+        public JsonResult Get_MST_BranchTypeList()
+        {
+            try
+            {
+                List<MST_BranchType> list = new List<MST_BranchType>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_BranchType_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new MST_BranchType
+                            {
+                                BranchTypeID = Convert.ToInt32(rdr["BranchTypeID"]),
+                                BranchTypeName = rdr["BranchTypeName"] != DBNull.Value ? Convert.ToString(rdr["BranchTypeName"]) : ""
+                            });
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_BranchType>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_BranchList(string SearchText)
+        {
+            try
+            {
+                List<MST_CompanyBranch> list = new List<MST_CompanyBranch>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(MapBranch(rdr));
+                        }
+                    }
+                    con.Close();
+                }
+
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_CompanyBranch>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_BranchById(int BranchID)
+        {
+            try
+            {
+                MST_CompanyBranch item = null;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_GetById", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@BranchID", BranchID);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            item = MapBranch(rdr);
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BranchMaster_Save(MST_CompanyBranch model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.BranchID > 0;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                {
+                    string spName = isUpdate ? "USP_MST_CompanyBranch_Update" : "USP_MST_CompanyBranch_Insert";
+                    using (SqlCommand cmd = new SqlCommand(spName, con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        if (isUpdate)
+                        {
+                            cmd.Parameters.AddWithValue("@BranchID", model.BranchID);
+                        }
+                        cmd.Parameters.AddWithValue("@BranchCode", model.BranchCode ?? "");
+                        cmd.Parameters.AddWithValue("@BranchName", model.BranchName ?? "");
+                        cmd.Parameters.AddWithValue("@BranchTypeID", model.BranchTypeID);
+                        cmd.Parameters.AddWithValue("@GSTIN", (object)model.GSTIN ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@StateCode", (object)model.StateCode ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Address", (object)model.Address ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@City", (object)model.City ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue("@Phone", (object)model.Phone ?? DBNull.Value);
+                        cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId);
+
+                        con.Open();
+                        using (SqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            if (rdr.Read())
+                            {
+                                object successVal = SafeGetColumn(rdr, "Success");
+                                isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                                object msgVal = SafeGetColumn(rdr, "Message");
+                                message = msgVal != null ? Convert.ToString(msgVal) : "";
+                            }
+                        }
+                        con.Close();
+                    }
+                }
+
+                if (isSuccess && string.IsNullOrEmpty(message))
+                {
+                    message = isUpdate ? "Branch updated successfully." : "Branch saved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult BranchMaster_Delete(int BranchID)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_Delete", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@BranchID", BranchID);
+                    cmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            object successVal = SafeGetColumn(rdr, "Success");
+                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                            object msgVal = SafeGetColumn(rdr, "Message");
+                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+                        }
+                    }
+                    con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult BranchMaster_ActiveInactive(int BranchID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_ActiveInactive", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@BranchID", BranchID);
+                    cmd.Parameters.AddWithValue("@IsActive", IsActive);
+                    cmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            object successVal = SafeGetColumn(rdr, "Success");
+                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                            object msgVal = SafeGetColumn(rdr, "Message");
+                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+                        }
+                    }
+                    con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        #endregion
+
+        #region Rough Inward (TRN_RoughInward)
+
+        public ActionResult RoughInward()
+        {
+            SetModulePermissions("Master", "RoughInward");
+            return View();
+        }
+
+        public JsonResult Get_MST_PurposeList()
+        {
+            try
+            {
+                List<MST_Purpose> list = new List<MST_Purpose>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_MST_Purpose_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            list.Add(new MST_Purpose
+                            {
+                                PurposeID = Convert.ToInt32(rdr["PurposeID"]),
+                                PurposeName = rdr["PurposeName"] != DBNull.Value ? Convert.ToString(rdr["PurposeName"]) : ""
+                            });
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Purpose>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_UserBranch()
+        {
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                int? branchId = null;
+                string branchName = null;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_SEC_User_GetBranch", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@UserID", currentUserId);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            branchId = rdr["BranchID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["BranchID"]) : null;
+                            branchName = rdr["BranchName"] != DBNull.Value ? Convert.ToString(rdr["BranchName"]) : null;
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = branchId != null, branchId = branchId, branchName = branchName }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private TRN_RoughInward MapRoughInwardHeader(SqlDataReader rdr)
+        {
+            return new TRN_RoughInward
+            {
+                InwardID = Convert.ToInt32(rdr["InwardID"]),
+                ChallanNo = rdr["ChallanNo"] != DBNull.Value ? Convert.ToString(rdr["ChallanNo"]) : "",
+                ChallanDate = rdr["ChallanDate"] != DBNull.Value ? Convert.ToDateTime(rdr["ChallanDate"]) : DateTime.MinValue,
+                SourceType = rdr["SourceType"] != DBNull.Value ? Convert.ToString(rdr["SourceType"]) : "",
+                FromBranchID = rdr["FromBranchID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["FromBranchID"]) : null,
+                FromBranchName = SafeGetColumn(rdr, "FromBranchName") != null ? Convert.ToString(SafeGetColumn(rdr, "FromBranchName")) : "",
+                FromPartyID = rdr["FromPartyID"] != DBNull.Value ? (Guid?)rdr["FromPartyID"] : null,
+                PartyName = SafeGetColumn(rdr, "PartyName") != null ? Convert.ToString(SafeGetColumn(rdr, "PartyName")) : "",
+                ToBranchID = rdr["ToBranchID"] != DBNull.Value ? Convert.ToInt32(rdr["ToBranchID"]) : 0,
+                ToBranchName = SafeGetColumn(rdr, "ToBranchName") != null ? Convert.ToString(SafeGetColumn(rdr, "ToBranchName")) : "",
+                PurposeID = rdr["PurposeID"] != DBNull.Value ? Convert.ToInt32(rdr["PurposeID"]) : 0,
+                PurposeName = SafeGetColumn(rdr, "PurposeName") != null ? Convert.ToString(SafeGetColumn(rdr, "PurposeName")) : "",
+                Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                TotalPcs = rdr["TotalPcs"] != DBNull.Value ? Convert.ToInt32(rdr["TotalPcs"]) : 0,
+                TotalCarat = rdr["TotalCarat"] != DBNull.Value ? Convert.ToDecimal(rdr["TotalCarat"]) : 0,
+                TotalAmount = rdr["TotalAmount"] != DBNull.Value ? Convert.ToDecimal(rdr["TotalAmount"]) : 0,
+                IsActive = rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr["CreatedBy"] != DBNull.Value ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
+                CreatedOn = rdr["CreatedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["ModifiedBy"]) : null,
+                ModifiedOn = rdr["ModifiedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null
+            };
+        }
+
+        public JsonResult Get_TRN_RoughInwardList(string SearchText)
+        {
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                List<TRN_RoughInward> list = new List<TRN_RoughInward>();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                {
+                    int? toBranchId = null;
+                    using (SqlCommand branchCmd = new SqlCommand("USP_SEC_User_GetBranch", con))
+                    {
+                        branchCmd.CommandType = CommandType.StoredProcedure;
+                        branchCmd.Parameters.AddWithValue("@UserID", currentUserId);
+                        con.Open();
+                        using (SqlDataReader rdr = branchCmd.ExecuteReader())
+                        {
+                            if (rdr.Read())
+                            {
+                                toBranchId = rdr["BranchID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["BranchID"]) : null;
+                            }
+                        }
+                    }
+
+                    using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_GetList", con))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
+                        cmd.Parameters.AddWithValue("@ToBranchID", (object)toBranchId ?? DBNull.Value);
+
+                        using (SqlDataReader rdr = cmd.ExecuteReader())
+                        {
+                            while (rdr.Read())
+                            {
+                                list.Add(MapRoughInwardHeader(rdr));
+                            }
+                        }
+                    }
+                    con.Close();
+                }
+
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<TRN_RoughInward>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_TRN_RoughInwardById(int InwardID)
+        {
+            try
+            {
+                TRN_RoughInward item = null;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_GetById", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@InwardID", InwardID);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            item = MapRoughInwardHeader(rdr);
+                        }
+
+                        if (item != null)
+                        {
+                            item.Details = new List<TRN_RoughInwardDetail>();
+                            if (rdr.NextResult())
+                            {
+                                while (rdr.Read())
+                                {
+                                    item.Details.Add(new TRN_RoughInwardDetail
+                                    {
+                                        InwardDetailID = Convert.ToInt32(rdr["InwardDetailID"]),
+                                        InwardID = Convert.ToInt32(rdr["InwardID"]),
+                                        SrNo = rdr["SrNo"] != DBNull.Value ? Convert.ToInt32(rdr["SrNo"]) : 0,
+                                        LotNo = rdr["LotNo"] != DBNull.Value ? Convert.ToString(rdr["LotNo"]) : "",
+                                        Grade = rdr["Grade"] != DBNull.Value ? Convert.ToString(rdr["Grade"]) : "",
+                                        Pcs = rdr["Pcs"] != DBNull.Value ? Convert.ToInt32(rdr["Pcs"]) : 0,
+                                        Carat = rdr["Carat"] != DBNull.Value ? Convert.ToDecimal(rdr["Carat"]) : 0,
+                                        Rate = rdr["Rate"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["Rate"]) : null,
+                                        Amount = rdr["Amount"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["Amount"]) : null,
+                                        Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : ""
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    con.Close();
+                }
+
+                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult RoughInward_Save(TRN_RoughInward model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.InwardID > 0;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                {
+                    con.Open();
+                    using (SqlTransaction tran = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            int inwardId;
+                            string spName = isUpdate ? "USP_TRN_RoughInward_Update" : "USP_TRN_RoughInward_Insert";
+
+                            using (SqlCommand cmd = new SqlCommand(spName, con, tran))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                if (isUpdate)
+                                {
+                                    cmd.Parameters.AddWithValue("@InwardID", model.InwardID);
+                                }
+                                cmd.Parameters.AddWithValue("@ChallanNo", model.ChallanNo ?? "");
+                                cmd.Parameters.AddWithValue("@ChallanDate", model.ChallanDate);
+                                cmd.Parameters.AddWithValue("@SourceType", model.SourceType ?? "");
+                                cmd.Parameters.AddWithValue("@FromBranchID", (object)model.FromBranchID ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue("@FromPartyID", (object)model.FromPartyID ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue("@PurposeID", model.PurposeID);
+                                cmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId);
+
+                                using (SqlDataReader rdr = cmd.ExecuteReader())
+                                {
+                                    if (!rdr.Read())
+                                    {
+                                        throw new Exception("No response from server while saving Rough Inward.");
+                                    }
+                                    object successVal = SafeGetColumn(rdr, "Success");
+                                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                                    object msgVal = SafeGetColumn(rdr, "Message");
+                                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                                    object idVal = SafeGetColumn(rdr, "InwardID");
+                                    inwardId = idVal != null ? Convert.ToInt32(idVal) : model.InwardID;
+                                }
+                            }
+
+                            if (!isSuccess)
+                            {
+                                tran.Rollback();
+                                return Json(new { success = false, message = message });
+                            }
+
+                            if (isUpdate)
+                            {
+                                using (SqlCommand delCmd = new SqlCommand("USP_TRN_RoughInwardDetail_DeleteByInward", con, tran))
+                                {
+                                    delCmd.CommandType = CommandType.StoredProcedure;
+                                    delCmd.Parameters.AddWithValue("@InwardID", inwardId);
+                                    delCmd.ExecuteNonQuery();
+                                }
+                            }
+
+                            if (model.Details != null)
+                            {
+                                int srNo = 1;
+                                foreach (var line in model.Details)
+                                {
+                                    if (string.IsNullOrWhiteSpace(line.LotNo)) continue;
+
+                                    using (SqlCommand lineCmd = new SqlCommand("USP_TRN_RoughInwardDetail_Insert", con, tran))
+                                    {
+                                        lineCmd.CommandType = CommandType.StoredProcedure;
+                                        lineCmd.Parameters.AddWithValue("@InwardID", inwardId);
+                                        lineCmd.Parameters.AddWithValue("@SrNo", srNo);
+                                        lineCmd.Parameters.AddWithValue("@LotNo", line.LotNo ?? "");
+                                        lineCmd.Parameters.AddWithValue("@Grade", (object)line.Grade ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Pcs", line.Pcs);
+                                        lineCmd.Parameters.AddWithValue("@Carat", line.Carat);
+                                        lineCmd.Parameters.AddWithValue("@Rate", (object)line.Rate ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Amount", (object)line.Amount ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Remarks", (object)line.Remarks ?? DBNull.Value);
+                                        lineCmd.ExecuteNonQuery();
+                                    }
+                                    srNo++;
+                                }
+                            }
+
+                            using (SqlCommand recalcCmd = new SqlCommand("USP_TRN_RoughInward_RecalcTotals", con, tran))
+                            {
+                                recalcCmd.CommandType = CommandType.StoredProcedure;
+                                recalcCmd.Parameters.AddWithValue("@InwardID", inwardId);
+                                recalcCmd.ExecuteNonQuery();
+                            }
+
+                            tran.Commit();
+                        }
+                        catch
+                        {
+                            tran.Rollback();
+                            throw;
+                        }
+                    }
+                }
+
+                if (isSuccess && string.IsNullOrEmpty(message))
+                {
+                    message = isUpdate ? "Rough Inward updated successfully." : "Rough Inward saved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult RoughInward_Delete(int InwardID)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_Delete", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@InwardID", InwardID);
+                    cmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            object successVal = SafeGetColumn(rdr, "Success");
+                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                            object msgVal = SafeGetColumn(rdr, "Message");
+                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+                        }
+                    }
+                    con.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        #endregion
+
         #region Master Book
         public ActionResult MasterBook()
         {

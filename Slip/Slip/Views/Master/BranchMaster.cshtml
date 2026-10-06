@@ -1,0 +1,679 @@
+@{
+    ViewBag.Title = "Branch Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Branch Master - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bm-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .bm-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .bm-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    .bm-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .bm-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .bm-header-left { display: flex; align-items: center; gap: 14px; }
+
+    .bm-header-icon {
+        width: 44px; height: 44px; border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff; display: flex; align-items: center; justify-content: center;
+        font-size: 20px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0;
+    }
+    .bm-header-card:hover .bm-header-icon { transform: scale(1.08) rotate(4deg); }
+
+    .bm-header-title { font-size: 18px !important; font-weight: 700 !important; color: #0f172a !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -0.2px; }
+
+    .bm-breadcrumb { font-size: 11.5px; color: #64748b; margin-bottom: 3px; font-weight: 500; }
+    .bm-breadcrumb a { color: #0284c7; text-decoration: none; transition: color 0.15s ease; font-weight: 500; }
+    .bm-breadcrumb a:hover { color: #0369a1; text-decoration: underline; }
+
+    .btn-bm-add-main {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important; border: none !important; border-radius: 8px !important;
+        padding: 9px 18px !important; font-size: 13px !important; font-weight: 700 !important;
+        display: inline-flex !important; align-items: center !important; gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; cursor: pointer !important; text-decoration: none !important;
+    }
+    .btn-bm-add-main:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important; box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important; color: #ffffff !important;
+    }
+    .btn-bm-add-main:active { transform: translateY(0) !important; }
+
+    .bm-grid-card {
+        background: #ffffff !important; border-radius: 12px !important; padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important; border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px); overflow: hidden !important; position: relative !important; transition: all 0.25s ease !important;
+    }
+    .bm-grid-card:hover { box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important; border-color: #94a3b8 !important; }
+
+    .bm-card-header {
+        background: #ffffff !important; padding: 12px 18px !important; border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important;
+    }
+    .bm-card-title-left { display: flex; align-items: center; gap: 10px; }
+    .bm-card-title-left i { font-size: 16px; color: #0284c7; }
+    .bm-card-title-left h3 { margin: 0 !important; font-size: 15px !important; font-weight: 700 !important; color: #0f172a !important; letter-spacing: -0.1px; }
+
+    .bm-grid-body { padding: 0 !important; }
+
+    .bm-grid-card #branchGridContainer {
+        width: 100% !important; background: transparent !important; border: none !important; border-radius: 0 !important;
+        padding: 0 !important; box-shadow: none !important; min-height: calc(100vh - 210px);
+    }
+
+    .grid-btn-group { display: inline-flex; align-items: center; gap: 6px; }
+
+    .grid-btn-edit {
+        color: #0284c7 !important; background: #e0f2fe !important; border: none !important;
+        width: 30px !important; height: 30px !important; border-radius: 6px !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        cursor: pointer !important; transition: all 0.2s ease !important; text-decoration: none !important;
+    }
+    .grid-btn-edit:hover { background: #0284c7 !important; color: #ffffff !important; transform: scale(1.08) translateY(-1px) !important; }
+
+    .grid-btn-toggle {
+        color: #0369a1 !important; background: #e0f2fe !important; border: none !important;
+        width: 30px !important; height: 30px !important; border-radius: 6px !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        cursor: pointer !important; transition: all 0.2s ease !important;
+    }
+    .grid-btn-toggle:hover { background: #0369a1 !important; color: #ffffff !important; transform: scale(1.08) translateY(-1px) !important; }
+    .grid-btn-toggle.is-inactive-state { color: #94a3b8 !important; background: #f1f5f9 !important; }
+    .grid-btn-toggle.is-inactive-state:hover { background: #64748b !important; color: #ffffff !important; }
+
+    .grid-btn-del {
+        color: #ef4444 !important; background: #fee2e2 !important; border: none !important;
+        width: 30px !important; height: 30px !important; border-radius: 6px !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        cursor: pointer !important; transition: all 0.2s ease !important;
+    }
+    .grid-btn-del:hover { background: #ef4444 !important; color: #ffffff !important; transform: scale(1.08) translateY(-1px) !important; }
+
+    .badge-status-pill { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; line-height: 1.2; }
+    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-pill-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    @@media (max-width: 768px) {
+        .bm-header-card { flex-direction: column !important; align-items: stretch !important; padding: 12px 14px !important; gap: 12px !important; }
+        .bm-header-left { width: 100%; }
+        .btn-bm-add-main { width: 100% !important; justify-content: center !important; }
+        .bm-card-header { padding: 12px 14px !important; }
+        .bm-grid-card { min-height: 480px; }
+        .bm-grid-card #branchGridContainer { min-height: 440px !important; height: calc(100vh - 240px) !important; }
+    }
+
+    /* Modal */
+    #BranchModal .modal-dialog { max-width: 820px; width: 92%; margin: 30px auto; }
+    #BranchModal .modal-content { border-radius: 12px; border: none; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28); overflow: hidden; background: #ffffff; }
+    #BranchModal .modal-header { background: #111827 !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #1f2937; position: relative; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+    #BranchModal .modal-header:before, #BranchModal .modal-header:after { display: none !important; }
+    .modal-header-flex { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .modal-header-title-left { display: flex; align-items: center; gap: 9px; }
+    #BranchModal .modal-title { font-size: 15px; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.3px; line-height: 1.3; }
+    #BranchModal .modal-title-icon { color: #10b981; font-size: 17px; }
+    #BranchModal .btn-close-header {
+        color: #94a3b8; opacity: 1; font-size: 24px; font-weight: 300; text-shadow: none; margin: 0; padding: 0 4px;
+        transition: color 0.15s ease; line-height: 1; background: transparent; border: none; outline: none; cursor: pointer;
+    }
+    #BranchModal .btn-close-header:hover { color: #ffffff; }
+
+    #BranchModal .modal-body { padding: 20px 22px 10px 22px; background: #f8fafc; max-height: calc(85vh - 120px); overflow-y: auto; }
+
+    .bm-modal-section { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 18px 4px 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03); }
+    .bm-modal-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #2563eb; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+    .bm-modal-section-title i { font-size: 12px; }
+
+    .bm-form-group { margin-bottom: 14px; }
+    .bm-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #334155; margin-bottom: 5px; display: block; }
+    .bm-label .req { color: #ef4444; margin-left: 2px; font-weight: bold; }
+
+    .bm-input {
+        width: 100%; height: 38px; padding: 6px 12px; font-size: 12.5px; color: #1e293b;
+        background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; transition: all 0.2s ease; outline: none;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .bm-input::placeholder { color: #94a3b8; font-size: 12px; }
+    .bm-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+    textarea.bm-input { height: auto; min-height: 60px; resize: vertical; padding-top: 8px; }
+
+    .chosen-container { width: 100% !important; font-size: 12.5px; }
+    .chosen-container-single .chosen-single {
+        height: 38px !important; line-height: 36px !important; border-radius: 6px !important; border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important; font-size: 12.5px !important; color: #1e293b !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important; padding: 0 12px !important;
+    }
+    .chosen-container-single .chosen-single span { margin-right: 24px; }
+    .chosen-container-single .chosen-single div b { background-position: 0 8px !important; }
+    .chosen-container-active.chosen-with-drop .chosen-single { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important; }
+    .chosen-container .chosen-drop { border-radius: 6px !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important; font-size: 12.5px !important; z-index: 99999 !important; }
+    .chosen-container .chosen-results li.highlighted { background: #2563eb !important; color: #ffffff !important; }
+
+    #BranchModal .modal-footer { background: #ffffff; border-top: 1px solid #e2e8f0; padding: 12px 22px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+
+    .btn-bm-reset {
+        background: #ffffff; color: #334155 !important; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 0 16px;
+        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-bm-reset:hover { background: #f1f5f9; border-color: #94a3b8; }
+
+    .btn-bm-save {
+        background: #2563eb; color: #ffffff !important; border: 1px solid #1d4ed8; border-radius: 6px; height: 36px; padding: 0 22px;
+        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); transition: all 0.15s ease;
+    }
+    .btn-bm-save:hover { background: #1d4ed8; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4); }
+    .btn-bm-save:disabled, .btn-bm-save[disabled] { opacity: 0.7; cursor: not-allowed; }
+</style>
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+<div ng-controller="BranchMasterCtrl" class="bm-page">
+    <div class="bm-header-card">
+        <div class="bm-header-left">
+            <div class="bm-header-icon"><i class="fa fa-building"></i></div>
+            <div>
+                <div class="bm-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
+                    <span>Branch Master</span>
+                </div>
+                <h4 class="bm-header-title">Branch Master</h4>
+            </div>
+        </div>
+        <div>
+            <button class="btn-bm-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                <i class="fa fa-plus"></i> ADD NEW BRANCH
+            </button>
+        </div>
+    </div>
+
+    <div class="bm-grid-card">
+        <div class="bm-card-header">
+            <div class="bm-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Branch Records</h3>
+                <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
+                    <i class="fa fa-database"></i> {{BranchList.length || 0}} Records
+                </span>
+            </div>
+        </div>
+        <div class="bm-grid-body">
+            <div id="branchGridContainer" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Modal -->
+    <div class="modal fade" id="BranchModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-building modal-title-icon"></i>
+                            <h4 class="modal-title">{{FormModel.BranchID > 0 ? 'Edit Branch' : 'Add New Branch'}}</h4>
+                        </div>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="bm-modal-section">
+                        <div class="bm-modal-section-title"><i class="fa fa-id-card text-primary"></i> BASIC DETAILS</div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalBranchCode">BRANCH CODE <span class="req">*</span></label>
+                                <input type="text" id="ModalBranchCode" ng-model="FormModel.BranchCode" placeholder="e.g. HO, GF01" class="bm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalBranchName">BRANCH NAME <span class="req">*</span></label>
+                                <input type="text" id="ModalBranchName" ng-model="FormModel.BranchName" placeholder="Enter Branch Name" class="bm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalBranchTypeID">BRANCH TYPE <span class="req">*</span></label>
+                                <select id="ModalBranchTypeID" chosen="BranchTypeList" class="form-control bm-input" ng-model="FormModel.BranchTypeID" ng-options="item.BranchTypeID as item.BranchTypeName for item in BranchTypeList">
+                                    <option value="">Select Branch Type</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalContactPerson">CONTACT PERSON</label>
+                                <input type="text" id="ModalContactPerson" ng-model="FormModel.ContactPerson" placeholder="Enter Contact Person" class="bm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalPhone">PHONE</label>
+                                <input type="text" id="ModalPhone" ng-model="FormModel.Phone" placeholder="Enter Phone" class="bm-input" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bm-modal-section">
+                        <div class="bm-modal-section-title"><i class="fa fa-map-marker text-primary"></i> ADDRESS</div>
+                        <div class="row">
+                            <div class="col-md-12 bm-form-group">
+                                <label class="bm-label" for="ModalAddress">ADDRESS</label>
+                                <textarea id="ModalAddress" ng-model="FormModel.Address" placeholder="Enter Address" class="bm-input"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalCity">CITY</label>
+                                <input type="text" id="ModalCity" ng-model="FormModel.City" placeholder="City" class="bm-input" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bm-modal-section" style="margin-bottom: 5px;">
+                        <div class="bm-modal-section-title"><i class="fa fa-file-text-o text-primary"></i> STATUTORY</div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalGSTIN">GSTIN</label>
+                                <input type="text" id="ModalGSTIN" ng-model="FormModel.GSTIN" placeholder="Enter GSTIN" maxlength="15" class="bm-input" />
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalStateCode">STATE CODE</label>
+                                <input type="text" id="ModalStateCode" ng-model="FormModel.StateCode" placeholder="e.g. 24" maxlength="2" class="bm-input" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-bm-reset" type="button" ng-click="ResetForm()">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-bm-save" type="button" ng-click="SaveBranch()" ng-disabled="IsSaving">
+                        <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                        {{FormModel.BranchID > 0 ? 'UPDATE' : 'SAVE'}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="BranchConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
+                    <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
+                    <p style="font-size: 13px; color: #334155; margin: 0;">
+                        Are you sure you want to delete branch <strong>{{SelectedDeleteItem.BranchName}}</strong> ({{SelectedDeleteItem.BranchCode}})?
+                    </p>
+                </div>
+                <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
+                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
+                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    try {
+        module.directive('chosen', ['$timeout', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attrs) {
+                    var list = attrs['chosen'];
+                    if (list) {
+                        scope.$watchCollection(list, function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    if (attrs['ngModel']) {
+                        scope.$watch(attrs['ngModel'], function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                }
+            };
+        }]);
+    } catch (e) { /* chosen directive already registered on this module */ }
+
+    module.controller("BranchMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.BranchList = [];
+        $scope.BranchTypeList = [];
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.SelectedDeleteItem = null;
+
+        $scope.FormModel = {
+            BranchID: 0,
+            BranchCode: '',
+            BranchName: '',
+            BranchTypeID: null,
+            GSTIN: '',
+            StateCode: '',
+            Address: '',
+            City: '',
+            ContactPerson: '',
+            Phone: ''
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#BranchModal").modal("show");
+            $timeout(function () { $('#ModalBranchTypeID').trigger('chosen:updated'); }, 60);
+        };
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = {
+                BranchID: 0,
+                BranchCode: '',
+                BranchName: '',
+                BranchTypeID: null,
+                GSTIN: '',
+                StateCode: '',
+                Address: '',
+                City: '',
+                ContactPerson: '',
+                Phone: ''
+            };
+            $timeout(function () { $('#ModalBranchTypeID').trigger('chosen:updated'); }, 40);
+        };
+
+        $scope.EditItem = function (item) {
+            if (!item) return;
+            $scope.FormModel = {
+                BranchID: item.BranchID,
+                BranchCode: item.BranchCode || '',
+                BranchName: item.BranchName || '',
+                BranchTypeID: item.BranchTypeID,
+                GSTIN: item.GSTIN || '',
+                StateCode: item.StateCode || '',
+                Address: item.Address || '',
+                City: item.City || '',
+                ContactPerson: item.ContactPerson || '',
+                Phone: item.Phone || ''
+            };
+            $("#BranchModal").modal("show");
+            $timeout(function () { $('#ModalBranchTypeID').trigger('chosen:updated'); }, 80);
+        };
+
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.BranchID) return;
+            $scope.SelectedDeleteItem = item;
+            $("#BranchConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem) return;
+            $http.post('@Url.Action("BranchMaster_Delete", "Master")', { BranchID: $scope.SelectedDeleteItem.BranchID })
+                .then(function (res) {
+                    $("#BranchConfirmDeleteModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        Noty("success", res.data.message || "Branch deleted successfully!");
+                        $scope.LoadBranchList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to delete branch.");
+                    }
+                }, function () {
+                    $("#BranchConfirmDeleteModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.GetGridInstance = function () {
+            var $el = $("#branchGridContainer");
+            if (!$el.data("dxDataGrid")) {
+                return null;
+            }
+            return $el.dxDataGrid("instance");
+        };
+
+        $scope.RefreshGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.refresh();
+            } else {
+                $scope.InitGrid();
+            }
+        };
+
+        $scope.ToggleActive = function (item) {
+            if (!item || !item.BranchID) return;
+            var newStatus = !item.IsActive;
+            $http.post('@Url.Action("BranchMaster_ActiveInactive", "Master")', { BranchID: item.BranchID, IsActive: newStatus })
+                .then(function (res) {
+                    if (res.data && res.data.success) {
+                        item.IsActive = newStatus;
+                        $scope.RefreshGrid();
+                        Noty("success", res.data.message || "Status updated successfully!");
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
+                }, function () {
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadBranchTypes = function () {
+            $http.get('@Url.Action("Get_MST_BranchTypeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.BranchTypeList = res.data.list || [];
+                    $timeout(function () { $('#ModalBranchTypeID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadBranchList = function (searchText) {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_BranchList", "Master")', { params: { SearchText: searchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.BranchList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load branches.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.SaveBranch = function () {
+            if (!$scope.FormModel.BranchCode) {
+                Noty("error", "Please enter Branch Code!");
+                $('#ModalBranchCode').focus();
+                return;
+            }
+            if (!$scope.FormModel.BranchName) {
+                Noty("error", "Please enter Branch Name!");
+                $('#ModalBranchName').focus();
+                return;
+            }
+            if (!$scope.FormModel.BranchTypeID) {
+                Noty("error", "Please select Branch Type!");
+                $('#ModalBranchTypeID').trigger('chosen:open');
+                return;
+            }
+
+            var action = ($scope.FormModel.BranchID > 0) ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("BranchMaster_Save", "Master")', { model: $scope.FormModel, Action: action })
+                .then(function (res) {
+                    $scope.IsSaving = false;
+                    if (res.data && res.data.success) {
+                        $("#BranchModal").modal("hide");
+                        Noty("success", res.data.message || (action === 'UPDATE' ? "Branch updated successfully!" : "Branch saved successfully!"));
+                        $scope.ResetForm();
+                        $scope.LoadBranchList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to save branch.");
+                    }
+                }, function () {
+                    $scope.IsSaving = false;
+                    Noty("error", "Error saving branch to server.");
+                });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.BranchList);
+                return;
+            }
+            $("#branchGridContainer").dxDataGrid({
+                dataSource: $scope.BranchList,
+                keyExpr: 'BranchID',
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard', rowRenderingMode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: true, width: 250, placeholder: 'Search branches...' },
+                filterRow: { visible: true },
+                headerFilter: { visible: true },
+                columns: [
+                    {
+                        caption: '#', width: 45, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Branch Code', dataField: 'BranchCode', minWidth: 110,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.BranchCode).css({ "color": "#1e293b" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Branch Name', dataField: 'BranchName', minWidth: 160 },
+                    {
+                        caption: 'Type', dataField: 'BranchTypeName', width: 110, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").addClass("badge-status-pill badge-pill-info").text(options.data.BranchTypeName).appendTo(container);
+                        }
+                    },
+                    { caption: 'Contact Person', dataField: 'ContactPerson', minWidth: 140 },
+                    { caption: 'Phone', dataField: 'Phone', minWidth: 110 },
+                    { caption: 'City', dataField: 'City', minWidth: 100 },
+                    { caption: 'GSTIN', dataField: 'GSTIN', minWidth: 140 },
+                    { caption: 'State Code', dataField: 'StateCode', width: 95, alignment: 'center' },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 120, alignment: 'center', fixed: true, fixedPosition: 'right',
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Branch").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate Branch" : "Activate Branch")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>").addClass("grid-btn-del").attr("title", "Delete Branch").html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $('#BranchModal').on('shown.bs.modal', function () {
+            $timeout(function () { $('#ModalBranchTypeID').trigger('chosen:updated'); }, 40);
+        });
+
+        $scope.LoadBranchTypes();
+        $scope.LoadBranchList();
+    }]);
+</script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Branch Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}

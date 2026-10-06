@@ -1,0 +1,822 @@
+@{
+    ViewBag.Title = "Rough Inward";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /* ==========================================================================
+       Rough Inward - SaaS Card View & Ice Blue Theming
+       ========================================================================== */
+    @@keyframes fadeInUpSmooth {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ri-page {
+        padding: 0 0 20px 0;
+        margin-top: -10px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .ri-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .ri-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
+
+    .ri-header-card {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 14px 20px !important;
+        margin-bottom: 14px !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+        border: 1.5px solid #cbd5e1 !important;
+        border-left: 5px solid #0284c7 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        transition: all 0.25s ease !important;
+    }
+    .ri-header-card:hover {
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
+        border-color: #94a3b8 !important;
+        border-left-color: #0369a1 !important;
+    }
+
+    .ri-header-left { display: flex; align-items: center; gap: 14px; }
+
+    .ri-header-icon {
+        width: 44px; height: 44px; border-radius: 10px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff; display: flex; align-items: center; justify-content: center;
+        font-size: 20px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
+        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); flex-shrink: 0;
+    }
+    .ri-header-card:hover .ri-header-icon { transform: scale(1.08) rotate(4deg); }
+
+    .ri-header-title { font-size: 18px !important; font-weight: 700 !important; color: #0f172a !important; margin: 0 !important; line-height: 1.2 !important; letter-spacing: -0.2px; }
+
+    .ri-breadcrumb { font-size: 11.5px; color: #64748b; margin-bottom: 3px; font-weight: 500; }
+    .ri-breadcrumb a { color: #0284c7; text-decoration: none; transition: color 0.15s ease; font-weight: 500; }
+    .ri-breadcrumb a:hover { color: #0369a1; text-decoration: underline; }
+
+    .btn-ri-add-main {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+        color: #ffffff !important; border: none !important; border-radius: 8px !important;
+        padding: 9px 18px !important; font-size: 13px !important; font-weight: 700 !important;
+        display: inline-flex !important; align-items: center !important; gap: 7px !important;
+        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; cursor: pointer !important; text-decoration: none !important;
+    }
+    .btn-ri-add-main:hover {
+        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
+        transform: translateY(-2px) !important; box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important; color: #ffffff !important;
+    }
+    .btn-ri-add-main:active { transform: translateY(0) !important; }
+
+    .ri-grid-card {
+        background: #ffffff !important; border-radius: 12px !important; padding: 0 !important;
+        box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important; border: 1.5px solid #cbd5e1 !important;
+        min-height: calc(100vh - 180px); overflow: hidden !important; position: relative !important; transition: all 0.25s ease !important;
+    }
+    .ri-grid-card:hover { box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important; border-color: #94a3b8 !important; }
+
+    .ri-card-header {
+        background: #ffffff !important; padding: 12px 18px !important; border-bottom: 1.5px solid #e2e8f0 !important;
+        display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: wrap !important; gap: 12px !important;
+    }
+    .ri-card-title-left { display: flex; align-items: center; gap: 10px; }
+    .ri-card-title-left i { font-size: 16px; color: #0284c7; }
+    .ri-card-title-left h3 { margin: 0 !important; font-size: 15px !important; font-weight: 700 !important; color: #0f172a !important; letter-spacing: -0.1px; }
+
+    .ri-grid-body { padding: 0 !important; }
+
+    .ri-grid-card #inwardGridContainer {
+        width: 100% !important; background: transparent !important; border: none !important; border-radius: 0 !important;
+        padding: 0 !important; box-shadow: none !important; min-height: calc(100vh - 210px);
+    }
+
+    .grid-btn-group { display: inline-flex; align-items: center; gap: 6px; }
+
+    .grid-btn-edit {
+        color: #0284c7 !important; background: #e0f2fe !important; border: none !important;
+        width: 30px !important; height: 30px !important; border-radius: 6px !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        cursor: pointer !important; transition: all 0.2s ease !important; text-decoration: none !important;
+    }
+    .grid-btn-edit:hover { background: #0284c7 !important; color: #ffffff !important; transform: scale(1.08) translateY(-1px) !important; }
+
+    .grid-btn-del {
+        color: #ef4444 !important; background: #fee2e2 !important; border: none !important;
+        width: 30px !important; height: 30px !important; border-radius: 6px !important;
+        display: inline-flex !important; align-items: center !important; justify-content: center !important;
+        cursor: pointer !important; transition: all 0.2s ease !important;
+    }
+    .grid-btn-del:hover { background: #ef4444 !important; color: #ffffff !important; transform: scale(1.08) translateY(-1px) !important; }
+
+    .badge-status-pill { display: inline-block; padding: 3px 9px; border-radius: 12px; font-size: 11px; font-weight: 700; line-height: 1.2; }
+    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-pill-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+    .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    @@media (max-width: 768px) {
+        .ri-header-card { flex-direction: column !important; align-items: stretch !important; padding: 12px 14px !important; gap: 12px !important; }
+        .ri-header-left { width: 100%; }
+        .btn-ri-add-main { width: 100% !important; justify-content: center !important; }
+        .ri-card-header { padding: 12px 14px !important; }
+        .ri-grid-card { min-height: 480px; }
+        .ri-grid-card #inwardGridContainer { min-height: 440px !important; height: calc(100vh - 240px) !important; }
+    }
+
+    /* Modal */
+    #InwardModal .modal-dialog { max-width: 1040px; width: 94%; margin: 24px auto; }
+    #InwardModal .modal-content { border-radius: 12px; border: none; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28); overflow: hidden; background: #ffffff; }
+    #InwardModal .modal-header { background: #111827 !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #1f2937; position: relative; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+    #InwardModal .modal-header:before, #InwardModal .modal-header:after { display: none !important; }
+    .modal-header-flex { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+    .modal-header-title-left { display: flex; align-items: center; gap: 9px; }
+    #InwardModal .modal-title { font-size: 15px; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.3px; line-height: 1.3; }
+    #InwardModal .modal-title-icon { color: #10b981; font-size: 17px; }
+    #InwardModal .btn-close-header {
+        color: #94a3b8; opacity: 1; font-size: 24px; font-weight: 300; text-shadow: none; margin: 0; padding: 0 4px;
+        transition: color 0.15s ease; line-height: 1; background: transparent; border: none; outline: none; cursor: pointer;
+    }
+    #InwardModal .btn-close-header:hover { color: #ffffff; }
+
+    #InwardModal .modal-body { padding: 20px 22px 10px 22px; background: #f8fafc; max-height: calc(85vh - 120px); overflow-y: auto; }
+
+    .ri-modal-section { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 18px 4px 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03); }
+    .ri-modal-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #2563eb; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+    .ri-modal-section-title i { font-size: 12px; }
+
+    .ri-form-group { margin-bottom: 14px; }
+    .ri-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #334155; margin-bottom: 5px; display: block; }
+    .ri-label .req { color: #ef4444; margin-left: 2px; font-weight: bold; }
+
+    .ri-input {
+        width: 100%; height: 38px; padding: 6px 12px; font-size: 12.5px; color: #1e293b;
+        background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; transition: all 0.2s ease; outline: none;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    }
+    .ri-input::placeholder { color: #94a3b8; font-size: 12px; }
+    .ri-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+    .ri-input[disabled], .ri-input:disabled { background-color: #f1f5f9 !important; color: #64748b !important; cursor: not-allowed !important; }
+    textarea.ri-input { height: auto; min-height: 54px; resize: vertical; padding-top: 8px; }
+
+    .chosen-container { width: 100% !important; font-size: 12.5px; }
+    .chosen-container-single .chosen-single {
+        height: 38px !important; line-height: 36px !important; border-radius: 6px !important; border: 1px solid #cbd5e1 !important;
+        background: #ffffff !important; font-size: 12.5px !important; color: #1e293b !important;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02) !important; padding: 0 12px !important;
+    }
+    .chosen-container-single .chosen-single span { margin-right: 24px; }
+    .chosen-container-single .chosen-single div b { background-position: 0 8px !important; }
+    .chosen-container-active.chosen-with-drop .chosen-single { border-color: #3b82f6 !important; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important; }
+    .chosen-container .chosen-drop { border-radius: 6px !important; border: 1px solid #cbd5e1 !important; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12) !important; font-size: 12.5px !important; z-index: 99999 !important; }
+    .chosen-container .chosen-results li.highlighted { background: #2563eb !important; color: #ffffff !important; }
+
+    .ri-source-toggle { display: flex; gap: 8px; height: 38px; }
+    .ri-source-btn {
+        flex: 1; border: 1px solid #cbd5e1; background: #ffffff; border-radius: 6px; font-size: 12.5px; font-weight: 700;
+        color: #334155; cursor: pointer; transition: all 0.15s ease; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .ri-source-btn.active { background: #2563eb; border-color: #1d4ed8; color: #ffffff; box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); }
+
+    /* Line items table */
+    .ri-lines-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .ri-lines-table th {
+        background: #f1f5f9; color: #334155; font-weight: 700; text-transform: uppercase; font-size: 10.5px;
+        letter-spacing: 0.3px; padding: 8px 6px; border: 1px solid #e2e8f0; text-align: center;
+    }
+    .ri-lines-table td { padding: 4px; border: 1px solid #e2e8f0; text-align: center; vertical-align: middle; }
+    .ri-lines-table input { width: 100%; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; font-size: 12px; text-align: center; }
+    .ri-lines-table input.ri-lot-input { text-align: left; }
+    .ri-lines-table .ri-amount-cell { font-weight: 700; color: #0f172a; }
+
+    .btn-ri-add-row {
+        background: #e0f2fe; color: #0369a1 !important; border: 1px dashed #7dd3fc; border-radius: 6px; height: 32px; padding: 0 14px;
+        font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; margin-top: 8px;
+    }
+    .btn-ri-add-row:hover { background: #bae6fd; }
+
+    .btn-ri-del-row {
+        color: #ef4444 !important; background: #fee2e2 !important; border: none !important;
+        width: 26px !important; height: 26px !important; border-radius: 5px !important; cursor: pointer !important;
+    }
+    .btn-ri-del-row:hover { background: #ef4444 !important; color: #ffffff !important; }
+
+    .ri-totals-bar {
+        display: flex; justify-content: flex-end; gap: 22px; padding: 10px 6px; margin-top: 8px;
+        background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 12.5px; font-weight: 700; color: #0f172a;
+    }
+    .ri-totals-bar span.lbl { color: #64748b; font-weight: 600; margin-right: 4px; }
+
+    #InwardModal .modal-footer { background: #ffffff; border-top: 1px solid #e2e8f0; padding: 12px 22px; display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
+
+    .btn-ri-reset {
+        background: #ffffff; color: #334155 !important; border: 1px solid #cbd5e1; border-radius: 6px; height: 36px; padding: 0 16px;
+        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.15s ease;
+    }
+    .btn-ri-reset:hover { background: #f1f5f9; border-color: #94a3b8; }
+
+    .btn-ri-save {
+        background: #2563eb; color: #ffffff !important; border: 1px solid #1d4ed8; border-radius: 6px; height: 36px; padding: 0 22px;
+        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); transition: all 0.15s ease;
+    }
+    .btn-ri-save:hover { background: #1d4ed8; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4); }
+    .btn-ri-save:disabled, .btn-ri-save[disabled] { opacity: 0.7; cursor: not-allowed; }
+</style>
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+<div ng-controller="RoughInwardCtrl" class="ri-page">
+    <div class="ri-header-card">
+        <div class="ri-header-left">
+            <div class="ri-header-icon"><i class="fa fa-truck"></i></div>
+            <div>
+                <div class="ri-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
+                    <span>Rough Inward</span>
+                </div>
+                <h4 class="ri-header-title">Rough Inward (Jangad)</h4>
+            </div>
+        </div>
+        <div>
+            <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                <i class="fa fa-plus"></i> NEW INWARD
+            </button>
+        </div>
+    </div>
+
+    <div class="ri-grid-card">
+        <div class="ri-card-header">
+            <div class="ri-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Inward Records</h3>
+                <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
+                    <i class="fa fa-database"></i> {{InwardList.length || 0}} Records
+                </span>
+            </div>
+        </div>
+        <div class="ri-grid-body">
+            <div id="inwardGridContainer" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Modal -->
+    <div class="modal fade" id="InwardModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-truck modal-title-icon"></i>
+                            <h4 class="modal-title">{{FormModel.InwardID > 0 ? 'Edit Rough Inward' : 'New Rough Inward'}}</h4>
+                        </div>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="ri-modal-section">
+                        <div class="ri-modal-section-title"><i class="fa fa-id-card text-primary"></i> CHALLAN DETAILS</div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalChallanNo">CHALLAN NO <span class="req">*</span></label>
+                                <input type="text" id="ModalChallanNo" ng-model="FormModel.ChallanNo" placeholder="Enter Challan No" class="ri-input" />
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalChallanDate">CHALLAN DATE <span class="req">*</span></label>
+                                <input type="date" id="ModalChallanDate" ng-model="FormModel.ChallanDate" class="ri-input" />
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label">SOURCE <span class="req">*</span></label>
+                                <div class="ri-source-toggle">
+                                    <button type="button" class="ri-source-btn" ng-class="{active: FormModel.SourceType === 'BRANCH'}" ng-click="SetSourceType('BRANCH')">
+                                        <i class="fa fa-building"></i> Branch
+                                    </button>
+                                    <button type="button" class="ri-source-btn" ng-class="{active: FormModel.SourceType === 'PARTY'}" ng-click="SetSourceType('PARTY')">
+                                        <i class="fa fa-handshake-o"></i> Party
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalPurposeID">PURPOSE <span class="req">*</span></label>
+                                <select id="ModalPurposeID" chosen="PurposeList" class="form-control ri-input" ng-model="FormModel.PurposeID" ng-options="item.PurposeID as item.PurposeName for item in PurposeList">
+                                    <option value="">Select Purpose</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'BRANCH'">
+                                <label class="ri-label" for="ModalFromBranchID">FROM BRANCH <span class="req">*</span></label>
+                                <select id="ModalFromBranchID" chosen="FromBranchList" class="form-control ri-input" ng-model="FormModel.FromBranchID" ng-options="item.BranchID as item.BranchName for item in FromBranchList">
+                                    <option value="">Select Branch</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'PARTY'">
+                                <label class="ri-label" for="ModalFromPartyID">FROM PARTY <span class="req">*</span></label>
+                                <select id="ModalFromPartyID" chosen="PartyList" class="form-control ri-input" ng-model="FormModel.FromPartyID" ng-options="item.PartyId as item.PartyName for item in PartyList">
+                                    <option value="">Select Party</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label">TO BRANCH (RECEIVING)</label>
+                                <input type="text" value="{{MyBranchName || 'Not Assigned'}}" disabled class="ri-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalRemarks">REMARKS</label>
+                                <input type="text" id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Enter Remarks" class="ri-input" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ri-modal-section" style="margin-bottom: 5px;">
+                        <div class="ri-modal-section-title"><i class="fa fa-list text-primary"></i> JANGAD / LOT LINES</div>
+                        <table class="ri-lines-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 36px;">#</th>
+                                    <th>Lot No</th>
+                                    <th style="width: 80px;">Grade</th>
+                                    <th style="width: 70px;">Pcs</th>
+                                    <th style="width: 90px;">Carat</th>
+                                    <th style="width: 100px;">Rate</th>
+                                    <th style="width: 110px;">Amount</th>
+                                    <th style="width: 40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr ng-repeat="line in FormModel.Details track by $index">
+                                    <td>{{$index + 1}}</td>
+                                    <td><input type="text" class="ri-lot-input" ng-model="line.LotNo" placeholder="Lot No" /></td>
+                                    <td><input type="text" ng-model="line.Grade" placeholder="Grade" /></td>
+                                    <td><input type="number" ng-model="line.Pcs" min="0" /></td>
+                                    <td><input type="number" ng-model="line.Carat" min="0" step="0.01" ng-change="RecalcLine(line)" /></td>
+                                    <td><input type="number" ng-model="line.Rate" min="0" step="0.01" ng-change="RecalcLine(line)" /></td>
+                                    <td class="ri-amount-cell">{{(line.Amount || 0) | number:2}}</td>
+                                    <td>
+                                        <button type="button" class="btn-ri-del-row" ng-click="RemoveLine($index)" title="Remove row">
+                                            <i class="fa fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn-ri-add-row" ng-click="AddLine()">
+                            <i class="fa fa-plus"></i> Add Row
+                        </button>
+
+                        <div class="ri-totals-bar">
+                            <div><span class="lbl">Total Pcs:</span> {{GetTotalPcs()}}</div>
+                            <div><span class="lbl">Total Carat:</span> {{GetTotalCarat() | number:3}}</div>
+                            <div><span class="lbl">Total Amount:</span> {{GetTotalAmount() | number:2}}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-ri-save" type="button" ng-click="SaveInward()" ng-disabled="IsSaving">
+                        <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                        {{FormModel.InwardID > 0 ? 'UPDATE' : 'SAVE'}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="InwardConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
+                    <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
+                    <p style="font-size: 13px; color: #334155; margin: 0;">
+                        Are you sure you want to delete Rough Inward <strong>{{SelectedDeleteItem.ChallanNo}}</strong>?
+                    </p>
+                </div>
+                <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
+                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
+                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    try {
+        module.directive('chosen', ['$timeout', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attrs) {
+                    var list = attrs['chosen'];
+                    if (list) {
+                        scope.$watchCollection(list, function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    if (attrs['ngModel']) {
+                        scope.$watch(attrs['ngModel'], function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                }
+            };
+        }]);
+    } catch (e) { /* chosen directive already registered on this module */ }
+
+    module.controller("RoughInwardCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.InwardList = [];
+        $scope.PurposeList = [];
+        $scope.BranchList = [];
+        $scope.PartyList = [];
+        $scope.FromBranchList = [];
+        $scope.MyBranchID = null;
+        $scope.MyBranchName = '';
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.SelectedDeleteItem = null;
+
+        $scope.NewEmptyLine = function () {
+            return { LotNo: '', Grade: '', Pcs: 0, Carat: 0, Rate: 0, Amount: 0, Remarks: '' };
+        };
+
+        $scope.FormModel = {
+            InwardID: 0,
+            ChallanNo: '',
+            ChallanDate: '',
+            SourceType: 'BRANCH',
+            FromBranchID: null,
+            FromPartyID: null,
+            PurposeID: null,
+            Remarks: '',
+            Details: [$scope.NewEmptyLine()]
+        };
+
+        $scope.SetSourceType = function (type) {
+            $scope.FormModel.SourceType = type;
+            if (type === 'BRANCH') {
+                $scope.FormModel.FromPartyID = null;
+            } else {
+                $scope.FormModel.FromBranchID = null;
+            }
+        };
+
+        $scope.AddLine = function () {
+            $scope.FormModel.Details.push($scope.NewEmptyLine());
+        };
+
+        $scope.RemoveLine = function (index) {
+            if ($scope.FormModel.Details.length <= 1) {
+                $scope.FormModel.Details[0] = $scope.NewEmptyLine();
+                return;
+            }
+            $scope.FormModel.Details.splice(index, 1);
+        };
+
+        $scope.RecalcLine = function (line) {
+            var carat = parseFloat(line.Carat) || 0;
+            var rate = parseFloat(line.Rate) || 0;
+            line.Amount = Math.round(carat * rate * 100) / 100;
+        };
+
+        $scope.GetTotalPcs = function () {
+            var total = 0;
+            angular.forEach($scope.FormModel.Details, function (l) { total += parseInt(l.Pcs) || 0; });
+            return total;
+        };
+        $scope.GetTotalCarat = function () {
+            var total = 0;
+            angular.forEach($scope.FormModel.Details, function (l) { total += parseFloat(l.Carat) || 0; });
+            return total;
+        };
+        $scope.GetTotalAmount = function () {
+            var total = 0;
+            angular.forEach($scope.FormModel.Details, function (l) { total += parseFloat(l.Amount) || 0; });
+            return total;
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#InwardModal").modal("show");
+            $timeout(function () {
+                $('#ModalPurposeID').trigger('chosen:updated');
+                $('#ModalFromBranchID').trigger('chosen:updated');
+                $('#ModalFromPartyID').trigger('chosen:updated');
+            }, 60);
+        };
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = {
+                InwardID: 0,
+                ChallanNo: '',
+                ChallanDate: new Date().toISOString().substring(0, 10),
+                SourceType: 'BRANCH',
+                FromBranchID: null,
+                FromPartyID: null,
+                PurposeID: null,
+                Remarks: '',
+                Details: [$scope.NewEmptyLine()]
+            };
+            $timeout(function () {
+                $('#ModalPurposeID').trigger('chosen:updated');
+                $('#ModalFromBranchID').trigger('chosen:updated');
+                $('#ModalFromPartyID').trigger('chosen:updated');
+            }, 40);
+        };
+
+        $scope.EditItem = function (item) {
+            if (!item || !item.InwardID) return;
+            $http.get('@Url.Action("Get_TRN_RoughInwardById", "Master")', { params: { InwardID: item.InwardID } })
+                .then(function (res) {
+                    if (res.data && res.data.success && res.data.item) {
+                        var data = res.data.item;
+                        $scope.FormModel = {
+                            InwardID: data.InwardID,
+                            ChallanNo: data.ChallanNo || '',
+                            ChallanDate: data.ChallanDate ? data.ChallanDate.substring(0, 10) : '',
+                            SourceType: data.SourceType || 'BRANCH',
+                            FromBranchID: data.FromBranchID,
+                            FromPartyID: data.FromPartyID,
+                            PurposeID: data.PurposeID,
+                            Remarks: data.Remarks || '',
+                            Details: (data.Details && data.Details.length > 0) ? data.Details : [$scope.NewEmptyLine()]
+                        };
+                        $("#InwardModal").modal("show");
+                        $timeout(function () {
+                            $('#ModalPurposeID').trigger('chosen:updated');
+                            $('#ModalFromBranchID').trigger('chosen:updated');
+                            $('#ModalFromPartyID').trigger('chosen:updated');
+                        }, 80);
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward details.");
+                    }
+                }, function () {
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.InwardID) return;
+            $scope.SelectedDeleteItem = item;
+            $("#InwardConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem) return;
+            $http.post('@Url.Action("RoughInward_Delete", "Master")', { InwardID: $scope.SelectedDeleteItem.InwardID })
+                .then(function (res) {
+                    $("#InwardConfirmDeleteModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        Noty("success", res.data.message || "Rough Inward deleted successfully!");
+                        $scope.LoadInwardList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to delete Rough Inward.");
+                    }
+                }, function () {
+                    $("#InwardConfirmDeleteModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadMyBranch = function () {
+            $http.get('@Url.Action("Get_UserBranch", "Master")').then(function (res) {
+                if (res.data) {
+                    $scope.MyBranchID = res.data.branchId;
+                    $scope.MyBranchName = res.data.branchName || '';
+                }
+            });
+        };
+
+        $scope.LoadPurposes = function () {
+            $http.get('@Url.Action("Get_MST_PurposeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.PurposeList = res.data.list || [];
+                    $timeout(function () { $('#ModalPurposeID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadBranches = function () {
+            $http.get('@Url.Action("Get_MST_BranchList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.BranchList = res.data.list || [];
+                    $scope.FromBranchList = $scope.BranchList.filter(function (b) {
+                        return !$scope.MyBranchID || b.BranchID !== $scope.MyBranchID;
+                    });
+                    $timeout(function () { $('#ModalFromBranchID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadParties = function () {
+            $http.get('@Url.Action("Get_MST_PartyMasterList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.PartyList = res.data.list || [];
+                    $timeout(function () { $('#ModalFromPartyID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.GetGridInstance = function () {
+            var $el = $("#inwardGridContainer");
+            if (!$el.data("dxDataGrid")) {
+                return null;
+            }
+            return $el.dxDataGrid("instance");
+        };
+
+        $scope.LoadInwardList = function (searchText) {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_TRN_RoughInwardList", "Master")', { params: { SearchText: searchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.InwardList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward records.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.SaveInward = function () {
+            if (!$scope.FormModel.ChallanNo) {
+                Noty("error", "Please enter Challan No!");
+                $('#ModalChallanNo').focus();
+                return;
+            }
+            if (!$scope.FormModel.ChallanDate) {
+                Noty("error", "Please select Challan Date!");
+                $('#ModalChallanDate').focus();
+                return;
+            }
+            if (!$scope.FormModel.PurposeID) {
+                Noty("error", "Please select Purpose!");
+                $('#ModalPurposeID').trigger('chosen:open');
+                return;
+            }
+            if ($scope.FormModel.SourceType === 'BRANCH' && !$scope.FormModel.FromBranchID) {
+                Noty("error", "Please select From Branch!");
+                $('#ModalFromBranchID').trigger('chosen:open');
+                return;
+            }
+            if ($scope.FormModel.SourceType === 'PARTY' && !$scope.FormModel.FromPartyID) {
+                Noty("error", "Please select From Party!");
+                $('#ModalFromPartyID').trigger('chosen:open');
+                return;
+            }
+            var validLines = $scope.FormModel.Details.filter(function (l) { return l.LotNo && l.LotNo.trim() !== ''; });
+            if (validLines.length === 0) {
+                Noty("error", "Please add at least one Lot line with Lot No!");
+                return;
+            }
+
+            var action = ($scope.FormModel.InwardID > 0) ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("RoughInward_Save", "Master")', { model: $scope.FormModel, Action: action })
+                .then(function (res) {
+                    $scope.IsSaving = false;
+                    if (res.data && res.data.success) {
+                        $("#InwardModal").modal("hide");
+                        Noty("success", res.data.message || (action === 'UPDATE' ? "Rough Inward updated successfully!" : "Rough Inward saved successfully!"));
+                        $scope.ResetForm();
+                        $scope.LoadInwardList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to save Rough Inward.");
+                    }
+                }, function () {
+                    $scope.IsSaving = false;
+                    Noty("error", "Error saving Rough Inward to server.");
+                });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.InwardList);
+                return;
+            }
+            $("#inwardGridContainer").dxDataGrid({
+                dataSource: $scope.InwardList,
+                keyExpr: 'InwardID',
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard', rowRenderingMode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: true, width: 250, placeholder: 'Search inward...' },
+                filterRow: { visible: true },
+                headerFilter: { visible: true },
+                columns: [
+                    {
+                        caption: '#', width: 45, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Challan No', dataField: 'ChallanNo', minWidth: 120,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.ChallanNo).css({ "color": "#1e293b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Date', dataField: 'ChallanDate', width: 110, dataType: 'date', format: 'dd-MMM-yyyy'
+                    },
+                    {
+                        caption: 'Source', dataField: 'SourceType', width: 100, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.SourceType === 'BRANCH') {
+                                $("<span>").addClass("badge-status-pill badge-pill-info").text("Branch").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-warning").text("Party").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'From', minWidth: 150,
+                        calculateCellValue: function (data) { return data.SourceType === 'BRANCH' ? data.FromBranchName : data.PartyName; }
+                    },
+                    { caption: 'To Branch', dataField: 'ToBranchName', minWidth: 130 },
+                    { caption: 'Purpose', dataField: 'PurposeName', width: 110 },
+                    { caption: 'Total Pcs', dataField: 'TotalPcs', width: 90, alignment: 'right' },
+                    { caption: 'Total Carat', dataField: 'TotalCarat', width: 100, alignment: 'right', format: { type: 'fixedPoint', precision: 3 } },
+                    { caption: 'Total Amount', dataField: 'TotalAmount', width: 120, alignment: 'right', format: { type: 'fixedPoint', precision: 2 } },
+                    {
+                        caption: 'Action', width: 100, alignment: 'center', fixed: true, fixedPosition: 'right',
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Inward").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>").addClass("grid-btn-del").attr("title", "Delete Inward").html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $scope.LoadMyBranch();
+        $scope.LoadPurposes();
+        $scope.LoadBranches();
+        $scope.LoadParties();
+        $scope.LoadInwardList();
+        $scope.ResetForm();
+    }]);
+</script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Rough Inward</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}
