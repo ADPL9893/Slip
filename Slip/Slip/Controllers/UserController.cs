@@ -33,23 +33,10 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_SYS_Module = new List<object>();
                 List<object> _list_SYS_Module_Group = new List<object>();
                 List<object> SYSModuleList = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_SYS_ModuleDataList", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Get_SYS_ModuleDataList");
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -98,26 +85,11 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
-
                 List<object> _list_SYS_Module = new List<object>();
 
                 List<object> SYSModuleList = new List<object>();
 
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("SEC_UserPrivileges_Getdata", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("SEC_UserPrivileges_Getdata");
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -167,23 +139,10 @@ namespace Slip.Controllers
             List<object> _SEC_User_List = new List<object>();
             List<object> _SEC_UserPrivileges_List = new List<object>(); try
             {
-                DataSet _PartyEditData = new DataSet();
-
                 List<object> _list_SYS_Module = new List<object>();
                 List<object> SYSModuleList = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_SEC_UserPrivileges_Edit", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@UserID", SqlDbType.Int).Value = UserID;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_PartyEditData);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _PartyEditData = DbHelper.ExecuteDataSet("Get_SEC_UserPrivileges_Edit",
+                    new SqlParameter("@UserID", SqlDbType.Int) { Value = UserID });
 
                 for (int i = 0; i < _PartyEditData.Tables[0].Rows.Count; i++)
                 {
@@ -256,27 +215,10 @@ namespace Slip.Controllers
                 #endregion
                 //  ErrorLogger.ErrorLogStr("XML Create" + xml);
                 //   ErrorLogger.ErrorLogStr("XML_Detail Create" + XML_Detail);
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("SEC_UserPrivileges_Insert_Update_Delete", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xml);
-                cmd.Parameters.AddWithValue("@XML_Detail", XML_Detail);
-                cmd.Parameters.AddWithValue("@ACTION", "UPDATE");
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-
-
-                con.Open();
-                // ErrorLogger.ErrorLogStr("Connection Open");
-                int i = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                //    ErrorLogger.ErrorLogStr("ExecuteNonQuery complete");
-                con.Close();
-                //  ErrorLogger.ErrorLogStr("Connection Close");
-                //if (i != 0)
-                //{
-                //    Message = "Record Is Inserted";
-                //}
+                Message = DbHelper.ExecuteNonQueryWithMessage("SEC_UserPrivileges_Insert_Update_Delete",
+                    new SqlParameter("@XML", xml),
+                    new SqlParameter("@XML_Detail", XML_Detail),
+                    new SqlParameter("@ACTION", "UPDATE"));
                 //  ErrorLogger.ErrorLogStr("Last" + Message);
             }
             catch (Exception ex)
@@ -292,27 +234,11 @@ namespace Slip.Controllers
             string Message = "";
             try
             {
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("ChangeThePasswordForUser", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@UserName", UserName);
-                cmd.Parameters.AddWithValue("@Password", Password);
-                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                cmd.Parameters.AddWithValue("@ACTION", Action);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-
-                con.Open();
-                // ErrorLogger.ErrorLogStr("Connection Open");
-                int i = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                //  ErrorLogger.ErrorLogStr("ExecuteNonQuery complete");
-                con.Close();
-                //  ErrorLogger.ErrorLogStr("Connection Close");
-                //if (i != 0)
-                //{
-                //    Message = "Record Is Inserted";
-                //}
+                Message = DbHelper.ExecuteNonQueryWithMessage("ChangeThePasswordForUser",
+                    new SqlParameter("@UserName", UserName),
+                    new SqlParameter("@Password", Password),
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                    new SqlParameter("@ACTION", Action));
                 //   ErrorLogger.ErrorLogStr("Last" + Message);
             }
             catch (Exception ex)
@@ -328,7 +254,6 @@ namespace Slip.Controllers
 
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_User = new List<object>();
                 List<object> _list_Process = new List<object>();
                 List<object> _list_Table = new List<object>();
@@ -336,19 +261,7 @@ namespace Slip.Controllers
                 List<object> UserList = new List<object>();
                 List<object> ProcessList = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_UserList", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Get_UserList");
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -444,36 +357,26 @@ namespace Slip.Controllers
             try
             {
                 List<Dictionary<string, object>> list = new List<Dictionary<string, object>>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("SEC_UserPermission_Manage", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@Action", SqlDbType.VarChar, 50).Value = "GET_PERMISSIONS";
-                        cmd.Parameters.Add("@TargetUserID", SqlDbType.Int).Value = UserID;
+                var rows = DbHelper.ExecuteReaderAsList("SEC_UserPermission_Manage",
+                    new SqlParameter("@Action", SqlDbType.VarChar, 50) { Value = "GET_PERMISSIONS" },
+                    new SqlParameter("@TargetUserID", SqlDbType.Int) { Value = UserID });
 
-                        con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                var dict = new Dictionary<string, object>();
-                                dict["GroupName"] = reader["GroupName"] != DBNull.Value ? reader["GroupName"].ToString() : "General";
-                                dict["ModuleID"] = reader["ModuleID"] != DBNull.Value ? Convert.ToInt32(reader["ModuleID"]) : 0;
-                                dict["ModuleName"] = reader["ModuleName"] != DBNull.Value ? reader["ModuleName"].ToString() : "";
-                                dict["SelectAll"] = reader["SelectAll"] != DBNull.Value && (Convert.ToBoolean(reader["SelectAll"]) || Convert.ToString(reader["SelectAll"]) == "1" || Convert.ToString(reader["SelectAll"]).ToLower() == "true");
-                                dict["View"] = reader["View"] != DBNull.Value && (Convert.ToBoolean(reader["View"]) || Convert.ToString(reader["View"]) == "1" || Convert.ToString(reader["View"]).ToLower() == "true");
-                                dict["Add"] = reader["Add"] != DBNull.Value && (Convert.ToBoolean(reader["Add"]) || Convert.ToString(reader["Add"]) == "1" || Convert.ToString(reader["Add"]).ToLower() == "true");
-                                dict["Edit"] = reader["Edit"] != DBNull.Value && (Convert.ToBoolean(reader["Edit"]) || Convert.ToString(reader["Edit"]) == "1" || Convert.ToString(reader["Edit"]).ToLower() == "true");
-                                dict["Delete"] = reader["Delete"] != DBNull.Value && (Convert.ToBoolean(reader["Delete"]) || Convert.ToString(reader["Delete"]) == "1" || Convert.ToString(reader["Delete"]).ToLower() == "true");
-                                dict["Export"] = reader["Export"] != DBNull.Value && (Convert.ToBoolean(reader["Export"]) || Convert.ToString(reader["Export"]) == "1" || Convert.ToString(reader["Export"]).ToLower() == "true");
-                                dict["Mail"] = reader["Mail"] != DBNull.Value && (Convert.ToBoolean(reader["Mail"]) || Convert.ToString(reader["Mail"]) == "1" || Convert.ToString(reader["Mail"]).ToLower() == "true");
-                                dict["Print"] = reader["Print"] != DBNull.Value && (Convert.ToBoolean(reader["Print"]) || Convert.ToString(reader["Print"]) == "1" || Convert.ToString(reader["Print"]).ToLower() == "true");
-                                dict["History"] = reader["History"] != DBNull.Value && (Convert.ToBoolean(reader["History"]) || Convert.ToString(reader["History"]) == "1" || Convert.ToString(reader["History"]).ToLower() == "true");
-                                list.Add(dict);
-                            }
-                        }
-                    }
+                foreach (var row in rows)
+                {
+                    var dict = new Dictionary<string, object>();
+                    dict["GroupName"] = row["GroupName"] != null ? row["GroupName"].ToString() : "General";
+                    dict["ModuleID"] = row["ModuleID"] != null ? Convert.ToInt32(row["ModuleID"]) : 0;
+                    dict["ModuleName"] = row["ModuleName"] != null ? row["ModuleName"].ToString() : "";
+                    dict["SelectAll"] = row["SelectAll"] != null && (Convert.ToBoolean(row["SelectAll"]) || Convert.ToString(row["SelectAll"]) == "1" || Convert.ToString(row["SelectAll"]).ToLower() == "true");
+                    dict["View"] = row["View"] != null && (Convert.ToBoolean(row["View"]) || Convert.ToString(row["View"]) == "1" || Convert.ToString(row["View"]).ToLower() == "true");
+                    dict["Add"] = row["Add"] != null && (Convert.ToBoolean(row["Add"]) || Convert.ToString(row["Add"]) == "1" || Convert.ToString(row["Add"]).ToLower() == "true");
+                    dict["Edit"] = row["Edit"] != null && (Convert.ToBoolean(row["Edit"]) || Convert.ToString(row["Edit"]) == "1" || Convert.ToString(row["Edit"]).ToLower() == "true");
+                    dict["Delete"] = row["Delete"] != null && (Convert.ToBoolean(row["Delete"]) || Convert.ToString(row["Delete"]) == "1" || Convert.ToString(row["Delete"]).ToLower() == "true");
+                    dict["Export"] = row["Export"] != null && (Convert.ToBoolean(row["Export"]) || Convert.ToString(row["Export"]) == "1" || Convert.ToString(row["Export"]).ToLower() == "true");
+                    dict["Mail"] = row["Mail"] != null && (Convert.ToBoolean(row["Mail"]) || Convert.ToString(row["Mail"]) == "1" || Convert.ToString(row["Mail"]).ToLower() == "true");
+                    dict["Print"] = row["Print"] != null && (Convert.ToBoolean(row["Print"]) || Convert.ToString(row["Print"]) == "1" || Convert.ToString(row["Print"]).ToLower() == "true");
+                    dict["History"] = row["History"] != null && (Convert.ToBoolean(row["History"]) || Convert.ToString(row["History"]) == "1" || Convert.ToString(row["History"]).ToLower() == "true");
+                    list.Add(dict);
                 }
 
                 var jsonResult = Json(new { success = true, data = list }, JsonRequestBehavior.AllowGet);
@@ -494,26 +397,16 @@ namespace Slip.Controllers
             try
             {
                 List<Dictionary<string, object>> list = new List<Dictionary<string, object>>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("SEC_UserPermission_Manage", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@Action", SqlDbType.VarChar, 50).Value = "GET_USERS";
-                        cmd.Parameters.Add("@TargetUserID", SqlDbType.Int).Value = UserID;
+                var rows = DbHelper.ExecuteReaderAsList("SEC_UserPermission_Manage",
+                    new SqlParameter("@Action", SqlDbType.VarChar, 50) { Value = "GET_USERS" },
+                    new SqlParameter("@TargetUserID", SqlDbType.Int) { Value = UserID });
 
-                        con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                var dict = new Dictionary<string, object>();
-                                dict["ID"] = reader["ID"] != DBNull.Value ? Convert.ToInt32(reader["ID"]) : 0;
-                                dict["UserName"] = reader["UserName"] != DBNull.Value ? reader["UserName"].ToString() : "";
-                                list.Add(dict);
-                            }
-                        }
-                    }
+                foreach (var row in rows)
+                {
+                    var dict = new Dictionary<string, object>();
+                    dict["ID"] = row["ID"] != null ? Convert.ToInt32(row["ID"]) : 0;
+                    dict["UserName"] = row["UserName"] != null ? row["UserName"].ToString() : "";
+                    list.Add(dict);
                 }
 
                 var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -534,31 +427,13 @@ namespace Slip.Controllers
         {
             try
             {
-                string message = "";
                 int createdBy = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("SEC_UserPermission_Manage", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@Action", SqlDbType.VarChar, 50).Value = "COPY_PERMISSIONS";
-                        cmd.Parameters.Add("@SourceUserID", SqlDbType.Int).Value = SourceUserID;
-                        cmd.Parameters.Add("@TargetUserID", SqlDbType.Int).Value = TargetUserID;
-                        cmd.Parameters.Add("@CreatedBy", SqlDbType.Int).Value = createdBy;
-
-                        SqlParameter outParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 1000)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(outParam);
-
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-
-                        message = outParam.Value != DBNull.Value ? outParam.Value.ToString() : "";
-                    }
-                }
+                string message = DbHelper.ExecuteNonQueryWithMessage("SEC_UserPermission_Manage",
+                    new SqlParameter("@Action", SqlDbType.VarChar, 50) { Value = "COPY_PERMISSIONS" },
+                    new SqlParameter("@SourceUserID", SqlDbType.Int) { Value = SourceUserID },
+                    new SqlParameter("@TargetUserID", SqlDbType.Int) { Value = TargetUserID },
+                    new SqlParameter("@CreatedBy", SqlDbType.Int) { Value = createdBy });
 
                 bool isSuccess = !string.IsNullOrEmpty(message) && !message.StartsWith("ERROR", StringComparison.OrdinalIgnoreCase);
                 return Json(new { success = isSuccess, message = message }, JsonRequestBehavior.AllowGet);
@@ -601,26 +476,10 @@ namespace Slip.Controllers
                     xmlDetail = "<DocumentElement>" + xmlDataDetails.DocumentElement.InnerXml + "</DocumentElement>";
                 }
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("SEC_UserPrivileges_Insert_Update_Delete", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@XML", "<DocumentElement></DocumentElement>");
-                        cmd.Parameters.AddWithValue("@XML_Detail", xmlDetail);
-                        cmd.Parameters.AddWithValue("@ACTION", "UPDATE");
-
-                        SqlParameter outParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 1000)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(outParam);
-
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        message = outParam.Value != DBNull.Value ? outParam.Value.ToString() : "";
-                    }
-                }
+                message = DbHelper.ExecuteNonQueryWithMessage("SEC_UserPrivileges_Insert_Update_Delete",
+                    new SqlParameter("@XML", "<DocumentElement></DocumentElement>"),
+                    new SqlParameter("@XML_Detail", xmlDetail),
+                    new SqlParameter("@ACTION", "UPDATE"));
 
                 bool isSuccess = !string.IsNullOrEmpty(message) && !message.StartsWith("ERROR", StringComparison.OrdinalIgnoreCase);
                 return Json(new { success = isSuccess, message = message });
@@ -709,23 +568,10 @@ namespace Slip.Controllers
             List<object> _SEC_User_List = new List<object>();
             List<object> _SEC_UserPrivileges_List = new List<object>(); try
             {
-                DataSet _PartyEditData = new DataSet();
-
                 List<object> _list_SYS_Module = new List<object>();
                 List<object> SYSModuleList = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_SEC_UserPermission_Edit", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@UserID", SqlDbType.Int).Value = UserID;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_PartyEditData);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _PartyEditData = DbHelper.ExecuteDataSet("Get_SEC_UserPermission_Edit",
+                    new SqlParameter("@UserID", SqlDbType.Int) { Value = UserID });
 
                 for (int i = 0; i < _PartyEditData.Tables[0].Rows.Count; i++)
                 {
@@ -799,27 +645,10 @@ namespace Slip.Controllers
                 #endregion
                 //  ErrorLogger.ErrorLogStr("XML Create" + xml);
                 //   ErrorLogger.ErrorLogStr("XML_Detail Create" + XML_Detail);
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("SEC_UserPermission_Insert_Update_Delete", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xml);
-                cmd.Parameters.AddWithValue("@XML_Detail", XML_Detail);
-                cmd.Parameters.AddWithValue("@ACTION", Action);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-
-
-                con.Open();
-                // ErrorLogger.ErrorLogStr("Connection Open");
-                int i = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                //    ErrorLogger.ErrorLogStr("ExecuteNonQuery complete");
-                con.Close();
-                //  ErrorLogger.ErrorLogStr("Connection Close");
-                //if (i != 0)
-                //{
-                //    Message = "Record Is Inserted";
-                //}
+                Message = DbHelper.ExecuteNonQueryWithMessage("SEC_UserPermission_Insert_Update_Delete",
+                    new SqlParameter("@XML", xml),
+                    new SqlParameter("@XML_Detail", XML_Detail),
+                    new SqlParameter("@ACTION", Action));
                 //  ErrorLogger.ErrorLogStr("Last" + Message);
             }
             catch (Exception ex)
@@ -840,21 +669,8 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_User_Permission", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_User_Permission");
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -912,21 +728,8 @@ namespace Slip.Controllers
             try
             {
                 List<Dictionary<string, object>> _list = new List<Dictionary<string, object>>();
-                DataSet ds = new DataSet();
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_Role", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        //cmd.Parameters.AddWithValue("@ShapeID", ShapeID);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                //cmd.Parameters.AddWithValue("@ShapeID", ShapeID);
+                DataSet ds = DbHelper.ExecuteDataSet("Getdata_Role");
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
                     foreach (DataRow row in ds.Tables[0].Rows)
@@ -962,23 +765,11 @@ namespace Slip.Controllers
             List<object> _SEC_RolePrivileges_List = new List<object>();
             try
             {
-                DataSet _RoleEditData = new DataSet();
                 List<object> _list_SYS_Module = new List<object>();
                 List<object> SYSModuleList = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_SEC_RolePrivileges_Edit", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@RoleID", SqlDbType.Int).Value = RoleID;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_RoleEditData);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _RoleEditData = DbHelper.ExecuteDataSet("Get_SEC_RolePrivileges_Edit",
+                    new SqlParameter("@RoleID", SqlDbType.Int) { Value = RoleID });
 
                 for (int i = 0; i < _RoleEditData.Tables[0].Rows.Count; i++)
                 {
@@ -1051,22 +842,11 @@ namespace Slip.Controllers
                 #endregion
                 //  ErrorLogger.ErrorLogStr("XML Create" + xml);
                 //   ErrorLogger.ErrorLogStr("XML_Detail Create" + XML_Detail);
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("MST_Role_Insert_Update_Delete", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xml);
-                cmd.Parameters.AddWithValue("@XML_Detail", XML_Detail);
-                cmd.Parameters.AddWithValue("@ACTION", Action);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-
-
-                con.Open();
-                int i = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
+                Message = DbHelper.ExecuteNonQueryWithMessage("MST_Role_Insert_Update_Delete",
+                    new SqlParameter("@XML", xml),
+                    new SqlParameter("@XML_Detail", XML_Detail),
+                    new SqlParameter("@ACTION", Action));
                 ErrorLogger.ErrorLogStr("SQL Message: " + Message); // Optional
-
-                con.Close();
 
             }
             catch (Exception ex)

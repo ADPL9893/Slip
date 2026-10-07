@@ -33,23 +33,9 @@ namespace Slip.Controllers
 
                 if (SessionFacade.UserSession == null)
                 {
-                    DataSet dataset = new DataSet();
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Check_Login", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.Add("@username", SqlDbType.VarChar).Value = username;
-                            cmd.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
-                            //   ErrorLogger.ErrorLogStr("1_Connection_On_Before_con_ " + con);
-                            con.Open();
-                            //  ErrorLogger.ErrorLogStr("2_Connection_On_ " + conn);
-                            SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                            adapter.Fill(dataset);
-                            cmd.Dispose();
-                        }
-                        con.Close();
-                    }
+                    DataSet dataset = DbHelper.ExecuteDataSet("Check_Login",
+                        new SqlParameter("@username", SqlDbType.VarChar) { Value = username },
+                        new SqlParameter("@password", SqlDbType.VarChar) { Value = password });
                     //  ErrorLogger.ErrorLogStr("3" + dataset.Tables[0].Rows.Count);
                     if (dataset.Tables[0].Rows.Count > 0)
                     {
@@ -75,16 +61,9 @@ namespace Slip.Controllers
                         XmlDocument Xmldata = CommonMethods.ConvertToXml(_TermsNew);
                         string xmlStr = "<DocumentElement><SEC_LoginHistory>" + Xmldata.DocumentElement.InnerXml + "</SEC_LoginHistory></DocumentElement>";
 
-                        SqlConnection con = new SqlConnection(conn);
-                        SqlCommand cmd = new SqlCommand("SEC_LoginHistory_Insert_Update_Delete", con);
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@XML", xmlStr);
-                        cmd.Parameters.AddWithValue("@ACTION", "INSERT");
-                        con.Open();
-
-                        int i = cmd.ExecuteNonQuery();
-
-                        con.Close();
+                        int i = DbHelper.ExecuteNonQuery("SEC_LoginHistory_Insert_Update_Delete",
+                            new SqlParameter("@XML", xmlStr),
+                            new SqlParameter("@ACTION", "INSERT"));
                         //  ErrorLogger.ErrorLogStr("4" + SessionFacade.UserSession.UserID);
                         #endregion
                         if (SessionFacade.UserSession.UserID == 0)
@@ -93,22 +72,10 @@ namespace Slip.Controllers
                             SessionFacade.UserSession.IsAdmin = false;
                         }
 
-                        DataSet datasetpermissions = new DataSet();
-                        using (SqlConnection conpermissions = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmdpermissions = new SqlCommand("Get_CheckPermission_User", con))
-                            {
-                                cmdpermissions.CommandType = CommandType.StoredProcedure;
-                                cmdpermissions.Parameters.Add("@UserID", SqlDbType.Int).Value = SessionFacade.UserSession.UserID;
-                                cmdpermissions.Parameters.Add("@RoleID", SqlDbType.Int).Value = SessionFacade.UserSession.RoleID;
-                                cmdpermissions.Parameters.Add("@IsAdmin", SqlDbType.Float).Value = SessionFacade.UserSession.IsAdmin;
-                                conpermissions.Open();
-                                SqlDataAdapter adapter = new SqlDataAdapter(cmdpermissions);
-                                adapter.Fill(datasetpermissions);
-                                cmdpermissions.Dispose();
-                            }
-                            conpermissions.Close();
-                        }
+                        DataSet datasetpermissions = DbHelper.ExecuteDataSet("Get_CheckPermission_User",
+                            new SqlParameter("@UserID", SqlDbType.Int) { Value = SessionFacade.UserSession.UserID },
+                            new SqlParameter("@RoleID", SqlDbType.Int) { Value = SessionFacade.UserSession.RoleID },
+                            new SqlParameter("@IsAdmin", SqlDbType.Float) { Value = SessionFacade.UserSession.IsAdmin });
 
                         List<CheckPermission_User> _CheckPermission_UserList = new List<CheckPermission_User>();
 
@@ -192,21 +159,9 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null)
                 {
-                    DataSet dataset = new DataSet();
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Check_Login", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.Add("@username", SqlDbType.VarChar).Value = username;
-                            cmd.Parameters.Add("@password", SqlDbType.VarChar).Value = password;
-                            con.Open();
-                            SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                            adapter.Fill(dataset);
-                            cmd.Dispose();
-                        }
-                        con.Close();
-                    }
+                    DataSet dataset = DbHelper.ExecuteDataSet("Check_Login",
+                        new SqlParameter("@username", SqlDbType.VarChar) { Value = username },
+                        new SqlParameter("@password", SqlDbType.VarChar) { Value = password });
 
                     if (dataset.Tables[0].Rows.Count > 0)
                     {
@@ -230,16 +185,9 @@ namespace Slip.Controllers
                         XmlDocument Xmldata = CommonMethods.ConvertToXml(_TermsNew);
                         string xmlStr = "<DocumentElement><SEC_LoginHistory>" + Xmldata.DocumentElement.InnerXml + "</SEC_LoginHistory></DocumentElement>";
 
-                        SqlConnection con = new SqlConnection(conn);
-                        SqlCommand cmd = new SqlCommand("SEC_LoginHistory_Insert_Update_Delete", con);
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@XML", xmlStr);
-                        cmd.Parameters.AddWithValue("@ACTION", "INSERT");
-                        con.Open();
-
-                        int i = cmd.ExecuteNonQuery();
-
-                        con.Close();
+                        int i = DbHelper.ExecuteNonQuery("SEC_LoginHistory_Insert_Update_Delete",
+                            new SqlParameter("@XML", xmlStr),
+                            new SqlParameter("@ACTION", "INSERT"));
 
                         #endregion
                         if (SessionFacade.UserSession.UserID == 0)
@@ -248,21 +196,9 @@ namespace Slip.Controllers
                             SessionFacade.UserSession.IsAdmin = false;
                         }
 
-                        DataSet datasetpermissions = new DataSet();
-                        using (SqlConnection conpermissions = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmdpermissions = new SqlCommand("Get_CheckPermission_User", con))
-                            {
-                                cmdpermissions.CommandType = CommandType.StoredProcedure;
-                                cmdpermissions.Parameters.Add("@UserID", SqlDbType.Int).Value = SessionFacade.UserSession.UserID;
-                                cmdpermissions.Parameters.Add("@IsAdmin", SqlDbType.Float).Value = SessionFacade.UserSession.IsAdmin;
-                                conpermissions.Open();
-                                SqlDataAdapter adapter = new SqlDataAdapter(cmdpermissions);
-                                adapter.Fill(datasetpermissions);
-                                cmdpermissions.Dispose();
-                            }
-                            conpermissions.Close();
-                        }
+                        DataSet datasetpermissions = DbHelper.ExecuteDataSet("Get_CheckPermission_User",
+                            new SqlParameter("@UserID", SqlDbType.Int) { Value = SessionFacade.UserSession.UserID },
+                            new SqlParameter("@IsAdmin", SqlDbType.Float) { Value = SessionFacade.UserSession.IsAdmin });
 
                         List<CheckPermission_User> _CheckPermission_UserList = new List<CheckPermission_User>();
 

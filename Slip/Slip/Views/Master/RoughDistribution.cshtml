@@ -42,26 +42,38 @@
             <div class="row">
                 <!-- Primary Jangad Dropdown (Clean Jangad No only & Clean Disabled Styling) -->
                 <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="SelectedPreRoughID">
+                    <label class="rd-label" for="SelectedJangadNo">
                         Select Jangad No <span class="req">*</span>
                     </label>
-                    <select id="SelectedPreRoughID" 
-                            chosen="PreRoughDropdownList" 
-                            ng-model="SelectedPreRoughID" 
-                            ng-change="OnJangadChange()" 
-                            ng-disabled="DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0" 
+                    <select id="SelectedJangadNo"
+                            chosen="JangadDropdownList"
+                            ng-model="SelectedJangadNo"
+                            ng-change="OnJangadNoChange()"
+                            ng-disabled="DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
                             class="form-control rd-input">
                         <option value="">-- Choose Jangad No --</option>
-                        <option ng-repeat="item in PreRoughDropdownList" value="{{item.PreRoughID}}">
+                        <option ng-repeat="item in JangadDropdownList" value="{{item.JangadNo}}">
                             {{item.JangadNo}}
                         </option>
                     </select>
                 </div>
 
-                <!-- Readonly / Auto-fetched fields with Dark, Bold styling -->
+                <!-- Lot No Dropdown (populated from the selected Jangad's lots) -->
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label">R. Name</label>
-                    <input type="text" ng-model="Master.RName" class="rd-input rd-master-input" readonly placeholder="R. Name" />
+                    <label class="rd-label" for="SelectedLotNo">
+                        Select Lot No <span class="req">*</span>
+                    </label>
+                    <select id="SelectedLotNo"
+                            chosen="LotDropdownList"
+                            ng-model="SelectedPreRoughID"
+                            ng-change="OnLotNoChange()"
+                            ng-disabled="!SelectedJangadNo || DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
+                            class="form-control rd-input">
+                        <option value="">-- Choose Lot No --</option>
+                        <option ng-repeat="item in LotDropdownList" value="{{item.PreRoughID}}">
+                            {{item.RName}}
+                        </option>
+                    </select>
                 </div>
                 <div class="clearfix visible-xs"></div>
 
@@ -451,7 +463,6 @@
         $scope.Master = {
             PreRoughID: 0,
             JangadNo: '',
-            RName: '',
             RoughPcs: 0,
             RoughWeight: 0,
             Rate: 0,
@@ -468,7 +479,10 @@
         $scope.RCodeConfig = null;
 
         // Dropdown Lists
-        $scope.PreRoughDropdownList = [];
+        $scope.PreRoughDropdownList = []; // Full flat list: one entry per lot line (Jangad + Lot combined)
+        $scope.JangadDropdownList = [];   // Distinct Jangad Nos derived from PreRoughDropdownList
+        $scope.LotDropdownList = [];      // Lots belonging to the selected Jangad No
+        $scope.SelectedJangadNo = '';
         $scope.BranchList = [];
         $scope.GradeList = ['A', 'B', 'C', 'D', 'MIX'];
 
@@ -647,7 +661,7 @@
             $scope.IsLoading = true;
 
             // Fetch Pre-Rough Lots for Dropdown
-            var p1 = $http.get('@Url.Action("Getdata_R_Rough_Add", "Master")').then(function (res) {
+            var p1 = $http.get('@Url.Action("GetRoughInwardLotsForDistribution", "Master")').then(function (res) {
                 var list = [];
                 if (res.data && res.data.DIARoughList) {
                     angular.forEach(res.data.DIARoughList, function (item) {
@@ -668,8 +682,21 @@
                     });
                 }
                 $scope.PreRoughDropdownList = list;
+
+                // Build the distinct Jangad No list for the top-level dropdown
+                var seenJangad = {};
+                var jangadArr = [];
+                angular.forEach(list, function (item) {
+                    if (item.JangadNo && !seenJangad[item.JangadNo]) {
+                        seenJangad[item.JangadNo] = true;
+                        jangadArr.push({ JangadNo: item.JangadNo });
+                    }
+                });
+                $scope.JangadDropdownList = jangadArr;
+
                 $timeout(function () {
-                    $('#SelectedPreRoughID').trigger('chosen:updated');
+                    $('#SelectedJangadNo').trigger('chosen:updated');
+                    $('#SelectedLotNo').trigger('chosen:updated');
                 }, 100);
             });
 
@@ -714,10 +741,8 @@
             $q.all([p1, p2]).then(function () {
                 $scope.IsLoading = false;
                 if ($scope.InitPreRoughID > 0) {
-                    $scope.SelectedPreRoughID = $scope.InitPreRoughID.toString();
-                    $timeout(function () {
-                        $('#SelectedPreRoughID').val($scope.SelectedPreRoughID).trigger('chosen:updated');
-                    }, 150);
+                    // LoadPreRoughDetails injects the lot into the dropdown lists if the
+                    // balance-filtered fetch omitted it, then syncs the Jangad/Lot selection itself.
                     $scope.LoadPreRoughDetails($scope.InitPreRoughID);
                 }
             });
@@ -749,14 +774,13 @@
             }
 
             $scope.IsLoading = true;
-            $http.get('@Url.Action("GetPreRoughDetails", "Master")?id=' + preRoughId).then(function (res) {
+            $http.get('@Url.Action("GetRoughInwardLotDetails", "Master")?id=' + preRoughId).then(function (res) {
                 $scope.IsLoading = false;
                 if (res.data && res.data.success) {
                     var m = res.data.MasterDetails || {};
                     $scope.Master = {
                         PreRoughID: parseInt(m.PreRoughID || preRoughId),
                         JangadNo: m.JangadNo || '',
-                        RName: m.RName || '',
                         RoughPcs: parseInt(m.RoughPcs || 0),
                         RoughWeight: parseFloat(m.RoughWeight || 0),
                         Rate: parseFloat(m.Rate || 0),
@@ -767,6 +791,28 @@
 
                     // Check if GradNo is 'MIX' (case-insensitive)
                     $scope.IsMixGrade = ($scope.Master.GradNo || '').trim().toUpperCase() === 'MIX';
+
+                    // The dropdown source only lists lots with remaining balance, so a lot that is
+                    // already fully (or partially) distributed - e.g. opened via the List page's
+                    // View/Edit link - may be missing from it. Inject it so the Jangad/Lot dropdowns
+                    // can still resolve and display the current selection.
+                    var existsInDropdown = $scope.PreRoughDropdownList.some(function (x) { return x.PreRoughID === $scope.Master.PreRoughID; });
+                    if (!existsInDropdown) {
+                        $scope.PreRoughDropdownList.push({
+                            PreRoughID: $scope.Master.PreRoughID,
+                            JangadNo: $scope.Master.JangadNo || ('Lot #' + $scope.Master.PreRoughID),
+                            RName: m.RName || '',
+                            RoughPcs: $scope.Master.RoughPcs,
+                            RoughWeight: $scope.Master.RoughWeight,
+                            GradNo: $scope.Master.GradNo,
+                            Rate: $scope.Master.Rate,
+                            FromHeight: $scope.Master.FromHeight,
+                            ToHeight: $scope.Master.ToHeight
+                        });
+                        if (!$scope.JangadDropdownList.some(function (j) { return j.JangadNo === $scope.Master.JangadNo; })) {
+                            $scope.JangadDropdownList.push({ JangadNo: $scope.Master.JangadNo });
+                        }
+                    }
 
                     // Parse Child List from DB & Resolve Accurate Branch Name, BranchID, and RCode
                     var cList = [];
@@ -810,6 +856,7 @@
                                 Remarks: c.Remarks || '',
                                 Priority: (c.Priority || c.priority || 'REGULAR').toUpperCase(),
                                 IsActive: c.IsActive === true || c.IsActive === 'True' || c.IsActive === '1' || c.IsActive === 1,
+                                IsReceived: c.IsReceived === true || c.IsReceived === 'True' || c.IsReceived === '1' || c.IsReceived === 1,
                                 IsStaged: false,
                                 IsSaved: true
                             });
@@ -828,8 +875,7 @@
 
                     $timeout(function () {
                         if ($scope.Master && $scope.Master.PreRoughID) {
-                            $scope.SelectedPreRoughID = $scope.Master.PreRoughID.toString();
-                            $('#SelectedPreRoughID').val($scope.SelectedPreRoughID).trigger('chosen:updated');
+                            $scope.SyncJangadLotSelection($scope.Master.PreRoughID);
                         }
                         $('#EntryGradNo').trigger('chosen:updated');
                     }, 200);
@@ -842,8 +888,17 @@
             });
         };
 
-        // Jangad selection change handler
-        $scope.OnJangadChange = function () {
+        // Jangad No selection change handler: rebuilds the Lot No dropdown for the chosen Jangad
+        $scope.OnJangadNoChange = function () {
+            $scope.SelectedPreRoughID = '';
+            $scope.LotDropdownList = $scope.SelectedJangadNo
+                ? $scope.PreRoughDropdownList.filter(function (item) { return item.JangadNo === $scope.SelectedJangadNo; })
+                : [];
+            $scope.ResetMaster();
+        };
+
+        // Lot No selection change handler
+        $scope.OnLotNoChange = function () {
             if ($scope.SelectedPreRoughID) {
                 $scope.LoadPreRoughDetails(parseInt($scope.SelectedPreRoughID));
             } else {
@@ -851,12 +906,26 @@
             }
         };
 
+        // Given a PreRoughID (lot line id), select its Jangad No + Lot No in both dropdowns
+        $scope.SyncJangadLotSelection = function (preRoughId) {
+            var match = $scope.PreRoughDropdownList.find(function (x) { return x.PreRoughID === parseInt(preRoughId); });
+            if (!match) return;
+            $scope.SelectedJangadNo = match.JangadNo;
+            $scope.LotDropdownList = $scope.PreRoughDropdownList.filter(function (item) {
+                return item.JangadNo === match.JangadNo;
+            });
+            $scope.SelectedPreRoughID = preRoughId.toString();
+            $timeout(function () {
+                $('#SelectedJangadNo').val($scope.SelectedJangadNo).trigger('chosen:updated');
+                $('#SelectedLotNo').val($scope.SelectedPreRoughID).trigger('chosen:updated');
+            }, 50);
+        };
+
         // Reset Master State
         $scope.ResetMaster = function () {
             $scope.Master = {
                 PreRoughID: 0,
                 JangadNo: '',
-                RName: '',
                 RoughPcs: 0,
                 RoughWeight: 0,
                 Rate: 0,
@@ -878,7 +947,7 @@
             $scope.ResetEntryForm();
             $scope.InitGrid();
             $timeout(function () {
-                $('#SelectedPreRoughID').trigger('chosen:updated');
+                $('#SelectedLotNo').trigger('chosen:updated');
             }, 50);
         };
 
@@ -954,7 +1023,7 @@
             $scope.AdjustWeight = parseFloat((origWt - $scope.TotalDistributedWeight).toFixed(3));
 
             $timeout(function () {
-                $('#SelectedPreRoughID').trigger('chosen:updated');
+                $('#SelectedLotNo').trigger('chosen:updated');
             }, 50);
         };
 
@@ -962,7 +1031,7 @@
         $scope.AddDistributionRow = function () {
             if (!$scope.Master.PreRoughID || $scope.Master.PreRoughID <= 0) {
                 Noty("warning", "Please select a Jangad No first!");
-                $('#SelectedPreRoughID').trigger('chosen:open');
+                $('#SelectedLotNo').trigger('chosen:open');
                 return;
             }
 
@@ -1235,6 +1304,11 @@
         // Prompt Delete Modal with Strict LIFO Sequential Check
         $scope.PromptDelete = function (item) {
             if (!item) return;
+
+            if (item.IsReceived) {
+                Noty("error", "Cannot delete: this distribution has already been received.");
+                return;
+            }
 
             var check = $scope.ValidateSequentialDeletion(item);
             if (!check.isValid) {
@@ -1540,13 +1614,20 @@
                         fixed: true,
                         fixedPosition: 'right',
                         cellTemplate: function (container, options) {
-                            // STRICT CONDITION: Render delete icon ONLY for Staged (unsaved) rows
                             var isStaged = options.data.IsStaged === true || (!options.data.DistributionID && !options.data.IsSaved);
-                            if (isStaged) {
+
+                            if (options.data.IsReceived) {
+                                // Already received - locked from deletion (editing happens via delete + re-add)
+                                $("<span>")
+                                    .css({ "color": "#94a3b8", "font-size": "14px" })
+                                    .attr("title", "Received - locked from deletion")
+                                    .html('<i class="fa fa-lock"></i>')
+                                    .appendTo(container);
+                            } else if (isStaged || $scope.CanDelete) {
                                 $("<button>")
                                     .addClass("grid-action-btn-del")
                                     .attr("type", "button")
-                                    .attr("title", "Remove Staged Row")
+                                    .attr("title", isStaged ? "Remove Staged Row" : "Delete Saved Row")
                                     .html('<i class="fa fa-trash-o"></i>')
                                     .on("click", function (e) {
                                         e.stopPropagation();
@@ -1556,7 +1637,6 @@
                                     })
                                     .appendTo(container);
                             }
-                            // Saved records remain completely clean with no delete button
                         }
                     }
                 ],

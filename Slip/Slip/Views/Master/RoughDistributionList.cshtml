@@ -503,6 +503,9 @@ else
                     var act = row.IsActive;
                     row.IsActive = (act === true || act === 'True' || act === 'true' || act === 1 || act === '1');
 
+                    var rcv = row.IsReceived;
+                    row.IsReceived = (rcv === true || rcv === 'True' || rcv === 'true' || rcv === 1 || rcv === '1');
+
                     // Pre-calculate HeightRange for seamless filtering & searching
                     if (row.FromHeight || row.ToHeight) {
                         row.HeightRange = (row.FromHeight || 0) + ' - ' + (row.ToHeight || 0);
@@ -804,6 +807,22 @@ else
                         }
                     },
                     {
+                        caption: 'Received',
+                        dataField: 'IsReceived',
+                        dataType: 'boolean',
+                        trueText: 'Received',
+                        falseText: 'Pending',
+                        minWidth: 105,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsReceived) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").html('<i class="fa fa-lock"></i> Received').appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-warning").text("Pending").appendTo(container);
+                            }
+                        }
+                    },
+                    {
                         caption: 'Created Date',
                         dataField: 'CreatedDate',
                         dataType: 'date',
@@ -834,7 +853,9 @@ else
                                 })
                                 .appendTo(group);
 
-                            // Edit / Open button (Rendered ONLY IF user has Edit permission)
+                            // Edit / Open button (Rendered ONLY IF user has Edit permission) - always
+                            // available, even when received, since the entry page itself already
+                            // locks add/delete per-row for received distributions.
                             if ($scope.CanEdit) {
                                 $("<button>")
                                     .addClass("grid-action-btn-edit")
@@ -848,8 +869,15 @@ else
                                     .appendTo(group);
                             }
 
-                            // Delete button (Rendered ONLY IF user has Delete permission)
-                            if ($scope.CanDelete) {
+                            if (options.data.IsReceived) {
+                                // Already received - delete is locked
+                                $("<span>")
+                                    .css({ "color": "#94a3b8", "font-size": "14px", "padding": "0 4px" })
+                                    .attr("title", "Received - locked from deletion")
+                                    .html('<i class="fa fa-lock"></i>')
+                                    .appendTo(group);
+                            } else if ($scope.CanDelete) {
+                                // Delete button (Rendered ONLY IF user has Delete permission)
                                 $("<button>")
                                     .addClass("grid-action-btn-del")
                                     .attr("title", "Delete Record")
