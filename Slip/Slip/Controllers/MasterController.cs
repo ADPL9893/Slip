@@ -34,22 +34,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_Slip = new List<object>();
 
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("GetData_For_MST_Lot", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("GetData_For_MST_Lot");
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -150,19 +137,9 @@ namespace Slip.Controllers
                             xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
                         }
 
-                        SqlConnection consW = new SqlConnection(conn);
-                        SqlCommand cmdsW = new SqlCommand("LotCode_Insert_Using_Excel", consW);
-                        cmdsW.CommandType = CommandType.StoredProcedure;
-                        cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                        cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        consW.Open();
-
-                        int k = cmdsW.ExecuteNonQuery();
-                        Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                        consW.Close();
+                        Message = DbHelper.ExecuteNonQueryWithMessage("LotCode_Insert_Using_Excel",
+                            new SqlParameter("@XML", xmlStr),
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                     }
                 }
             }
@@ -177,7 +154,6 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_Process = new List<object>();
                 List<object> _list_Receipe = new List<object>();
                 List<object> _list_RCode = new List<object>();
@@ -185,19 +161,7 @@ namespace Slip.Controllers
                 List<object> _list_User = new List<object>();
                 List<object> _list_Branch = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_For_DropDown", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_For_DropDown");
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -303,20 +267,8 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list__DIA_Rough = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Z_Getdata_R_Rough_Add", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Z_Getdata_R_Rough_Add");
 
                 HashSet<string> uploadedJangads = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 HashSet<int> uploadedPreRoughIds = new HashSet<int>();
@@ -453,19 +405,9 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(model);
                 string xmlStr = "<DocumentElement><R_Rough_Add>" + Xmldata.DocumentElement.InnerXml + "</R_Rough_Add></DocumentElement>";
 
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("Z_R_Rough_Add_Insert_Update_Delete", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xmlStr);
-                cmd.Parameters.AddWithValue("@ACTION", Action);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                con.Open();
-
-                int j = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-
-                con.Close();
+                Message = DbHelper.ExecuteNonQueryWithMessage("Z_R_Rough_Add_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ACTION", Action));
             }
             catch (Exception ex)
             {
@@ -530,29 +472,13 @@ namespace Slip.Controllers
                         string webRelativePath = relativeDirectory + fileName;
                         savedPaths.Add(webRelativePath);
 
-                        using (SqlConnection con = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Jangad_Images_Insert", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@PreRoughID", (object)PreRoughID ?? DBNull.Value);
-                                cmd.Parameters.AddWithValue("@DistributionID", (object)DistributionID ?? DBNull.Value);
-                                cmd.Parameters.AddWithValue("@JangadNo", safeJangadNo);
-                                cmd.Parameters.AddWithValue("@ImagePath", webRelativePath);
-                                cmd.Parameters.AddWithValue("@UploadBy", uploadBy);
-                                cmd.Parameters.AddWithValue("@Status", normalizedStatus);
-
-                                SqlParameter outMsg = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 500)
-                                {
-                                    Direction = ParameterDirection.Output
-                                };
-                                cmd.Parameters.Add(outMsg);
-
-                                con.Open();
-                                cmd.ExecuteNonQuery();
-                                con.Close();
-                            }
-                        }
+                        DbHelper.ExecuteNonQueryWithMessage("Jangad_Images_Insert",
+                            new SqlParameter("@PreRoughID", (object)PreRoughID ?? DBNull.Value),
+                            new SqlParameter("@DistributionID", (object)DistributionID ?? DBNull.Value),
+                            new SqlParameter("@JangadNo", safeJangadNo),
+                            new SqlParameter("@ImagePath", webRelativePath),
+                            new SqlParameter("@UploadBy", uploadBy),
+                            new SqlParameter("@Status", normalizedStatus));
                         successCount++;
                     }
                 }
@@ -582,43 +508,32 @@ namespace Slip.Controllers
 
                 List<object> imageList = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                List<Dictionary<string, object>> imageRows = DbHelper.ExecuteReaderAsList("Get_Jangad_Images",
+                    new SqlParameter("@JangadNo", string.IsNullOrEmpty(JangadNo) ? (object)DBNull.Value : JangadNo),
+                    new SqlParameter("@PreRoughID", (object)PreRoughID ?? DBNull.Value),
+                    new SqlParameter("@DistributionID", (object)DistributionID ?? DBNull.Value),
+                    new SqlParameter("@Status", (object)normalizedStatus ?? DBNull.Value));
+
+                foreach (var row in imageRows)
                 {
-                    using (SqlCommand cmd = new SqlCommand("Get_Jangad_Images", con))
+                    string rawPath = row["ImagePath"] != null ? row["ImagePath"].ToString() : "";
+                    string resolvedUrl = rawPath;
+                    if (!string.IsNullOrEmpty(rawPath) && !rawPath.StartsWith("http") && !rawPath.StartsWith("/"))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@JangadNo", string.IsNullOrEmpty(JangadNo) ? (object)DBNull.Value : JangadNo);
-                        cmd.Parameters.AddWithValue("@PreRoughID", (object)PreRoughID ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@DistributionID", (object)DistributionID ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Status", (object)normalizedStatus ?? DBNull.Value);
-
-                        con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                string rawPath = reader["ImagePath"] != DBNull.Value ? reader["ImagePath"].ToString() : "";
-                                string resolvedUrl = rawPath;
-                                if (!string.IsNullOrEmpty(rawPath) && !rawPath.StartsWith("http") && !rawPath.StartsWith("/"))
-                                {
-                                    resolvedUrl = "/" + rawPath;
-                                }
-
-                                imageList.Add(new
-                                {
-                                    ID = reader["ID"] != DBNull.Value ? Convert.ToInt32(reader["ID"]) : 0,
-                                    PreRoughID = reader["PreRoughID"] != DBNull.Value ? (int?)Convert.ToInt32(reader["PreRoughID"]) : null,
-                                    DistributionID = reader["DistributionID"] != DBNull.Value ? (int?)Convert.ToInt32(reader["DistributionID"]) : null,
-                                    JangadNo = reader["JangadNo"] != DBNull.Value ? reader["JangadNo"].ToString() : "",
-                                    ImagePath = resolvedUrl,
-                                    Created = reader["Created"] != DBNull.Value ? Convert.ToDateTime(reader["Created"]).ToString("dd-MMM-yyyy HH:mm") : "",
-                                    UploadBy = reader["UploadBy"] != DBNull.Value ? Convert.ToInt32(reader["UploadBy"]) : 0,
-                                    Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : ""
-                                });
-                            }
-                        }
-                        con.Close();
+                        resolvedUrl = "/" + rawPath;
                     }
+
+                    imageList.Add(new
+                    {
+                        ID = row["ID"] != null ? Convert.ToInt32(row["ID"]) : 0,
+                        PreRoughID = row["PreRoughID"] != null ? (int?)Convert.ToInt32(row["PreRoughID"]) : null,
+                        DistributionID = row["DistributionID"] != null ? (int?)Convert.ToInt32(row["DistributionID"]) : null,
+                        JangadNo = row["JangadNo"] != null ? row["JangadNo"].ToString() : "",
+                        ImagePath = resolvedUrl,
+                        Created = row["Created"] != null ? Convert.ToDateTime(row["Created"]).ToString("dd-MMM-yyyy HH:mm") : "",
+                        UploadBy = row["UploadBy"] != null ? Convert.ToInt32(row["UploadBy"]) : 0,
+                        Status = row["Status"] != null ? row["Status"].ToString() : ""
+                    });
                 }
 
                 var jsonResult = Json(new
@@ -650,27 +565,10 @@ namespace Slip.Controllers
                 bool isAdmin = SessionFacade.UserSession != null && SessionFacade.UserSession.IsAdmin;
                 int userId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
 
-                string message = "";
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Jangad_Images_Insert", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@ImageID", imageId);
-                        cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@UploadBy", userId);
-                        SqlParameter outMsg = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 500)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(outMsg);
-
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                string message = DbHelper.ExecuteNonQueryWithMessage("Jangad_Images_Insert",
+                    new SqlParameter("@ImageID", imageId),
+                    new SqlParameter("@Action", "DELETE"),
+                    new SqlParameter("@UploadBy", userId));
 
                 bool isSuccess = !string.IsNullOrEmpty(message) && message.ToLower().Contains("success");
                 return Json(new { success = isSuccess, message = message });
@@ -704,52 +602,43 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "TRNLabour", "TRN Labour", "Labour" };
-                    
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                    foreach (string actName in possibleActions)
+                    {
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
+
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm) break;
-                                    }
+                                    if (Convert.ToBoolean(kvp.Value)) { canView = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canExport = true; foundPerm = true; }
                                 }
                             }
+                            if (foundPerm) break;
                         }
                     }
                 }
@@ -777,22 +666,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list__DIA_Rough = new List<object>();
                 List<object> DIARoughList = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_TRN_Labour", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_TRN_Labour");
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -854,51 +730,42 @@ namespace Slip.Controllers
                 {
                     string[] possibleActions = new string[] { "UserFileSizeMaster", "User File Size Master", "UserFileSize", "User File Size" };
 
-                    using (SqlConnection con = new SqlConnection(conn))
+                    foreach (string actName in possibleActions)
                     {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm) break;
-                                    }
+                                    if (Convert.ToBoolean(kvp.Value)) { canView = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canExport = true; foundPerm = true; }
                                 }
                             }
+                            if (foundPerm) break;
                         }
                     }
                 }
@@ -928,21 +795,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("MST_UserFileSize_Get", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("MST_UserFileSize_Get");
 
                 if (_DropDownList.Tables.Count > 0 && _DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -982,27 +837,13 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(model);
                 string xmlStr = "<DocumentElement><UserFileSizeModel>" + Xmldata.DocumentElement.InnerXml + "</UserFileSizeModel></DocumentElement>";
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("MST_UserFileSize_Insert_Update_Delete", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@XML", xmlStr);
-                        cmd.Parameters.AddWithValue("@ACTION", Action);
-                        cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        con.Open();
+                Message = DbHelper.ExecuteNonQueryWithMessage("MST_UserFileSize_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ACTION", Action));
 
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        
-                        if (Message.ToLower().Contains("successfully"))
-                        {
-                            isSuccess = true;
-                        }
-                        
-                        con.Close();
-                    }
+                if (Message.ToLower().Contains("successfully"))
+                {
+                    isSuccess = true;
                 }
             }
             catch (Exception ex)
@@ -1031,59 +872,50 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "RoughDistributionList", "RoughDistribution", "Rough Distribution List", "Rough Distribution" };
-                    
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                    foreach (string actName in possibleActions)
+                    {
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
+
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm)
-                                        {
-                                            break;
-                                        }
-                                    }
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canView = true; foundPerm = true; }
                                 }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canExport = true; foundPerm = true; }
+                                }
+                            }
+                            if (foundPerm)
+                            {
+                                break;
                             }
                         }
                     }
@@ -1114,21 +946,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
                 List<object> list = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_MST_RoughDistributionList", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Get_MST_RoughDistributionList");
 
                 HashSet<int> uploadedDistIds = new HashSet<int>();
                 HashSet<string> uploadedDistJangadsWithoutDistId = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1225,27 +1045,44 @@ namespace Slip.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetPreRoughDetails(int id = 0)
+        public JsonResult GetRoughInwardLotsForDistribution()
         {
             try
             {
-                DataSet ds = new DataSet();
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_TRN_RoughInward_GetLotsForDistribution");
+
+                var jsonResult = Json(new
+                {
+                    success = true,
+                    DIARoughList = list
+                }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                var jsonResult = Json(new
+                {
+                    success = false,
+                    message = ex.Message,
+                    DIARoughList = new List<object>()
+                }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetRoughInwardLotDetails(int id = 0)
+        {
+            try
+            {
                 Dictionary<string, object> masterDetails = new Dictionary<string, object>();
                 List<Dictionary<string, object>> childList = new List<Dictionary<string, object>>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_PreRoughDetails_For_Distribution", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@ID", id);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("USP_TRN_RoughInward_GetLotDetailForDistribution",
+                    new SqlParameter("@InwardDetailID", id));
 
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
@@ -1350,8 +1187,9 @@ namespace Slip.Controllers
                                 int branchId = 0;
                                 int preRoughId = 0;
                                 string rCode = "";
+                                bool isReceived = false;
 
-                                using (SqlCommand getCmd = new SqlCommand("SELECT BranchID, PreRoughID, RCode FROM MST_RoughDistribution WITH(NOLOCK) WHERE DistributionID = @DistributionID", con))
+                                using (SqlCommand getCmd = new SqlCommand("SELECT BranchID, PreRoughID, RCode, IsReceived FROM MST_RoughDistribution WITH(NOLOCK) WHERE DistributionID = @DistributionID", con))
                                 {
                                     getCmd.Parameters.AddWithValue("@DistributionID", delId);
                                     using (SqlDataReader rdr = getCmd.ExecuteReader())
@@ -1361,8 +1199,19 @@ namespace Slip.Controllers
                                             branchId = Convert.ToInt32(rdr["BranchID"] != DBNull.Value ? rdr["BranchID"] : 0);
                                             preRoughId = Convert.ToInt32(rdr["PreRoughID"] != DBNull.Value ? rdr["PreRoughID"] : 0);
                                             rCode = Convert.ToString(rdr["RCode"] != DBNull.Value ? rdr["RCode"] : "");
+                                            isReceived = rdr["IsReceived"] != DBNull.Value && Convert.ToBoolean(rdr["IsReceived"]);
                                         }
                                     }
+                                }
+
+                                if (isReceived)
+                                {
+                                    con.Close();
+                                    return Json(new
+                                    {
+                                        success = false,
+                                        message = "Cannot delete: this distribution (R.Code '" + rCode + "') has already been received."
+                                    });
                                 }
 
                                 if (!string.IsNullOrEmpty(rCode) && TryParseRCodeSequence(rCode, out string prefix, out int currentSeq))
@@ -1432,22 +1281,9 @@ namespace Slip.Controllers
                             delXmlBuilder.Append("</MST_RoughDistribution>");
                             delXmlBuilder.Append("</DocumentElement>");
 
-                            using (SqlConnection con = new SqlConnection(conn))
-                            {
-                                using (SqlCommand cmd = new SqlCommand("RoughDistribution_Insert_Update_Delete", con))
-                                {
-                                    cmd.CommandType = CommandType.StoredProcedure;
-                                    cmd.Parameters.AddWithValue("@XML", delXmlBuilder.ToString());
-                                    cmd.Parameters.AddWithValue("@ACTION", "DELETE");
-                                    cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 100);
-                                    cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-
-                                    con.Open();
-                                    cmd.ExecuteNonQuery();
-                                    Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                                    con.Close();
-                                }
-                            }
+                            Message = DbHelper.ExecuteNonQueryWithMessage("RoughDistribution_Insert_Update_Delete",
+                                new SqlParameter("@XML", delXmlBuilder.ToString()),
+                                new SqlParameter("@ACTION", "DELETE"));
                         }
                     }
                 }
@@ -1507,6 +1343,7 @@ namespace Slip.Controllers
                         xmlBuilder.Append("<MST_RoughDistribution>");
                         xmlBuilder.Append("<DistributionID>").Append(item.DistributionID).Append("</DistributionID>");
                         xmlBuilder.Append("<PreRoughID>").Append(item.PreRoughID).Append("</PreRoughID>");
+                        xmlBuilder.Append("<InwardDetailID>").Append(item.PreRoughID).Append("</InwardDetailID>");
                         xmlBuilder.Append("<BranchID>").Append(item.BranchID).Append("</BranchID>");
                         xmlBuilder.Append("<RCode>").Append(System.Security.SecurityElement.Escape(item.RCode ?? "")).Append("</RCode>");
                         xmlBuilder.Append("<RoughPcs>").Append(item.RoughPcs).Append("</RoughPcs>");
@@ -1532,22 +1369,9 @@ namespace Slip.Controllers
                     }
                     xmlBuilder.Append("</DocumentElement>");
 
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("RoughDistribution_Insert_Update_Delete", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@XML", xmlBuilder.ToString());
-                            cmd.Parameters.AddWithValue("@ACTION", "INSERT");
-                            cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 100);
-                            cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                            Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                            con.Close();
-                        }
-                    }
+                    Message = DbHelper.ExecuteNonQueryWithMessage("RoughDistribution_Insert_Update_Delete",
+                        new SqlParameter("@XML", xmlBuilder.ToString()),
+                        new SqlParameter("@ACTION", "INSERT"));
 
                     // Commit sequence counter in MST_BranchVoucherSequence for Automatic numbering branches
                     if (string.IsNullOrEmpty(Message) || Message.ToLower().Contains("inserted") || Message.ToLower().Contains("success") || Message.ToLower().Contains("record is"))
@@ -1565,15 +1389,11 @@ namespace Slip.Controllers
                                         object methodObj = chkCmd.ExecuteScalar();
                                         if (methodObj != null && Convert.ToString(methodObj).Trim().Equals("Automatic", StringComparison.OrdinalIgnoreCase))
                                         {
-                                            using (SqlCommand commitCmd = new SqlCommand("Get_RoughCodeConfig", con))
-                                            {
-                                                commitCmd.CommandType = CommandType.StoredProcedure;
-                                                commitCmd.Parameters.AddWithValue("@BranchID", item.BranchID);
-                                                commitCmd.Parameters.AddWithValue("@VoucherType", "Rough Distribution");
-                                                commitCmd.Parameters.AddWithValue("@ActionType", "COMMIT_AUTO");
-                                                commitCmd.Parameters.AddWithValue("@ManualRCode", "");
-                                                commitCmd.ExecuteNonQuery();
-                                            }
+                                            DbHelper.ExecuteNonQuery("Get_RoughCodeConfig",
+                                                new SqlParameter("@BranchID", item.BranchID),
+                                                new SqlParameter("@VoucherType", "Rough Distribution"),
+                                                new SqlParameter("@ActionType", "COMMIT_AUTO"),
+                                                new SqlParameter("@ManualRCode", ""));
                                         }
                                     }
                                 }
@@ -1637,59 +1457,50 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "RoughCodeMaster", "Rough Code Master", "RoughCode Master", "RoughCode" };
-                    
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                    foreach (string actName in possibleActions)
+                    {
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
+
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm)
-                                        {
-                                            break;
-                                        }
-                                    }
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canView = true; foundPerm = true; }
                                 }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canExport = true; foundPerm = true; }
+                                }
+                            }
+                            if (foundPerm)
+                            {
+                                break;
                             }
                         }
                     }
@@ -2152,30 +1963,30 @@ namespace Slip.Controllers
             return null;
         }
 
-        private MST_PartyMaster MapPartyMaster(SqlDataReader rdr)
+        private MST_PartyMaster MapPartyMaster(Dictionary<string, object> rdr)
         {
             return new MST_PartyMaster
             {
-                PartyId = rdr["PartyId"] != DBNull.Value ? (Guid)rdr["PartyId"] : Guid.Empty,
-                PartyCode = rdr["PartyCode"] != DBNull.Value ? Convert.ToString(rdr["PartyCode"]) : "",
-                PartyName = rdr["PartyName"] != DBNull.Value ? Convert.ToString(rdr["PartyName"]) : "",
-                ContactPerson = rdr["ContactPerson"] != DBNull.Value ? Convert.ToString(rdr["ContactPerson"]) : "",
-                IsOutSide = rdr["IsOutSide"] != DBNull.Value && Convert.ToBoolean(rdr["IsOutSide"]),
-                MobileNo = rdr["MobileNo"] != DBNull.Value ? Convert.ToString(rdr["MobileNo"]) : "",
-                Email = rdr["Email"] != DBNull.Value ? Convert.ToString(rdr["Email"]) : "",
-                Address = rdr["Address"] != DBNull.Value ? Convert.ToString(rdr["Address"]) : "",
-                CityName = rdr["CityName"] != DBNull.Value ? Convert.ToString(rdr["CityName"]) : "",
-                StateName = rdr["StateName"] != DBNull.Value ? Convert.ToString(rdr["StateName"]) : "",
-                CountryName = rdr["CountryName"] != DBNull.Value ? Convert.ToString(rdr["CountryName"]) : "",
-                Pincode = rdr["Pincode"] != DBNull.Value ? Convert.ToString(rdr["Pincode"]) : "",
-                GSTNo = rdr["GSTNo"] != DBNull.Value ? Convert.ToString(rdr["GSTNo"]) : "",
-                PANNo = rdr["PANNo"] != DBNull.Value ? Convert.ToString(rdr["PANNo"]) : "",
-                IsActive = rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
-                Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
-                CreatedOn = rdr["CreatedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
-                CreatedBy = rdr["CreatedBy"] != DBNull.Value ? (Guid?)rdr["CreatedBy"] : null,
-                ModifiedOn = rdr["ModifiedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null,
-                ModifiedBy = rdr["ModifiedBy"] != DBNull.Value ? (Guid?)rdr["ModifiedBy"] : null
+                PartyId = rdr["PartyId"] != null ? (Guid)rdr["PartyId"] : Guid.Empty,
+                PartyCode = rdr["PartyCode"] != null ? Convert.ToString(rdr["PartyCode"]) : "",
+                PartyName = rdr["PartyName"] != null ? Convert.ToString(rdr["PartyName"]) : "",
+                ContactPerson = rdr["ContactPerson"] != null ? Convert.ToString(rdr["ContactPerson"]) : "",
+                IsOutSide = rdr["IsOutSide"] != null && Convert.ToBoolean(rdr["IsOutSide"]),
+                MobileNo = rdr["MobileNo"] != null ? Convert.ToString(rdr["MobileNo"]) : "",
+                Email = rdr["Email"] != null ? Convert.ToString(rdr["Email"]) : "",
+                Address = rdr["Address"] != null ? Convert.ToString(rdr["Address"]) : "",
+                CityName = rdr["CityName"] != null ? Convert.ToString(rdr["CityName"]) : "",
+                StateName = rdr["StateName"] != null ? Convert.ToString(rdr["StateName"]) : "",
+                CountryName = rdr["CountryName"] != null ? Convert.ToString(rdr["CountryName"]) : "",
+                Pincode = rdr["Pincode"] != null ? Convert.ToString(rdr["Pincode"]) : "",
+                GSTNo = rdr["GSTNo"] != null ? Convert.ToString(rdr["GSTNo"]) : "",
+                PANNo = rdr["PANNo"] != null ? Convert.ToString(rdr["PANNo"]) : "",
+                IsActive = rdr["IsActive"] != null && Convert.ToBoolean(rdr["IsActive"]),
+                Remarks = rdr["Remarks"] != null ? Convert.ToString(rdr["Remarks"]) : "",
+                CreatedOn = rdr["CreatedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                CreatedBy = rdr["CreatedBy"] != null ? (Guid?)rdr["CreatedBy"] : null,
+                ModifiedOn = rdr["ModifiedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != null ? (Guid?)rdr["ModifiedBy"] : null
             };
         }
 
@@ -2185,21 +1996,12 @@ namespace Slip.Controllers
             {
                 List<MST_PartyMaster> list = new List<MST_PartyMaster>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_GetList", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
+                List<Dictionary<string, object>> partyRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        while (rdr.Read())
-                        {
-                            list.Add(MapPartyMaster(rdr));
-                        }
-                    }
-                    con.Close();
+                foreach (var row in partyRows)
+                {
+                    list.Add(MapPartyMaster(row));
                 }
 
                 var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2219,21 +2021,12 @@ namespace Slip.Controllers
             {
                 MST_PartyMaster item = null;
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_GetById", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
+                List<Dictionary<string, object>> partyRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_GetById",
+                    new SqlParameter("@PartyId", PartyId));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            item = MapPartyMaster(rdr);
-                        }
-                    }
-                    con.Close();
+                if (partyRows.Count > 0)
+                {
+                    item = MapPartyMaster(partyRows[0]);
                 }
 
                 return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
@@ -2254,49 +2047,39 @@ namespace Slip.Controllers
             {
                 bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.PartyId != Guid.Empty;
 
-                using (SqlConnection con = new SqlConnection(conn))
+                List<SqlParameter> saveParams = new List<SqlParameter>();
+                if (isUpdate)
                 {
-                    string spName = "USP_MST_PartyMaster_Save";
-                    using (SqlCommand cmd = new SqlCommand(spName, con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (isUpdate)
-                        {
-                            cmd.Parameters.AddWithValue("@PartyId", model.PartyId);
-                        }
-                        cmd.Parameters.AddWithValue("@PartyCode", model.PartyCode ?? "");
-                        cmd.Parameters.AddWithValue("@PartyName", model.PartyName ?? "");
-                        cmd.Parameters.AddWithValue("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@IsOutSide", model.IsOutSide);
-                        cmd.Parameters.AddWithValue("@MobileNo", (object)model.MobileNo ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Email", (object)model.Email ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Address", (object)model.Address ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@CityName", (object)model.CityName ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@StateName", (object)model.StateName ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@CountryName", (object)model.CountryName ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Pincode", (object)model.Pincode ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@GSTNo", (object)model.GSTNo ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@PANNo", (object)model.PANNo ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", DBNull.Value);
+                    saveParams.Add(new SqlParameter("@PartyId", model.PartyId));
+                }
+                saveParams.Add(new SqlParameter("@PartyCode", model.PartyCode ?? ""));
+                saveParams.Add(new SqlParameter("@PartyName", model.PartyName ?? ""));
+                saveParams.Add(new SqlParameter("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@IsOutSide", model.IsOutSide));
+                saveParams.Add(new SqlParameter("@MobileNo", (object)model.MobileNo ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Email", (object)model.Email ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Address", (object)model.Address ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@CityName", (object)model.CityName ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@StateName", (object)model.StateName ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@CountryName", (object)model.CountryName ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Pincode", (object)model.Pincode ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@GSTNo", (object)model.GSTNo ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@PANNo", (object)model.PANNo ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value));
+                saveParams.Add(new SqlParameter(isUpdate ? "@ModifiedBy" : "@CreatedBy", DBNull.Value));
 
-                        con.Open();
-                        using (SqlDataReader rdr = cmd.ExecuteReader())
-                        {
-                            if (rdr.Read())
-                            {
-                                object successVal = SafeGetColumn(rdr, "Success");
-                                isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
-                                object msgVal = SafeGetColumn(rdr, "Message");
-                                message = msgVal != null ? Convert.ToString(msgVal) : "";
-                            }
-                            else
-                            {
-                                isSuccess = true;
-                            }
-                        }
-                        con.Close();
-                    }
+                List<Dictionary<string, object>> saveRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_Save", saveParams.ToArray());
+                if (saveRows.Count > 0)
+                {
+                    var row = saveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+                else
+                {
+                    isSuccess = true;
                 }
 
                 if (isSuccess && string.IsNullOrEmpty(message))
@@ -2320,25 +2103,17 @@ namespace Slip.Controllers
             bool isSuccess = false;
             try
             {
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_Delete", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
-                    cmd.Parameters.AddWithValue("@ModifiedBy", DBNull.Value);
+                List<Dictionary<string, object>> deleteRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_Delete",
+                    new SqlParameter("@PartyId", PartyId),
+                    new SqlParameter("@ModifiedBy", DBNull.Value));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            object successVal = SafeGetColumn(rdr, "Success");
-                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
-                            object msgVal = SafeGetColumn(rdr, "Message");
-                            message = msgVal != null ? Convert.ToString(msgVal) : "";
-                        }
-                    }
-                    con.Close();
+                if (deleteRows.Count > 0)
+                {
+                    var row = deleteRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
                 }
             }
             catch (Exception ex)
@@ -2357,26 +2132,18 @@ namespace Slip.Controllers
             bool isSuccess = false;
             try
             {
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_PartyMaster_ActiveInactive", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@PartyId", PartyId);
-                    cmd.Parameters.AddWithValue("@IsActive", IsActive);
-                    cmd.Parameters.AddWithValue("@ModifiedBy", DBNull.Value);
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_ActiveInactive",
+                    new SqlParameter("@PartyId", PartyId),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@ModifiedBy", DBNull.Value));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            object successVal = SafeGetColumn(rdr, "Success");
-                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
-                            object msgVal = SafeGetColumn(rdr, "Message");
-                            message = msgVal != null ? Convert.ToString(msgVal) : "";
-                        }
-                    }
-                    con.Close();
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
                 }
             }
             catch (Exception ex)
@@ -2398,26 +2165,26 @@ namespace Slip.Controllers
             return View();
         }
 
-        private MST_CompanyBranch MapBranch(SqlDataReader rdr)
+        private MST_CompanyBranch MapBranch(Dictionary<string, object> rdr)
         {
             return new MST_CompanyBranch
             {
-                BranchID = rdr["BranchID"] != DBNull.Value ? Convert.ToInt32(rdr["BranchID"]) : 0,
-                BranchCode = rdr["BranchCode"] != DBNull.Value ? Convert.ToString(rdr["BranchCode"]) : "",
-                BranchName = rdr["BranchName"] != DBNull.Value ? Convert.ToString(rdr["BranchName"]) : "",
-                BranchTypeID = rdr["CompanyBranchTypeID"] != DBNull.Value ? Convert.ToInt32(rdr["CompanyBranchTypeID"]) : 0,
-                BranchTypeName = SafeGetColumn(rdr, "BranchTypeName") != null ? Convert.ToString(SafeGetColumn(rdr, "BranchTypeName")) : "",
-                GSTIN = rdr["GSTIN"] != DBNull.Value ? Convert.ToString(rdr["GSTIN"]) : "",
-                StateCode = rdr["StateCode"] != DBNull.Value ? Convert.ToString(rdr["StateCode"]) : "",
-                Address = rdr["Address"] != DBNull.Value ? Convert.ToString(rdr["Address"]) : "",
-                City = rdr["City"] != DBNull.Value ? Convert.ToString(rdr["City"]) : "",
-                ContactPerson = rdr["ContactPerson"] != DBNull.Value ? Convert.ToString(rdr["ContactPerson"]) : "",
-                Phone = rdr["Phone"] != DBNull.Value ? Convert.ToString(rdr["Phone"]) : "",
-                IsActive = rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
-                CreatedBy = rdr["CreatedBy"] != DBNull.Value ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
-                CreatedOn = rdr["CreatedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
-                ModifiedBy = rdr["ModifiedBy"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["ModifiedBy"]) : null,
-                ModifiedOn = rdr["ModifiedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null
+                BranchID = rdr["BranchID"] != null ? Convert.ToInt32(rdr["BranchID"]) : 0,
+                BranchCode = rdr["BranchCode"] != null ? Convert.ToString(rdr["BranchCode"]) : "",
+                BranchName = rdr["BranchName"] != null ? Convert.ToString(rdr["BranchName"]) : "",
+                BranchTypeID = rdr["CompanyBranchTypeID"] != null ? Convert.ToInt32(rdr["CompanyBranchTypeID"]) : 0,
+                BranchTypeName = rdr.ContainsKey("BranchTypeName") && rdr["BranchTypeName"] != null ? Convert.ToString(rdr["BranchTypeName"]) : "",
+                GSTIN = rdr["GSTIN"] != null ? Convert.ToString(rdr["GSTIN"]) : "",
+                StateCode = rdr["StateCode"] != null ? Convert.ToString(rdr["StateCode"]) : "",
+                Address = rdr["Address"] != null ? Convert.ToString(rdr["Address"]) : "",
+                City = rdr["City"] != null ? Convert.ToString(rdr["City"]) : "",
+                ContactPerson = rdr["ContactPerson"] != null ? Convert.ToString(rdr["ContactPerson"]) : "",
+                Phone = rdr["Phone"] != null ? Convert.ToString(rdr["Phone"]) : "",
+                IsActive = rdr["IsActive"] != null && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr["CreatedBy"] != null ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
+                CreatedOn = rdr["CreatedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != null ? (int?)Convert.ToInt32(rdr["ModifiedBy"]) : null,
+                ModifiedOn = rdr["ModifiedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null
             };
         }
 
@@ -2427,23 +2194,14 @@ namespace Slip.Controllers
             {
                 List<MST_BranchType> list = new List<MST_BranchType>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranchType_GetList", con))
+                List<Dictionary<string, object>> branchTypeRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranchType_GetList");
+                foreach (var row in branchTypeRows)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    list.Add(new MST_BranchType
                     {
-                        while (rdr.Read())
-                        {
-                            list.Add(new MST_BranchType
-                            {
-                                BranchTypeID = Convert.ToInt32(rdr["ID"]),
-                                BranchTypeName = rdr["BranchTypeName"] != DBNull.Value ? Convert.ToString(rdr["BranchTypeName"]) : ""
-                            });
-                        }
-                    }
-                    con.Close();
+                        BranchTypeID = Convert.ToInt32(row["ID"]),
+                        BranchTypeName = row["BranchTypeName"] != null ? Convert.ToString(row["BranchTypeName"]) : ""
+                    });
                 }
 
                 return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2461,21 +2219,12 @@ namespace Slip.Controllers
             {
                 List<MST_CompanyBranch> list = new List<MST_CompanyBranch>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_GetList", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
+                List<Dictionary<string, object>> branchRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        while (rdr.Read())
-                        {
-                            list.Add(MapBranch(rdr));
-                        }
-                    }
-                    con.Close();
+                foreach (var row in branchRows)
+                {
+                    list.Add(MapBranch(row));
                 }
 
                 var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2495,21 +2244,12 @@ namespace Slip.Controllers
             {
                 MST_CompanyBranch item = null;
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_GetById", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@BranchID", BranchID);
+                List<Dictionary<string, object>> branchRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_GetById",
+                    new SqlParameter("@BranchID", BranchID));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            item = MapBranch(rdr);
-                        }
-                    }
-                    con.Close();
+                if (branchRows.Count > 0)
+                {
+                    item = MapBranch(branchRows[0]);
                 }
 
                 return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
@@ -2531,40 +2271,31 @@ namespace Slip.Controllers
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
                 bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.BranchID > 0;
 
-                using (SqlConnection con = new SqlConnection(conn))
+                string spName = isUpdate ? "USP_MST_CompanyBranch_Update" : "USP_MST_CompanyBranch_Insert";
+                List<SqlParameter> branchParams = new List<SqlParameter>();
+                if (isUpdate)
                 {
-                    string spName = isUpdate ? "USP_MST_CompanyBranch_Update" : "USP_MST_CompanyBranch_Insert";
-                    using (SqlCommand cmd = new SqlCommand(spName, con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (isUpdate)
-                        {
-                            cmd.Parameters.AddWithValue("@BranchID", model.BranchID);
-                        }
-                        cmd.Parameters.AddWithValue("@BranchCode", model.BranchCode ?? "");
-                        cmd.Parameters.AddWithValue("@BranchName", model.BranchName ?? "");
-                        cmd.Parameters.AddWithValue("@CompanyBranchTypeID", model.BranchTypeID);
-                        cmd.Parameters.AddWithValue("@GSTIN", (object)model.GSTIN ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@StateCode", (object)model.StateCode ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Address", (object)model.Address ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@City", (object)model.City ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Phone", (object)model.Phone ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId);
+                    branchParams.Add(new SqlParameter("@BranchID", model.BranchID));
+                }
+                branchParams.Add(new SqlParameter("@BranchCode", model.BranchCode ?? ""));
+                branchParams.Add(new SqlParameter("@BranchName", model.BranchName ?? ""));
+                branchParams.Add(new SqlParameter("@CompanyBranchTypeID", model.BranchTypeID));
+                branchParams.Add(new SqlParameter("@GSTIN", (object)model.GSTIN ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@StateCode", (object)model.StateCode ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@Address", (object)model.Address ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@City", (object)model.City ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@Phone", (object)model.Phone ?? DBNull.Value));
+                branchParams.Add(new SqlParameter(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId));
 
-                        con.Open();
-                        using (SqlDataReader rdr = cmd.ExecuteReader())
-                        {
-                            if (rdr.Read())
-                            {
-                                object successVal = SafeGetColumn(rdr, "Success");
-                                isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
-                                object msgVal = SafeGetColumn(rdr, "Message");
-                                message = msgVal != null ? Convert.ToString(msgVal) : "";
-                            }
-                        }
-                        con.Close();
-                    }
+                List<Dictionary<string, object>> branchSaveRows = DbHelper.ExecuteReaderAsList(spName, branchParams.ToArray());
+                if (branchSaveRows.Count > 0)
+                {
+                    var row = branchSaveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
                 }
 
                 if (isSuccess && string.IsNullOrEmpty(message))
@@ -2590,25 +2321,17 @@ namespace Slip.Controllers
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_Delete", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@BranchID", BranchID);
-                    cmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+                List<Dictionary<string, object>> branchDeleteRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_Delete",
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@ModifiedBy", currentUserId));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            object successVal = SafeGetColumn(rdr, "Success");
-                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
-                            object msgVal = SafeGetColumn(rdr, "Message");
-                            message = msgVal != null ? Convert.ToString(msgVal) : "";
-                        }
-                    }
-                    con.Close();
+                if (branchDeleteRows.Count > 0)
+                {
+                    var row = branchDeleteRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
                 }
             }
             catch (Exception ex)
@@ -2629,26 +2352,18 @@ namespace Slip.Controllers
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_CompanyBranch_ActiveInactive", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@BranchID", BranchID);
-                    cmd.Parameters.AddWithValue("@IsActive", IsActive);
-                    cmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_ActiveInactive",
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@ModifiedBy", currentUserId));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            object successVal = SafeGetColumn(rdr, "Success");
-                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
-                            object msgVal = SafeGetColumn(rdr, "Message");
-                            message = msgVal != null ? Convert.ToString(msgVal) : "";
-                        }
-                    }
-                    con.Close();
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
                 }
             }
             catch (Exception ex)
@@ -2676,23 +2391,14 @@ namespace Slip.Controllers
             {
                 List<MST_Purpose> list = new List<MST_Purpose>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_Purpose_GetList", con))
+                List<Dictionary<string, object>> purposeRows = DbHelper.ExecuteReaderAsList("USP_MST_Purpose_GetList");
+                foreach (var row in purposeRows)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    list.Add(new MST_Purpose
                     {
-                        while (rdr.Read())
-                        {
-                            list.Add(new MST_Purpose
-                            {
-                                PurposeID = Convert.ToInt32(rdr["PurposeID"]),
-                                PurposeName = rdr["PurposeName"] != DBNull.Value ? Convert.ToString(rdr["PurposeName"]) : ""
-                            });
-                        }
-                    }
-                    con.Close();
+                        PurposeID = Convert.ToInt32(row["PurposeID"]),
+                        PurposeName = row["PurposeName"] != null ? Convert.ToString(row["PurposeName"]) : ""
+                    });
                 }
 
                 return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2710,23 +2416,14 @@ namespace Slip.Controllers
             {
                 List<MST_Receipe> list = new List<MST_Receipe>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_Receipe_GetList", con))
+                List<Dictionary<string, object>> receipeRows = DbHelper.ExecuteReaderAsList("USP_MST_Receipe_GetList");
+                foreach (var row in receipeRows)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    list.Add(new MST_Receipe
                     {
-                        while (rdr.Read())
-                        {
-                            list.Add(new MST_Receipe
-                            {
-                                ReceipeID = Convert.ToInt32(rdr["ReceipeID"]),
-                                Receipe = rdr["Receipe"] != DBNull.Value ? Convert.ToString(rdr["Receipe"]) : ""
-                            });
-                        }
-                    }
-                    con.Close();
+                        ReceipeID = Convert.ToInt32(row["ReceipeID"]),
+                        Receipe = row["Receipe"] != null ? Convert.ToString(row["Receipe"]) : ""
+                    });
                 }
 
                 return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2744,23 +2441,14 @@ namespace Slip.Controllers
             {
                 List<MST_Grade> list = new List<MST_Grade>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_Grade_GetList", con))
+                List<Dictionary<string, object>> gradeRows = DbHelper.ExecuteReaderAsList("USP_MST_Grade_GetList");
+                foreach (var row in gradeRows)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    list.Add(new MST_Grade
                     {
-                        while (rdr.Read())
-                        {
-                            list.Add(new MST_Grade
-                            {
-                                GradeID = Convert.ToInt32(rdr["ID"]),
-                                Grade = rdr["Grade"] != DBNull.Value ? Convert.ToString(rdr["Grade"]) : ""
-                            });
-                        }
-                    }
-                    con.Close();
+                        GradeID = Convert.ToInt32(row["ID"]),
+                        Grade = row["Grade"] != null ? Convert.ToString(row["Grade"]) : ""
+                    });
                 }
 
                 return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2778,23 +2466,14 @@ namespace Slip.Controllers
             {
                 List<MST_FactoryCode> list = new List<MST_FactoryCode>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_MST_FactoryCode_GetList", con))
+                List<Dictionary<string, object>> factoryCodeRows = DbHelper.ExecuteReaderAsList("USP_MST_FactoryCode_GetList");
+                foreach (var row in factoryCodeRows)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    list.Add(new MST_FactoryCode
                     {
-                        while (rdr.Read())
-                        {
-                            list.Add(new MST_FactoryCode
-                            {
-                                FactoryCodeID = Convert.ToInt32(rdr["ID"]),
-                                FactoryCode = rdr["FactoryCode"] != DBNull.Value ? Convert.ToString(rdr["FactoryCode"]) : ""
-                            });
-                        }
-                    }
-                    con.Close();
+                        FactoryCodeID = Convert.ToInt32(row["ID"]),
+                        FactoryCode = row["FactoryCode"] != null ? Convert.ToString(row["FactoryCode"]) : ""
+                    });
                 }
 
                 return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2814,22 +2493,14 @@ namespace Slip.Controllers
                 int? branchId = null;
                 string branchName = null;
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_SEC_User_GetBranch", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@UserID", currentUserId);
+                List<Dictionary<string, object>> userBranchRows = DbHelper.ExecuteReaderAsList("USP_SEC_User_GetBranch",
+                    new SqlParameter("@UserID", currentUserId));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            branchId = rdr["BranchID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["BranchID"]) : null;
-                            branchName = rdr["BranchName"] != DBNull.Value ? Convert.ToString(rdr["BranchName"]) : null;
-                        }
-                    }
-                    con.Close();
+                if (userBranchRows.Count > 0)
+                {
+                    var row = userBranchRows[0];
+                    branchId = row["BranchID"] != null ? (int?)Convert.ToInt32(row["BranchID"]) : null;
+                    branchName = row["BranchName"] != null ? Convert.ToString(row["BranchName"]) : null;
                 }
 
                 return Json(new { success = branchId != null, branchId = branchId, branchName = branchName }, JsonRequestBehavior.AllowGet);
@@ -3110,25 +2781,17 @@ namespace Slip.Controllers
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
 
-                using (SqlConnection con = new SqlConnection(conn))
-                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_Delete", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@InwardID", InwardID);
-                    cmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+                List<Dictionary<string, object>> deleteRows = DbHelper.ExecuteReaderAsList("USP_TRN_RoughInward_Delete",
+                    new SqlParameter("@InwardID", InwardID),
+                    new SqlParameter("@ModifiedBy", currentUserId));
 
-                    con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
-                    {
-                        if (rdr.Read())
-                        {
-                            object successVal = SafeGetColumn(rdr, "Success");
-                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
-                            object msgVal = SafeGetColumn(rdr, "Message");
-                            message = msgVal != null ? Convert.ToString(msgVal) : "";
-                        }
-                    }
-                    con.Close();
+                if (deleteRows.Count > 0)
+                {
+                    var row = deleteRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
                 }
             }
             catch (Exception ex)
@@ -3154,24 +2817,12 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
                 List<object> list = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_MasterBook_Data", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@FilterType", FilterType ?? "Rough Entry");
-                        cmd.Parameters.AddWithValue("@FromDate", FromDate ?? "");
-                        cmd.Parameters.AddWithValue("@ToDate", ToDate ?? "");
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Get_MasterBook_Data",
+                    new SqlParameter("@FilterType", FilterType ?? "Rough Entry"),
+                    new SqlParameter("@FromDate", FromDate ?? ""),
+                    new SqlParameter("@ToDate", ToDate ?? ""));
 
                 // Table 0: Data Rows
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)

@@ -376,6 +376,7 @@
     <Compile Include="obj\Debug\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\CommonMethods.cs" />
+    <Compile Include="Utility\DbHelper.cs" />
     <Compile Include="Utility\ErrorLogger.cs" />
     <Compile Include="Utility\ExcelExport.cs" />
     <Compile Include="Utility\FormPermissionHelper.cs" />
