@@ -40,5 +40,7 @@ namespace Slip.Models
         public int RoleID { get; set; }
         public string ReferenceName { get; set; }
         public string PhotoPath2 { get; set; }
+        public Nullable<int> CompanyBranchID { get; set; }
+        public Nullable<Guid> PartyID { get; set; }
     }
 }

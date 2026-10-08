@@ -20,6 +20,5 @@ namespace Slip.Models
         public string TableNo { get; set; }
         public bool IsDashBoardShow { get; set; }
         public int RoleID { get; set; }
-        public Nullable<int> BranchID { get; set; }
     }
 }

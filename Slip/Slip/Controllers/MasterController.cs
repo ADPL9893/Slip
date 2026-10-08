@@ -150,20 +150,15 @@ namespace Slip.Controllers
             }
             return Json(new { Message });
         }
-        public JsonResult Getdata_For_DropDown()
+        public JsonResult GetBranchdata_For_DropDown()
         {
             try
             {
-                List<object> _list_Process = new List<object>();
-                List<object> _list_Receipe = new List<object>();
-                List<object> _list_RCode = new List<object>();
-                List<object> _list_LotCode = new List<object>();
-                List<object> _list_User = new List<object>();
+                
                 List<object> _list_Branch = new List<object>();
 
-                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_For_DropDown");
-
-                if (_DropDownList.Tables[0].Rows.Count > 0)
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("GetBranchdata_For_DropDown");
+                if (_DropDownList.Tables.Count > 0 && _DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
                     {
@@ -172,76 +167,12 @@ namespace Slip.Controllers
                         {
                             Values.Add(_DropDownList.Tables[0].Columns[j].ToString(), _DropDownList.Tables[0].Rows[i][j].ToString());
                         }
-                        _list_Process.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables[1].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[1].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[1].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[1].Columns[j].ToString(), _DropDownList.Tables[1].Rows[i][j].ToString());
-                        }
-                        _list_Receipe.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables[2].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[2].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[2].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[2].Columns[j].ToString(), _DropDownList.Tables[2].Rows[i][j].ToString());
-                        }
-                        _list_RCode.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables[3].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[3].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[3].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[3].Columns[j].ToString(), _DropDownList.Tables[3].Rows[i][j].ToString());
-                        }
-                        _list_LotCode.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables.Count > 4 && _DropDownList.Tables[4].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[4].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[4].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[4].Columns[j].ToString(), _DropDownList.Tables[4].Rows[i][j].ToString());
-                        }
-                        _list_User.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables.Count > 5 && _DropDownList.Tables[5].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[5].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[5].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[5].Columns[j].ToString(), _DropDownList.Tables[5].Rows[i][j].ToString());
-                        }
                         _list_Branch.Add(Values);
                     }
                 }
+
                 var jsonResult = Json(new
                 {
-                    TableList = _list_Process,
-                    ReceipeList = _list_Receipe,
-                    RCodeList = _list_RCode,
-                    LotCodeList = _list_LotCode,
-                    UserList = _list_User,
                     BranchList = _list_Branch
                 }, JsonRequestBehavior.AllowGet);
                 jsonResult.MaxJsonLength = Int32.MaxValue;

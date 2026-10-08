@@ -701,27 +701,17 @@
             });
 
             // Fetch Branch List from Getdata_For_DropDown (Table 5: MST_GeneralSetting WHERE MasterType = 'Branch')
-            var p2 = $http.post('@Url.Action("Getdata_For_DropDown", "Master")').then(function (res) {
+            var p2 = $http.post('@Url.Action("GetBranchdata_For_DropDown", "Master")').then(function (res) {
+                debugger
                 var bList = [];
                 if (res.data && res.data.BranchList && res.data.BranchList.length > 0) {
                     for (var i = 0; i < res.data.BranchList.length; i++) {
-                        var bId = res.data.BranchList[i]["ID"] || res.data.BranchList[i]["id"];
-                        var bVal = res.data.BranchList[i]["Value"] || res.data.BranchList[i]["value"];
+                        var bId = res.data.BranchList[i]["ID"] || res.data.BranchList[i]["ID"];
+                        var bVal = res.data.BranchList[i]["Name"] || res.data.BranchList[i]["Name"];
                         if (bId !== undefined && bId !== null) {
                             bList.push({
                                 id: parseInt(bId),
                                 value: bVal
-                            });
-                        }
-                    }
-                } else if (res.data && res.data.UserList && res.data.UserList.length > 0) {
-                    for (var j = 0; j < res.data.UserList.length; j++) {
-                        var uId = res.data.UserList[j]["UserID"] || res.data.UserList[j]["ID"] || res.data.UserList[j]["id"];
-                        var uVal = res.data.UserList[j]["UserName"] || res.data.UserList[j]["Value"] || res.data.UserList[j]["value"];
-                        if (uId !== undefined && uId !== null) {
-                            bList.push({
-                                id: parseInt(uId),
-                                value: uVal
                             });
                         }
                     }

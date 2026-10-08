@@ -22,6 +22,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Syncopate" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 
     <!-- Third-Party Base Framework Stylesheets -->
     <link href="~/Content/LoaderManage.css" rel="stylesheet" />
@@ -47,9 +48,9 @@
     <link href="~/Content/dx.material.blue.light.compact.css" rel="stylesheet" />
     <link href="~/Content/angular/ui-grid.css" rel="stylesheet" />
 
-    <!-- Custom Theme Stylesheets (Loaded AFTER Base Themes) -->
+    <!-- Custom Theme Stylesheets (Loaded AFTER Base Themes) 
     <link href="~/Content/css/NavbarCSS.css" rel="stylesheet" />
-    <link href="~/Content/css/theme-obsidian.css" rel="stylesheet" />
+    <link href="~/Content/css/theme-obsidian.css" rel="stylesheet" />-->
 
     <!-- Global Common Stylesheet (all page/feature CSS consolidates here) -->
     <link href="~/Content/css/common.css" rel="stylesheet" />
@@ -459,6 +460,7 @@
                             <!-- User Session Indicator -->
                             <li>
                                 <div class="user-badge" title="Logged in as @Slip.Utility.SessionFacade.UserSession.UserName">
+                                    <span class="avatar">@(string.IsNullOrEmpty(Slip.Utility.SessionFacade.UserSession.UserName) ? "?" : Slip.Utility.SessionFacade.UserSession.UserName.Substring(0, 1).ToUpper())</span>
                                     <span class="user-badge-name">@Slip.Utility.SessionFacade.UserSession.UserName</span>
                                 </div>
                             </li>

@@ -1,6 +1,166 @@
-        /* ==========================================================================
-           PRIORITY COLOR STYLES FOR R.CODE
-           ========================================================================== */
+/* ==========================================================================
+   PREMIUM TOPBAR THEME (fonts, colors, navbar restyle)
+   Source: topbar-premium-v3.html mockup. Light theme only - no dark-mode
+   variant, no search/notification/mega-menu (dropped per scope decision).
+   ========================================================================== */
+:root {
+    --font-ui: 'Manrope', 'Segoe UI', system-ui, sans-serif;
+    --font-brand: 'Cormorant Garamond', Georgia, serif;
+    --nav-1: #14235F;
+    --nav-2: #0A1235;
+    --nav-text: #C7D0EE;
+    --gold: #D4AF37;
+    --ice: #5EE1F5;
+    --card: #FFFFFF;
+    --text: #17203A;
+    --muted: #6A7490;
+    --line: #E4E8F2;
+    --tile: #EEF1FB;
+    --tile-ico: #2A3A8C;
+    --hover: #F3F5FD;
+    --shadow: 0 24px 60px -12px rgba(10, 18, 53, .35), 0 2px 8px rgba(10, 18, 53, .08);
+}
+
+body {
+    font-family: var(--font-ui), 'Segoe UI', sans-serif;
+}
+
+/* ---------- Topbar (restyles the EXISTING .main-header / .navbar markup) ----------
+   NOTE: selectors below are deliberately written to match (or exceed) the
+   specificity of the legacy rules in NavbarCSS.css / theme-obsidian.css
+   (e.g. "header.main-header", ".main-header .top-nav .logout-link a").
+   Those files load before this one, so on an equal-specificity tie this
+   sheet wins on source order - but a *lower*-specificity selector here
+   would still lose to their compound selectors regardless of load order
+   or !important. ---------- */
+.main-header,
+header.main-header {
+    background: linear-gradient(180deg, var(--nav-1), var(--nav-2)) !important;
+    position: relative;
+}
+
+.main-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold) 20%, var(--gold) 80%, transparent);
+    opacity: .7;
+}
+
+.main-header .navbar {
+    background: transparent !important;
+}
+
+.main-header .navbar-nav > li > a {
+    color: var(--nav-text) !important;
+    font-family: var(--font-ui) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    height: 40px !important;
+    line-height: 40px !important;
+    margin: 14px 4px !important;
+    padding: 0 15px !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    transition: background .15s, color .15s !important;
+}
+
+.main-header .navbar-nav > li > a:hover,
+.main-header .navbar-nav > li > a:focus,
+.main-header .navbar-nav > .open > a,
+.main-header .navbar-nav > .open > a:hover,
+.main-header .navbar-nav > .open > a:focus {
+    color: #fff !important;
+    background: rgba(255, 255, 255, .1) !important;
+}
+
+.main-header .navbar .dropdown-menu,
+.main-header .navbar-nav .dropdown-menu,
+.main-header .navbar-custom-menu .dropdown-menu {
+    padding: 8px !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--shadow) !important;
+    background-color: var(--card) !important;
+}
+
+.main-header .navbar .dropdown-menu > li > a,
+.main-header .navbar-nav .dropdown-menu > li > a {
+    padding: 9px 12px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--text) !important;
+    background-color: transparent !important;
+}
+
+.main-header .navbar .dropdown-menu > li > a:hover,
+.main-header .navbar .dropdown-menu > li > a:focus,
+.main-header .navbar-nav .dropdown-menu > li > a:hover,
+.main-header .navbar-nav .dropdown-menu > li > a:focus {
+    background-color: var(--hover) !important;
+    color: var(--text) !important;
+}
+
+.main-header .top-nav .user-badge {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 4px 14px 4px 4px !important;
+    height: auto !important;
+    min-width: 0 !important;
+    border: none !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, .07) !important;
+    cursor: default !important;
+}
+
+.main-header .top-nav .user-badge .avatar {
+    display: grid !important;
+    place-items: center !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(145deg, #E8CB6A, #B8901E) !important;
+    color: #1A1500 !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+    line-height: 30px !important;
+    box-shadow: 0 0 0 2px var(--nav-2), 0 0 0 3px rgba(212, 175, 55, .6) !important;
+}
+
+.main-header .top-nav .user-badge .user-badge-name {
+    color: #fff !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    letter-spacing: normal !important;
+}
+
+.main-header .top-nav .logout-link a {
+    color: var(--nav-text) !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    padding: 0 15px !important;
+    height: 40px !important;
+    border-radius: 999px !important;
+    background: transparent !important;
+    border: none !important;
+    transition: background .15s, color .15s !important;
+}
+
+.main-header .top-nav .logout-link a:hover {
+    color: #fff !important;
+    background: rgba(255, 255, 255, .1) !important;
+    border-color: transparent !important;
+    transform: none !important;
+}
+
+/* ==========================================================================
+   PRIORITY COLOR STYLES FOR R.CODE
+   ========================================================================== */
         .rcode-regular {
             color: #0284c7 !important; /* Azure Blue (Default) */
             font-weight: 700;
