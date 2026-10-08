@@ -317,27 +317,17 @@ namespace Slip.Controllers
                         dxmlStr = "<DocumentElement>" + dXmldata.DocumentElement.InnerXml + "</DocumentElement>";
                     }
 
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("Daily_Report_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@PolishXML", pxmlStr);
-                    cmdsW.Parameters.AddWithValue("@RoughhXML", rxmlStr);
-                    cmdsW.Parameters.AddWithValue("@JWXML", jwxmlStr);
-                    cmdsW.Parameters.AddWithValue("@SWXML", swxmlStr);
-                    cmdsW.Parameters.AddWithValue("@ColorXML", cxmlStr);
-                    cmdsW.Parameters.AddWithValue("@UnderXML", uxmlStr);
-                    cmdsW.Parameters.AddWithValue("@TransferXML", txmlStr);
-                    cmdsW.Parameters.AddWithValue("@DetailsXML", dxmlStr);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("Daily_Report_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@PolishXML", pxmlStr),
+                        new SqlParameter("@RoughhXML", rxmlStr),
+                        new SqlParameter("@JWXML", jwxmlStr),
+                        new SqlParameter("@SWXML", swxmlStr),
+                        new SqlParameter("@ColorXML", cxmlStr),
+                        new SqlParameter("@UnderXML", uxmlStr),
+                        new SqlParameter("@TransferXML", txmlStr),
+                        new SqlParameter("@DetailsXML", dxmlStr),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)
@@ -355,23 +345,11 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_Process = new List<object>();
                 List<object> EMPEmployeeList = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Daily_RP_Rough_Polish_GetData", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Type", Type);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Daily_RP_Rough_Polish_GetData",
+                    new SqlParameter("@Type", Type));
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -424,24 +402,11 @@ namespace Slip.Controllers
                 string xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
                 // ErrorLogger.ErrorLogStr("XML Create" + xmlStr);
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Daily_RP_Rough_Polish_Insert_Update_Delete", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@XML", xmlStr);
-                        cmd.Parameters.AddWithValue("@Action", Action);
-                        cmd.Parameters.AddWithValue("@Type", Type);
-                        cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        SqlParameter messageParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 1000);
-                        messageParam.Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add(messageParam);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                Message = DbHelper.ExecuteNonQueryWithMessage("Daily_RP_Rough_Polish_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@Action", Action),
+                    new SqlParameter("@Type", Type),
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
             }
             catch (Exception ex)
             {
@@ -528,20 +493,10 @@ namespace Slip.Controllers
                         XmlDocument pXmldata = CommonMethods.ConvertToXml(List);
                         xmlStr = "<DocumentElement>" + pXmldata.DocumentElement.InnerXml + "</DocumentElement>";
                     }
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("After4POk_Loss_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("After4POk_Loss_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@XML", xmlStr),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)
@@ -617,20 +572,10 @@ namespace Slip.Controllers
                         XmlDocument pXmldata = CommonMethods.ConvertToXml(List);
                         xmlStr = "<DocumentElement>" + pXmldata.DocumentElement.InnerXml + "</DocumentElement>";
                     }
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("RoughTo4POk_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("RoughTo4POk_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@XML", xmlStr),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)
@@ -641,7 +586,7 @@ namespace Slip.Controllers
             return Json(new { Message });
         }
 
-       
+
         public JsonResult Process_Wise_Timing_Insert_Using_Excel(HttpPostedFileBase excelFile)
         {
             ExcelPackage.License.SetNonCommercialPersonal("ANJALI LABTECH");
@@ -824,24 +769,14 @@ namespace Slip.Controllers
                         XmlDocument SXmldata = CommonMethods.ConvertToXml(SmallColorList);
                         SCxmlStr = "<DocumentElement>" + SXmldata.DocumentElement.InnerXml + "</DocumentElement>";
                     }
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("Process_Wise_Timing_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@TableNo", TableNo);
-                    cmdsW.Parameters.AddWithValue("@JumboWhiteXML", JWxmlStr);
-                    cmdsW.Parameters.AddWithValue("@JumboColorXML", JCxmlStr);
-                    cmdsW.Parameters.AddWithValue("@SmallWhiteXML", SWxmlStr);
-                    cmdsW.Parameters.AddWithValue("@SmallColorXML", SCxmlStr);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("Process_Wise_Timing_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@TableNo", TableNo),
+                        new SqlParameter("@JumboWhiteXML", JWxmlStr),
+                        new SqlParameter("@JumboColorXML", JCxmlStr),
+                        new SqlParameter("@SmallWhiteXML", SWxmlStr),
+                        new SqlParameter("@SmallColorXML", SCxmlStr),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)
@@ -918,20 +853,10 @@ namespace Slip.Controllers
                             xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
                         }
 
-                        SqlConnection consW = new SqlConnection(conn);
-                        SqlCommand cmdsW = new SqlCommand("Process_Wise_Issue_Receive_Loss_Insert_Using_Excel", consW);
-                        cmdsW.CommandType = CommandType.StoredProcedure;
-                        cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                        cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                        cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        consW.Open();
-
-                        int k = cmdsW.ExecuteNonQuery();
-                        Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                        consW.Close();
+                        Message = DbHelper.ExecuteNonQueryWithMessage("Process_Wise_Issue_Receive_Loss_Insert_Using_Excel",
+                            new SqlParameter("@ReportDate", Date),
+                            new SqlParameter("@XML", xmlStr),
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                     }
                 }
             }
@@ -1077,22 +1002,15 @@ namespace Slip.Controllers
                         }
 
                         
-                        SqlConnection consW = new SqlConnection(conn);
-                        SqlCommand cmdsW = new SqlCommand("Pridiction_Details_Insert_Using_Excel", consW);
-                        cmdsW.CommandType = CommandType.StoredProcedure;
-                        cmdsW.CommandTimeout = 60;
-                        SqlParameter tvpParam = cmdsW.Parameters.AddWithValue("@TVP", dt);
-                        tvpParam.SqlDbType = SqlDbType.Structured;
-                        tvpParam.TypeName = "dbo.Pridiction_TVP";
-                        cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        consW.Open();
+                        SqlParameter tvpParam = new SqlParameter("@TVP", dt)
+                        {
+                            SqlDbType = SqlDbType.Structured,
+                            TypeName = "dbo.Pridiction_TVP"
+                        };
 
-                        int k = cmdsW.ExecuteNonQuery();
-                        Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                        consW.Close();
+                        Message = DbHelper.ExecuteNonQueryWithMessage("Pridiction_Details_Insert_Using_Excel", 60,
+                            tvpParam,
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                     }
                 }
             }
@@ -1167,20 +1085,10 @@ namespace Slip.Controllers
                             xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
                         }
 
-                        SqlConnection consW = new SqlConnection(conn);
-                        SqlCommand cmdsW = new SqlCommand("Sawing_Loss_Summary_Insert", consW);
-                        cmdsW.CommandType = CommandType.StoredProcedure;
-                        cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                        cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                        cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        consW.Open();
-
-                        int k = cmdsW.ExecuteNonQuery();
-                        Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                        consW.Close();
+                        Message = DbHelper.ExecuteNonQueryWithMessage("Sawing_Loss_Summary_Insert",
+                            new SqlParameter("@ReportDate", Date),
+                            new SqlParameter("@XML", xmlStr),
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                     }
                 }
             }
@@ -1333,20 +1241,10 @@ namespace Slip.Controllers
                             xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
                         }
 
-                        SqlConnection consW = new SqlConnection(conn);
-                        SqlCommand cmdsW = new SqlCommand("TRN_Ideal_Labour_Upload", consW);
-                        cmdsW.CommandType = CommandType.StoredProcedure;
-                        cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                        cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                        cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        consW.Open();
-
-                        int k = cmdsW.ExecuteNonQuery();
-                        Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                        consW.Close();
+                        Message = DbHelper.ExecuteNonQueryWithMessage("TRN_Ideal_Labour_Upload",
+                            new SqlParameter("@ReportDate", Date),
+                            new SqlParameter("@XML", xmlStr),
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                     }
                 }
             }
@@ -1436,20 +1334,10 @@ namespace Slip.Controllers
                         XmlDocument pXmldata = CommonMethods.ConvertToXml(List);
                         xmlStr = "<DocumentElement>" + pXmldata.DocumentElement.InnerXml + "</DocumentElement>";
                     }
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("Jumbo_Date_Wise_Loss_Summary_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("Jumbo_Date_Wise_Loss_Summary_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@XML", xmlStr),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)
@@ -1651,21 +1539,11 @@ namespace Slip.Controllers
                         xmlDetails = "<DocumentElement>" + pXmldata2.DocumentElement.InnerXml + "</DocumentElement>";
                     }
 
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("Kapan_Wise_Cleaving_Report_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                    cmdsW.Parameters.AddWithValue("@XML_Details", xmlDetails);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("Kapan_Wise_Cleaving_Report_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@XML", xmlStr),
+                        new SqlParameter("@XML_Details", xmlDetails),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)
@@ -1823,20 +1701,10 @@ namespace Slip.Controllers
                         xmlStr = "<DocumentElement>" + pXmldata.DocumentElement.InnerXml + "</DocumentElement>";
                     }
 
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("Kapan_Wise_DST_Report_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("Kapan_Wise_DST_Report_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@XML", xmlStr),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)
@@ -1995,20 +1863,10 @@ namespace Slip.Controllers
                         xmlStr = "<DocumentElement>" + pXmldata.DocumentElement.InnerXml + "</DocumentElement>";
                     }
 
-                    SqlConnection consW = new SqlConnection(conn);
-                    SqlCommand cmdsW = new SqlCommand("Kapan_Wise_MFG_Report_Insert_Using_Excel", consW);
-                    cmdsW.CommandType = CommandType.StoredProcedure;
-                    cmdsW.Parameters.AddWithValue("@ReportDate", Date);
-                    cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                    cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                    cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                    cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                    consW.Open();
-
-                    int k = cmdsW.ExecuteNonQuery();
-                    Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                    consW.Close();
+                    Message = DbHelper.ExecuteNonQueryWithMessage("Kapan_Wise_MFG_Report_Insert_Using_Excel",
+                        new SqlParameter("@ReportDate", Date),
+                        new SqlParameter("@XML", xmlStr),
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                 }
             }
             catch (Exception ex)

@@ -18,6 +18,7 @@ namespace Slip.Models
         public string Remarks { get; set; }
         public string Priority { get; set; } = "REGULAR";
         public bool IsActive { get; set; }
+        public bool IsReceived { get; set; }
         public int UserID { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }

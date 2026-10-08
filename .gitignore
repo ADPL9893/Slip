@@ -34,3 +34,5 @@ secrets.json
 .env
 *.publishxml
 *.pubxml
+/SQL
+/Slip/.vs/Slip/config/applicationhost.config
