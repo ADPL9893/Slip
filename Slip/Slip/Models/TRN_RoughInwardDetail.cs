@@ -1,4 +1,4 @@
-namespace Slip.Models
+﻿namespace Slip.Models
 {
     public class TRN_RoughInwardDetail
     {
@@ -17,5 +17,15 @@ namespace Slip.Models
         public decimal? Rate { get; set; }
         public decimal? Amount { get; set; }
         public string Remarks { get; set; }
+        public string MachineNo { get; set; }
+        public string Size { get; set; }
+        public decimal? FromHeight { get; set; }
+        public decimal? ToHeight { get; set; }
+        public decimal? Hours { get; set; }
+        public string BoxNo { get; set; }
+        public string SizeCode { get; set; }
+        public string ColorType { get; set; }
+        public object IsDelete { get; internal set; }
+        public bool NotAllow { get; internal set; } = false;
     }
 }

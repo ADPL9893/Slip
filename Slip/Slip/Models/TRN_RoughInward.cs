@@ -8,6 +8,7 @@ namespace Slip.Models
         public int InwardID { get; set; }
         public string ChallanNo { get; set; }
         public DateTime ChallanDate { get; set; }
+        public string ChallanDateStr { get; set; }
         public int? FactoryCodeID { get; set; }
         public string FactoryCodeName { get; set; }
         public string SourceType { get; set; }
@@ -19,6 +20,8 @@ namespace Slip.Models
         public string ToBranchName { get; set; }
         public int PurposeID { get; set; }
         public string PurposeName { get; set; }
+        public string SizeCode { get; set; }
+        public string ColorType { get; set; }
         public string Remarks { get; set; }
         public int TotalPcs { get; set; }
         public decimal TotalCarat { get; set; }
