@@ -704,7 +704,7 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "TRNLabour", "TRN Labour", "Labour" };
-                    
+
                     using (SqlConnection con = new SqlConnection(conn))
                     {
                         con.Open();
@@ -995,12 +995,12 @@ namespace Slip.Controllers
 
                         cmd.ExecuteNonQuery();
                         Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        
+
                         if (Message.ToLower().Contains("successfully"))
                         {
                             isSuccess = true;
                         }
-                        
+
                         con.Close();
                     }
                 }
@@ -1031,7 +1031,7 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "RoughDistributionList", "RoughDistribution", "Rough Distribution List", "Rough Distribution" };
-                    
+
                     using (SqlConnection con = new SqlConnection(conn))
                     {
                         con.Open();
@@ -1637,7 +1637,7 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "RoughCodeMaster", "Rough Code Master", "RoughCode Master", "RoughCode" };
-                    
+
                     using (SqlConnection con = new SqlConnection(conn))
                     {
                         con.Open();
@@ -2843,11 +2843,13 @@ namespace Slip.Controllers
 
         private TRN_RoughInward MapRoughInwardHeader(SqlDataReader rdr)
         {
+            DateTime cDate = rdr["ChallanDate"] != DBNull.Value ? Convert.ToDateTime(rdr["ChallanDate"]) : DateTime.MinValue;
             return new TRN_RoughInward
             {
                 InwardID = Convert.ToInt32(rdr["InwardID"]),
                 ChallanNo = rdr["ChallanNo"] != DBNull.Value ? Convert.ToString(rdr["ChallanNo"]) : "",
-                ChallanDate = rdr["ChallanDate"] != DBNull.Value ? Convert.ToDateTime(rdr["ChallanDate"]) : DateTime.MinValue,
+                ChallanDate = cDate,
+                ChallanDateStr = cDate > new DateTime(1753, 1, 1) ? cDate.ToString("yyyy-MM-dd") : "",
                 FactoryCodeID = rdr["FactoryCodeID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["FactoryCodeID"]) : null,
                 FactoryCodeName = SafeGetColumn(rdr, "FactoryCodeName") != null ? Convert.ToString(SafeGetColumn(rdr, "FactoryCodeName")) : "",
                 SourceType = rdr["SourceType"] != DBNull.Value ? Convert.ToString(rdr["SourceType"]) : "",
@@ -2859,6 +2861,8 @@ namespace Slip.Controllers
                 ToBranchName = SafeGetColumn(rdr, "ToBranchName") != null ? Convert.ToString(SafeGetColumn(rdr, "ToBranchName")) : "",
                 PurposeID = rdr["PurposeID"] != DBNull.Value ? Convert.ToInt32(rdr["PurposeID"]) : 0,
                 PurposeName = SafeGetColumn(rdr, "PurposeName") != null ? Convert.ToString(SafeGetColumn(rdr, "PurposeName")) : "",
+                SizeCode = SafeGetColumn(rdr, "SizeCode") != null ? Convert.ToString(SafeGetColumn(rdr, "SizeCode")) : "",
+                ColorType = SafeGetColumn(rdr, "ColorType") != null ? Convert.ToString(SafeGetColumn(rdr, "ColorType")) : "",
                 Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
                 TotalPcs = rdr["TotalPcs"] != DBNull.Value ? Convert.ToInt32(rdr["TotalPcs"]) : 0,
                 TotalCarat = rdr["TotalCarat"] != DBNull.Value ? Convert.ToDecimal(rdr["TotalCarat"]) : 0,
@@ -2875,7 +2879,7 @@ namespace Slip.Controllers
         {
             try
             {
-                List<TRN_RoughInward> list = new List<TRN_RoughInward>();
+                DataTable dt = new DataTable();
 
                 using (SqlConnection con = new SqlConnection(conn))
                 using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_GetList", con))
@@ -2885,14 +2889,38 @@ namespace Slip.Controllers
                     cmd.Parameters.AddWithValue("@ToBranchID", DBNull.Value);
 
                     con.Open();
-                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                     {
-                        while (rdr.Read())
-                        {
-                            list.Add(MapRoughInwardHeader(rdr));
-                        }
+                        da.Fill(dt);
                     }
                     con.Close();
+                }
+
+                List<Dictionary<string, object>> list = new List<Dictionary<string, object>>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    var dict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                    foreach (DataColumn col in dt.Columns)
+                    {
+                        object val = row[col];
+                        if (val == DBNull.Value)
+                        {
+                            dict[col.ColumnName] = null;
+                        }
+                        else if (col.DataType == typeof(DateTime))
+                        {
+                            dict[col.ColumnName] = Convert.ToDateTime(val).ToString("yyyy-MM-dd");
+                        }
+                        else if (col.DataType == typeof(string))
+                        {
+                            dict[col.ColumnName] = val.ToString().Trim();
+                        }
+                        else
+                        {
+                            dict[col.ColumnName] = val;
+                        }
+                    }
+                    list.Add(dict);
                 }
 
                 var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
@@ -2902,7 +2930,7 @@ namespace Slip.Controllers
             catch (Exception ex)
             {
                 ErrorLogger.ErrorLog(ex);
-                return Json(new { success = false, message = ex.Message, list = new List<TRN_RoughInward>() }, JsonRequestBehavior.AllowGet);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
             }
         }
 
@@ -2949,7 +2977,17 @@ namespace Slip.Controllers
                                         Carat = rdr["Carat"] != DBNull.Value ? Convert.ToDecimal(rdr["Carat"]) : 0,
                                         Rate = rdr["Rate"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["Rate"]) : null,
                                         Amount = rdr["Amount"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["Amount"]) : null,
-                                        Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : ""
+                                        Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                                        MachineNo = SafeGetColumn(rdr, "MachineNo") != null ? Convert.ToString(SafeGetColumn(rdr, "MachineNo")) : "",
+                                        Size = SafeGetColumn(rdr, "Size") != null ? Convert.ToString(SafeGetColumn(rdr, "Size")) : "",
+                                        FromHeight = SafeGetColumn(rdr, "FromHeight") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "FromHeight")) : null,
+                                        ToHeight = SafeGetColumn(rdr, "ToHeight") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "ToHeight")) : null,
+                                        Hours = SafeGetColumn(rdr, "Hours") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "Hours")) : null,
+                                        BoxNo = SafeGetColumn(rdr, "BoxNo") != null ? Convert.ToString(SafeGetColumn(rdr, "BoxNo")) : "",
+                                        SizeCode = SafeGetColumn(rdr, "SizeCode") != null ? Convert.ToString(SafeGetColumn(rdr, "SizeCode")) : "",
+                                        ColorType = SafeGetColumn(rdr, "ColorType") != null ? Convert.ToString(SafeGetColumn(rdr, "ColorType")) : "",
+                                        //NotAllow = SafeGetColumn(rdr, "NotAllow") != null ? Convert.ToBoolean(SafeGetColumn(rdr, "NotAllow")) : false,
+                                        NotAllow = SafeGetColumn(rdr, "NotAllow") != null ? (Convert.ToInt32(SafeGetColumn(rdr, "NotAllow")) == 1) : false,
                                     });
                                 }
                             }
@@ -2958,7 +2996,13 @@ namespace Slip.Controllers
                     con.Close();
                 }
 
-                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+                string cDateFormatted = "";
+                if (item != null && item.ChallanDate > new DateTime(1753, 1, 1))
+                {
+                    cDateFormatted = item.ChallanDate.ToString("yyyy-MM-dd");
+                }
+
+                return Json(new { success = item != null, item = item, challanDateFormatted = cDateFormatted }, JsonRequestBehavior.AllowGet);
             }
             catch (Exception ex)
             {
@@ -2966,6 +3010,175 @@ namespace Slip.Controllers
                 return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
+
+        //[HttpPost]
+        //public JsonResult RoughInward_Save(TRN_RoughInward model, string Action = "INSERT")
+        //{
+        //    string message = "";
+        //    bool isSuccess = false;
+        //    try
+        //    {
+        //        int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+        //        bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.InwardID > 0;
+
+        //        if (string.Equals(model.SourceType, "BRANCH", StringComparison.OrdinalIgnoreCase)
+        //            && model.FromBranchID.HasValue && model.FromBranchID.Value == model.ToBranchID)
+        //        {
+        //            return Json(new { success = false, message = "From Branch and To Branch cannot be the same." });
+        //        }
+
+        //        using (SqlConnection con = new SqlConnection(conn))
+        //        {
+        //            con.Open();
+        //            using (SqlTransaction tran = con.BeginTransaction())
+        //            {
+        //                try
+        //                {
+        //                    int inwardId;
+        //                    string spName = isUpdate ? "USP_TRN_RoughInward_Update" : "USP_TRN_RoughInward_Insert";
+
+        //                    using (SqlCommand cmd = new SqlCommand(spName, con, tran))
+        //                    {
+        //                        cmd.CommandType = CommandType.StoredProcedure;
+        //                        if (isUpdate)
+        //                        {
+        //                            cmd.Parameters.AddWithValue("@InwardID", model.InwardID);
+        //                        }
+
+        //                        DateTime saveChallanDate = model.ChallanDate;
+        //                        if (!string.IsNullOrWhiteSpace(model.ChallanDateStr))
+        //                        {
+        //                            DateTime parsed;
+        //                            if (DateTime.TryParse(model.ChallanDateStr, out parsed) && parsed >= new DateTime(1753, 1, 1))
+        //                            {
+        //                                saveChallanDate = parsed;
+        //                            }
+        //                        }
+        //                        if (saveChallanDate < new DateTime(1753, 1, 1))
+        //                        {
+        //                            saveChallanDate = DateTime.Today;
+        //                        }
+
+        //                        cmd.Parameters.AddWithValue("@ChallanNo", model.ChallanNo ?? "");
+        //                        cmd.Parameters.AddWithValue("@ChallanDate", saveChallanDate);
+        //                        cmd.Parameters.AddWithValue("@FactoryCodeID", (object)model.FactoryCodeID ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue("@SourceType", model.SourceType ?? "");
+        //                        cmd.Parameters.AddWithValue("@FromBranchID", (object)model.FromBranchID ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue("@FromPartyID", (object)model.FromPartyID ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue("@ToBranchID", model.ToBranchID);
+        //                        cmd.Parameters.AddWithValue("@PurposeID", model.PurposeID);
+        //                        cmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId);
+
+        //                        using (SqlDataReader rdr = cmd.ExecuteReader())
+        //                        {
+        //                            if (!rdr.Read())
+        //                            {
+        //                                throw new Exception("No response from server while saving Rough Inward.");
+        //                            }
+        //                            object successVal = SafeGetColumn(rdr, "Success");
+        //                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+        //                            object msgVal = SafeGetColumn(rdr, "Message");
+        //                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+        //                            object idVal = SafeGetColumn(rdr, "InwardID");
+        //                            inwardId = idVal != null ? Convert.ToInt32(idVal) : model.InwardID;
+        //                        }
+        //                    }
+
+        //                    if (!isSuccess)
+        //                    {
+        //                        tran.Rollback();
+        //                        return Json(new { success = false, message = message });
+        //                    }
+
+        //                    //if (isUpdate)
+        //                    //{
+        //                    //    using (SqlCommand delCmd = new SqlCommand("USP_TRN_RoughInwardDetail_DeleteByInward", con, tran))
+        //                    //    {
+        //                    //        delCmd.CommandType = CommandType.StoredProcedure;
+        //                    //        delCmd.Parameters.AddWithValue("@InwardID", inwardId);
+        //                    //        delCmd.ExecuteNonQuery();
+        //                    //    }
+        //                    //}
+
+        //                    if (model.Details != null)
+        //                    {
+        //                        int srNo = 1;
+        //                        foreach (var line in model.Details)
+        //                        {
+        //                            if (string.IsNullOrWhiteSpace(line.LotNo)) continue;
+
+
+        //                            if (line.InwardDetailID != 0)
+        //                            { 
+
+
+
+        //                            }
+        //                            else
+        //                            {
+        //                                using (SqlCommand lineCmd = new SqlCommand("USP_TRN_RoughInwardDetail_Insert", con, tran))
+        //                                {
+        //                                    lineCmd.CommandType = CommandType.StoredProcedure;
+        //                                    lineCmd.Parameters.AddWithValue("@InwardID", inwardId);
+        //                                    lineCmd.Parameters.AddWithValue("@SrNo", srNo);
+        //                                    lineCmd.Parameters.AddWithValue("@LotNo", line.LotNo ?? "");
+        //                                    lineCmd.Parameters.AddWithValue("@GrowthRate", (object)line.GrowthRate ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@AvgGrowthRate", (object)line.AvgGrowthRate ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@RecipeID", (object)line.RecipeID ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@GradeID", (object)line.GradeID ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Pcs", line.Pcs);
+        //                                    lineCmd.Parameters.AddWithValue("@Carat", line.Carat);
+        //                                    lineCmd.Parameters.AddWithValue("@Rate", (object)line.Rate ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Amount", (object)line.Amount ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Remarks", (object)line.Remarks ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@MachineNo", (object)line.MachineNo ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Size", (object)line.Size ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@FromHeight", (object)line.FromHeight ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@ToHeight", (object)line.ToHeight ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Hours", (object)line.Hours ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@BoxNo", (object)line.BoxNo ?? DBNull.Value);
+        //                                    string lineSizeCode = !string.IsNullOrWhiteSpace(line.SizeCode) ? line.SizeCode : model.SizeCode;
+        //                                    string lineColorType = !string.IsNullOrWhiteSpace(line.ColorType) ? line.ColorType : model.ColorType;
+        //                                    lineCmd.Parameters.AddWithValue("@SizeCode", (object)lineSizeCode ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@ColorType", (object)lineColorType ?? DBNull.Value);
+        //                                    lineCmd.ExecuteNonQuery();
+        //                                }
+        //                            }
+        //                            srNo++;
+        //                        }
+        //                    }
+
+        //                    using (SqlCommand recalcCmd = new SqlCommand("USP_TRN_RoughInward_RecalcTotals", con, tran))
+        //                    {
+        //                        recalcCmd.CommandType = CommandType.StoredProcedure;
+        //                        recalcCmd.Parameters.AddWithValue("@InwardID", inwardId);
+        //                        recalcCmd.ExecuteNonQuery();
+        //                    }
+
+        //                    tran.Commit();
+        //                }
+        //                catch
+        //                {
+        //                    tran.Rollback();
+        //                    throw;
+        //                }
+        //            }
+        //        }
+
+        //        if (isSuccess && string.IsNullOrEmpty(message))
+        //        {
+        //            message = isUpdate ? "Rough Inward updated successfully." : "Rough Inward saved successfully.";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ErrorLogger.ErrorLog(ex);
+        //        message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+        //        isSuccess = false;
+        //    }
+        //    return Json(new { success = isSuccess, message = message });
+        //}
 
         [HttpPost]
         public JsonResult RoughInward_Save(TRN_RoughInward model, string Action = "INSERT")
@@ -3000,8 +3213,23 @@ namespace Slip.Controllers
                                 {
                                     cmd.Parameters.AddWithValue("@InwardID", model.InwardID);
                                 }
+
+                                DateTime saveChallanDate = model.ChallanDate;
+                                if (!string.IsNullOrWhiteSpace(model.ChallanDateStr))
+                                {
+                                    DateTime parsed;
+                                    if (DateTime.TryParse(model.ChallanDateStr, out parsed) && parsed >= new DateTime(1753, 1, 1))
+                                    {
+                                        saveChallanDate = parsed;
+                                    }
+                                }
+                                if (saveChallanDate < new DateTime(1753, 1, 1))
+                                {
+                                    saveChallanDate = DateTime.Today;
+                                }
+
                                 cmd.Parameters.AddWithValue("@ChallanNo", model.ChallanNo ?? "");
-                                cmd.Parameters.AddWithValue("@ChallanDate", model.ChallanDate);
+                                cmd.Parameters.AddWithValue("@ChallanDate", saveChallanDate);
                                 cmd.Parameters.AddWithValue("@FactoryCodeID", (object)model.FactoryCodeID ?? DBNull.Value);
                                 cmd.Parameters.AddWithValue("@SourceType", model.SourceType ?? "");
                                 cmd.Parameters.AddWithValue("@FromBranchID", (object)model.FromBranchID ?? DBNull.Value);
@@ -3032,26 +3260,15 @@ namespace Slip.Controllers
                                 return Json(new { success = false, message = message });
                             }
 
-                            if (isUpdate)
-                            {
-                                using (SqlCommand delCmd = new SqlCommand("USP_TRN_RoughInwardDetail_DeleteByInward", con, tran))
-                                {
-                                    delCmd.CommandType = CommandType.StoredProcedure;
-                                    delCmd.Parameters.AddWithValue("@InwardID", inwardId);
-                                    delCmd.ExecuteNonQuery();
-                                }
-                            }
-
                             if (model.Details != null)
                             {
                                 int srNo = 1;
                                 foreach (var line in model.Details)
                                 {
-                                    if (string.IsNullOrWhiteSpace(line.LotNo)) continue;
-
-                                    using (SqlCommand lineCmd = new SqlCommand("USP_TRN_RoughInwardDetail_Insert", con, tran))
+                                    using (SqlCommand lineCmd = new SqlCommand("USP_TRN_RoughInwardDetail_Save", con, tran))
                                     {
                                         lineCmd.CommandType = CommandType.StoredProcedure;
+                                        lineCmd.Parameters.AddWithValue("@InwardDetailID", line.InwardDetailID);
                                         lineCmd.Parameters.AddWithValue("@InwardID", inwardId);
                                         lineCmd.Parameters.AddWithValue("@SrNo", srNo);
                                         lineCmd.Parameters.AddWithValue("@LotNo", line.LotNo ?? "");
@@ -3064,6 +3281,17 @@ namespace Slip.Controllers
                                         lineCmd.Parameters.AddWithValue("@Rate", (object)line.Rate ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@Amount", (object)line.Amount ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@Remarks", (object)line.Remarks ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@MachineNo", (object)line.MachineNo ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Size", (object)line.Size ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@FromHeight", (object)line.FromHeight ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@ToHeight", (object)line.ToHeight ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Hours", (object)line.Hours ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@BoxNo", (object)line.BoxNo ?? DBNull.Value);
+                                        string lineSizeCode = !string.IsNullOrWhiteSpace(line.SizeCode) ? line.SizeCode : model.SizeCode;
+                                        string lineColorType = !string.IsNullOrWhiteSpace(line.ColorType) ? line.ColorType : model.ColorType;
+                                        lineCmd.Parameters.AddWithValue("@SizeCode", (object)lineSizeCode ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@ColorType", (object)lineColorType ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@IsDelete", line.IsDelete);
                                         lineCmd.ExecuteNonQuery();
                                     }
                                     srNo++;
@@ -3102,33 +3330,215 @@ namespace Slip.Controllers
         }
 
         [HttpPost]
-        public JsonResult RoughInward_Delete(int InwardID)
+        public JsonResult RoughInward_Delete(int? InwardID, TRN_RoughInward model)
         {
             string message = "";
             bool isSuccess = false;
             try
             {
+                int targetInwardId = InwardID.HasValue && InwardID.Value > 0 ? InwardID.Value : (model != null ? model.InwardID : 0);
+                if (targetInwardId <= 0)
+                {
+                    string rawId = Request["InwardID"] ?? Request["inwardID"] ?? Request["id"];
+                    int.TryParse(rawId, out targetInwardId);
+                }
+
+                if (targetInwardId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid Inward ID specified for deletion." }, JsonRequestBehavior.AllowGet);
+                }
+
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
 
                 using (SqlConnection con = new SqlConnection(conn))
                 using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_Delete", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("@InwardID", InwardID);
+                    cmd.Parameters.AddWithValue("@InwardID", targetInwardId);
                     cmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
 
                     con.Open();
                     using (SqlDataReader rdr = cmd.ExecuteReader())
                     {
-                        if (rdr.Read())
+                        do
+                        {
+                            while (rdr.Read())
+                            {
+                                object successVal = SafeGetColumn(rdr, "Success");
+                                if (successVal != null)
+                                {
+                                    int sVal = 0;
+                                    if (int.TryParse(successVal.ToString(), out sVal))
+                                    {
+                                        isSuccess = (sVal == 1);
+                                    }
+                                    else if (bool.TryParse(successVal.ToString(), out bool bVal))
+                                    {
+                                        isSuccess = bVal;
+                                    }
+                                }
+
+                                object msgVal = SafeGetColumn(rdr, "Message");
+                                if (msgVal != null && !string.IsNullOrWhiteSpace(msgVal.ToString()))
+                                {
+                                    message = msgVal.ToString().Trim();
+                                }
+                            }
+                        } while (rdr.NextResult());
+                    }
+                    con.Close();
+                }
+
+                if (!isSuccess && string.IsNullOrWhiteSpace(message))
+                {
+                    message = "Cannot delete Rough Inward.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = !string.IsNullOrWhiteSpace(message) ? message : (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message }, JsonRequestBehavior.AllowGet);
+        }
+
+
+        //[HttpPost]
+        //public JsonResult RoughInwardDetail_Delete(int? InwardDetailID, TRN_RoughInward model)
+        //{
+        //    string message = "";
+        //    bool isSuccess = false;
+        //    try
+        //    {
+        //        int targetInwardId = InwardDetailID.HasValue && InwardDetailID.Value > 0 ? InwardDetailID.Value : (model != null ? model.InwardID : 0);
+        //        if (targetInwardId <= 0)
+        //        {
+        //            string rawId = Request["InwardID"] ?? Request["inwardID"] ?? Request["id"];
+        //            int.TryParse(rawId, out targetInwardId);
+        //        }
+
+        //        if (targetInwardId <= 0)
+        //        {
+        //            return Json(new { success = false, message = "Invalid Inward ID specified for deletion." }, JsonRequestBehavior.AllowGet);
+        //        }
+
+        //        int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+        //        using (SqlConnection con = new SqlConnection(conn))
+        //        using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInwardDetail_DeleteByInwardDetail", con))
+        //        {
+        //            cmd.CommandType = CommandType.StoredProcedure;
+        //            cmd.Parameters.AddWithValue("@InwardDetailID", targetInwardId);
+
+        //            con.Open();
+        //            using (SqlDataReader rdr = cmd.ExecuteReader())
+        //            {
+        //                do
+        //                {
+        //                    while (rdr.Read())
+        //                    {
+        //                        object successVal = SafeGetColumn(rdr, "Success");
+        //                        if (successVal != null)
+        //                        {
+        //                            int sVal = 0;
+        //                            if (int.TryParse(successVal.ToString(), out sVal))
+        //                            {
+        //                                isSuccess = (sVal == 1);
+        //                            }
+        //                            else if (bool.TryParse(successVal.ToString(), out bool bVal))
+        //                            {
+        //                                isSuccess = bVal;
+        //                            }
+        //                        }
+
+        //                        object msgVal = SafeGetColumn(rdr, "Message");
+        //                        if (msgVal != null && !string.IsNullOrWhiteSpace(msgVal.ToString()))
+        //                        {
+        //                            message = msgVal.ToString().Trim();
+        //                        }
+        //                    }
+        //                } while (rdr.NextResult());
+        //            }
+        //            con.Close();
+        //        }
+
+        //        if (!isSuccess && string.IsNullOrWhiteSpace(message))
+        //        {
+        //            message = "Cannot delete Rough Inward.";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ErrorLogger.ErrorLog(ex);
+        //        message = !string.IsNullOrWhiteSpace(message) ? message : (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+        //        isSuccess = false;
+        //    }
+        //    return Json(new { success = isSuccess, message = message }, JsonRequestBehavior.AllowGet);
+        //}
+
+
+        [HttpPost]
+        public JsonResult RoughInwardDetail_Delete(int? InwardDetailID, int? InwardID, TRN_RoughInward model)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int targetDetailId = InwardDetailID.HasValue && InwardDetailID.Value > 0 ? InwardDetailID.Value : 0;
+                if (targetDetailId <= 0 && InwardID.HasValue && InwardID.Value > 0)
+                {
+                    targetDetailId = InwardID.Value;
+                }
+                if (targetDetailId <= 0 && model != null)
+                {
+                    targetDetailId = model.InwardID;
+                }
+                if (targetDetailId <= 0)
+                {
+                    string rawId = Request["InwardID"] ?? Request["inwardID"] ?? Request["InwardDetailID"] ?? Request["id"] ?? Request["InwardDetailId"];
+                    int.TryParse(rawId, out targetDetailId);
+                }
+
+                if (targetDetailId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid Inward Detail ID specified for deletion." }, JsonRequestBehavior.AllowGet);
+                }
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInwardDetail_DeleteByInwardDetail", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@InwardDetailID", targetDetailId);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
                         {
                             object successVal = SafeGetColumn(rdr, "Success");
-                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                            if (successVal != null)
+                            {
+                                int sVal = 0;
+                                if (int.TryParse(successVal.ToString(), out sVal))
+                                {
+                                    isSuccess = (sVal == 1);
+                                }
+                            }
+
                             object msgVal = SafeGetColumn(rdr, "Message");
-                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+                            if (msgVal != null)
+                            {
+                                message = msgVal.ToString().Trim();
+                                }
                         }
                     }
                     con.Close();
+                }
+
+                if (!isSuccess && string.IsNullOrWhiteSpace(message))
+                {
+                    message = "Cannot delete this lot line.";
                 }
             }
             catch (Exception ex)
@@ -3137,7 +3547,7 @@ namespace Slip.Controllers
                 message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
                 isSuccess = false;
             }
-            return Json(new { success = isSuccess, message = message });
+            return Json(new { success = isSuccess, message = message }, JsonRequestBehavior.AllowGet);
         }
 
         #endregion

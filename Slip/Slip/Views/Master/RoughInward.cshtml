@@ -95,6 +95,47 @@
         padding: 0 !important; box-shadow: none !important; min-height: calc(100vh - 210px);
     }
 
+    /* ==========================================================================
+       DevExtreme Grid Header Filter Icons: Single Funnel on RIGHT for All Columns
+       ========================================================================== */
+    #inwardGridContainer .dx-datagrid-headers .dx-header-row > td {
+        white-space: nowrap !important;
+    }
+
+    #inwardGridContainer .dx-datagrid-headers .dx-column-indicators {
+        float: right !important;
+        margin-left: 6px !important;
+        margin-right: 0 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        vertical-align: middle !important;
+    }
+
+    /* Hide any duplicate / dummy second indicator container that DevExtreme creates for centered columns */
+    #inwardGridContainer .dx-datagrid-headers .dx-column-indicators ~ .dx-column-indicators,
+    #inwardGridContainer .dx-datagrid-headers .dx-column-indicators.dx-visibility-hidden,
+    #inwardGridContainer .dx-datagrid-headers .dx-column-indicators.dx-visibility-hidden *,
+    #inwardGridContainer .dx-datagrid-headers .dx-visibility-hidden,
+    #inwardGridContainer .dx-datagrid-headers .dx-visibility-hidden * {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+    }
+
+    #inwardGridContainer .dx-datagrid-headers .dx-header-filter {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        vertical-align: middle !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
     .grid-btn-group { display: inline-flex; align-items: center; gap: 6px; }
 
     .grid-btn-edit {
@@ -208,9 +249,13 @@
     }
     .ri-lines-table td { padding: 4px; border: 1px solid #e2e8f0; text-align: center; vertical-align: middle; }
     .ri-lines-table input, .ri-lines-table select { width: 100%; height: 32px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; font-size: 12px; text-align: center; }
+    .ri-lines-table select { background-color: #ffffff; cursor: pointer; }
     .ri-lines-table input.ri-lot-input { text-align: left; }
     .ri-lines-table .ri-amount-cell { font-weight: 700; color: #0f172a; }
     .ri-lines-table-wrap { width: 100%; overflow-x: auto; }
+    .ri-range-cell { display: flex; align-items: center; gap: 3px; min-width: 110px; }
+    .ri-range-cell input { flex: 1; min-width: 44px; text-align: center; height: 32px; }
+    .ri-range-sep { color: #64748b; font-weight: 700; font-size: 11px; flex-shrink: 0; padding: 0 1px; }
 
     .btn-ri-add-row {
         background: #e0f2fe; color: #0369a1 !important; border: 1px dashed #7dd3fc; border-radius: 6px; height: 32px; padding: 0 14px;
@@ -364,68 +409,112 @@
                     <div class="ri-modal-section" style="margin-bottom: 5px;">
                         <div class="ri-modal-section-title"><i class="fa fa-list text-primary"></i> JANGAD / LOT LINES</div>
                         <div class="row">
-                            <div class="col-md-4 col-sm-4 col-xs-12 ri-form-group">
-                                <label class="ri-label" for="ModalFactoryCodeID">FACTORY CODE</label>
-                                <select id="ModalFactoryCodeID" chosen="FactoryCodeList" class="form-control ri-input" ng-model="FormModel.FactoryCodeID" ng-options="item.FactoryCodeID as item.FactoryCode for item in FactoryCodeList">
-                                    <option value="">Select Factory Code</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 col-sm-4 col-xs-12 ri-form-group">
+                            <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalPurposeID">PURPOSE <span class="req">*</span></label>
                                 <select id="ModalPurposeID" chosen="PurposeList" class="form-control ri-input" ng-model="FormModel.PurposeID" ng-options="item.PurposeID as item.PurposeName for item in PurposeList">
                                     <option value="">Select Purpose</option>
                                 </select>
                             </div>
-                            <div class="col-md-4 col-sm-4 col-xs-12 ri-form-group">
+                            <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalFactoryCodeID">FACTORY CODE <span class="req">*</span></label>
+                                <select id="ModalFactoryCodeID" chosen="FactoryCodeList" class="form-control ri-input" ng-model="FormModel.FactoryCodeID" ng-options="item.FactoryCodeID as item.FactoryCode for item in FactoryCodeList">
+                                    <option value="">Select Factory Code</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalSizeCode">SIZE CODE <span class="req">*</span></label>
+                                <select id="ModalSizeCode" chosen="SizeCodeList" class="form-control ri-input" ng-model="FormModel.SizeCode" ng-change="OnHeaderSizeCodeChange()">
+                                    <option value="">Select Size Code</option>
+                                    <option value="JC">JC</option>
+                                    <option value="JW">JW</option>
+                                    <option value="SW">SW</option>
+                                    <option value="SC">SC</option>
+                                    <option value="G2">G2</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalColorType">COLOR TYPE <span class="req">*</span></label>
+                                <select id="ModalColorType" chosen="ColorTypeList" class="form-control ri-input" ng-model="FormModel.ColorType" ng-change="OnHeaderColorTypeChange()">
+                                    <option value="">Select Color Type</option>
+                                    <option value="White">White</option>
+                                    <option value="Color">Color</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 col-sm-8 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalRemarks">REMARKS</label>
                                 <input type="text" id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Enter Remarks" class="ri-input" />
                             </div>
                         </div>
                         <div class="ri-lines-table-wrap">
-                        <table class="ri-lines-table">
-                            <thead>
-                                <tr>
-                                    <th style="width: 36px;">#</th>
-                                    <th style="min-width: 130px;">Lot No</th>
-                                    <th style="width: 100px;">Growth Rate</th>
-                                    <th style="width: 100px;">Avg Growth Rate</th>
-                                    <th style="width: 120px;">Recipe</th>
-                                    <th style="width: 100px;">Grade</th>
-                                    <th style="width: 70px;">Pcs</th>
-                                    <th style="width: 90px;">Carat</th>
-                                    <th style="width: 100px;">Rate</th>
-                                    <th style="width: 110px;">Amount</th>
-                                    <th style="width: 40px;"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr ng-repeat="line in FormModel.Details track by $index">
-                                    <td>{{$index + 1}}</td>
-                                    <td><input type="text" class="ri-lot-input" ng-model="line.LotNo" placeholder="Lot No" /></td>
-                                    <td><input type="text" ng-model="line.GrowthRate" placeholder="Growth Rate" /></td>
-                                    <td><input type="number" ng-model="line.AvgGrowthRate" min="0" step="0.01" placeholder="Avg Growth Rate" /></td>
-                                    <td>
-                                        <select ng-model="line.RecipeID" ng-options="item.ReceipeID as item.Receipe for item in RecipeList">
-                                            <option value="">Select</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select ng-model="line.GradeID" ng-options="item.GradeID as item.Grade for item in GradeList">
-                                            <option value="">Select</option>
-                                        </select>
-                                    </td>
-                                    <td><input type="number" ng-model="line.Pcs" min="0" /></td>
-                                    <td><input type="number" ng-model="line.Carat" min="0" step="0.01" ng-change="RecalcLine(line)" /></td>
-                                    <td><input type="number" ng-model="line.Rate" min="0" step="0.01" ng-change="RecalcLine(line)" /></td>
-                                    <td class="ri-amount-cell">{{(line.Amount || 0) | number:2}}</td>
-                                    <td>
-                                        <button type="button" class="btn-ri-del-row" ng-click="RemoveLine($index)" title="Remove row">
-                                            <i class="fa fa-times"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                            <table class="ri-lines-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 36px;">#</th>
+                                        <th style="min-width: 120px;">Lot No <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="width: 95px;">Growth Rate</th>
+                                        <th style="width: 95px;">Avg Growth Rate</th>
+                                        <th style="width: 90px;">Machine No</th>
+                                        <th style="width: 80px;">Size <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="min-width: 125px;">Height (From - To) <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="width: 75px;">Hours</th>
+                                        <th style="width: 85px;">Box No <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="width: 110px;">Recipe <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="width: 95px;">Grade <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="width: 65px;">Pcs</th>
+                                        <th style="width: 85px;">Carat</th>
+                                        <th style="width: 85px;">Rate</th>
+                                        <th style="width: 95px;">Amount</th>
+                                        <th style="width: 40px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="line in FormModel.Details track by $index" ng-hide="line.IsDelete">
+                                        <td>{{$index + 1}}</td>
+                                        <td><input type="text" class="ri-lot-input" ng-model="line.LotNo" placeholder="Lot No" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="text" ng-model="line.GrowthRate" placeholder="Growth Rate" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="number" ng-model="line.AvgGrowthRate" min="0" step="0.001" placeholder="Avg Growth Rate" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="text" ng-model="line.MachineNo" placeholder="M/C No" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="text" ng-model="line.Size" placeholder="Size" ng-disabled="line.NotAllow" /></td>
+                                        <td>
+                                            <div class="ri-range-cell">
+                                                <input type="number" ng-model="line.FromHeight" min="0" step="0.001" placeholder="From" ng-disabled="line.NotAllow" />
+                                                <span class="ri-range-sep">-</span>
+                                                <input type="number" ng-model="line.ToHeight" min="0" step="0.001" placeholder="To" ng-disabled="line.NotAllow" />
+                                            </div>
+                                        </td>
+                                        <td><input type="number" ng-model="line.Hours" min="0" step="0.01" placeholder="Hours" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="text" ng-model="line.BoxNo" placeholder="Box No" ng-disabled="line.NotAllow" /></td>
+                                        <td>
+                                            <select ng-model="line.RecipeID" ng-options="item.ReceipeID as item.Receipe for item in RecipeList" ng-disabled="line.NotAllow">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select ng-model="line.GradeID" ng-options="item.GradeID as item.Grade for item in GradeList" ng-disabled="line.NotAllow">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </td>
+                                        <td><input type="number" ng-model="line.Pcs" min="0" ng-disabled="line.NotAllow"/></td>
+                                        <td><input type="number" ng-model="line.Carat" min="0" step="0.001" ng-change="RecalcLine(line)" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="number" ng-model="line.Rate" min="0" step="0.01" ng-change="RecalcLine(line)" ng-disabled="line.NotAllow" /></td>
+                                        <td class="ri-amount-cell">{{(line.Amount || 0) | number:2}}</td>
+                                        <td>
+                                            <span ng-if="line.NotAllow === true || line.IsLocked === true" title="Locked: Already distributed in Rough Distribution" style="color: #f59e0b; font-size: 15px; font-weight: bold; display: inline-block; padding: 4px;">
+                                                <i class="fa fa-lock"></i>
+                                            </span>
+                                            @*<button type="button" class="btn-ri-del-row" ng-click="RemoveLine($index)" title="Remove row">
+            <i class="fa fa-times"></i>
+        </button>*@
+                                            @*<button type="button" class="btn-ri-del-row" ng-if="line.NotAllow !== true && !line.IsLocked && !FormModel.IsReadOnly" ng-click="RemoveLine($index)" title="Remove row">
+            <i class="fa fa-times"></i>
+        </button>*@
+                                            <button type="button" class="btn-ri-del-row" ng-if="!line.NotAllow && !FormModel.IsReadOnly" ng-click="RemoveLine($index)" title="Remove row">
+                                                <i class="fa fa-times"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                         <button type="button" class="btn-ri-add-row" ng-click="AddLine()">
                             <i class="fa fa-plus"></i> Add Row
@@ -439,11 +528,21 @@
                     </div>
                 </div>
 
+                @*<div class="modal-footer">
+            <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
+                <i class="fa fa-refresh"></i> Reset
+            </button>
+            <button class="btn-ri-save" type="button" ng-click="SaveInward()" ng-disabled="IsSaving">
+                <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                {{FormModel.InwardID > 0 ? 'UPDATE' : 'SAVE'}}
+            </button>
+        </div>*@
                 <div class="modal-footer">
-                    <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
+                    <!-- Reset button is hidden when form is in ReadOnly/Locked mode -->
+                    <button class="btn-ri-reset" type="button" ng-hide="FormModel.IsReadOnly" ng-click="ResetForm()">
                         <i class="fa fa-refresh"></i> Reset
                     </button>
-                    <button class="btn-ri-save" type="button" ng-click="SaveInward()" ng-disabled="IsSaving">
+                    <button class="btn-ri-save" type="button" ng-click="SaveInward()" ng-disabled="IsSaving || FormModel.IsReadOnly">
                         <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
                         {{FormModel.InwardID > 0 ? 'UPDATE' : 'SAVE'}}
                     </button>
@@ -469,8 +568,10 @@
                     </p>
                 </div>
                 <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
-                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
-                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
+                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;" ng-disabled="IsDeleting">Cancel</button>
+                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;" ng-disabled="IsDeleting">
+                        <i class="fa fa-spinner fa-spin" ng-show="IsDeleting"></i> Delete
+                    </button>
                 </div>
             </div>
         </div>
@@ -522,29 +623,66 @@
         $scope.RecipeList = [];
         $scope.GradeList = [];
         $scope.FactoryCodeList = [];
+        $scope.SizeCodeList = ['JC', 'JW', 'SW', 'SC', 'G2'];
+        $scope.ColorTypeList = ['White', 'Color'];
         $scope.IsLoading = false;
         $scope.IsSaving = false;
+        $scope.IsDeleting = false;
         $scope.SelectedDeleteItem = null;
 
         $scope.NewEmptyLine = function () {
             return {
-                LotNo: '', GrowthRate: '', AvgGrowthRate: null, RecipeID: null, GradeID: null,
-                Pcs: 0, Carat: 0, Rate: 0, Amount: 0, Remarks: ''
+                InwardDetailID: 0,
+                LotNo: '',
+                GrowthRate: '',
+                AvgGrowthRate: null,
+                MachineNo: '',
+                Size: '',
+                FromHeight: null,
+                ToHeight: null,
+                Hours: null,
+                BoxNo: '',
+                RecipeID: null,
+                GradeID: null,
+                Pcs: 0,
+                Carat: 0,
+                Rate: 0,
+                Amount: 0,
+                SizeCode: $scope.FormModel ? ($scope.FormModel.SizeCode || '') : '',
+                ColorType: $scope.FormModel ? ($scope.FormModel.ColorType || '') : '',
+                Remarks: '',
+                IsDelete: false
             };
         };
 
         $scope.FormModel = {
             InwardID: 0,
             ChallanNo: '',
-            ChallanDate: '',
+            ChallanDate: new Date(),
+            ChallanDateStr: '',
             FactoryCodeID: null,
             SourceType: 'BRANCH',
             FromBranchID: null,
             FromPartyID: null,
             ToBranchID: null,
             PurposeID: null,
+            SizeCode: '',
+            ColorType: '',
             Remarks: '',
+            IsReadOnly: false,
             Details: [$scope.NewEmptyLine()]
+        };
+
+        $scope.OnHeaderSizeCodeChange = function () {
+            angular.forEach($scope.FormModel.Details, function (line) {
+                line.SizeCode = $scope.FormModel.SizeCode || '';
+            });
+        };
+
+        $scope.OnHeaderColorTypeChange = function () {
+            angular.forEach($scope.FormModel.Details, function (line) {
+                line.ColorType = $scope.FormModel.ColorType || '';
+            });
         };
 
         $scope.UpdateBranchFilters = function () {
@@ -574,12 +712,28 @@
             $scope.FormModel.Details.push($scope.NewEmptyLine());
         };
 
+        //$scope.RemoveLine = function (index) {
+        //    if ($scope.FormModel.Details.length <= 1) {
+        //        $scope.FormModel.Details[0] = $scope.NewEmptyLine();
+        //        return;
+        //    }
+        //    $scope.FormModel.Details.splice(index, 1);
+        //};
+
         $scope.RemoveLine = function (index) {
+            var line = $scope.FormModel.Details[index];
+            if (!line) return;
+
             if ($scope.FormModel.Details.length <= 1) {
                 $scope.FormModel.Details[0] = $scope.NewEmptyLine();
                 return;
             }
-            $scope.FormModel.Details.splice(index, 1);
+
+            if (line.InwardDetailID && line.InwardDetailID > 0) {
+                line.IsDelete = true;
+            } else {
+                $scope.FormModel.Details.splice(index, 1);
+            }
         };
 
         $scope.RecalcLine = function (line) {
@@ -604,69 +758,275 @@
             return total;
         };
 
+        $scope.FormatDateYMD = function (d) {
+            if (!d) return '';
+            if (!(d instanceof Date)) {
+                d = $scope.ParseDateObj(d);
+            }
+            if (!d || isNaN(d.getTime())) return '';
+            var yyyy = d.getFullYear();
+            var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+            var dd = ('0' + d.getDate()).slice(-2);
+            return yyyy + '-' + mm + '-' + dd;
+        };
+
+        $scope.ParseDateObj = function (val) {
+            if (!val) return new Date();
+            if (val instanceof Date) return val;
+            if (typeof val === 'string' && val.indexOf('/Date(') !== -1) {
+                var num = parseInt(val.replace(/\/Date\((\d+).*/, '$1'), 10);
+                return !isNaN(num) ? new Date(num) : new Date();
+            }
+            if (typeof val === 'string') {
+                var parts = val.substring(0, 10).split('-');
+                if (parts.length === 3) {
+                    var y = parseInt(parts[0], 10);
+                    var m = parseInt(parts[1], 10) - 1;
+                    var d = parseInt(parts[2], 10);
+                    return new Date(y, m, d);
+                }
+            }
+            var dt = new Date(val);
+            return isNaN(dt.getTime()) ? new Date() : dt;
+        };
+
         $scope.OpenAddModal = function () {
             $scope.ResetForm();
             $("#InwardModal").modal("show");
+            var dateStr = $scope.FormatDateYMD(new Date());
             $timeout(function () {
+                $('#ModalChallanDate').val(dateStr);
                 $('#ModalPurposeID').trigger('chosen:updated');
                 $('#ModalFromBranchID').trigger('chosen:updated');
                 $('#ModalFromPartyID').trigger('chosen:updated');
                 $('#ModalFactoryCodeID').trigger('chosen:updated');
                 $('#ModalToBranchID').trigger('chosen:updated');
+                $('#ModalSizeCode').trigger('chosen:updated');
+                $('#ModalColorType').trigger('chosen:updated');
             }, 60);
         };
 
         $scope.ResetForm = function () {
+            var today = new Date();
+            var dateStr = $scope.FormatDateYMD(today);
             $scope.FormModel = {
                 InwardID: 0,
                 ChallanNo: '',
-                ChallanDate: new Date().toISOString().substring(0, 10),
+                ChallanDate: today,
+                ChallanDateStr: dateStr,
                 FactoryCodeID: null,
                 SourceType: 'BRANCH',
                 FromBranchID: null,
                 FromPartyID: null,
                 ToBranchID: null,
                 PurposeID: null,
+                SizeCode: '',
+                ColorType: '',
                 Remarks: '',
                 Details: [$scope.NewEmptyLine()]
             };
             $scope.UpdateBranchFilters();
             $timeout(function () {
+                $('#ModalChallanDate').val(dateStr);
                 $('#ModalPurposeID').trigger('chosen:updated');
                 $('#ModalFromBranchID').trigger('chosen:updated');
                 $('#ModalFromPartyID').trigger('chosen:updated');
                 $('#ModalFactoryCodeID').trigger('chosen:updated');
                 $('#ModalToBranchID').trigger('chosen:updated');
+                $('#ModalSizeCode').trigger('chosen:updated');
+                $('#ModalColorType').trigger('chosen:updated');
             }, 40);
         };
 
-        $scope.EditItem = function (item) {
+        @*$scope.EditItem = function (item) {
             if (!item || !item.InwardID) return;
+
+            var isLockedRecord = item.NotAllow === 1 || item.NotAllow === true || item.NotAllow === "1";
+
             $http.get('@Url.Action("Get_TRN_RoughInwardById", "Master")', { params: { InwardID: item.InwardID } })
                 .then(function (res) {
                     if (res.data && res.data.success && res.data.item) {
                         var data = res.data.item;
+                        var rawDate = res.data.challanDateFormatted || data.ChallanDateStr || data.ChallanDate || (item.ChallanDate ? item.ChallanDate : '');
+                        var dateObj = $scope.ParseDateObj(rawDate);
+                        var dateStr = $scope.FormatDateYMD(dateObj);
+
+                        var firstDetail = (data.Details && data.Details.length > 0) ? data.Details[0] : null;
+                        var headerColorType = data.ColorType || (firstDetail ? firstDetail.ColorType : '') || '';
+                        if (headerColorType.toUpperCase() === 'WHITE') headerColorType = 'White';
+                        else if (headerColorType.toUpperCase() === 'COLOR') headerColorType = 'Color';
+                        var headerSizeCode = (data.SizeCode || (firstDetail ? firstDetail.SizeCode : '') || '').trim().toUpperCase();
+
+
                         $scope.FormModel = {
                             InwardID: data.InwardID,
                             ChallanNo: data.ChallanNo || '',
-                            ChallanDate: data.ChallanDate ? data.ChallanDate.substring(0, 10) : '',
+                            ChallanDate: dateObj,
+                            ChallanDateStr: dateStr,
                             FactoryCodeID: data.FactoryCodeID,
                             SourceType: data.SourceType || 'BRANCH',
                             FromBranchID: data.FromBranchID,
                             FromPartyID: data.FromPartyID,
                             ToBranchID: data.ToBranchID,
                             PurposeID: data.PurposeID,
+                            SizeCode: headerSizeCode,
+                            ColorType: headerColorType,
                             Remarks: data.Remarks || '',
-                            Details: (data.Details && data.Details.length > 0) ? data.Details : [$scope.NewEmptyLine()]
+                            IsReadOnly: isLockedRecord,
+                            Details: (data.Details && data.Details.length > 0) ? data.Details.map(function (d) {
+                                var cType = d.ColorType || headerColorType || '';
+                                if (cType.toUpperCase() === 'WHITE') cType = 'White';
+                                else if (cType.toUpperCase() === 'COLOR') cType = 'Color';
+                                debugger
+                                return {
+                                    InwardDetailID: d.InwardDetailID,
+                                    InwardID: d.InwardID,
+                                    SrNo: d.SrNo,
+                                    LotNo: d.LotNo || '',
+                                    GrowthRate: d.GrowthRate || '',
+                                    AvgGrowthRate: (d.AvgGrowthRate !== null && d.AvgGrowthRate !== undefined) ? parseFloat(d.AvgGrowthRate) : null,
+                                    MachineNo: d.MachineNo || '',
+                                    Size: d.Size || '',
+                                    FromHeight: (d.FromHeight !== null && d.FromHeight !== undefined) ? parseFloat(d.FromHeight) : null,
+                                    ToHeight: (d.ToHeight !== null && d.ToHeight !== undefined) ? parseFloat(d.ToHeight) : null,
+                                    Hours: (d.Hours !== null && d.Hours !== undefined && d.Hours !== '') ? parseFloat(d.Hours) : null,
+                                    BoxNo: d.BoxNo || '',
+                                    RecipeID: d.RecipeID || null,
+                                    RecipeName: d.RecipeName || '',
+                                    GradeID: d.GradeID || null,
+                                    GradeName: d.GradeName || '',
+                                    Pcs: parseInt(d.Pcs) || 0,
+                                    Carat: parseFloat(d.Carat) || 0,
+                                    Rate: (d.Rate !== null && d.Rate !== undefined) ? parseFloat(d.Rate) : 0,
+                                    Amount: (d.Amount !== null && d.Amount !== undefined) ? parseFloat(d.Amount) : 0,
+                                    SizeCode: (d.SizeCode || headerSizeCode || '').trim().toUpperCase(),
+                                    ColorType: cType,
+                                    Remarks: d.Remarks || '',
+                                    //NotAllow: d.NotAllow || false,
+                                    NotAllow: (d.NotAllow === 1 || d.NotAllow === true || d.NotAllow === "1") ? true : false,
+                                    
+                                    //IsLocked: d.IsLocked === true || d.IsLocked === 1 || d.NotAllow === 1,
+                                    //IsDelete: d.IsDelete === true || d.IsDelete === 1 || d.IsDelete === '1'
+                                };
+                            }) : [$scope.NewEmptyLine()]
                         };
                         $scope.UpdateBranchFilters();
                         $("#InwardModal").modal("show");
+                    //    $timeout(function () {
+                    //        if (dateStr) {
+                    //            $('#ModalChallanDate').val(dateStr);
+                    //        }
+                    //        $('#ModalPurposeID').trigger('chosen:updated');
+                    //        $('#ModalFromBranchID').trigger('chosen:updated');
+                    //        $('#ModalFromPartyID').trigger('chosen:updated');
+                    //        $('#ModalFactoryCodeID').trigger('chosen:updated');
+                    //        $('#ModalToBranchID').trigger('chosen:updated');
+                    //        $('#ModalSizeCode').trigger('chosen:updated');
+                    //        $('#ModalColorType').trigger('chosen:updated');
+                    //    }, 80);
+                    //} else {
+                    //    Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward details.");
+                        //}
+                        $timeout(function () {
+                            if (isLockedRecord) {
+                                $('#InwardModal').find('input, select, textarea').prop('disabled', true);
+                                $('#InwardModal').find('.btn-ri-save, .btn-ri-add-row, .btn-ri-del-row').hide();
+                            } else {
+                                $('#InwardModal').find('input, select, textarea').prop('disabled', false);
+                                $('#InwardModal').find('.btn-ri-save, .btn-ri-add-row, .btn-ri-del-row').show();
+                            }
+                        }, 150);
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward details.");
+                    }
+                }, function () {
+                    Noty("error", "Error connecting to server.");
+                });
+        };*@
+
+
+        $scope.EditItem = function (item) {
+            if (!item || !item.InwardID) return;
+
+            $http.get('@Url.Action("Get_TRN_RoughInwardById", "Master")', { params: { InwardID: item.InwardID } })
+                .then(function (res) {
+                    if (res.data && res.data.success && res.data.item) {
+                        var data = res.data.item;
+                        var rawDate = res.data.challanDateFormatted || data.ChallanDateStr || data.ChallanDate || (item.ChallanDate ? item.ChallanDate : '');
+                        var dateObj = $scope.ParseDateObj(rawDate);
+                        var dateStr = $scope.FormatDateYMD(dateObj);
+
+                        var firstDetail = (data.Details && data.Details.length > 0) ? data.Details[0] : null;
+                        var headerColorType = data.ColorType || (firstDetail ? firstDetail.ColorType : '') || '';
+                        if (headerColorType.toUpperCase() === 'WHITE') headerColorType = 'White';
+                        else if (headerColorType.toUpperCase() === 'COLOR') headerColorType = 'Color';
+                        var headerSizeCode = (data.SizeCode || (firstDetail ? firstDetail.SizeCode : '') || '').trim().toUpperCase();
+
+                        var mappedDetails = (data.Details && data.Details.length > 0) ? data.Details.map(function (d) {
+                            var cType = d.ColorType || headerColorType || '';
+                            if (cType.toUpperCase() === 'WHITE') cType = 'White';
+                            else if (cType.toUpperCase() === 'COLOR') cType = 'Color';
+                    
+                            return {
+                                InwardDetailID: d.InwardDetailID,
+                                InwardID: d.InwardID,
+                                SrNo: d.SrNo,
+                                LotNo: d.LotNo || '',
+                                GrowthRate: d.GrowthRate || '',
+                                AvgGrowthRate: (d.AvgGrowthRate !== null && d.AvgGrowthRate !== undefined) ? parseFloat(d.AvgGrowthRate) : null,
+                                MachineNo: d.MachineNo || '',
+                                Size: d.Size || '',
+                                FromHeight: (d.FromHeight !== null && d.FromHeight !== undefined) ? parseFloat(d.FromHeight) : null,
+                                ToHeight: (d.ToHeight !== null && d.ToHeight !== undefined) ? parseFloat(d.ToHeight) : null,
+                                Hours: (d.Hours !== null && d.Hours !== undefined && d.Hours !== '') ? parseFloat(d.Hours) : null,
+                                BoxNo: d.BoxNo || '',
+                                RecipeID: d.RecipeID || null,
+                                RecipeName: d.RecipeName || '',
+                                GradeID: d.GradeID || null,
+                                GradeName: d.GradeName || '',
+                                Pcs: parseInt(d.Pcs) || 0,
+                                Carat: parseFloat(d.Carat) || 0,
+                                Rate: (d.Rate !== null && d.Rate !== undefined) ? parseFloat(d.Rate) : 0,
+                                Amount: (d.Amount !== null && d.Amount !== undefined) ? parseFloat(d.Amount) : 0,
+                                SizeCode: (d.SizeCode || headerSizeCode || '').trim().toUpperCase(),
+                                ColorType: cType,
+                                Remarks: d.Remarks || '',
+                                NotAllow: d.NotAllow === 1 || d.NotAllow === true || d.NotAllow === "1"
+                            };
+                        }) : [$scope.NewEmptyLine()];
+
+                        // Check karo ke shu badhi details lock che ke nahi
+                        var allLocked = mappedDetails.length > 0 && mappedDetails.every(function(d) { return d.NotAllow; });
+
+                        $scope.FormModel = {
+                            InwardID: data.InwardID,
+                            ChallanNo: data.ChallanNo || '',
+                            ChallanDate: dateObj,
+                            ChallanDateStr: dateStr,
+                            FactoryCodeID: data.FactoryCodeID,
+                            SourceType: data.SourceType || 'BRANCH',
+                            FromBranchID: data.FromBranchID,
+                            FromPartyID: data.FromPartyID,
+                            ToBranchID: data.ToBranchID,
+                            PurposeID: data.PurposeID,
+                            SizeCode: headerSizeCode,
+                            ColorType: headerColorType,
+                            Remarks: data.Remarks || '',
+                            IsReadOnly: allLocked, // Fakt jyare badhi rows locked hoy tyarej aakhu form read-only thase
+                            Details: mappedDetails
+                        };
+
+                        $scope.UpdateBranchFilters();
+                        $("#InwardModal").modal("show");
+
                         $timeout(function () {
                             $('#ModalPurposeID').trigger('chosen:updated');
                             $('#ModalFromBranchID').trigger('chosen:updated');
                             $('#ModalFromPartyID').trigger('chosen:updated');
                             $('#ModalFactoryCodeID').trigger('chosen:updated');
                             $('#ModalToBranchID').trigger('chosen:updated');
+                            $('#ModalSizeCode').trigger('chosen:updated');
+                            $('#ModalColorType').trigger('chosen:updated');
                         }, 80);
                     } else {
                         Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward details.");
@@ -677,23 +1037,102 @@
         };
 
         $scope.PromptDelete = function (item) {
-            if (!item || !item.InwardID) return;
+            if (!item) return;
+            var inwardId = item.InwardID || item.inwardID || (typeof item === 'number' ? item : 0);
+            if (!inwardId) {
+                Noty("error", "Invalid Rough Inward selected.");
+                return;
+            }
             $scope.SelectedDeleteItem = item;
             $("#InwardConfirmDeleteModal").modal("show");
         };
 
-        $scope.ExecuteDelete = function () {
-            if (!$scope.SelectedDeleteItem) return;
-            $http.post('@Url.Action("RoughInward_Delete", "Master")', { InwardID: $scope.SelectedDeleteItem.InwardID })
+        @*$scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem || $scope.IsDeleting) return;
+
+            var inwardDetailId = $scope.SelectedDeleteItem.InwardDetailID || $scope.SelectedDeleteItem.InwardDetailID;
+            if (!inwardDetailId && typeof $scope.SelectedDeleteItem === 'number') {
+                inwardDetailId = $scope.SelectedDeleteItem;
+            }
+
+            if (!inwardDetailId) {
+                $("#InwardConfirmDeleteModal").modal("hide");
+                Noty("error", "No Inward ID found for deletion.");
+                return;
+            }
+
+            $scope.IsDeleting = true;
+            $http.post('@Url.Action("RoughInwardDetail_Delete", "Master")', { InwardDetailID: inwardDetailId })
                 .then(function (res) {
+                    $scope.IsDeleting = false;
                     $("#InwardConfirmDeleteModal").modal("hide");
-                    if (res.data && res.data.success) {
-                        Noty("success", res.data.message || "Rough Inward deleted successfully!");
+
+                    var data = res.data;
+                    if (typeof data === 'string') {
+                        try { data = JSON.parse(data); } catch (e) { }
+                    }
+
+                    var isSuccess = data && (data.success === true || data.success === 1 || data.success === 'true');
+
+                    if (isSuccess) {
+                        Noty("success", (data && data.message) ? data.message : "Rough Inward deleted successfully!");
+                        $scope.SelectedDeleteItem = null;
                         $scope.LoadInwardList();
                     } else {
-                        Noty("error", (res.data && res.data.message) || "Failed to delete Rough Inward.");
+                        var errMsg = (data && data.message) ? data.message : "Failed to delete Rough Inward.";
+                        Noty("error", errMsg);
                     }
-                }, function () {
+                }, function (err) {
+                    $scope.IsDeleting = false;
+                    $("#InwardConfirmDeleteModal").modal("hide");
+                    var errData = err && err.data;
+                    if (typeof errData === 'string') {
+                        try { errData = JSON.parse(errData); } catch (e) { }
+                    }
+                    var errMsg = (errData && errData.message) ? errData.message : "Error connecting to server.";
+                    Noty("error", errMsg);
+                });
+        };*@
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem || $scope.IsDeleting) return;
+
+            // Extract InwardDetailID properly from the selected row object
+            var detailId = $scope.SelectedDeleteItem.InwardDetailID ||
+                           $scope.SelectedDeleteItem.inwardDetailID ||
+                           $scope.SelectedDeleteItem.InwardID ||
+                           (typeof $scope.SelectedDeleteItem === 'number' ? $scope.SelectedDeleteItem : 0);
+
+            if (!detailId) {
+                $("#InwardConfirmDeleteModal").modal("hide");
+                Noty("error", "No Inward Detail ID found for deletion.");
+                return;
+            }
+
+            $scope.IsDeleting = true;
+            // Explicitly sending InwardDetailID in post data
+            $http.post('@Url.Action("RoughInwardDetail_Delete", "Master")', { InwardDetailID: detailId })
+                .then(function (res) {
+                    $scope.IsDeleting = false;
+                    $("#InwardConfirmDeleteModal").modal("hide");
+
+                    var data = res.data;
+                    if (typeof data === 'string') {
+                        try { data = JSON.parse(data); } catch (e) { }
+                    }
+
+                    var isSuccess = data && (data.success === true || data.success === 1 || data.success === 'true');
+
+                    if (isSuccess) {
+                        Noty("success", (data && data.message) ? data.message : "Lot line deleted successfully!");
+                        $scope.SelectedDeleteItem = null;
+                        $scope.LoadInwardList();
+                    } else {
+                        var errMsg = (data && data.message) ? data.message : "Failed to delete lot line.";
+                        Noty("error", errMsg);
+                    }
+                }, function (err) {
+                    $scope.IsDeleting = false;
                     $("#InwardConfirmDeleteModal").modal("hide");
                     Noty("error", "Error connecting to server.");
                 });
@@ -782,7 +1221,17 @@
                 $('#ModalChallanNo').focus();
                 return;
             }
-            if (!$scope.FormModel.ChallanDate) {
+            var dateObj = $scope.FormModel.ChallanDate;
+            var finalDateStr = '';
+            if (dateObj instanceof Date && !isNaN(dateObj.getTime())) {
+                finalDateStr = $scope.FormatDateYMD(dateObj);
+            } else if ($('#ModalChallanDate').val()) {
+                finalDateStr = $('#ModalChallanDate').val();
+            } else if (typeof $scope.FormModel.ChallanDate === 'string' && $scope.FormModel.ChallanDate) {
+                finalDateStr = $scope.FormModel.ChallanDate;
+            }
+
+            if (!finalDateStr) {
                 Noty("error", "Please select Challan Date!");
                 $('#ModalChallanDate').focus();
                 return;
@@ -790,6 +1239,21 @@
             if (!$scope.FormModel.PurposeID) {
                 Noty("error", "Please select Purpose!");
                 $('#ModalPurposeID').trigger('chosen:open');
+                return;
+            }
+            if (!$scope.FormModel.FactoryCodeID) {
+                Noty("error", "Please select Factory Code!");
+                $('#ModalFactoryCodeID').trigger('chosen:open');
+                return;
+            }
+            if (!$scope.FormModel.SizeCode) {
+                Noty("error", "Please select Size Code!");
+                $('#ModalSizeCode').trigger('chosen:open');
+                return;
+            }
+            if (!$scope.FormModel.ColorType) {
+                Noty("error", "Please select Color Type!");
+                $('#ModalColorType').trigger('chosen:open');
                 return;
             }
             if ($scope.FormModel.SourceType === 'BRANCH' && !$scope.FormModel.FromBranchID) {
@@ -811,16 +1275,67 @@
                 Noty("error", "From Branch and To Branch cannot be the same!");
                 return;
             }
-            var validLines = $scope.FormModel.Details.filter(function (l) { return l.LotNo && l.LotNo.trim() !== ''; });
-            if (validLines.length === 0) {
-                Noty("error", "Please add at least one Lot line with Lot No!");
+
+            if (!$scope.FormModel.Details || $scope.FormModel.Details.length === 0) {
+                Noty("error", "Please add at least one Lot line!");
                 return;
             }
+
+            for (var i = 0; i < $scope.FormModel.Details.length; i++) {
+                var line = $scope.FormModel.Details[i];
+                if (line.IsDelete) continue;
+                var rowNum = i + 1;
+                if (!line.LotNo || line.LotNo.trim() === '') {
+                    Noty("error", "Please enter Lot No in row #" + rowNum + "!");
+                    return;
+                }
+                if (!line.Size || line.Size.trim() === '') {
+                    Noty("error", "Please enter Size in row #" + rowNum + "!");
+                    return;
+                }
+                if (line.FromHeight === null || line.FromHeight === undefined || line.FromHeight === '') {
+                    Noty("error", "Please enter From Height in row #" + rowNum + "!");
+                    return;
+                }
+                if (line.ToHeight === null || line.ToHeight === undefined || line.ToHeight === '') {
+                    Noty("error", "Please enter To Height in row #" + rowNum + "!");
+                    return;
+                }
+                if (!line.BoxNo || line.BoxNo.trim() === '') {
+                    Noty("error", "Please enter Box No in row #" + rowNum + "!");
+                    return;
+                }
+                if (!line.RecipeID) {
+                    Noty("error", "Please select Recipe in row #" + rowNum + "!");
+                    return;
+                }
+                if (!line.GradeID) {
+                    Noty("error", "Please select Grade in row #" + rowNum + "!");
+                    return;
+                }
+            }
+
+            angular.forEach($scope.FormModel.Details, function (line) {
+                line.MachineNo = line.MachineNo ? line.MachineNo.trim() : '';
+                line.Size = line.Size ? line.Size.trim() : '';
+                line.BoxNo = line.BoxNo ? line.BoxNo.trim() : '';
+                line.SizeCode = line.SizeCode ? line.SizeCode.trim() : '';
+                line.ColorType = line.ColorType ? line.ColorType.trim() : '';
+                line.Remarks = line.Remarks ? line.Remarks.trim() : '';
+                line.FromHeight = (line.FromHeight !== null && line.FromHeight !== undefined && line.FromHeight !== '') ? parseFloat(line.FromHeight) : null;
+                line.ToHeight = (line.ToHeight !== null && line.ToHeight !== undefined && line.ToHeight !== '') ? parseFloat(line.ToHeight) : null;
+                line.Hours = (line.Hours !== null && line.Hours !== undefined && line.Hours !== '') ? parseFloat(line.Hours) : null;
+                line.AvgGrowthRate = (line.AvgGrowthRate !== null && line.AvgGrowthRate !== undefined && line.AvgGrowthRate !== '') ? parseFloat(line.AvgGrowthRate) : null;
+            });
 
             var action = ($scope.FormModel.InwardID > 0) ? 'UPDATE' : 'INSERT';
             $scope.IsSaving = true;
 
-            $http.post('@Url.Action("RoughInward_Save", "Master")', { model: $scope.FormModel, Action: action })
+            var postModel = angular.copy($scope.FormModel);
+            postModel.ChallanDate = finalDateStr;
+            postModel.ChallanDateStr = finalDateStr;
+
+            $http.post('@Url.Action("RoughInward_Save", "Master")', { model: postModel, Action: action })
                 .then(function (res) {
                     $scope.IsSaving = false;
                     if (res.data && res.data.success) {
@@ -841,79 +1356,249 @@
             var gridInstance = $scope.GetGridInstance();
             if (gridInstance) {
                 gridInstance.option("dataSource", $scope.InwardList);
+                gridInstance.refresh();
                 return;
             }
             $("#inwardGridContainer").dxDataGrid({
                 dataSource: $scope.InwardList,
-                keyExpr: 'InwardID',
                 height: 'calc(100vh - 210px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
                 showColumnLines: true,
                 showRowLines: true,
                 showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
                 sorting: { mode: "multiple" },
-                scrolling: { mode: 'standard', rowRenderingMode: 'standard' },
+                scrolling: { mode: 'virtual' },
                 paging: { enabled: false },
                 pager: { visible: false },
-                searchPanel: { visible: true, width: 250, placeholder: 'Search inward...' },
-                filterRow: { visible: true },
+                searchPanel: { visible: true, width: 280, placeholder: 'Search inward records...' },
+                filterRow: { visible: true, applyFilter: 'auto' },
                 headerFilter: { visible: true },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "header") {
+                        e.cellElement.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $indicators = e.cellElement.find(".dx-column-indicators");
+                        if ($indicators.length > 1) {
+                            $indicators.slice(1).remove();
+                        }
+                        var $first = e.cellElement.find(".dx-column-indicators").first();
+                        if ($first.length) {
+                            e.cellElement.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    }
+                },
+                onContentReady: function (e) {
+                    e.element.find(".dx-datagrid-headers .dx-header-row > td").each(function () {
+                        var $td = $(this);
+                        $td.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $ind = $td.find(".dx-column-indicators");
+                        if ($ind.length > 1) {
+                            $ind.slice(1).remove();
+                        }
+                        var $first = $ind.first();
+                        if ($first.length) {
+                            $td.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    });
+                },
+                selection: { mode: 'single' },
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'LotNo',
+                            summaryType: 'count',
+                            displayFormat: 'Total: {0}'
+                        },
+                        {
+                            column: 'Pcs',
+                            summaryType: 'sum',
+                            valueFormat: '#,##0',
+                            displayFormat: '{0}'
+                        },
+                        {
+                            column: 'Carat',
+                            summaryType: 'sum',
+                            valueFormat: '#,##0.000',
+                            displayFormat: '{0}'
+                        },
+                        {
+                            column: 'Amount',
+                            summaryType: 'sum',
+                            valueFormat: '#,##0.00',
+                            displayFormat: '{0}'
+                        }
+                    ]
+                },
+                export: {
+                    enabled: true,
+                    formats: ['xlsx'],
+                    allowExportSelectedData: false
+                },
+                onExporting: function (e) {
+                    if (e.format === 'xlsx') {
+                        if (typeof ExcelJS !== 'undefined') {
+                            const workbook = new ExcelJS.Workbook();
+                            const worksheet = workbook.addWorksheet('RoughInward');
+                            DevExpress.excelExporter.exportDataGrid({
+                                component: e.component,
+                                worksheet: worksheet,
+                                autoFilterEnabled: true,
+                            }).then(function () {
+                                workbook.xlsx.writeBuffer().then(function (buffer) {
+                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RoughInward.xlsx');
+                                });
+                            });
+                        }
+                    }
+                },
                 columns: [
                     {
-                        caption: '#', width: 45, alignment: 'center',
+                        caption: '#', width: 45, alignment: 'center', allowReordering: false, allowFiltering: false, allowSorting: false,
                         cellTemplate: function (container, options) {
                             $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
                         }
                     },
                     {
-                        caption: 'Challan No', dataField: 'ChallanNo', minWidth: 120,
+                        caption: 'Challan No', dataField: 'ChallanNo', minWidth: 115, alignment: 'center',
                         cellTemplate: function (container, options) {
-                            $("<strong>").text(options.data.ChallanNo).css({ "color": "#1e293b" }).appendTo(container);
+                            $("<strong>").text(options.data.ChallanNo || '').css({ "color": "#1e293b" }).appendTo(container);
                         }
                     },
                     {
-                        caption: 'Date', dataField: 'ChallanDate', width: 110, dataType: 'date', format: 'dd-MMM-yyyy'
+                        caption: 'Date', dataField: 'ChallanDate', width: 110, dataType: 'date', format: 'dd-MMM-yyyy', alignment: 'center'
                     },
                     {
-                        caption: 'Factory Code', dataField: 'FactoryCodeName', width: 110
-                    },
-                    {
-                        caption: 'Source', dataField: 'SourceType', width: 100, alignment: 'center',
+                        caption: 'Lot No', dataField: 'LotNo', minWidth: 110,
                         cellTemplate: function (container, options) {
-                            if (options.data.SourceType === 'BRANCH') {
-                                $("<span>").addClass("badge-status-pill badge-pill-info").text("Branch").appendTo(container);
-                            } else {
-                                $("<span>").addClass("badge-status-pill badge-pill-warning").text("Party").appendTo(container);
-                            }
+                            $("<strong>").text(options.data.LotNo || '').css({ "color": "#0284c7" }).appendTo(container);
                         }
+                    },
+                    {
+                        caption: 'Pcs', dataField: 'Pcs', width: 75, dataType: 'number', alignment: 'right', format: '#,##0'
+                    },
+                    {
+                        caption: 'Carat', dataField: 'Carat', width: 90, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
+                        caption: 'Rate', dataField: 'Rate', width: 85, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
+                    },
+                    {
+                        caption: 'Amount', dataField: 'Amount', width: 100, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
+                    },
+                    {
+                        caption: 'Growth Rate', dataField: 'GrowthRate', width: 100, alignment: 'center'
+                    },
+                    {
+                        caption: 'Avg Growth Rate', dataField: 'AvgGrowthRate', width: 110, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
+                        caption: 'Machine No', dataField: 'MachineNo', width: 95, alignment: 'center'
+                    },
+                    {
+                        caption: 'Size', dataField: 'Size', width: 80, alignment: 'center'
+                    },
+                    {
+                        caption: 'From Height', dataField: 'FromHeight', width: 95, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
+                        caption: 'To Height', dataField: 'ToHeight', width: 95, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
+                        caption: 'Hours', dataField: 'Hours', width: 80, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
+                    },
+                    {
+                        caption: 'Box No', dataField: 'BoxNo', width: 85, alignment: 'center'
+                    },
+                    {
+                        caption: 'Recipe', dataField: 'RecipeName', minWidth: 100
+                    },
+                    {
+                        caption: 'Grade', dataField: 'GradeName', width: 85, alignment: 'center'
+                    },
+                    {
+                        caption: 'Size Code', dataField: 'SizeCode', width: 90, alignment: 'center'
+                    },
+                    {
+                        caption: 'Color Type', dataField: 'ColorType', width: 95, alignment: 'center'
+                    },
+                    {
+                        caption: 'Factory Code', dataField: 'FactoryCodeName', width: 100, alignment: 'center'
                     },
                     {
                         caption: 'From', minWidth: 150,
-                        calculateCellValue: function (data) { return data.SourceType === 'BRANCH' ? data.FromBranchName : data.PartyName; }
+                        calculateCellValue: function (data) { return data.SourceType === 'BRANCH' ? data.FromBranchName : (data.Party || data.PartyName || data.FromSourceName); }
                     },
-                    { caption: 'To Branch', dataField: 'ToBranchName', minWidth: 130 },
-                    { caption: 'Purpose', dataField: 'PurposeName', width: 110 },
-                    { caption: 'Total Pcs', dataField: 'TotalPcs', width: 90, alignment: 'right' },
-                    { caption: 'Total Carat', dataField: 'TotalCarat', width: 100, alignment: 'right', format: { type: 'fixedPoint', precision: 3 } },
-                    { caption: 'Total Amount', dataField: 'TotalAmount', width: 120, alignment: 'right', format: { type: 'fixedPoint', precision: 2 } },
                     {
-                        caption: 'Action', width: 100, alignment: 'center', fixed: true, fixedPosition: 'right',
+                        caption: 'To Branch', dataField: 'ToBranchName', minWidth: 130
+                    },
+                    {
+                        caption: 'Purpose', dataField: 'PurposeName', width: 100, alignment: 'center'
+                    },
+                    {
+                        caption: 'Remarks', dataField: 'Remarks', minWidth: 130
+                    },
+                    {
+                        caption: 'Action', width: 90, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
                         visible: ($scope.CanEdit || $scope.CanDelete),
                         cellTemplate: function (container, options) {
                             var div = $("<div>").addClass("grid-btn-group");
+                            var isLocked = options.data.NotAllow === 1 || options.data.NotAllow === true || options.data.NotAllow === "1";
+
+                            //if ($scope.CanEdit) {
+                            //    $("<button>").addClass("grid-btn-edit").attr("title", "Edit Inward").html('<i class="fa fa-pencil"></i>')
+                            //        .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                            //        .appendTo(div);
+                            //}
+
+                            //if ($scope.CanDelete) {
+                            //    $("<button>").addClass("grid-btn-del").attr("title", "Delete Inward").html('<i class="fa fa-trash-o"></i>')
+                            //        .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                            //        .appendTo(div);
+                            //}
 
                             if ($scope.CanEdit) {
-                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Inward").html('<i class="fa fa-pencil"></i>')
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit / View Inward").html('<i class="fa fa-pencil"></i>')
                                     .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
                                     .appendTo(div);
                             }
 
-                            if ($scope.CanDelete) {
-                                $("<button>").addClass("grid-btn-del").attr("title", "Delete Inward").html('<i class="fa fa-trash-o"></i>')
-                                    .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                            if (isLocked) {
+                                $("<span>")
+                                    .attr("title", "Locked: This Inward lot has already been distributed in Rough Distribution!")
+                                    .css({ "color": "#f59e0b", "font-size": "15px", "padding": "4px 8px", "display": "inline-flex", "align-items": "center" })
+                                    .html('<i class="fa fa-lock"></i>')
                                     .appendTo(div);
+                            } else {
+                                if ($scope.CanDelete) {
+                                    $("<button>").addClass("grid-btn-del").attr("title", "Delete Inward").html('<i class="fa fa-trash-o"></i>')
+                                        .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                                        .appendTo(div);
+                                }
                             }
 
                             div.appendTo(container);
