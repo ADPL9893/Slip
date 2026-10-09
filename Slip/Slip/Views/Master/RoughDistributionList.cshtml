@@ -299,24 +299,46 @@ else
 
         // Open Add New in new browser tab
         $scope.OpenAddNew = function () {
-            window.open('@Url.Action("RoughDistribution", "Master")', '_blank');
+            var url = '@Url.Action("RoughDistribution", "Master")';
+            if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
+                window.top.ChromeTabs.openTab({
+                    title: 'Rough Distribution',
+                    url: url,
+                    forceReload: true
+                });
+            } else {
+                window.open(url, '_blank');
+            }
         };
 
         // Open Entry / Edit in new browser tab
         $scope.OpenEdit = function (row) {
-            var url = '@Url.Action("RoughDistribution", "Master")';
-            if (row && row.PreRoughID) {
-                url += '?id=' + row.PreRoughID;
+            var id = 0;
+            if (row) {
+                id = row.PreRoughID || row.InwardDetailID || row.ID || 0;
             }
-            window.open(url, '_blank');
+            var url = '@Url.Action("RoughDistribution", "Master")';
+            if (id && parseInt(id) > 0) {
+                url += '?id=' + parseInt(id);
+            }
+            if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
+                window.top.ChromeTabs.openTab({
+                    title: 'Rough Distribution',
+                    url: url,
+                    forceReload: true
+                });
+            } else {
+                window.open(url, '_blank');
+            }
         };
 
         // Open Upload Image Modal
         $scope.OpenUploadModal = function (row) {
             $scope.SelectedUploadRow = row;
+            var prId = row ? (row.PreRoughID || row.InwardDetailID || null) : null;
             $scope.UploadModel = {
                 JangadNo: row ? (row.JangadNo || '') : '',
-                PreRoughID: row ? (row.PreRoughID || null) : null,
+                PreRoughID: prId,
                 DistributionID: row ? (row.DistributionID || null) : null,
                 RoughPcs: row ? (row.RoughPcs || '') : '',
                 RoughWeight: row ? (row.RoughWeight || '') : '',
@@ -400,7 +422,7 @@ else
             $scope.IsLoadingImages = true;
 
             var distId = row ? (row.DistributionID || '') : '';
-            var prId = row ? (row.PreRoughID || '') : '';
+            var prId = row ? (row.PreRoughID || row.InwardDetailID || '') : '';
             var jNo = encodeURIComponent($scope.ActiveJangadNo);
 
             $('#ViewImageModal').modal('show');
@@ -522,6 +544,24 @@ else
             });
         };
 
+        // Show QR code for a single saved distribution row
+        $scope.ShowQRCode = function (item) {
+            if (!item || !item.DistributionID) return;
+            if (typeof show_loader === 'function') show_loader();
+            $http.post('@Url.Action("GenerateRoughDistributionQRs", "Master")', { distributionIDs: [item.DistributionID] })
+                .then(function (res) {
+                    if (typeof hide_loader === 'function') hide_loader();
+                    if (res.data && res.data.success) {
+                        window.open('@Url.Action("RoughDistributionQRPrint", "Master")', '_blank');
+                    } else {
+                        Noty("error", res.data.message || "Failed to generate QR code.");
+                    }
+                }, function () {
+                    if (typeof hide_loader === 'function') hide_loader();
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
         // Delete handlers
         $scope.PromptDelete = function (item) {
             $scope.SelectedDeleteItem = item;
@@ -557,6 +597,12 @@ else
             $("#gridContainer").dxDataGrid({
                 dataSource: $scope.List,
                 keyExpr: 'DistributionID',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
                 height: 'calc(100vh - 210px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
@@ -669,7 +715,7 @@ else
                         cellTemplate: function (container, options) {
                             $("<span>")
                                 .addClass("badge-status-pill badge-pill-info")
-                                .text(options.data.JangadNo || ('Lot #' + options.data.PreRoughID))
+                                .text(options.data.JangadNo || ('Lot #' + (options.data.PreRoughID || options.data.InwardDetailID || '')))
                                 .appendTo(container);
                         }
                     },
@@ -840,15 +886,15 @@ else
                         cellTemplate: function (container, options) {
                             var group = $("<div>").addClass("grid-btn-group");
 
-                            // Upload Image button
+                            // Show QR button
                             $("<button>")
                                 .addClass("grid-action-btn-upload")
-                                .attr("title", "Upload Jangad Images")
-                                .html('<i class="fa fa-cloud-upload"></i>')
+                                .attr("title", "Show QR Code")
+                                .html('<i class="fa fa-qrcode"></i>')
                                 .on("click", function (e) {
                                     e.stopPropagation();
                                     $scope.$apply(function () {
-                                        $scope.OpenUploadModal(options.data);
+                                        $scope.ShowQRCode(options.data);
                                     });
                                 })
                                 .appendTo(group);
@@ -900,13 +946,15 @@ else
                             column: 'RoughPcs',
                             summaryType: 'sum',
                             valueFormat: '#,##0',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         },
                         {
                             column: 'RoughWeight',
                             summaryType: 'sum',
                             valueFormat: '#,##0.000',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         }
                     ]
                 }

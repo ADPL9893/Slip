@@ -82,7 +82,7 @@
                     <input type="text" ng-model="Master.RoughPcs" class="rd-input rd-master-input" readonly placeholder="0" />
                 </div>
 
-                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 rd-form-group">
+                <div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 rd-form-group">
                     <label class="rd-label">Rough Weight (Cts)</label>
                     <input type="text" ng-model="Master.RoughWeight" class="rd-input rd-master-input" readonly placeholder="0.000" />
                 </div>
@@ -106,6 +106,11 @@
                 <div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 rd-form-group">
                     <label class="rd-label">Master Grad No</label>
                     <input type="text" ng-model="Master.GradNo" class="rd-input rd-master-input" ng-class="{'highlight-mix': IsMixGrade}" readonly placeholder="Grad No" />
+                </div>
+                <div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 rd-form-group">
+                    <label class="rd-label">Size Code</label>
+                    <input type="text" ng-model="Master.SizeCode" class="rd-input rd-master-input" readonly placeholder="" />
+                    <input type="hidden"   id="hdnsizeCodeid" />
                 </div>
                 <div class="clearfix"></div>
             </div>
@@ -193,21 +198,10 @@
                     <label class="rd-label" for="BranchID">
                         Branch <span class="req">*</span>
                     </label>
-                    <select id="BranchID" chosen="BranchList" class="form-control rd-input input-sm" ng-model="NewEntry.BranchID" ng-change="OnBranchChange()" ng-options="item.id as item.value for item in BranchList">
+                    <select id="BranchID" chosen="BranchList" class="form-control rd-input input-sm" ng-model="NewEntry.BranchID" ng-options="item.id as item.value for item in BranchList">
                         <option value="">-- Select Target Branch --</option>
                     </select>
                 </div>
-
-                <!-- Task 3: Dynamic R. Code Input Field (Automatic vs Manual) -->
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="EntryRCode">
-                        R. Code <span class="req">*</span>
-                        <span class="helper-note text-primary" ng-if="IsRCodeAuto">(Auto)</span>
-                        <span class="helper-note text-muted" ng-if="!IsRCodeAuto && NewEntry.BranchID">(Manual)</span>
-                    </label>
-                    <input type="text" id="EntryRCode" ng-model="NewEntry.RCode" ng-disabled="IsRCodeAuto" placeholder="{{IsRCodeAuto ? 'Auto-Generated' : 'Enter R. Code'}}" class="rd-input" ng-class="{'rd-master-input': IsRCodeAuto}" />
-                </div>
-                <div class="clearfix visible-xs"></div>
 
                 <!-- Rough Pcs -->
                 <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 rd-form-group">
@@ -456,7 +450,16 @@
         $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
 
         // URL / Parameter ID
-        $scope.InitPreRoughID = parseInt('@ViewBag.PreRoughID') || 0;
+        function getQueryParam(name) {
+            try {
+                var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+                return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+            } catch (e) {
+                return null;
+            }
+        }
+        var urlId = parseInt(getQueryParam('id')) || 0;
+        $scope.InitPreRoughID = parseInt('@ViewBag.PreRoughID') || urlId || 0;
         $scope.SelectedPreRoughID = $scope.InitPreRoughID > 0 ? $scope.InitPreRoughID.toString() : '';
 
         // Master Lot Details
@@ -473,10 +476,6 @@
 
         // Condition Flag: Is MIX grade?
         $scope.IsMixGrade = false;
-
-        // R.Code Auto / Manual State from MST_VoucherDetails
-        $scope.IsRCodeAuto = false;
-        $scope.RCodeConfig = null;
 
         // Dropdown Lists
         $scope.PreRoughDropdownList = []; // Full flat list: one entry per lot line (Jangad + Lot combined)
@@ -505,13 +504,12 @@
         $scope.AdjustPcs = 0;
         $scope.AdjustWeight = 0;
 
-        // Form Model for New Entry (Kept clean / blank by default with RCode)
+        // Form Model for New Entry
         $scope.NewEntry = {
             DistributionID: 0,
             PreRoughID: 0,
             BranchID: '',
             BranchName: '',
-            RCode: '',
             RoughPcs: null,
             RoughWeight: null,
             Rate: null,
@@ -525,114 +523,6 @@
 
         $scope.IsLoading = false;
         $scope.IsSaving = false;
-        $scope.BasePreviewRCode = '';
-
-        // Dynamic In-Memory Sequence Calculation for Automatic R.Code
-        $scope.EvaluateNextRCode = function (branchId, basePreviewRCode) {
-            if (!basePreviewRCode || typeof basePreviewRCode !== 'string') return basePreviewRCode || '';
-
-            // Collect all existing RCodes in the current lot for this branch (Staged + Saved)
-            var currentGridRows = ($scope.SavedList || []).concat($scope.StagedList || []);
-
-            // Pattern to separate prefix and trailing number (e.g. "BRN-26-1" -> prefix "BRN-26-", number "1")
-            var match = basePreviewRCode.trim().match(/^(.*?)(\d+)$/);
-            if (!match) {
-                var branchStagedCount = ($scope.StagedList || []).filter(function (x) {
-                    return parseInt(x.BranchID || 0) === branchId;
-                }).length;
-                return branchStagedCount > 0 ? (basePreviewRCode + '-' + (branchStagedCount + 1)) : basePreviewRCode;
-            }
-
-            var prefix = match[1];
-            var numStr = match[2];
-            var minDigits = numStr.length;
-            var baseNum = parseInt(numStr, 10);
-
-            // Find all used numbers in staged and saved lists that match this prefix for this branch
-            var usedNums = [];
-            angular.forEach(currentGridRows, function (row) {
-                if (row && row.RCode && (parseInt(row.BranchID || 0) === branchId)) {
-                    var rMatch = (row.RCode || '').trim().match(/^(.*?)(\d+)$/);
-                    if (rMatch && rMatch[1].toLowerCase() === prefix.toLowerCase()) {
-                        var usedN = parseInt(rMatch[2], 10);
-                        if (!isNaN(usedN)) {
-                            usedNums.push(usedN);
-                        }
-                    }
-                }
-            });
-
-            var targetNum = baseNum;
-            if (usedNums.length > 0) {
-                var maxUsed = Math.max.apply(null, usedNums);
-                if (maxUsed >= baseNum) {
-                    targetNum = maxUsed + 1;
-                }
-            }
-
-            // Zero-pad to preserve original formatting width (e.g. 001 -> 002)
-            function padNumber(n, width) {
-                var s = n + '';
-                while (s.length < width) {
-                    s = '0' + s;
-                }
-                return s;
-            }
-
-            return prefix + padNumber(targetNum, minDigits);
-        };
-
-        // Fetch R.Code Configuration on Branch Selection
-        $scope.OnBranchChange = function () {
-            var branchId = parseInt($scope.NewEntry.BranchID || 0);
-            if (!branchId || branchId <= 0) {
-                $scope.IsRCodeAuto = false;
-                $scope.RCodeConfig = null;
-                $scope.BasePreviewRCode = '';
-                $scope.NewEntry.RCode = '';
-                return;
-            }
-
-            // Call Get_RoughCodeConfig to fetch configuration for this Branch & Module
-            $http.post('@Url.Action("Get_RoughCodeConfig", "Master")', {
-                BranchID: branchId,
-                VoucherType: 'Rough Distribution',
-                ActionType: 'GET_CONFIG'
-            }).then(function (res) {
-                if (res.data && res.data.success && res.data.Config) {
-                    $scope.RCodeConfig = res.data.Config;
-                    var numMethod = ($scope.RCodeConfig.NumericMethod || '').trim();
-                    if (numMethod.toLowerCase() === 'automatic') {
-                        $scope.IsRCodeAuto = true;
-                        // Safe preview of next expected R.Code without incrementing counter
-                        $http.post('@Url.Action("Get_RoughCodeConfig", "Master")', {
-                            BranchID: branchId,
-                            VoucherType: 'Rough Distribution',
-                            ActionType: 'PREVIEW_AUTO'
-                        }).then(function (genRes) {
-                            if (genRes.data && genRes.data.success && genRes.data.GeneratedRCode) {
-                                $scope.BasePreviewRCode = genRes.data.GeneratedRCode;
-                                $scope.NewEntry.RCode = $scope.EvaluateNextRCode(branchId, $scope.BasePreviewRCode);
-                            }
-                        });
-                    } else {
-                        $scope.IsRCodeAuto = false;
-                        $scope.BasePreviewRCode = '';
-                        $scope.NewEntry.RCode = '';
-                    }
-                } else {
-                    $scope.IsRCodeAuto = false;
-                    $scope.RCodeConfig = null;
-                    $scope.BasePreviewRCode = '';
-                    $scope.NewEntry.RCode = '';
-                }
-            }, function () {
-                $scope.IsRCodeAuto = false;
-                $scope.RCodeConfig = null;
-                $scope.BasePreviewRCode = '';
-                $scope.NewEntry.RCode = '';
-            });
-        };
 
         // Reactive Changes Counter & Pending Changes Detection (For Save Button State)
         $scope.GetChangesCount = function () {
@@ -767,6 +657,7 @@
             $http.get('@Url.Action("GetRoughInwardLotDetails", "Master")?id=' + preRoughId).then(function (res) {
                 $scope.IsLoading = false;
                 if (res.data && res.data.success) {
+                    debugger
                     var m = res.data.MasterDetails || {};
                     $scope.Master = {
                         PreRoughID: parseInt(m.PreRoughID || preRoughId),
@@ -776,7 +667,10 @@
                         Rate: parseFloat(m.Rate || 0),
                         GradNo: m.GradNo || '',
                         FromHeight: m.FromHeight !== null && m.FromHeight !== undefined ? parseFloat(m.FromHeight) : null,
-                        ToHeight: m.ToHeight !== null && m.ToHeight !== undefined ? parseFloat(m.ToHeight) : null
+                        ToHeight: m.ToHeight !== null && m.ToHeight !== undefined ? parseFloat(m.ToHeight) : null,
+                        SizeCode: m.SizeCode !== null && m.FromHeight !== undefined ? m.SizeCode : null,
+                        SizeCodeId: m.SizeCodeId !== null && m.SizeCodeId !== undefined ? m.SizeCodeId: null
+
                     };
 
                     // Check if GradNo is 'MIX' (case-insensitive)
@@ -921,7 +815,9 @@
                 Rate: 0,
                 GradNo: '',
                 FromHeight: null,
-                ToHeight: null
+                ToHeight: null,
+                SizeCode: null,
+                SizeCodeId : null
             };
             $scope.IsMixGrade = false;
             $scope.SavedList = [];
@@ -932,7 +828,6 @@
             $scope.DeletedIDs = [];
             $scope.DeletedDistributionIDs = $scope.DeletedIDs;
             $scope.HasChanges = false;
-            $scope.BasePreviewRCode = '';
             $scope.RecalculateBalances();
             $scope.ResetEntryForm();
             $scope.InitGrid();
@@ -943,15 +838,11 @@
 
         // Reset Entry Form Fields - KEPT COMPLETELY BLANK / CLEAN
         $scope.ResetEntryForm = function () {
-            $scope.IsRCodeAuto = false;
-            $scope.RCodeConfig = null;
-            $scope.BasePreviewRCode = '';
             $scope.NewEntry = {
                 DistributionID: 0,
                 PreRoughID: $scope.Master.PreRoughID || 0,
                 BranchID: '',
                 BranchName: '',
-                RCode: '',
                 RoughPcs: null,
                 RoughWeight: null,
                 Rate: $scope.IsMixGrade ? null : ($scope.Master.Rate || null),
@@ -960,7 +851,9 @@
                 ToHeight: null,
                 Remarks: '',
                 Priority: 'REGULAR',
-                IsActive: true
+                IsActive: true,
+                SizeCode: null,
+                SizeCodeId: null
             };
             $timeout(function () {
                 $('#BranchID').val('').trigger('chosen:updated');
@@ -1045,33 +938,8 @@
                 }
             }
 
-            // Refresh & Evaluate Dynamic Sequential R.Code if Automatic Numbering is Configured
-            if ($scope.IsRCodeAuto) {
-                $scope.NewEntry.RCode = $scope.EvaluateNextRCode(selectedBranchId, $scope.BasePreviewRCode || $scope.NewEntry.RCode);
-            }
-
-            // Task 1: R. Code Validation (Mandatory)
-            var rCode = ($scope.NewEntry.RCode || "").trim();
-            if (!rCode) {
-                Noty("error", "Please enter R. Code !");
-                $('#EntryRCode').focus();
-                return;
-            }
-
-            // Strict In-Memory Duplicate Check across all current rows (Saved + Staged)
-            var allCurrentRows = ($scope.SavedList || []).concat($scope.StagedList || []);
-            var isLocalDuplicateRCode = false;
-            for (var rc = 0; rc < allCurrentRows.length; rc++) {
-                if ((allCurrentRows[rc].RCode || "").trim().toLowerCase() === rCode.toLowerCase()) {
-                    isLocalDuplicateRCode = true;
-                    break;
-                }
-            }
-            if (isLocalDuplicateRCode) {
-                Noty("error", "R.Code '" + rCode + "' already exists in the distribution table! Each packet must have a unique R.Code.");
-                $('#EntryRCode').focus();
-                return;
-            }
+            // R.Code is no longer entered/known here - it's generated server-side
+            // (dbo.usp_GenerateRoughCode) at the moment each row is actually saved.
 
             // 2. Rough Pcs Validation (Strict Capacity Check)
             var pcs = parseInt($scope.NewEntry.RoughPcs);
@@ -1159,43 +1027,22 @@
                 return;
             }
 
-            // If manual R.Code entry, verify against database for uniqueness
-            if (!$scope.IsRCodeAuto) {
-                $scope.IsLoading = true;
-                $http.post('@Url.Action("Get_RoughCodeConfig", "Master")', {
-                    BranchID: selectedBranchId,
-                    VoucherType: 'Rough Distribution',
-                    ActionType: 'CHECK_DUPLICATE',
-                    ManualRCode: rCode
-                }).then(function (chkRes) {
-                    $scope.IsLoading = false;
-                    if (chkRes.data && chkRes.data.success && chkRes.data.IsExists) {
-                        Noty("error", "R.Code '" + rCode + "' already exists in database! Please enter a unique R.Code.");
-                        $('#EntryRCode').focus();
-                        return;
-                    }
-                    $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks);
-                }, function () {
-                    $scope.IsLoading = false;
-                    $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks);
-                });
-            } else {
-                $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks);
-            }
+            $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, pcs, weight, rate, gradNo, fromH, toH, remarks);
         };
 
-        // Commit and add validated distribution row to staged list
-        $scope.CommitAddDistributionRow = function (selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks) {
+        // Commit and add validated distribution row to staged list.
+        // RCode is left blank here - it doesn't exist yet and is only
+        // generated server-side (usp_GenerateRoughCode) when actually saved.
+        $scope.CommitAddDistributionRow = function (selectedBranchId, selectedBranchName, pcs, weight, rate, gradNo, fromH, toH, remarks) {
             // Resolve Branch Name from MST_GeneralSetting
             var branchName = selectedBranchName || ('Branch #' + selectedBranchId);
 
-            // Build new staged object including RCode & Priority
             var stagedItem = {
                 DistributionID: 0,
-                PreRoughID: $scope.Master.PreRoughID,
+                InwardDetailID: $scope.Master.PreRoughID,
                 BranchID: selectedBranchId,
                 BranchName: branchName,
-                RCode: rCode,
+                RCode: '',
                 RoughPcs: pcs,
                 RoughWeight: parseFloat(weight.toFixed(3)),
                 Rate: rate,
@@ -1215,7 +1062,7 @@
             $scope.ResetEntryForm();
             $scope.InitGrid();
 
-            Noty("success", "Added " + pcs + " Pcs (" + weight.toFixed(3) + " Cts) for " + branchName + " (R.Code: " + rCode + ") to distribution table.");
+            Noty("success", "Added " + pcs + " Pcs (" + weight.toFixed(3) + " Cts) for " + branchName + " to distribution table.");
         };
 
         // Aliased function names
@@ -1365,12 +1212,6 @@
             $scope.RecalculateBalances();
             $scope.InitGrid();
 
-            // Re-evaluate current form R.Code if automatic for selected branch
-            var currentBranchId = parseInt($scope.NewEntry.BranchID || 0);
-            if (currentBranchId > 0 && $scope.IsRCodeAuto && $scope.BasePreviewRCode) {
-                $scope.NewEntry.RCode = $scope.EvaluateNextRCode(currentBranchId, $scope.BasePreviewRCode);
-            }
-
             $("#ConfirmDeleteModal").modal("hide");
             $scope.SelectedDeleteItem = null;
 
@@ -1400,7 +1241,8 @@
             $http.post('@Url.Action("SaveRoughDistribution", "Master")', {
                 list: $scope.StagedList,
                 deletedIDs: $scope.DeletedIDs,
-                Action: 'INSERT'
+                Action: 'INSERT',
+                SizeCodeID: $scope.Master.SizeCodeId
             }).then(function (res) {
                 $scope.IsSaving = false;
                 if (res.data && res.data.success) {
@@ -1408,6 +1250,18 @@
                     $scope.DeletedIDs = [];
                     $scope.StagedList = [];
                     Noty("success", res.data.message || "Distributions saved successfully!");
+
+                    // Generate + open QR codes (new tab) for the rows just inserted
+                    var newIDs = res.data.newDistributionIDs || [];
+                    if (newIDs.length > 0) {
+                        $http.post('@Url.Action("GenerateRoughDistributionQRs", "Master")', { distributionIDs: newIDs })
+                            .then(function (qrRes) {
+                                if (qrRes.data && qrRes.data.success) {
+                                    window.open('@Url.Action("RoughDistributionQRPrint", "Master")', '_blank');
+                                }
+                            });
+                    }
+
                     // Auto-Redirect to RoughDistributionList
                     $timeout(function () {
                         window.location.href = '@Url.Action("RoughDistributionList", "Master")';
@@ -1436,7 +1290,7 @@
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
                 allowColumnReordering: true,
-                columnChooser: { enabled: true, mode: 'select', title: 'Column Chooser' },
+                columnChooser: { enabled: false, mode: 'select', title: 'Column Chooser' },
                 columnFixing: { enabled: true },
                 hoverStateEnabled: true,
                 rowAlternationEnabled: true,
@@ -1452,16 +1306,20 @@
                 paging: { enabled: false },
                 pager: { visible: false },
                 searchPanel: {
-                    visible: true,
+                    visible: false,
                     width: isMobile ? 180 : 260,
                     placeholder: 'Search distribution...',
                     highlightCaseSensitive: false
                 },
-                filterRow: { visible: true, applyFilter: 'auto' },
+                filterRow: { visible: false, applyFilter: 'auto' },
                 headerFilter: { visible: true },
                 onRowPrepared: function (e) {
-                    if (e.rowType === "data" && e.data.IsStaged) {
-                        $(e.rowElement).addClass("staged-row");
+                    if (e.rowType === "data") {
+                        if (e.data.IsStaged) {
+                            $(e.rowElement).addClass("staged-row");
+                        }
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
                     }
                 },
                 columns: [
@@ -1520,6 +1378,12 @@
                         minWidth: 110,
                         alignment: 'center',
                         cellTemplate: function (container, options) {
+                            // Staged/unsaved rows have no RCode yet - it's only
+                            // generated server-side once the row is actually saved.
+                            if (options.data.IsStaged || !options.data.DistributionID) {
+                                return;
+                            }
+
                             var priority = (options.data.Priority || 'REGULAR').toUpperCase();
                             var priorityClass = 'rcode-regular';
 
@@ -1636,13 +1500,15 @@
                             column: 'RoughPcs',
                             summaryType: 'sum',
                             valueFormat: '#,##0',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         },
                         {
                             column: 'RoughWeight',
                             summaryType: 'sum',
                             valueFormat: '#,##0.000',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         }
                     ]
                 }

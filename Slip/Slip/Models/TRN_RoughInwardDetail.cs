@@ -24,6 +24,7 @@
         public decimal? Hours { get; set; }
         public string BoxNo { get; set; }
         public string SizeCode { get; set; }
+        public int? SizeCodeId { get; set; }
         public string ColorType { get; set; }
         public object IsDelete { get; internal set; }
         public bool NotAllow { get; internal set; } = false;

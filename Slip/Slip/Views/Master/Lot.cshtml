@@ -115,6 +115,7 @@
                 $scope.List = List;
                 DataField = response.data.DataField || [];
                 DataFieldSummary = response.data.DataFieldSummary || [];
+                DataFieldSummary.forEach(function (s) { s.alignByColumn = true; });
 
                 $scope.BuildGridColumns(DataField);
             }, function () {
@@ -177,6 +178,12 @@
                 dataSource: $scope.List,
                 keyExpr: 'ID',
                 columns: columns,
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
                 height: 'calc(100vh - 210px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,

@@ -5,7 +5,7 @@ namespace Slip.Models
     public class MST_RoughDistribution
     {
         public int DistributionID { get; set; }
-        public int PreRoughID { get; set; }
+        public int InwardDetailID { get; set; }
         public int BranchID { get; set; }
         public string BranchName { get; set; }
         public string RCode { get; set; }

@@ -152,6 +152,12 @@ else
                 dataSource: $scope.List,
                 columns: columns,
                 keyExpr: 'ID',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
                 height: 'calc(100vh - 210px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
@@ -194,7 +200,7 @@ else
                 },
                 summary: {
                     totalItems: [
-                        { column: 'ID', summaryType: 'count', displayFormat: "{0}" }
+                        { column: 'ID', summaryType: 'count', displayFormat: "{0}", alignByColumn: true }
                     ]
                 },
                 export: {

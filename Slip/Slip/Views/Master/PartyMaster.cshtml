@@ -410,6 +410,12 @@
             $("#partyGridContainer").dxDataGrid({
                 dataSource: $scope.PartyList,
                 keyExpr: 'PartyId',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
                 height: 'calc(100vh - 210px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,

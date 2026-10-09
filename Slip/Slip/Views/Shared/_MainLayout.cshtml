@@ -1,4 +1,4 @@
-@{ 
+@{
     DateTime now = DateTime.Now;
     var CurDate = System.DateTime.Now.Date.ToString("dd-MMM-yyyy");
     var StartMonthDateType = new DateTime(now.Year, now.Month, 1).ToString("dd-MMM-yyyy");
@@ -10,7 +10,19 @@
 <!DOCTYPE html>
 <html ng-app="app">
 <head>
-    <title>@Page.Title</title>
+    <!-- Immediate Iframe Detection to prevent layout jitter -->
+    <script>
+        (function () {
+            try {
+                if (window.self !== window.top) {
+                    document.documentElement.classList.add('in-tab-iframe');
+                }
+            } catch (e) {
+                document.documentElement.classList.add('in-tab-iframe');
+            }
+        })();
+    </script>
+    <title>@(ViewBag.Title ?? Page.Title ?? "ADPL")</title>
     @RenderSection("head", required: false)
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -22,7 +34,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Syncopate" />
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet">
 
     <!-- Third-Party Base Framework Stylesheets -->
     <link href="~/Content/LoaderManage.css" rel="stylesheet" />
@@ -34,6 +46,7 @@
     <!-- Scripts & Framework Bundles -->
     <script src="~/Content/Scripts/jquery.js"></script>
     <script src="~/Content/js/main.js"></script>
+    <script src="~/Content/js/chrome-tabs.js"></script>
     <script src="~/Content/plugins/Chosen-AutoSuggestion/js/angular-chosen.min.js"></script>
     <script src="~/Content/plugins/Noty/js/noty/packaged/jquery.noty.packaged.min.js"></script>
 
@@ -48,277 +61,277 @@
     <link href="~/Content/dx.material.blue.light.compact.css" rel="stylesheet" />
     <link href="~/Content/angular/ui-grid.css" rel="stylesheet" />
 
-    <!-- Custom Theme Stylesheets (Loaded AFTER Base Themes) 
+    <!-- Custom Theme Stylesheets (Loaded AFTER Base Themes)
     <link href="~/Content/css/NavbarCSS.css" rel="stylesheet" />
     <link href="~/Content/css/theme-obsidian.css" rel="stylesheet" />-->
-
     <!-- Global Common Stylesheet (all page/feature CSS consolidates here) -->
     <link href="~/Content/css/common.css" rel="stylesheet" />
+    <link href="~/Content/css/chrome-tabs.css" rel="stylesheet" />
 
     <script>
-        DevExpress.config({ licenseKey: 'ewogICJmb3JtYXQiOiAxLAogICJjdXN0b21lcklkIjogIjc3YWNjMjc4LWJjMWQtNGYzZS1iZTRlLWRmYTVhY2MzMTY0NyIsCiAgIm1heFZlcnNpb25BbGxvd2VkIjogMjQyCn0=.o0I38uew6ot4KdU99q++Pi1725KtWxFib6HCSDhJVtI9iY3EzMhoc3yv7PGbqe+UftVEH7QRg6Zj6uINPxwmIRieADZzB14g0XU0FVMszx4RQdKBV4uM6RFg9SqHuoIV9SxyXw==' });
+                                                        DevExpress.config({ licenseKey: 'ewogICJmb3JtYXQiOiAxLAogICJjdXN0b21lcklkIjogIjc3YWNjMjc4LWJjMWQtNGYzZS1iZTRlLWRmYTVhY2MzMTY0NyIsCiAgIm1heFZlcnNpb25BbGxvd2VkIjogMjQyCn0=.o0I38uew6ot4KdU99q++Pi1725KtWxFib6HCSDhJVtI9iY3EzMhoc3yv7PGbqe+UftVEH7QRg6Zj6uINPxwmIRieADZzB14g0XU0FVMszx4RQdKBV4uM6RFg9SqHuoIV9SxyXw==' });
 
-        // Globally Remove '#' (Row Number / Serial) Column & Enable Filter Operation Chooser (Magnifying Glass) on all DevExtreme Grids
-        (function () {
-            function isHashColumn(col) {
-                if (!col) return false;
-                var cap = (col.caption || '').toString().trim();
-                var df = (col.dataField || '').toString().trim();
-                var nm = (col.name || '').toString().trim();
-                return (cap === '#' || df === '#' || nm === '#');
-            }
+                                                        // Globally Remove '#' (Row Number / Serial) Column & Enable Filter Operation Chooser (Magnifying Glass) on all DevExtreme Grids
+                                                        (function () {
+                                                            function isHashColumn(col) {
+                                                                if (!col) return false;
+                                                                var cap = (col.caption || '').toString().trim();
+                                                                var df = (col.dataField || '').toString().trim();
+                                                                var nm = (col.name || '').toString().trim();
+                                                                return (cap === '#' || df === '#' || nm === '#');
+                                                            }
 
-            function ensureFilterOperations(col) {
-                if (!col || typeof col !== 'object') return col;
-                if (col.allowFiltering !== false) {
-                    var dt = (col.dataType || '').toLowerCase();
-                    var df = (col.dataField || '').toLowerCase();
-                    var isBool = (dt === 'boolean' || df === 'isactive' || df === 'status');
+                                                            function ensureFilterOperations(col) {
+                                                                if (!col || typeof col !== 'object') return col;
+                                                                if (col.allowFiltering !== false) {
+                                                                    var dt = (col.dataType || '').toLowerCase();
+                                                                    var df = (col.dataField || '').toLowerCase();
+                                                                    var isBool = (dt === 'boolean' || df === 'isactive' || df === 'status');
 
-                    if (isBool || col.lookup) {
-                        col.showOperationChooser = false;
-                        col.filterOperations = ["="];
-                        col.selectedFilterOperation = "=";
-                        if (isBool) {
-                            col.dataType = 'boolean';
-                            if (!col.trueText) col.trueText = 'Active';
-                            if (!col.falseText) col.falseText = 'Inactive';
-                        }
-                    } else if (!col.filterOperations || !Array.isArray(col.filterOperations) || col.filterOperations.length === 0) {
-                        if (dt === 'number' || dt === 'date' || dt === 'datetime') {
-                            col.filterOperations = ["=", "<>", "<", "<=", ">", ">=", "between"];
-                            if (!col.selectedFilterOperation && !col.defaultFilterOperation) {
-                                col.selectedFilterOperation = "=";
-                            }
-                        } else {
-                            col.filterOperations = ["contains", "notcontains", "startswith", "endswith", "=", "<>"];
-                            if (!col.selectedFilterOperation && !col.defaultFilterOperation) {
-                                col.selectedFilterOperation = "contains";
-                            }
-                        }
-                    }
-                }
-                return col;
-            }
+                                                                    if (isBool || col.lookup) {
+                                                                        col.showOperationChooser = false;
+                                                                        col.filterOperations = ["="];
+                                                                        col.selectedFilterOperation = "=";
+                                                                        if (isBool) {
+                                                                            col.dataType = 'boolean';
+                                                                            if (!col.trueText) col.trueText = 'Active';
+                                                                            if (!col.falseText) col.falseText = 'Inactive';
+                                                                        }
+                                                                    } else if (!col.filterOperations || !Array.isArray(col.filterOperations) || col.filterOperations.length === 0) {
+                                                                        if (dt === 'number' || dt === 'date' || dt === 'datetime') {
+                                                                            col.filterOperations = ["=", "<>", "<", "<=", ">", ">=", "between"];
+                                                                            if (!col.selectedFilterOperation && !col.defaultFilterOperation) {
+                                                                                col.selectedFilterOperation = "=";
+                                                                            }
+                                                                        } else {
+                                                                            col.filterOperations = ["contains", "notcontains", "startswith", "endswith", "=", "<>"];
+                                                                            if (!col.selectedFilterOperation && !col.defaultFilterOperation) {
+                                                                                col.selectedFilterOperation = "contains";
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                                return col;
+                                                            }
 
-            function processColumnsArray(columns) {
-                if (!Array.isArray(columns)) return columns;
-                return columns
-                    .filter(function (col) {
-                        return !isHashColumn(col);
-                    })
-                    .map(function (col) {
-                        if (col && typeof col === 'object') {
-                            if ((col.caption === null || col.caption === '' || typeof col.caption === 'undefined') && col.dataField) {
-                                col.caption = col.dataField
-                                    .replace(/([a-z])([A-Z])/g, '$1 $2')
-                                    .replace(/_/g, ' ')
-                                    .trim();
-                            }
-                            ensureFilterOperations(col);
-                        }
-                        return col;
-                    });
-            }
+                                                            function processColumnsArray(columns) {
+                                                                if (!Array.isArray(columns)) return columns;
+                                                                return columns
+                                                                    .filter(function (col) {
+                                                                        return !isHashColumn(col);
+                                                                    })
+                                                                    .map(function (col) {
+                                                                        if (col && typeof col === 'object') {
+                                                                            if ((col.caption === null || col.caption === '' || typeof col.caption === 'undefined') && col.dataField) {
+                                                                                col.caption = col.dataField
+                                                                                    .replace(/([a-z])([A-Z])/g, '$1 $2')
+                                                                                    .replace(/_/g, ' ')
+                                                                                    .trim();
+                                                                            }
+                                                                            ensureFilterOperations(col);
+                                                                        }
+                                                                        return col;
+                                                                    });
+                                                            }
 
-            if (window.DevExpress && DevExpress.ui) {
-                if (DevExpress.ui.dxDataGrid) {
-                    DevExpress.ui.dxDataGrid.defaultOptions({
-                        options: {
-                            filterRow: {
-                                visible: true,
-                                showOperationChooser: true,
-                                applyFilter: 'auto',
-                                resetOperationText: 'Reset'
-                            },
-                            headerFilter: {
-                                visible: true
-                            },
-                            columnChooser: {
-                                enabled: true,
-                                mode: 'select',
-                                allowSearch: true,
-                                searchTimeout: 300,
-                                allowSelectAll: true,
-                                selection: {
-                                    allowSelectAll: true,
-                                    selectByClick: true,
-                                    recursive: true
-                                },
-                                position: {
-                                    my: 'right top',
-                                    at: 'right top',
-                                    of: '.dx-datagrid',
-                                    offset: '-15 45'
-                                },
-                                width: 260,
-                                height: 400,
-                                title: 'Column Chooser'
-                            },
-                            customizeColumns: function (columns) {
-                                if (Array.isArray(columns)) {
-                                    for (var i = 0; i < columns.length; i++) {
-                                        var col = columns[i];
-                                        if (col) {
-                                            if (isHashColumn(col)) {
-                                                col.visible = false;
-                                            }
-                                            ensureFilterOperations(col);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-                if (DevExpress.ui.dxTreeList) {
-                    DevExpress.ui.dxTreeList.defaultOptions({
-                        options: {
-                            filterRow: {
-                                visible: true,
-                                showOperationChooser: true,
-                                applyFilter: 'auto',
-                                resetOperationText: 'Reset'
-                            },
-                            headerFilter: {
-                                visible: true
-                            },
-                            columnChooser: {
-                                enabled: true,
-                                mode: 'select',
-                                allowSearch: true,
-                                searchTimeout: 300,
-                                allowSelectAll: true,
-                                selection: {
-                                    allowSelectAll: true,
-                                    selectByClick: true,
-                                    recursive: true
-                                },
-                                position: {
-                                    my: 'right top',
-                                    at: 'right top',
-                                    of: '.dx-treelist',
-                                    offset: '-15 45'
-                                },
-                                width: 260,
-                                height: 400,
-                                title: 'Column Chooser'
-                            },
-                            customizeColumns: function (columns) {
-                                if (Array.isArray(columns)) {
-                                    for (var i = 0; i < columns.length; i++) {
-                                        var col = columns[i];
-                                        if (col) {
-                                            if (isHashColumn(col)) {
-                                                col.visible = false;
-                                            }
-                                            ensureFilterOperations(col);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
+                                                            if (window.DevExpress && DevExpress.ui) {
+                                                                if (DevExpress.ui.dxDataGrid) {
+                                                                    DevExpress.ui.dxDataGrid.defaultOptions({
+                                                                        options: {
+                                                                            filterRow: {
+                                                                                visible: true,
+                                                                                showOperationChooser: true,
+                                                                                applyFilter: 'auto',
+                                                                                resetOperationText: 'Reset'
+                                                                            },
+                                                                            headerFilter: {
+                                                                                visible: true
+                                                                            },
+                                                                            columnChooser: {
+                                                                                enabled: true,
+                                                                                mode: 'select',
+                                                                                allowSearch: true,
+                                                                                searchTimeout: 300,
+                                                                                allowSelectAll: true,
+                                                                                selection: {
+                                                                                    allowSelectAll: true,
+                                                                                    selectByClick: true,
+                                                                                    recursive: true
+                                                                                },
+                                                                                position: {
+                                                                                    my: 'right top',
+                                                                                    at: 'right top',
+                                                                                    of: '.dx-datagrid',
+                                                                                    offset: '-15 45'
+                                                                                },
+                                                                                width: 260,
+                                                                                height: 400,
+                                                                                title: 'Column Chooser'
+                                                                            },
+                                                                            customizeColumns: function (columns) {
+                                                                                if (Array.isArray(columns)) {
+                                                                                    for (var i = 0; i < columns.length; i++) {
+                                                                                        var col = columns[i];
+                                                                                        if (col) {
+                                                                                            if (isHashColumn(col)) {
+                                                                                                col.visible = false;
+                                                                                            }
+                                                                                            ensureFilterOperations(col);
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                }
+                                                                if (DevExpress.ui.dxTreeList) {
+                                                                    DevExpress.ui.dxTreeList.defaultOptions({
+                                                                        options: {
+                                                                            filterRow: {
+                                                                                visible: true,
+                                                                                showOperationChooser: true,
+                                                                                applyFilter: 'auto',
+                                                                                resetOperationText: 'Reset'
+                                                                            },
+                                                                            headerFilter: {
+                                                                                visible: true
+                                                                            },
+                                                                            columnChooser: {
+                                                                                enabled: true,
+                                                                                mode: 'select',
+                                                                                allowSearch: true,
+                                                                                searchTimeout: 300,
+                                                                                allowSelectAll: true,
+                                                                                selection: {
+                                                                                    allowSelectAll: true,
+                                                                                    selectByClick: true,
+                                                                                    recursive: true
+                                                                                },
+                                                                                position: {
+                                                                                    my: 'right top',
+                                                                                    at: 'right top',
+                                                                                    of: '.dx-treelist',
+                                                                                    offset: '-15 45'
+                                                                                },
+                                                                                width: 260,
+                                                                                height: 400,
+                                                                                title: 'Column Chooser'
+                                                                            },
+                                                                            customizeColumns: function (columns) {
+                                                                                if (Array.isArray(columns)) {
+                                                                                    for (var i = 0; i < columns.length; i++) {
+                                                                                        var col = columns[i];
+                                                                                        if (col) {
+                                                                                            if (isHashColumn(col)) {
+                                                                                                col.visible = false;
+                                                                                            }
+                                                                                            ensureFilterOperations(col);
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
 
-            if (window.jQuery && jQuery.fn) {
-                if (jQuery.fn.dxDataGrid) {
-                    var origDataGrid = jQuery.fn.dxDataGrid;
-                    jQuery.fn.dxDataGrid = function () {
-                        if (arguments.length > 0 && typeof arguments[0] === 'object' && arguments[0] !== null) {
-                            var opts = arguments[0];
-                            if (Array.isArray(opts.columns)) {
-                                opts.columns = processColumnsArray(opts.columns);
-                            }
-                            // Globally enforce filterRow with showOperationChooser: true (magnifying glass)
-                            opts.filterRow = jQuery.extend(true, {
-                                visible: true,
-                                showOperationChooser: true,
-                                applyFilter: 'auto',
-                                resetOperationText: 'Reset'
-                            }, opts.filterRow || {});
-                            opts.filterRow.showOperationChooser = true;
+                                                            if (window.jQuery && jQuery.fn) {
+                                                                if (jQuery.fn.dxDataGrid) {
+                                                                    var origDataGrid = jQuery.fn.dxDataGrid;
+                                                                    jQuery.fn.dxDataGrid = function () {
+                                                                        if (arguments.length > 0 && typeof arguments[0] === 'object' && arguments[0] !== null) {
+                                                                            var opts = arguments[0];
+                                                                            if (Array.isArray(opts.columns)) {
+                                                                                opts.columns = processColumnsArray(opts.columns);
+                                                                            }
+                                                                            // Globally enforce filterRow with showOperationChooser: true (magnifying glass)
+                                                                            opts.filterRow = jQuery.extend(true, {
+                                                                                visible: true,
+                                                                                showOperationChooser: true,
+                                                                                applyFilter: 'auto',
+                                                                                resetOperationText: 'Reset'
+                                                                            }, opts.filterRow || {});
+                                                                            opts.filterRow.showOperationChooser = true;
 
-                            // Globally enforce headerFilter: { visible: true }
-                            if (typeof opts.headerFilter === 'undefined') {
-                                opts.headerFilter = { visible: true };
-                            }
+                                                                            // Globally enforce headerFilter: { visible: true }
+                                                                            if (typeof opts.headerFilter === 'undefined') {
+                                                                                opts.headerFilter = { visible: true };
+                                                                            }
 
-                            var gridEl = this;
-                            opts.columnChooser = jQuery.extend(true, {
-                                enabled: true,
-                                mode: 'select',
-                                allowSearch: true,
-                                searchTimeout: 300,
-                                allowSelectAll: true,
-                                selection: {
-                                    allowSelectAll: true,
-                                    selectByClick: true,
-                                    recursive: true
-                                },
-                                position: {
-                                    my: 'right top',
-                                    at: 'right top',
-                                    of: gridEl,
-                                    offset: '-15 45'
-                                },
-                                width: 260,
-                                height: 400,
-                                title: 'Column Chooser'
-                            }, opts.columnChooser || {});
-                        }
-                        return origDataGrid.apply(this, arguments);
-                    };
-                }
-                if (jQuery.fn.dxTreeList) {
-                    var origTreeList = jQuery.fn.dxTreeList;
-                    jQuery.fn.dxTreeList = function () {
-                        if (arguments.length > 0 && typeof arguments[0] === 'object' && arguments[0] !== null) {
-                            var opts = arguments[0];
-                            if (Array.isArray(opts.columns)) {
-                                opts.columns = processColumnsArray(opts.columns);
-                            }
-                            opts.filterRow = jQuery.extend(true, {
-                                visible: true,
-                                showOperationChooser: true,
-                                applyFilter: 'auto',
-                                resetOperationText: 'Reset'
-                            }, opts.filterRow || {});
-                            opts.filterRow.showOperationChooser = true;
+                                                                            var gridEl = this;
+                                                                            opts.columnChooser = jQuery.extend(true, {
+                                                                                enabled: true,
+                                                                                mode: 'select',
+                                                                                allowSearch: true,
+                                                                                searchTimeout: 300,
+                                                                                allowSelectAll: true,
+                                                                                selection: {
+                                                                                    allowSelectAll: true,
+                                                                                    selectByClick: true,
+                                                                                    recursive: true
+                                                                                },
+                                                                                position: {
+                                                                                    my: 'right top',
+                                                                                    at: 'right top',
+                                                                                    of: gridEl,
+                                                                                    offset: '-15 45'
+                                                                                },
+                                                                                width: 260,
+                                                                                height: 400,
+                                                                                title: 'Column Chooser'
+                                                                            }, opts.columnChooser || {});
+                                                                        }
+                                                                        return origDataGrid.apply(this, arguments);
+                                                                    };
+                                                                }
+                                                                if (jQuery.fn.dxTreeList) {
+                                                                    var origTreeList = jQuery.fn.dxTreeList;
+                                                                    jQuery.fn.dxTreeList = function () {
+                                                                        if (arguments.length > 0 && typeof arguments[0] === 'object' && arguments[0] !== null) {
+                                                                            var opts = arguments[0];
+                                                                            if (Array.isArray(opts.columns)) {
+                                                                                opts.columns = processColumnsArray(opts.columns);
+                                                                            }
+                                                                            opts.filterRow = jQuery.extend(true, {
+                                                                                visible: true,
+                                                                                showOperationChooser: true,
+                                                                                applyFilter: 'auto',
+                                                                                resetOperationText: 'Reset'
+                                                                            }, opts.filterRow || {});
+                                                                            opts.filterRow.showOperationChooser = true;
 
-                            if (typeof opts.headerFilter === 'undefined') {
-                                opts.headerFilter = { visible: true };
-                            }
+                                                                            if (typeof opts.headerFilter === 'undefined') {
+                                                                                opts.headerFilter = { visible: true };
+                                                                            }
 
-                            var treeEl = this;
-                            opts.columnChooser = jQuery.extend(true, {
-                                enabled: true,
-                                mode: 'select',
-                                allowSearch: true,
-                                searchTimeout: 300,
-                                allowSelectAll: true,
-                                selection: {
-                                    allowSelectAll: true,
-                                    selectByClick: true,
-                                    recursive: true
-                                },
-                                position: {
-                                    my: 'right top',
-                                    at: 'right top',
-                                    of: treeEl,
-                                    offset: '-15 45'
-                                },
-                                width: 260,
-                                height: 400,
-                                title: 'Column Chooser'
-                            }, opts.columnChooser || {});
-                        }
-                        return origTreeList.apply(this, arguments);
-                    };
-                }
-            }
-        })();
+                                                                            var treeEl = this;
+                                                                            opts.columnChooser = jQuery.extend(true, {
+                                                                                enabled: true,
+                                                                                mode: 'select',
+                                                                                allowSearch: true,
+                                                                                searchTimeout: 300,
+                                                                                allowSelectAll: true,
+                                                                                selection: {
+                                                                                    allowSelectAll: true,
+                                                                                    selectByClick: true,
+                                                                                    recursive: true
+                                                                                },
+                                                                                position: {
+                                                                                    my: 'right top',
+                                                                                    at: 'right top',
+                                                                                    of: treeEl,
+                                                                                    offset: '-15 45'
+                                                                                },
+                                                                                width: 260,
+                                                                                height: 400,
+                                                                                title: 'Column Chooser'
+                                                                            }, opts.columnChooser || {});
+                                                                        }
+                                                                        return origTreeList.apply(this, arguments);
+                                                                    };
+                                                                }
+                                                            }
+                                                        })();
     </script>
 
 </head>
@@ -327,6 +340,16 @@
     <div class="wrapper">
         <!-- Obsidian Slate Navbar Header -->
         <header class="main-header hidden-print">
+            <!-- Topbar icon sprite (trimmed from topbar-premium-v3.html - only the icons actually used) -->
+            <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+                <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+                <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z" /><path d="M2 9h20M10 3 8 9l4 12 4-12-2-6" /></symbol>
+                <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></symbol>
+                <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></symbol>
+                <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.9 1.9 0 0 0 3.4 0" /></symbol>
+                <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9" /></symbol>
+                <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4" /><path d="m11 12 9-9M17 6l3 3M14 9l2 2" /></symbol>
+            </svg>
             <a class="logo" href="@Url.Action("Index", "Home")" title="ADPL Enterprise Management">
                 <div class="adpl-brand-wrap">
                     <div class="adpl-brand-gem">
@@ -372,108 +395,211 @@
                     </button>
                 </div>
                 <div class="collapse navbar-collapse" id="navbar-collapse">
-                    <ul class="nav navbar-nav">
-                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(5))
+                    <ul class="nav tb-menu" id="tbMenu">
+
+                        
+
+                        @if (Slip.Utility.SessionFacade.FormPermissionsGroup.Count() > 0)
                         {
-                            <li>
-                                <a href="@Url.Action("Dashboard", "Dashboard")" role="button" aria-haspopup="true" aria-expanded="false">Dashboard</a>
-                            </li>
+
+                            foreach (var Group in Slip.Utility.SessionFacade.FormPermissionsGroup)
+                            {
+                                var groupItems = Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == Group.GroupID).ToList();
+                                var isWide = groupItems.Count > 4;
+                                var half = (int)Math.Ceiling(groupItems.Count / 2.0);
+
+
+                                if (groupItems.Count == 1)
+                                {
+                                    var singleItem = groupItems[0];
+                                    <li>
+                                        <a class="tb-menu-link" href="@Url.Action(singleItem.Action, singleItem.Controller)">
+                                            <span class="tb-txt">@Group.GroupName</span>
+                                        </a>
+                                    </li>
+
+                                }
+                                else
+                                {
+                                    <li>
+                                        <button class="tb-menu-btn" type="button" aria-expanded="false" aria-haspopup="true">@Group.GroupName <svg class="tb-chev i"><use href="#i-down"></use></svg></button>
+                                        <div class="tb-dropdown @(isWide ? "wide" : "")">
+                                            
+                                                @if (isWide)
+                                                {
+                                                    <div class="tb-cols">
+                                                        <div>
+                                                            @foreach (var i in groupItems.Take(half))
+                                                            {
+                                                                <a class="tb-item" href="@Url.Action(i.Action, i.Controller)"><span class="tb-ico"><svg class="i"><use href="#i-gem"></use></svg></span><span class="tb-txt">@i.ModuleName</span></a>
+                                                            }
+                                                        </div>
+                                                        <div>
+                                                            @foreach (var t in groupItems.Skip(half))
+                                                            {
+                                                                <a class="tb-item" href="@Url.Action(t.Action, t.Controller)"><span class="tb-ico"><svg class="i"><use href="#i-gem"></use></svg></span><span class="tb-txt">@t.ModuleName</span></a>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="tb-cols">
+                                                        <div>
+
+                                                            @foreach (var i in groupItems)
+                                                            {
+                                                                <a class="tb-item" href="@Url.Action(i.Action, i.Controller)"><span class="tb-ico"><svg class="i"><use href="#i-gem"></use></svg></span><span class="tb-txt">@i.ModuleName</span></a>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+                                            
+                                        </div>
+                                    </li>
+                                }
+
+
+                            }
+
+
+
+
                         }
-                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(1))
-                        {
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">User <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 1).ToList())
-                                    {
-                                        if (item.GroupID == 1)
-                                        {
-                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
-                                        }
-                                    }
-                                </ul>
-                            </li>
-                        }
-                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(4))
-                        {
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Master <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 4).ToList())
-                                    {
-                                        if (item.GroupID == 4)
-                                        {
-                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
-                                        }
-                                    }
-                                </ul>
-                            </li>
-                        }
-                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(2))
-                        {
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Slip <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 2).ToList())
-                                    {
-                                        if (item.GroupID == 2)
-                                        {
-                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
-                                        }
-                                    }
-                                </ul>
-                            </li>
-                        }
-                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(3))
-                        {
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Report <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 3).ToList())
-                                    {
-                                        if (item.GroupID == 3)
-                                        {
-                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
-                                        }
-                                    }
-                                </ul>
-                            </li>
-                        }
-                        @if (Slip.Utility.FormPermissionHelper.CheckFormPermissionGroup(6))
-                        {
-                            <li class="dropdown">
-                                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Pricing <span class="caret"></span></a>
-                                <ul class="dropdown-menu">
-                                    @foreach (var item in Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == 6).ToList())
-                                    {
-                                        if (item.GroupID == 6)
-                                        {
-                                            <li><a href="@Url.Action(item.Action, item.Controller)">@item.ModuleName</a></li>
-                                        }
-                                    }
-                                </ul>
-                            </li>
-                        }
+
+
+
                     </ul>
                     <div class="navbar-custom-menu">
-                        <ul class="top-nav">
-                            <!-- User Session Indicator -->
-                            <li>
-                                <div class="user-badge" title="Logged in as @Slip.Utility.SessionFacade.UserSession.UserName">
-                                    <span class="avatar">@(string.IsNullOrEmpty(Slip.Utility.SessionFacade.UserSession.UserName) ? "?" : Slip.Utility.SessionFacade.UserSession.UserName.Substring(0, 1).ToUpper())</span>
-                                    <span class="user-badge-name">@Slip.Utility.SessionFacade.UserSession.UserName</span>
+                        <div class="tb-right">
+                            @*<button class="tb-search" type="button" aria-label="Search">
+                                    <svg class="i"><use href="#i-search"></use></svg>
+                                    Search lot, party, issue no
+                                    <kbd>Ctrl K</kbd>
+                                </button>
+
+                                <button class="tb-icon-btn" id="tbThemeToggle" type="button" aria-label="Switch light or dark theme">
+                                    <svg class="i"><use href="#i-moon"></use></svg>
+                                </button>
+
+                                <button class="tb-icon-btn" type="button" aria-label="Notifications">
+                                    <svg class="i"><use href="#i-bell"></use></svg>
+                                    <span class="tb-dot"></span>
+                                </button>*@
+
+                            <div class="tb-user">
+                                <button class="tb-user-btn" type="button" aria-expanded="false" aria-haspopup="true" title="Logged in as @Slip.Utility.SessionFacade.UserSession.UserName">
+                                    <span class="tb-avatar">@(string.IsNullOrEmpty(Slip.Utility.SessionFacade.UserSession.UserName) ? "?" : Slip.Utility.SessionFacade.UserSession.UserName.Substring(0, 1).ToUpper())</span>
+                                    <span class="tb-user-meta">
+                                        <b>@Slip.Utility.SessionFacade.UserSession.UserName</b>
+                                        <small>@(Slip.Utility.SessionFacade.UserSession.IsAdmin ? "Administrator" : "User")</small>
+                                    </span>
+                                </button>
+                                <div class="tb-dropdown">
+                                    <a class="tb-item" href="@Url.Action("ChangePassword","User")">
+                                        <span class="tb-ico"><svg class="i"><use href="#i-key"></use></svg></span>
+                                        <span class="tb-txt">Change Password</span>
+                                    </a>
+                                    <div class="tb-sep"></div>
+                                    <a class="tb-item tb-danger" href="@Url.Action("Logout","Login")">
+                                        <span class="tb-ico"><svg class="i"><use href="#i-logout"></use></svg></span>
+                                        <span class="tb-txt">Logout</span>
+                                    </a>
                                 </div>
-                            </li>
-                            <li class="logout-link">
-                                <a href="@Url.Action("Logout","Login")"><i class="fa fa-sign-out fa-lg"></i> Logout</a>
-                            </li>
-                        </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </nav>
         </header>
+
+        <!-- ==============================================================
+             CHROME-STYLE TAB BAR (Outer Master Shell)
+             ============================================================== -->
+        <div class="chrome-tab-bar" id="chromeTabBar">
+            <!-- Scroll Left Arrow (overflow) -->
+            <button type="button" class="chrome-tab-scroll-btn" id="tabScrollLeft" title="Scroll tabs left">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+
+            <!-- Tabs Strip & Track -->
+            <div class="chrome-tabs-strip" id="chromeTabsStrip">
+                <div class="chrome-tabs-track" id="chromeTabsTrack">
+                    <!-- Dynamic Chrome Tabs rendered here -->
+                </div>
+            </div>
+
+            <!-- Scroll Right Arrow (overflow) -->
+            <button type="button" class="chrome-tab-scroll-btn" id="tabScrollRight" title="Scroll tabs right">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+
+            <!-- Tab Utilities (Reload, Close Others, Fullscreen, All Tabs List) -->
+            <div class="chrome-tabs-actions">
+                <button type="button" class="chrome-tab-act-btn" id="chromeTabReloadCurrent" title="Reload active tab">
+                    <i class="fa fa-refresh"></i>
+                </button>
+                <button type="button" class="chrome-tab-act-btn" id="chromeTabCloseOthers" title="Close other tabs">
+                    <i class="fa fa-times-circle-o"></i>
+                </button>
+                <button type="button" class="chrome-tab-act-btn" id="chromeTabFullscreen" title="Toggle Fullscreen">
+                    <i class="fa fa-arrows-alt"></i>
+                </button>
+                <button type="button" class="chrome-tab-act-btn" id="chromeTabAllBtn" title="List all open tabs">
+                    <i class="fa fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ==============================================================
+             CHROME TABS VIEWPORT (Iframes Container)
+             ============================================================== -->
+        <div class="chrome-tabs-viewport" id="chromeTabsViewport">
+            <!-- Empty state when no tabs are open -->
+            <div class="chrome-tabs-empty-state" id="chromeTabsEmptyState">
+                <div class="empty-state-content">
+                    <div class="empty-state-gem">
+                        <i class="fa fa-diamond"></i>
+                    </div>
+                    <h4>ADPL Enterprise</h4>
+                    <p>Select a module from the menu above to start working.</p>
+                </div>
+            </div>
+            <!-- Dynamic Iframes rendered here -->
+        </div>
+
+        <!-- Context Menu for Tabs (Right Click) -->
+        <div class="chrome-tabs-context-menu" id="chromeTabContextMenu">
+            <a href="javascript:void(0)" class="chrome-ctx-item" data-action="reload">
+                <i class="fa fa-refresh"></i> Reload Tab
+            </a>
+            <a href="javascript:void(0)" class="chrome-ctx-item" data-action="duplicate">
+                <i class="fa fa-clone"></i> Duplicate Tab
+            </a>
+            <div class="chrome-ctx-sep"></div>
+            <a href="javascript:void(0)" class="chrome-ctx-item" data-action="close">
+                <i class="fa fa-times"></i> Close Tab
+            </a>
+            <a href="javascript:void(0)" class="chrome-ctx-item" data-action="close-others">
+                <i class="fa fa-times-circle-o"></i> Close Other Tabs
+            </a>
+            <a href="javascript:void(0)" class="chrome-ctx-item" data-action="close-right">
+                <i class="fa fa-arrow-right"></i> Close Tabs to Right
+            </a>
+            <div class="chrome-ctx-sep"></div>
+            <a href="javascript:void(0)" class="chrome-ctx-item danger" data-action="close-all">
+                <i class="fa fa-trash-o"></i> Close All Tabs
+            </a>
+        </div>
+
+        <!-- All Open Tabs Dropdown List -->
+        <div class="chrome-tabs-dropdown-menu" id="chromeTabsDropdown">
+        </div>
+
+        <!-- Child Iframe Content Wrapper (Satisfies Razor RenderBody requirement) -->
         <div class="content-wrapper">
             @RenderBody()
+        </div>
 
             <!-- Ultra-Modern Diamond 3D Spinning Loader Overlay -->
             <div id="custom-diamond-loader" class="diamond-loader-overlay" style="display: none;">
@@ -481,7 +607,7 @@
                     <!-- 3D Stage & Ambient Glow -->
                     <div class="diamond-3d-stage">
                         <div class="diamond-aura"></div>
-                        
+
                         <!-- Sparkles -->
                         <div class="diamond-sparkle sparkle-1"><i class="fa fa-star"></i></div>
                         <div class="diamond-sparkle sparkle-2"><i class="fa fa-diamond"></i></div>
@@ -553,7 +679,7 @@
                                 <g filter="url(#diamond-glow-filter)">
                                     <!-- CROWN / TOP TABLE -->
                                     <polygon points="40,24 80,24 96,44 24,44" fill="url(#facet-top)" stroke="#e0f2fe" stroke-width="0.75" stroke-linejoin="round" />
-                                    
+
                                     <!-- CROWN STAR / KITE FACETS -->
                                     <polygon points="40,24 60,24 60,44 48,44" fill="url(#facet-crown-center)" stroke="#bae6fd" stroke-width="0.5" />
                                     <polygon points="60,24 80,24 72,44 60,44" fill="url(#facet-crown-r)" stroke="#7dd3fc" stroke-width="0.5" />
@@ -569,7 +695,7 @@
                                     <polygon points="60,44 78,44 60,102" fill="url(#facet-pav-r)" stroke="#60a5fa" stroke-width="0.5" />
                                     <polygon points="78,44 96,44 60,102" fill="url(#facet-pav-outer-r)" stroke="#93c5fd" stroke-width="0.5" />
                                     <polygon points="24,44 32,44 60,102" fill="url(#facet-pav-outer-l)" stroke="#0369a1" stroke-width="0.5" />
-                                    
+
                                     <!-- SHIMMER SPECULAR REFLECTIONS -->
                                     <polygon points="48,27 72,27 60,41" fill="#ffffff" opacity="0.4" />
                                     <circle cx="60" cy="102" r="1.5" fill="#ffffff" />
@@ -593,7 +719,6 @@
             <!-- Legacy fallback compatibility anchor -->
             <div id="loader" style="display:none;"></div>
         </div>
-    </div>
 </body>
 </html>
 <script>
@@ -659,6 +784,63 @@
 
         function openWebsite(obj) {
             window.location.href = $(obj).attr("href");
+        }
+
+        // ---- Topbar: menu/user dropdowns (tb-*) ----
+        function tbCloseAll(exceptBtn) {
+            $(".main-header .tb-menu-btn, .main-header .tb-user-btn").each(function () {
+                var $btn = $(this);
+                if (exceptBtn && $btn.is(exceptBtn)) { return; }
+                $btn.attr("aria-expanded", "false");
+                $btn.next(".tb-dropdown").removeClass("open");
+            });
+        }
+
+        $(".main-header .tb-menu-btn, .main-header .tb-user-btn").on("click", function (e) {
+            e.stopPropagation();
+            var $btn = $(this);
+            var $dd = $btn.next(".tb-dropdown");
+            var willOpen = !$dd.hasClass("open");
+            tbCloseAll($btn);
+            $dd.toggleClass("open", willOpen);
+            $btn.attr("aria-expanded", willOpen);
+        });
+
+        $(document).on("click", function (e) {
+            if (!$(e.target).closest(".tb-dropdown").length) {
+                tbCloseAll();
+            }
+        });
+
+        $(document).on("keyup", function (e) {
+            if (e.key === "Escape") {
+                tbCloseAll();
+            }
+        });
+
+        // ---- Topbar: light/dark theme toggle (persisted) ----
+        var tbThemeRoot = document.documentElement;
+        try {
+            var tbSavedTheme = localStorage.getItem("slip-erp-theme");
+            if (tbSavedTheme) { tbThemeRoot.setAttribute("data-theme", tbSavedTheme); }
+        } catch (ex) { }
+
+        $("#tbThemeToggle").on("click", function () {
+            var next = tbThemeRoot.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            if (next === "dark") {
+                tbThemeRoot.setAttribute("data-theme", "dark");
+            } else {
+                tbThemeRoot.removeAttribute("data-theme");
+            }
+            try { localStorage.setItem("slip-erp-theme", next); } catch (ex) { }
+        });
+
+        // ---- Initialize Chrome Tabs Multi-Tab View (in master shell only) ----
+        if (window.ChromeTabs && !document.documentElement.classList.contains('in-tab-iframe')) {
+            window.ChromeTabs.init({
+                homeUrl: '@Url.Action("Index", "Home")',
+                homeTitle: 'Home'
+            });
         }
     });
 </script>

@@ -952,6 +952,11 @@ namespace Slip.Controllers
                             row["Priority"] = "REGULAR";
                         }
 
+                        if (row.ContainsKey("InwardDetailID") && row["InwardDetailID"] != null && !row.ContainsKey("PreRoughID"))
+                        {
+                            row["PreRoughID"] = row["InwardDetailID"];
+                        }
+
                         list.Add(row);
                     }
                 }
@@ -1085,16 +1090,17 @@ namespace Slip.Controllers
         }
 
         [HttpPost]
-        public JsonResult SaveRoughDistribution(List<MST_RoughDistribution> list, List<int> deletedIDs = null, string Action = "INSERT")
+        public JsonResult SaveRoughDistribution(List<MST_RoughDistribution> list, List<int> deletedIDs = null, string Action = "INSERT", int SizeCodeID = 0)
         {
-            return RoughDistribution_Insert_Update_Delete(list, Action, deletedIDs);
+            return RoughDistribution_Insert_Update_Delete(list, Action, deletedIDs, SizeCodeID);
         }
 
         [HttpPost]
-        public JsonResult RoughDistribution_Insert_Update_Delete(List<MST_RoughDistribution> list, string Action = "INSERT", List<int> deletedIDs = null)
+        public JsonResult RoughDistribution_Insert_Update_Delete(List<MST_RoughDistribution> list, string Action = "INSERT", List<int> deletedIDs = null, int SizeCodeID = 0)
         {
             string Message = "";
             bool isSuccess = false;
+            List<int> newDistributionIDs = new List<int>();
             try
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
@@ -1117,11 +1123,11 @@ namespace Slip.Controllers
                             if (delId > 0)
                             {
                                 int branchId = 0;
-                                int preRoughId = 0;
+                                int inwardDetailId = 0;
                                 string rCode = "";
                                 bool isReceived = false;
 
-                                using (SqlCommand getCmd = new SqlCommand("SELECT BranchID, PreRoughID, RCode, IsReceived FROM MST_RoughDistribution WITH(NOLOCK) WHERE DistributionID = @DistributionID", con))
+                                using (SqlCommand getCmd = new SqlCommand("SELECT BranchID, InwardDetailID, RCode, IsReceived FROM MST_RoughDistribution WITH(NOLOCK) WHERE DistributionID = @DistributionID", con))
                                 {
                                     getCmd.Parameters.AddWithValue("@DistributionID", delId);
                                     using (SqlDataReader rdr = getCmd.ExecuteReader())
@@ -1129,7 +1135,7 @@ namespace Slip.Controllers
                                         if (rdr.Read())
                                         {
                                             branchId = Convert.ToInt32(rdr["BranchID"] != DBNull.Value ? rdr["BranchID"] : 0);
-                                            preRoughId = Convert.ToInt32(rdr["PreRoughID"] != DBNull.Value ? rdr["PreRoughID"] : 0);
+                                            inwardDetailId = Convert.ToInt32(rdr["InwardDetailID"] != DBNull.Value ? rdr["InwardDetailID"] : 0);
                                             rCode = Convert.ToString(rdr["RCode"] != DBNull.Value ? rdr["RCode"] : "");
                                             isReceived = rdr["IsReceived"] != DBNull.Value && Convert.ToBoolean(rdr["IsReceived"]);
                                         }
@@ -1148,12 +1154,12 @@ namespace Slip.Controllers
 
                                 if (!string.IsNullOrEmpty(rCode) && TryParseRCodeSequence(rCode, out string prefix, out int currentSeq))
                                 {
-                                    // Fetch sibling active records for this branch under the same Jangad/PreRough lot
+                                    // Fetch sibling active records for this branch under the same Jangad/lot (InwardDetailID)
                                     List<string> siblingRCodes = new List<string>();
-                                    using (SqlCommand sibCmd = new SqlCommand("SELECT DistributionID, RCode FROM MST_RoughDistribution WITH(NOLOCK) WHERE BranchID = @BranchID AND PreRoughID = @PreRoughID AND IsActive = 1", con))
+                                    using (SqlCommand sibCmd = new SqlCommand("SELECT DistributionID, RCode FROM MST_RoughDistribution WITH(NOLOCK) WHERE BranchID = @BranchID AND InwardDetailID = @InwardDetailID AND IsActive = 1", con))
                                     {
                                         sibCmd.Parameters.AddWithValue("@BranchID", branchId);
-                                        sibCmd.Parameters.AddWithValue("@PreRoughID", preRoughId);
+                                        sibCmd.Parameters.AddWithValue("@InwardDetailID", inwardDetailId);
                                         using (SqlDataReader sibRdr = sibCmd.ExecuteReader())
                                         {
                                             while (sibRdr.Read())
@@ -1225,42 +1231,27 @@ namespace Slip.Controllers
 
                 if (newItems.Count > 0)
                 {
-                    // Intra-payload duplicate RCode check
-                    var duplicateInPayload = newItems
-                        .Where(x => !string.IsNullOrEmpty((x.RCode ?? "").Trim()))
-                        .GroupBy(x => x.RCode.Trim(), StringComparer.OrdinalIgnoreCase)
-                        .FirstOrDefault(g => g.Count() > 1);
-
-                    if (duplicateInPayload != null)
-                    {
-                        return Json(new
-                        {
-                            success = false,
-                            message = "Duplicate RCode '" + duplicateInPayload.Key + "' detected within the entries list! Each distribution must have a unique R.Code."
-                        });
-                    }
-
-                    // Strict Database Concurrency & Duplicate Check against MST_RoughDistribution
+                    // R.Code is generated server-side, atomically, per item - via
+                    // dbo.usp_GenerateRoughCode(@SizeID, @BranchID, @Year). This replaces
+                    // the old manual/auto entry + three-layer duplicate-check system;
+                    // the SP's UPDLOCK/HOLDLOCK increment on MST_RoughCodeGenerator makes
+                    // duplicates structurally impossible, so no pre-check is needed.
                     using (SqlConnection con = new SqlConnection(conn))
                     {
                         con.Open();
                         foreach (var item in newItems)
                         {
-                            string checkRCode = (item.RCode ?? "").Trim();
-                            if (!string.IsNullOrEmpty(checkRCode))
+                            using (SqlCommand genCmd = new SqlCommand("usp_GenerateRoughCode", con))
                             {
-                                using (SqlCommand chkCmd = new SqlCommand("SELECT COUNT(1) FROM MST_RoughDistribution WITH(NOLOCK) WHERE RCode = @RCode", con))
+                                genCmd.CommandType = CommandType.StoredProcedure;
+                                genCmd.Parameters.AddWithValue("@SizeID", SizeCodeID);
+                                genCmd.Parameters.AddWithValue("@BranchID", item.BranchID);
+                                genCmd.Parameters.AddWithValue("@Year", DateTime.Now.Year);
+                                using (SqlDataReader genRdr = genCmd.ExecuteReader())
                                 {
-                                    chkCmd.Parameters.AddWithValue("@RCode", checkRCode);
-                                    int count = Convert.ToInt32(chkCmd.ExecuteScalar() ?? 0);
-                                    if (count > 0)
+                                    if (genRdr.Read())
                                     {
-                                        con.Close();
-                                        return Json(new
-                                        {
-                                            success = false,
-                                            message = "Duplicate RCode detected! Another user/tab has already used this code (" + checkRCode + "). Please refresh and try again."
-                                        });
+                                        item.RCode = Convert.ToString(genRdr["RoughCode"]);
                                     }
                                 }
                             }
@@ -1274,8 +1265,7 @@ namespace Slip.Controllers
                     {
                         xmlBuilder.Append("<MST_RoughDistribution>");
                         xmlBuilder.Append("<DistributionID>").Append(item.DistributionID).Append("</DistributionID>");
-                        xmlBuilder.Append("<PreRoughID>").Append(item.PreRoughID).Append("</PreRoughID>");
-                        xmlBuilder.Append("<InwardDetailID>").Append(item.PreRoughID).Append("</InwardDetailID>");
+                        xmlBuilder.Append("<InwardDetailID>").Append(item.InwardDetailID).Append("</InwardDetailID>");
                         xmlBuilder.Append("<BranchID>").Append(item.BranchID).Append("</BranchID>");
                         xmlBuilder.Append("<RCode>").Append(System.Security.SecurityElement.Escape(item.RCode ?? "")).Append("</RCode>");
                         xmlBuilder.Append("<RoughPcs>").Append(item.RoughPcs).Append("</RoughPcs>");
@@ -1301,41 +1291,28 @@ namespace Slip.Controllers
                     }
                     xmlBuilder.Append("</DocumentElement>");
 
-                    Message = DbHelper.ExecuteNonQueryWithMessage("RoughDistribution_Insert_Update_Delete",
-                        new SqlParameter("@XML", xmlBuilder.ToString()),
-                        new SqlParameter("@ACTION", "INSERT"));
-
-                    // Commit sequence counter in MST_BranchVoucherSequence for Automatic numbering branches
-                    if (string.IsNullOrEmpty(Message) || Message.ToLower().Contains("inserted") || Message.ToLower().Contains("success") || Message.ToLower().Contains("record is"))
+                    // Raw ADO.NET here (instead of DbHelper.ExecuteNonQueryWithMessage) because
+                    // we need both the @MESSAGE output param AND the second result set the SP
+                    // returns (the DistributionID(s) just inserted, via OUTPUT INSERTED), so the
+                    // QR codes can be generated for exactly the new rows right after Save.
+                    using (SqlConnection con = new SqlConnection(conn))
+                    using (SqlCommand insCmd = new SqlCommand("RoughDistribution_Insert_Update_Delete", con))
                     {
-                        using (SqlConnection con = new SqlConnection(conn))
+                        insCmd.CommandType = CommandType.StoredProcedure;
+                        insCmd.Parameters.AddWithValue("@XML", xmlBuilder.ToString());
+                        insCmd.Parameters.AddWithValue("@ACTION", "INSERT");
+                        var messageParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 100) { Direction = ParameterDirection.Output };
+                        insCmd.Parameters.Add(messageParam);
+
+                        con.Open();
+                        using (SqlDataReader insRdr = insCmd.ExecuteReader())
                         {
-                            con.Open();
-                            foreach (var item in newItems)
+                            while (insRdr.Read())
                             {
-                                try
-                                {
-                                    using (SqlCommand chkCmd = new SqlCommand("SELECT NumericMethod FROM MST_VoucherDetails WITH(NOLOCK) WHERE BranchID = @BranchID AND VoucherType = 'Rough Distribution' AND IsActive = 1", con))
-                                    {
-                                        chkCmd.Parameters.AddWithValue("@BranchID", item.BranchID);
-                                        object methodObj = chkCmd.ExecuteScalar();
-                                        if (methodObj != null && Convert.ToString(methodObj).Trim().Equals("Automatic", StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            DbHelper.ExecuteNonQuery("Get_RoughCodeConfig",
-                                                new SqlParameter("@BranchID", item.BranchID),
-                                                new SqlParameter("@VoucherType", "Rough Distribution"),
-                                                new SqlParameter("@ActionType", "COMMIT_AUTO"),
-                                                new SqlParameter("@ManualRCode", ""));
-                                        }
-                                    }
-                                }
-                                catch (Exception exSeq)
-                                {
-                                    ErrorLogger.ErrorLog(exSeq);
-                                }
+                                newDistributionIDs.Add(Convert.ToInt32(insRdr["DistributionID"]));
                             }
-                            con.Close();
                         }
+                        Message = Convert.ToString(messageParam.Value);
                     }
                 }
 
@@ -1357,7 +1334,7 @@ namespace Slip.Controllers
                 Message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
                 isSuccess = false;
             }
-            return Json(new { success = isSuccess, message = Message });
+            return Json(new { success = isSuccess, message = Message, newDistributionIDs = newDistributionIDs });
         }
 
         [HttpPost]
@@ -2417,6 +2394,31 @@ namespace Slip.Controllers
             }
         }
 
+        public JsonResult Get_MST_SizeCodeList()
+        {
+            try
+            {
+                var list = new List<object>();
+
+                List<Dictionary<string, object>> sizeCodeRows = DbHelper.ExecuteReaderAsList("USP_MST_SizeCode_GetList");
+                foreach (var row in sizeCodeRows)
+                {
+                    list.Add(new
+                    {
+                        ID = Convert.ToInt32(row["ID"]),
+                        ShortName = row["ShortName"] != null ? Convert.ToString(row["ShortName"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         public JsonResult Get_UserBranch()
         {
             try
@@ -2588,6 +2590,7 @@ namespace Slip.Controllers
                                         Hours = SafeGetColumn(rdr, "Hours") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "Hours")) : null,
                                         BoxNo = SafeGetColumn(rdr, "BoxNo") != null ? Convert.ToString(SafeGetColumn(rdr, "BoxNo")) : "",
                                         SizeCode = SafeGetColumn(rdr, "SizeCode") != null ? Convert.ToString(SafeGetColumn(rdr, "SizeCode")) : "",
+                                        SizeCodeId = SafeGetColumn(rdr, "SizeCodeId") != null ? (int?)Convert.ToInt32(SafeGetColumn(rdr, "SizeCodeId")) : null,
                                         ColorType = SafeGetColumn(rdr, "ColorType") != null ? Convert.ToString(SafeGetColumn(rdr, "ColorType")) : "",
                                         //NotAllow = SafeGetColumn(rdr, "NotAllow") != null ? Convert.ToBoolean(SafeGetColumn(rdr, "NotAllow")) : false,
                                         NotAllow = SafeGetColumn(rdr, "NotAllow") != null ? (Convert.ToInt32(SafeGetColumn(rdr, "NotAllow")) == 1) : false,
@@ -2891,8 +2894,10 @@ namespace Slip.Controllers
                                         lineCmd.Parameters.AddWithValue("@Hours", (object)line.Hours ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@BoxNo", (object)line.BoxNo ?? DBNull.Value);
                                         string lineSizeCode = !string.IsNullOrWhiteSpace(line.SizeCode) ? line.SizeCode : model.SizeCode;
+                                        int? lineSizeCodeId = line.SizeCodeId ?? model.SizeCodeID;
                                         string lineColorType = !string.IsNullOrWhiteSpace(line.ColorType) ? line.ColorType : model.ColorType;
                                         lineCmd.Parameters.AddWithValue("@SizeCode", (object)lineSizeCode ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@SizeCodeID", (object)lineSizeCodeId ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@ColorType", (object)lineColorType ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@IsDelete", line.IsDelete);
                                         lineCmd.ExecuteNonQuery();
@@ -3099,9 +3104,9 @@ namespace Slip.Controllers
                         dataType = row.Field<string>("dataType"),
                         format = row.Field<string>("format"),
                         alignment = row.Field<string>("alignment"),
-                        visible = row.Field<bool>("visible")
+                        visible = row.IsNull("visible") ? false : Convert.ToBoolean(row["visible"])
                     }).ToList();
-                }
+                } 
 
                 // Table 2: Dynamic Summary Footers
                 List<object> summary = new List<object>();
@@ -3192,6 +3197,97 @@ namespace Slip.Controllers
             }
             catch (Exception ex)
             {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public ActionResult RoughDistributionQRPrint()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult GenerateRoughDistributionQRs(List<int> distributionIDs)
+        {
+            try
+            {
+                if (distributionIDs == null || distributionIDs.Count == 0)
+                    return Json(new { success = false, message = "No distribution rows selected." });
+
+                string folder = Server.MapPath("~/Upload/RDQR/");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                List<RoughDistributionQRList> qrList = new List<RoughDistributionQRList>();
+
+                foreach (var id in distributionIDs.Distinct())
+                {
+                    var rows = DbHelper.ExecuteReaderAsList("USP_MST_RoughDistribution_GetQRData",
+                        new SqlParameter("@DistributionID", id));
+
+                    if (rows == null || rows.Count == 0) continue;
+                    var row = rows[0];
+
+                    string Val(string key) => row.ContainsKey(key) && row[key] != null && row[key] != DBNull.Value ? row[key].ToString() : "";
+
+                    string Text =
+                         Val("Receipe") + "," +
+                          Val("GrowthRate") + "," +
+                       Val("RCode") + "," +
+                       Val("LotNo") + "," +
+                       Val("RoughPcs") + "," +
+                       Val("RoughWeight") + "," +
+                       Val("FromName") + "," +
+                       Val("Rate") + "," +
+                       Val("ChallanNo") + "," +
+                       Val("MachineNo") + "," +
+                       Val("Hours") + "," +
+                       Val("Height") + "," +
+                       Val("Size") + "," +
+                       Val("SourceType") + "," +
+                       Val("SizeCode") + "," +
+                       Val("FactoryCode") + "," +
+                       Val("Grade");
+
+                    string label =
+                         Val("RCode") + "\n" +
+                         Val("RoughWeight") + " (" + Val("RoughPcs") + ")" + "\n" +
+                         Val("ColorType") + " / " + Val("SizeCode") + " / " + Val("Grade") +  "\n" +
+                         Val("Receipe")  + " (" + Val("FactoryCode") + ")";
+
+                    string qrFileName = "RD" + id + ".png";
+                    string QRPath = Path.Combine(folder, qrFileName);
+
+                    BarcodeWriter writer = new BarcodeWriter
+                    {
+                        Format = BarcodeFormat.QR_CODE,
+                        Options = new EncodingOptions
+                        {
+                            Width = 100,
+                            Height = 100,
+                            Margin = 0
+                        }
+                    };
+
+                    Bitmap qrCodeBitmap = writer.Write(Text);
+                    qrCodeBitmap.Save(QRPath, System.Drawing.Imaging.ImageFormat.Png);
+
+                    qrList.Add(new RoughDistributionQRList
+                    {
+                        QRUrl = "/Upload/RDQR/" + qrFileName,
+                        LabelText = label
+                    });
+                }
+
+                SessionFacade.RoughDistributionQRList = qrList;
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
                 return Json(new { success = false, message = ex.Message });
             }
         }

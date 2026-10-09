@@ -176,6 +176,12 @@ else
             $("#gridContainer").dxDataGrid({
                 dataSource: $scope.List,
                 keyExpr: 'SizeID',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
                 columns: [
                     { dataField: 'SizeID', caption: 'ID', width: 70, allowEditing: false, alignment: 'center' },
                     { dataField: 'SizeName', caption: 'Size Name', minWidth: 110 },

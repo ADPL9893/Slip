@@ -14,8 +14,11 @@
                 <div class="ri-breadcrumb">
                     <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
                     <span>Rough Inward</span>
+
                 </div>
                 <h4 class="ri-header-title">Rough Inward (Jangad)</h4>
+                @*<i class="fa fa-database"></i> {{InwardList.length || 0}} Records*@
+                
             </div>
         </div>
         <div>
@@ -26,15 +29,7 @@
     </div>
 
     <div class="ri-grid-card">
-        <div class="ri-card-header">
-            <div class="ri-card-title-left">
-                <i class="fa fa-table"></i>
-                <h3>Inward Records</h3>
-                <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
-                    <i class="fa fa-database"></i> {{InwardList.length || 0}} Records
-                </span>
-            </div>
-        </div>
+        
         <div class="ri-grid-body">
             <div id="inwardGridContainer" style="width: 100%;"></div>
         </div>
@@ -135,13 +130,8 @@
                             </div>
                             <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalSizeCode">SIZE CODE <span class="req">*</span></label>
-                                <select id="ModalSizeCode" chosen="SizeCodeList" class="form-control ri-input" ng-model="FormModel.SizeCode" ng-change="OnHeaderSizeCodeChange()">
+                                <select id="ModalSizeCode" chosen="SizeCodeList" class="form-control ri-input" ng-model="FormModel.SizeCodeID" ng-change="OnHeaderSizeCodeChange()" ng-options="item.ID as item.ShortName for item in SizeCodeList">
                                     <option value="">Select Size Code</option>
-                                    <option value="JC">JC</option>
-                                    <option value="JW">JW</option>
-                                    <option value="SW">SW</option>
-                                    <option value="SC">SC</option>
-                                    <option value="G2">G2</option>
                                 </select>
                             </div>
                             <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
@@ -163,11 +153,11 @@
                                     <tr>
                                         <th style="width: 36px;">#</th>
                                         <th style="min-width: 120px;">Lot No <span class="req" style="color: #ef4444;">*</span></th>
-                                        <th style="width: 95px;">Growth Rate</th>
-                                        <th style="width: 95px;">Avg Growth Rate</th>
-                                        <th style="width: 90px;">Machine No</th>
+                                        <th style="width: 115px;">Growth Rate</th>
+                                        <th style="width: 120px;">Avg Growth Rate</th>
+                                        <th style="width: 100px;">Machine No</th>
                                         <th style="width: 80px;">Size <span class="req" style="color: #ef4444;">*</span></th>
-                                        <th style="min-width: 125px;">Height (From - To) <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="min-width: 150px;">Height (From - To) <span class="req" style="color: #ef4444;">*</span></th>
                                         <th style="width: 75px;">Hours</th>
                                         <th style="width: 85px;">Box No <span class="req" style="color: #ef4444;">*</span></th>
                                         <th style="width: 110px;">Recipe <span class="req" style="color: #ef4444;">*</span></th>
@@ -183,8 +173,8 @@
                                     <tr ng-repeat="line in FormModel.Details track by $index" ng-hide="line.IsDelete">
                                         <td>{{$index + 1}}</td>
                                         <td><input type="text" class="ri-lot-input" ng-model="line.LotNo" placeholder="Lot No" ng-disabled="line.NotAllow" /></td>
-                                        <td><input type="text" ng-model="line.GrowthRate" placeholder="Growth Rate" ng-disabled="line.NotAllow" /></td>
-                                        <td><input type="number" ng-model="line.AvgGrowthRate" min="0" step="0.001" placeholder="Avg Growth Rate" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="text" ng-model="line.GrowthRate" placeholder="Rate" ng-disabled="line.NotAllow" /></td>
+                                        <td><input type="number" ng-model="line.AvgGrowthRate" min="0" step="0.001" placeholder="Avg rate" ng-disabled="line.NotAllow" /></td>
                                         <td><input type="text" ng-model="line.MachineNo" placeholder="M/C No" ng-disabled="line.NotAllow" /></td>
                                         <td><input type="text" ng-model="line.Size" placeholder="Size" ng-disabled="line.NotAllow" /></td>
                                         <td>
@@ -361,6 +351,7 @@
                 Rate: 0,
                 Amount: 0,
                 SizeCode: $scope.FormModel ? ($scope.FormModel.SizeCode || '') : '',
+                SizeCodeId: $scope.FormModel ? ($scope.FormModel.SizeCodeID || null) : null,
                 ColorType: $scope.FormModel ? ($scope.FormModel.ColorType || '') : '',
                 Remarks: '',
                 IsDelete: false
@@ -379,6 +370,7 @@
             ToBranchID: null,
             PurposeID: null,
             SizeCode: '',
+            SizeCodeID: null,
             ColorType: '',
             Remarks: '',
             IsReadOnly: false,
@@ -386,8 +378,11 @@
         };
 
         $scope.OnHeaderSizeCodeChange = function () {
+            var match = ($scope.SizeCodeList || []).find(function (x) { return x.ID === $scope.FormModel.SizeCodeID; });
+            $scope.FormModel.SizeCode = match ? match.ShortName : '';
             angular.forEach($scope.FormModel.Details, function (line) {
                 line.SizeCode = $scope.FormModel.SizeCode || '';
+                line.SizeCodeId = $scope.FormModel.SizeCodeID || null;
             });
         };
 
@@ -533,6 +528,7 @@
                 ToBranchID: null,
                 PurposeID: null,
                 SizeCode: '',
+                SizeCodeID: null,
                 ColorType: '',
                 Remarks: '',
                 Details: [$scope.NewEmptyLine()]
@@ -550,113 +546,7 @@
             }, 40);
         };
 
-        @*$scope.EditItem = function (item) {
-            if (!item || !item.InwardID) return;
-
-            var isLockedRecord = item.NotAllow === 1 || item.NotAllow === true || item.NotAllow === "1";
-
-            $http.get('@Url.Action("Get_TRN_RoughInwardById", "Master")', { params: { InwardID: item.InwardID } })
-                .then(function (res) {
-                    if (res.data && res.data.success && res.data.item) {
-                        var data = res.data.item;
-                        var rawDate = res.data.challanDateFormatted || data.ChallanDateStr || data.ChallanDate || (item.ChallanDate ? item.ChallanDate : '');
-                        var dateObj = $scope.ParseDateObj(rawDate);
-                        var dateStr = $scope.FormatDateYMD(dateObj);
-
-                        var firstDetail = (data.Details && data.Details.length > 0) ? data.Details[0] : null;
-                        var headerColorType = data.ColorType || (firstDetail ? firstDetail.ColorType : '') || '';
-                        if (headerColorType.toUpperCase() === 'WHITE') headerColorType = 'White';
-                        else if (headerColorType.toUpperCase() === 'COLOR') headerColorType = 'Color';
-                        var headerSizeCode = (data.SizeCode || (firstDetail ? firstDetail.SizeCode : '') || '').trim().toUpperCase();
-
-
-                        $scope.FormModel = {
-                            InwardID: data.InwardID,
-                            ChallanNo: data.ChallanNo || '',
-                            ChallanDate: dateObj,
-                            ChallanDateStr: dateStr,
-                            FactoryCodeID: data.FactoryCodeID,
-                            SourceType: data.SourceType || 'BRANCH',
-                            FromBranchID: data.FromBranchID,
-                            FromPartyID: data.FromPartyID,
-                            ToBranchID: data.ToBranchID,
-                            PurposeID: data.PurposeID,
-                            SizeCode: headerSizeCode,
-                            ColorType: headerColorType,
-                            Remarks: data.Remarks || '',
-                            IsReadOnly: isLockedRecord,
-                            Details: (data.Details && data.Details.length > 0) ? data.Details.map(function (d) {
-                                var cType = d.ColorType || headerColorType || '';
-                                if (cType.toUpperCase() === 'WHITE') cType = 'White';
-                                else if (cType.toUpperCase() === 'COLOR') cType = 'Color';
-                                debugger
-                                return {
-                                    InwardDetailID: d.InwardDetailID,
-                                    InwardID: d.InwardID,
-                                    SrNo: d.SrNo,
-                                    LotNo: d.LotNo || '',
-                                    GrowthRate: d.GrowthRate || '',
-                                    AvgGrowthRate: (d.AvgGrowthRate !== null && d.AvgGrowthRate !== undefined) ? parseFloat(d.AvgGrowthRate) : null,
-                                    MachineNo: d.MachineNo || '',
-                                    Size: d.Size || '',
-                                    FromHeight: (d.FromHeight !== null && d.FromHeight !== undefined) ? parseFloat(d.FromHeight) : null,
-                                    ToHeight: (d.ToHeight !== null && d.ToHeight !== undefined) ? parseFloat(d.ToHeight) : null,
-                                    Hours: (d.Hours !== null && d.Hours !== undefined && d.Hours !== '') ? parseFloat(d.Hours) : null,
-                                    BoxNo: d.BoxNo || '',
-                                    RecipeID: d.RecipeID || null,
-                                    RecipeName: d.RecipeName || '',
-                                    GradeID: d.GradeID || null,
-                                    GradeName: d.GradeName || '',
-                                    Pcs: parseInt(d.Pcs) || 0,
-                                    Carat: parseFloat(d.Carat) || 0,
-                                    Rate: (d.Rate !== null && d.Rate !== undefined) ? parseFloat(d.Rate) : 0,
-                                    Amount: (d.Amount !== null && d.Amount !== undefined) ? parseFloat(d.Amount) : 0,
-                                    SizeCode: (d.SizeCode || headerSizeCode || '').trim().toUpperCase(),
-                                    ColorType: cType,
-                                    Remarks: d.Remarks || '',
-                                    //NotAllow: d.NotAllow || false,
-                                    NotAllow: (d.NotAllow === 1 || d.NotAllow === true || d.NotAllow === "1") ? true : false,
-                                    
-                                    //IsLocked: d.IsLocked === true || d.IsLocked === 1 || d.NotAllow === 1,
-                                    //IsDelete: d.IsDelete === true || d.IsDelete === 1 || d.IsDelete === '1'
-                                };
-                            }) : [$scope.NewEmptyLine()]
-                        };
-                        $scope.UpdateBranchFilters();
-                        $("#InwardModal").modal("show");
-                    //    $timeout(function () {
-                    //        if (dateStr) {
-                    //            $('#ModalChallanDate').val(dateStr);
-                    //        }
-                    //        $('#ModalPurposeID').trigger('chosen:updated');
-                    //        $('#ModalFromBranchID').trigger('chosen:updated');
-                    //        $('#ModalFromPartyID').trigger('chosen:updated');
-                    //        $('#ModalFactoryCodeID').trigger('chosen:updated');
-                    //        $('#ModalToBranchID').trigger('chosen:updated');
-                    //        $('#ModalSizeCode').trigger('chosen:updated');
-                    //        $('#ModalColorType').trigger('chosen:updated');
-                    //    }, 80);
-                    //} else {
-                    //    Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward details.");
-                        //}
-                        $timeout(function () {
-                            if (isLockedRecord) {
-                                $('#InwardModal').find('input, select, textarea').prop('disabled', true);
-                                $('#InwardModal').find('.btn-ri-save, .btn-ri-add-row, .btn-ri-del-row').hide();
-                            } else {
-                                $('#InwardModal').find('input, select, textarea').prop('disabled', false);
-                                $('#InwardModal').find('.btn-ri-save, .btn-ri-add-row, .btn-ri-del-row').show();
-                            }
-                        }, 150);
-                    } else {
-                        Noty("error", (res.data && res.data.message) || "Failed to load Rough Inward details.");
-                    }
-                }, function () {
-                    Noty("error", "Error connecting to server.");
-                });
-        };*@
-
-
+  
         $scope.EditItem = function (item) {
             if (!item || !item.InwardID) return;
 
@@ -673,6 +563,7 @@
                         if (headerColorType.toUpperCase() === 'WHITE') headerColorType = 'White';
                         else if (headerColorType.toUpperCase() === 'COLOR') headerColorType = 'Color';
                         var headerSizeCode = (data.SizeCode || (firstDetail ? firstDetail.SizeCode : '') || '').trim().toUpperCase();
+                        var headerSizeCodeId = data.SizeCodeID || (firstDetail ? firstDetail.SizeCodeId : null) || null;
 
                         var mappedDetails = (data.Details && data.Details.length > 0) ? data.Details.map(function (d) {
                             var cType = d.ColorType || headerColorType || '';
@@ -701,6 +592,7 @@
                                 Rate: (d.Rate !== null && d.Rate !== undefined) ? parseFloat(d.Rate) : 0,
                                 Amount: (d.Amount !== null && d.Amount !== undefined) ? parseFloat(d.Amount) : 0,
                                 SizeCode: (d.SizeCode || headerSizeCode || '').trim().toUpperCase(),
+                                SizeCodeId: d.SizeCodeId || headerSizeCodeId || null,
                                 ColorType: cType,
                                 Remarks: d.Remarks || '',
                                 NotAllow: d.NotAllow === 1 || d.NotAllow === true || d.NotAllow === "1"
@@ -722,6 +614,7 @@
                             ToBranchID: data.ToBranchID,
                             PurposeID: data.PurposeID,
                             SizeCode: headerSizeCode,
+                            SizeCodeID: headerSizeCodeId,
                             ColorType: headerColorType,
                             Remarks: data.Remarks || '',
                             IsReadOnly: allLocked, // Fakt jyare badhi rows locked hoy tyarej aakhu form read-only thase
@@ -902,6 +795,15 @@
             });
         };
 
+        $scope.LoadSizeCodes = function () {
+            $http.get('@Url.Action("Get_MST_SizeCodeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.SizeCodeList = res.data.list || [];
+                    $timeout(function () { $('#ModalSizeCode').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
         $scope.GetGridInstance = function () {
             var $el = $("#inwardGridContainer");
             if (!$el.data("dxDataGrid")) {
@@ -958,7 +860,7 @@
                 $('#ModalFactoryCodeID').trigger('chosen:open');
                 return;
             }
-            if (!$scope.FormModel.SizeCode) {
+            if (!$scope.FormModel.SizeCodeID) {
                 Noty("error", "Please select Size Code!");
                 $('#ModalSizeCode').trigger('chosen:open');
                 return;
@@ -1073,7 +975,7 @@
             }
             $("#inwardGridContainer").dxDataGrid({
                 dataSource: $scope.InwardList,
-                height: 'calc(100vh - 210px)',
+                height: 'calc(106vh - 210px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
@@ -1085,18 +987,24 @@
                 columnFixing: {
                     enabled: true
                 },
-                showColumnLines: true,
+                showColumnLines: false,
                 showRowLines: true,
                 showBorders: true,
                 rowAlternationEnabled: true,
                 wordWrapEnabled: false,
                 sorting: { mode: "multiple" },
-                scrolling: { mode: 'virtual' },
+                scrolling: { mode: 'standard' },
                 paging: { enabled: false },
                 pager: { visible: false },
                 searchPanel: { visible: true, width: 280, placeholder: 'Search inward records...' },
-                filterRow: { visible: true, applyFilter: 'auto' },
+                filterRow: { visible: false, applyFilter: 'auto' },
                 headerFilter: { visible: true },
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
                 onCellPrepared: function (e) {
                     if (e.rowType === "header") {
                         e.cellElement.find(".dx-column-indicators.dx-visibility-hidden").remove();
@@ -1144,25 +1052,29 @@
                         {
                             column: 'LotNo',
                             summaryType: 'count',
-                            displayFormat: 'Total: {0}'
+                            displayFormat: 'Total: {0}',
+                            alignByColumn: true
                         },
                         {
                             column: 'Pcs',
                             summaryType: 'sum',
                             valueFormat: '#,##0',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         },
                         {
                             column: 'Carat',
                             summaryType: 'sum',
                             valueFormat: '#,##0.000',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         },
                         {
                             column: 'Amount',
                             summaryType: 'sum',
                             valueFormat: '#,##0.00',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         }
                     ]
                 },
@@ -1196,7 +1108,7 @@
                         }
                     },
                     {
-                        caption: 'Challan No', dataField: 'ChallanNo', minWidth: 115, alignment: 'center',
+                        caption: 'Challan No', dataField: 'ChallanNo', minWidth: 130, alignment: 'center',
                         cellTemplate: function (container, options) {
                             $("<strong>").text(options.data.ChallanNo || '').css({ "color": "#1e293b" }).appendTo(container);
                         }
@@ -1205,9 +1117,9 @@
                         caption: 'Date', dataField: 'ChallanDate', width: 110, dataType: 'date', format: 'dd-MMM-yyyy', alignment: 'center'
                     },
                     {
-                        caption: 'Lot No', dataField: 'LotNo', minWidth: 110,
+                        caption: 'Lot No', dataField: 'LotNo', minWidth: 120,
                         cellTemplate: function (container, options) {
-                            $("<strong>").text(options.data.LotNo || '').css({ "color": "#0284c7" }).appendTo(container);
+                            $("<strong>").text(options.data.LotNo || '').css({ "color": "#1C5F8F" }).appendTo(container);
                         }
                     },
                     {
@@ -1220,46 +1132,46 @@
                         caption: 'Rate', dataField: 'Rate', width: 85, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
                     },
                     {
-                        caption: 'Amount', dataField: 'Amount', width: 100, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
+                        caption: 'Amount', dataField: 'Amount', width: 115, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
                     },
                     {
-                        caption: 'Growth Rate', dataField: 'GrowthRate', width: 100, alignment: 'center'
+                        caption: 'Growth Rate', dataField: 'GrowthRate', width: 130, alignment: 'center'
                     },
                     {
-                        caption: 'Avg Growth Rate', dataField: 'AvgGrowthRate', width: 110, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                        caption: 'Avg Growth Rate', dataField: 'AvgGrowthRate', width: 160, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
                     },
                     {
-                        caption: 'Machine No', dataField: 'MachineNo', width: 95, alignment: 'center'
+                        caption: 'Machine No', dataField: 'MachineNo', width: 125, alignment: 'center'
                     },
                     {
                         caption: 'Size', dataField: 'Size', width: 80, alignment: 'center'
                     },
                     {
-                        caption: 'From Height', dataField: 'FromHeight', width: 95, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                        caption: 'From Height', dataField: 'FromHeight', width: 125, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
                     },
                     {
-                        caption: 'To Height', dataField: 'ToHeight', width: 95, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                        caption: 'To Height', dataField: 'ToHeight', width: 115, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
                     },
                     {
                         caption: 'Hours', dataField: 'Hours', width: 80, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
                     },
                     {
-                        caption: 'Box No', dataField: 'BoxNo', width: 85, alignment: 'center'
+                        caption: 'Box No', dataField: 'BoxNo', width: 100, alignment: 'center'
                     },
                     {
-                        caption: 'Recipe', dataField: 'RecipeName', minWidth: 100
+                        caption: 'Recipe', dataField: 'RecipeName', minWidth: 115
                     },
                     {
-                        caption: 'Grade', dataField: 'GradeName', width: 85, alignment: 'center'
+                        caption: 'Grade', dataField: 'GradeName', width: 90, alignment: 'center'
                     },
                     {
-                        caption: 'Size Code', dataField: 'SizeCode', width: 90, alignment: 'center'
+                        caption: 'Size Code', dataField: 'SizeCode', width: 115, alignment: 'center'
                     },
                     {
-                        caption: 'Color Type', dataField: 'ColorType', width: 95, alignment: 'center'
+                        caption: 'Color Type', dataField: 'ColorType', width: 125, alignment: 'center'
                     },
                     {
-                        caption: 'Factory Code', dataField: 'FactoryCodeName', width: 100, alignment: 'center'
+                        caption: 'Factory Code', dataField: 'FactoryCodeName', width: 130, alignment: 'center'
                     },
                     {
                         caption: 'From', minWidth: 150,
@@ -1326,6 +1238,7 @@
         $scope.LoadRecipes();
         $scope.LoadGrades();
         $scope.LoadFactoryCodes();
+        $scope.LoadSizeCodes();
         $scope.LoadInwardList();
         $scope.ResetForm();
     }]);

@@ -21,6 +21,7 @@ namespace Slip.Models
         public int PurposeID { get; set; }
         public string PurposeName { get; set; }
         public string SizeCode { get; set; }
+        public int? SizeCodeID { get; set; }
         public string ColorType { get; set; }
         public string Remarks { get; set; }
         public int TotalPcs { get; set; }

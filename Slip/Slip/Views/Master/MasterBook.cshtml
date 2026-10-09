@@ -445,7 +445,8 @@
                 column: countCol,
                 summaryType: 'count',
                 valueFormat: '#,##0',
-                displayFormat: '{0}'
+                displayFormat: '{0}',
+                alignByColumn: true
             });
 
             angular.forEach($scope.DynamicSummary, function (s) {
@@ -455,7 +456,8 @@
                         column: sumCol,
                         summaryType: s.summaryType || 'sum',
                         valueFormat: s.valueFormat || '#,##0.000',
-                        displayFormat: '{0}'
+                        displayFormat: '{0}',
+                        alignByColumn: true
                     });
                 }
             });
@@ -470,6 +472,12 @@
                 dataSource: $scope.List,
                 columns: gridCols,
                 keyExpr: 'ID',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
                 height: 'calc(100vh - 215px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,

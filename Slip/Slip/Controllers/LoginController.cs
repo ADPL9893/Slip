@@ -91,6 +91,7 @@ namespace Slip.Controllers
                             IconName = dataRow.Field<string>("IconName"),
                             Description = dataRow.Field<string>("Description"),
                             SubMenu = dataRow.Field<string>("SubMenu"),
+                            Sequence = dataRow.Field<int>("Sequence")
                         }).ToList();
 
                         SessionFacade.FormPermissions = _CheckPermission_UserList;
@@ -100,7 +101,9 @@ namespace Slip.Controllers
                         .Select(dataRow => new CheckPermission_User
                         {
                             GroupID = dataRow.Field<Int32>("GroupID"),
+                            GroupName = dataRow.Field<string>("GroupName"),
                             SubMenu = dataRow.Field<string>("SubMenu"),
+                            Sequence = dataRow.Field<int>("Sequence")
                         }).ToList();
 
                         SessionFacade.FormPermissionsGroup = _CheckPermission_UserListGroup;

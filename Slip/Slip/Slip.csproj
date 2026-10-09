@@ -357,6 +357,7 @@
     <Compile Include="Models\ProcessWiseTiming.cs" />
     <Compile Include="Models\Process_Wise_Issue_Receive_Loss.cs" />
     <Compile Include="Models\QRList.cs" />
+    <Compile Include="Models\RoughDistributionQRList.cs" />
     <Compile Include="Models\RoughTo4POk_Loss.cs" />
     <Compile Include="Models\Rp_Prd_Summary.cs" />
     <Compile Include="Models\RP_Slip_Entry.cs" />
@@ -473,6 +474,7 @@
     <Content Include="Content\css\bootstrap.css" />
     <Content Include="Content\css\bootstrap.min.css" />
     <Content Include="Content\css\common.css" />
+    <Content Include="Content\css\chrome-tabs.css" />
     <Content Include="Content\css\Dashboard.css" />
     <Content Include="Content\css\DashboardCSS.css" />
     <Content Include="Content\css\datepicker.css" />
@@ -657,6 +659,7 @@
     <Content Include="Content\js\jquery.dblbx.js" />
     <Content Include="Content\js\jquery.js" />
     <Content Include="Content\js\jquery.toaster.js" />
+    <Content Include="Content\js\chrome-tabs.js" />
     <Content Include="Content\js\main.js" />
     <Content Include="Content\js\moment.js" />
     <Content Include="Content\js\ng-camera.js" />
@@ -1329,6 +1332,7 @@
     <Content Include="Views\Master\MasterBook.cshtml" />
     <Content Include="Views\Master\QRPrint.cshtml" />
     <Content Include="Views\Master\QRGenerator.cshtml" />
+    <Content Include="Views\Master\RoughDistributionQRPrint.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
