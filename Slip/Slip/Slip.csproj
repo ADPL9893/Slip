@@ -374,7 +374,6 @@
     <Compile Include="Models\TRN_Pricing.cs" />
     <Compile Include="Models\TRN_Process_Timing.cs" />
     <Compile Include="Models\UserFileSizeModel.cs" />
-    <Compile Include="obj\Debug\.NETFramework,Version=v4.7.2.AssemblyAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\CommonMethods.cs" />
     <Compile Include="Utility\DbHelper.cs" />
@@ -1078,9 +1077,6 @@
     <Content Include="Scripts\aspnet\dx.aspnet.mvc.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include="obj\Debug\build.force" />
-    <Content Include="obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
-    <Content Include="obj\Debug\Slip.csproj.AssemblyReference.cache" />
     <Content Include="Content\angular\angular.min.js.map" />
     <Content Include="Content\angular\errors.json" />
     <Content Include="Content\angular\ui-grid.eot" />
@@ -1288,7 +1284,6 @@
     <Content Include="Views\User\UserRole.cshtml" />
     <Content Include="Views\User\UserRoleUpdate.cshtml" />
     <Content Include="Views\Shared\_LoginLayout.cshtml" />
-    <Content Include="Views\Slip\Slip_Entry.cshtml" />
     <Content Include="Views\Slip\MumbaiSubmit.cshtml" />
     <Content Include="Views\Slip\Vipulbhai.cshtml" />
     <Content Include="Views\Slip\AddReports.cshtml" />
@@ -1337,7 +1332,6 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Logs\" />
-    <Folder Include="obj\Debug\TempPE\" />
     <Folder Include="Upload\CVD\" />
     <Folder Include="Upload\DiamondExcelFile\" />
     <Folder Include="Upload\ExportExcel\" />

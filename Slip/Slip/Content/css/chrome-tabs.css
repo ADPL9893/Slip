@@ -65,7 +65,7 @@ html:not(.in-tab-iframe) .wrapper {
     min-height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
-    background: #0f172a !important;
+    background: var(--topbar-bg-solid, #1C2B6B) !important;
 }
 
 /* Hide original content-wrapper on outer shell because iframes host the content */
@@ -82,8 +82,8 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     height: 38px;
     min-height: 38px;
     max-height: 38px;
-    background: linear-gradient(180deg, #2A3F8F, #1C2B6B);
-    border-bottom: 1px solid var(--nav-2);
+    background: var(--topbar-bg, linear-gradient(180deg, #2A3F8F, #1C2B6B)) !important;
+    border-bottom: 1px solid var(--topbar-border, rgba(255, 255, 255, 0.1));
     position: relative;
     z-index: 9999;
     padding: 0 8px 0 10px;
@@ -152,12 +152,12 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     border-radius: 8px 8px 0 0;
     cursor: pointer;
     position: relative;
-    color: #94a3b8;
+    color: #ffff;
     font-family: var(--font-ui, 'Inter', -apple-system, sans-serif);
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 500;
     transition: background 0.16s ease, color 0.16s ease, max-width 0.16s ease;
-    border: 1px solid transparent;
+    border: 1px solid #4f504b;
     border-bottom: none;
     background: transparent;
     box-sizing: border-box;
@@ -203,7 +203,7 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     border-color: #334155 !important;
 }
 
-/* Chrome Active Tab Top Accent Ribbon */
+/* Chrome Active Tab Top Accent Ribbon 
 .chrome-tab.active::before {
     content: "";
     position: absolute;
@@ -213,7 +213,7 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     height: 3px;
     background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
     border-radius: 8px 8px 0 0;
-}
+}*/
 
 .chrome-tab.active::after {
     display: none !important;
@@ -238,7 +238,7 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     margin-right: 7px;
     flex-shrink: 0;
     font-size: 13px;
-    color: #64748b;
+    color: #ffff;
     transition: color 0.15s ease;
 }
 
@@ -302,8 +302,8 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     height: 18px;
     margin-left: 6px;
     border-radius: 50%;
-    color: #94a3b8;
-    font-size: 11px;
+    color: #ffff;
+    font-size: 14px;
     flex-shrink: 0;
     background: transparent;
     border: none;
@@ -371,7 +371,7 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     gap: 4px;
     margin-left: auto;
     padding-left: 8px;
-    border-left: 1px solid #1e293b;
+    border-left: 1px solid var(--topbar-border, rgba(255, 255, 255, 0.12));
     flex-shrink: 0;
     align-self: center;
 }

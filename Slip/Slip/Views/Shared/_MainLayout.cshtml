@@ -397,10 +397,7 @@
                 <div class="collapse navbar-collapse" id="navbar-collapse">
                     <ul class="nav tb-menu" id="tbMenu">
 
-                        
-
-                        @if (Slip.Utility.SessionFacade.FormPermissionsGroup.Count() > 0)
-                        {
+                        @{
 
                             foreach (var Group in Slip.Utility.SessionFacade.FormPermissionsGroup)
                             {
