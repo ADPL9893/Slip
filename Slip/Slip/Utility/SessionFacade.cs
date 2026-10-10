@@ -16,6 +16,7 @@ namespace Slip.Utility
         private const string _ReceiveIssuePrint = "ReceiveIssuePrint";
         private const string _FormPermissionsGroup = "FormPermissionsGroup";
         private const string _QRGenerateNew = "QRGenerateNew";
+        private const string _RoughDistributionQRNew = "RoughDistributionQRNew";
         #endregion
 
         #region::Public Property::
@@ -115,6 +116,18 @@ namespace Slip.Utility
             set
             {
                 HttpContext.Current.Session[_QRGenerateNew] = value;
+            }
+        }
+
+        public static List<RoughDistributionQRList> RoughDistributionQRList
+        {
+            get
+            {
+                return (List<RoughDistributionQRList>)HttpContext.Current.Session[_RoughDistributionQRNew];
+            }
+            set
+            {
+                HttpContext.Current.Session[_RoughDistributionQRNew] = value;
             }
         }
     }

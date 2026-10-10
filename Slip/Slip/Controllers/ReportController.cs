@@ -28,25 +28,12 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_Slip = new List<object>();
 
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("RP_Pridiction_Getdata", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@RCode", RCode);
-                        cmd.Parameters.AddWithValue("@FromDate", FromDate);
-                        cmd.Parameters.AddWithValue("@ToDate", ToDate);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("RP_Pridiction_Getdata",
+                    new SqlParameter("@RCode", RCode),
+                    new SqlParameter("@FromDate", FromDate),
+                    new SqlParameter("@ToDate", ToDate));
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -108,23 +95,10 @@ namespace Slip.Controllers
                 string Data = "";
                 string headername = "Lot Wise Prd. With Labour";
 
-                DataSet _DropDownList = new DataSet();
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("RP_Prd_Summary_Getdata", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@RCode", RCode);
-                        cmd.Parameters.AddWithValue("@FromDate", FromDate);
-                        cmd.Parameters.AddWithValue("@ToDate", ToDate);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("RP_Prd_Summary_Getdata",
+                    new SqlParameter("@RCode", RCode),
+                    new SqlParameter("@FromDate", FromDate),
+                    new SqlParameter("@ToDate", ToDate));
 
                 string Tital = "";
 
@@ -300,26 +274,14 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_Slip = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("RP_Slip_Report_Getdata", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Process", Process ?? "");
-                        cmd.Parameters.AddWithValue("@FromDate", FromDate ?? "");
-                        cmd.Parameters.AddWithValue("@ToDate", ToDate ?? "");
-                        cmd.Parameters.AddWithValue("@RCode", RCode ?? "");
-                        cmd.Parameters.AddWithValue("@TableNo", TableNo ?? "");
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("RP_Slip_Report_Getdata",
+                    new SqlParameter("@Process", Process ?? ""),
+                    new SqlParameter("@FromDate", FromDate ?? ""),
+                    new SqlParameter("@ToDate", ToDate ?? ""),
+                    new SqlParameter("@RCode", RCode ?? ""),
+                    new SqlParameter("@TableNo", TableNo ?? ""));
 
                 if (_DropDownList.Tables.Count > 0 && _DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -778,24 +740,10 @@ namespace Slip.Controllers
                 List<object> List1 = new List<object>();
                 List<object> List2 = new List<object>();
                 List<object> List3 = new List<object>();
-                DataSet _DropDownList = new DataSet();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("API_GetData_For_Process_Wise_Timing_Report", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Date", Date);
-                        cmd.Parameters.AddWithValue("@TableNo", TableNo);
-                        con.Open();
-                        //   ErrorLogger.ErrorLogStr("1 Connection Open");
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                    //  ErrorLogger.ErrorLogStr("2 Connection Close");
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("API_GetData_For_Process_Wise_Timing_Report",
+                    new SqlParameter("@Date", Date),
+                    new SqlParameter("@TableNo", TableNo));
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -874,24 +822,10 @@ namespace Slip.Controllers
             {
                 string Data = "";
                 string headername = "Process Wise Timing";
-                DataSet _DropDownList = new DataSet();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("API_GetData_For_Process_Wise_Timing_Report", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Date", Date);
-                        cmd.Parameters.AddWithValue("@TableNo", TableNo);
-                        con.Open();
-                        //   ErrorLogger.ErrorLogStr("1 Connection Open");
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                    //  ErrorLogger.ErrorLogStr("2 Connection Close");
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("API_GetData_For_Process_Wise_Timing_Report",
+                    new SqlParameter("@Date", Date),
+                    new SqlParameter("@TableNo", TableNo));
 
                 List<ProcessWiseTiming> List = new List<ProcessWiseTiming>();
                 List<ProcessWiseTiming> List1 = new List<ProcessWiseTiming>();
@@ -984,23 +918,9 @@ namespace Slip.Controllers
             try
             {
                 List<object> After4POk_Loss = new List<object>();
-                DataSet _DropDownList = new DataSet();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("API_GetData_For_After4POk_Loss_Report", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Date", Date);
-                        con.Open();
-                        //   ErrorLogger.ErrorLogStr("1 Connection Open");
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                    //  ErrorLogger.ErrorLogStr("2 Connection Close");
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("API_GetData_For_After4POk_Loss_Report",
+                    new SqlParameter("@Date", Date));
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -1016,23 +936,9 @@ namespace Slip.Controllers
                 }
 
                 List<object> RoughTo4P_Loss = new List<object>();
-                DataSet ds = new DataSet();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("API_GetData_For_RoughTo4POk_Loss_Report", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Date", Date);
-                        con.Open();
-                        //   ErrorLogger.ErrorLogStr("1 Connection Open");
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                    //  ErrorLogger.ErrorLogStr("2 Connection Close");
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("API_GetData_For_RoughTo4POk_Loss_Report",
+                    new SqlParameter("@Date", Date));
 
                 if (ds.Tables[0].Rows.Count > 0)
                 {
@@ -1076,23 +982,9 @@ namespace Slip.Controllers
             try
             {
                 List<object> List = new List<object>();
-                DataSet _DropDownList = new DataSet();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("API_GetData_For_Process_Wise_Issue_Receive_Loss_Report", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Date", Date);
-                        con.Open();
-                        //   ErrorLogger.ErrorLogStr("1 Connection Open");
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                    //  ErrorLogger.ErrorLogStr("2 Connection Close");
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("API_GetData_For_Process_Wise_Issue_Receive_Loss_Report",
+                    new SqlParameter("@Date", Date));
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -1134,23 +1026,9 @@ namespace Slip.Controllers
             try
             {
                 List<object> List = new List<object>();
-                DataSet _DropDownList = new DataSet();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Jumbo_GetData_For_Date_Wise_Loss_Summary", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Date", Date);
-                        con.Open();
-                        //   ErrorLogger.ErrorLogStr("1 Connection Open");
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                    //  ErrorLogger.ErrorLogStr("2 Connection Close");
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Jumbo_GetData_For_Date_Wise_Loss_Summary",
+                    new SqlParameter("@Date", Date));
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -1192,26 +1070,13 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> SummaryList = new List<object>();
                 List<object> List = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("RP_Getdata_Cleaving_Report_Summary", con))
-                    {
-
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@ReportDate", reportDate);
-                        cmd.Parameters.AddWithValue("@Action", Action);
-                        cmd.Parameters.AddWithValue("@Status", Status);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("RP_Getdata_Cleaving_Report_Summary",
+                    new SqlParameter("@ReportDate", reportDate),
+                    new SqlParameter("@Action", Action),
+                    new SqlParameter("@Status", Status));
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -1264,25 +1129,12 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> List = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("RP_Getdata_DST_Report_Summary", con))
-                    {
-
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@ReportDate", reportDate);
-                        cmd.Parameters.AddWithValue("@Action", Action);
-                        cmd.Parameters.AddWithValue("@Status", Status);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("RP_Getdata_DST_Report_Summary",
+                    new SqlParameter("@ReportDate", reportDate),
+                    new SqlParameter("@Action", Action),
+                    new SqlParameter("@Status", Status));
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -1322,25 +1174,12 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> List = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("RP_Getdata_MFG_Report_Summary", con))
-                    {
-
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@ReportDate", reportDate);
-                        cmd.Parameters.AddWithValue("@Action", Action);
-                        cmd.Parameters.AddWithValue("@Status", Status);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("RP_Getdata_MFG_Report_Summary",
+                    new SqlParameter("@ReportDate", reportDate),
+                    new SqlParameter("@Action", Action),
+                    new SqlParameter("@Status", Status));
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
