@@ -3246,10 +3246,11 @@ namespace Slip.Controllers
                        Val("Hours") + "," +
                        Val("Height") + "," +
                        Val("Size") + "," +
-                       Val("SourceType") + "," +
                        Val("SizeCode") + "," +
                        Val("FactoryCode") + "," +
-                       Val("Grade");
+                       Val("Grade") + "," +
+                       Val("PurposeName") + "," +
+                        Val("ColorType") ;
 
                     string label =
                          Val("RCode") + "\n" +
