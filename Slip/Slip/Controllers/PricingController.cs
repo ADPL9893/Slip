@@ -42,28 +42,19 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "Pricing");
-                            cmd.Parameters.AddWithValue("@ActionName", "Pricing");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "Pricing"),
+                        new SqlParameter("@ActionName", "Pricing"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        var row = permissionRows[0];
+                        foreach (var kvp in row)
+                        {
+                            if (kvp.Key.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        if (reader.GetName(i).Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -92,37 +83,28 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "Pricing");
-                            cmd.Parameters.AddWithValue("@ActionName", "PricingDetails");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "Pricing"),
+                        new SqlParameter("@ActionName", "PricingDetails"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        var row = permissionRows[0];
+                        foreach (var kvp in row)
+                        {
+                            string col = kvp.Key;
+                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        string col = reader.GetName(i);
-                                        if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canView = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canAdd = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canView = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canAdd = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -161,19 +143,7 @@ namespace Slip.Controllers
                 List<object> DIAShapeTypeList = new List<object>();
                 List<object> MSTLabourList = new List<object>();
                 List<object> MSTClarityWithColorList = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_DataList_DIAMaster", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                _DropDownList = DbHelper.ExecuteDataSet("Get_DataList_DIAMaster");
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -294,25 +264,13 @@ namespace Slip.Controllers
                     xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
                 }
 
-                DataSet _DiamondEditData = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_TRN_Pricing", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@SizeXML", SqlDbType.Xml).Value = xmlStr;
-                        cmd.Parameters.Add("@Date", SqlDbType.VarChar).Value = Date;
-                        cmd.Parameters.Add("@SizeType", SqlDbType.VarChar).Value = SizeType;
-                        cmd.Parameters.Add("@Shape", SqlDbType.VarChar).Value = Shape;
-                        cmd.Parameters.Add("@GradType", SqlDbType.VarChar).Value = GradType;
-                        cmd.Parameters.Add("@Action", SqlDbType.VarChar).Value = Action;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DiamondEditData);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DiamondEditData = DbHelper.ExecuteDataSet("Getdata_TRN_Pricing",
+                    new SqlParameter("@SizeXML", SqlDbType.Xml) { Value = xmlStr },
+                    new SqlParameter("@Date", SqlDbType.VarChar) { Value = Date },
+                    new SqlParameter("@SizeType", SqlDbType.VarChar) { Value = SizeType },
+                    new SqlParameter("@Shape", SqlDbType.VarChar) { Value = Shape },
+                    new SqlParameter("@GradType", SqlDbType.VarChar) { Value = GradType },
+                    new SqlParameter("@Action", SqlDbType.VarChar) { Value = Action });
 
                 for (int i = 0; i < _DiamondEditData.Tables[0].Rows.Count; i++)
                 {
@@ -349,25 +307,12 @@ namespace Slip.Controllers
             List<object> _History = new List<object>();
             try
             {
-                DataSet _DataSet = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("GetData_TRN_Pricing_History", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@Shape", SqlDbType.VarChar).Value = Shape ?? "";
-                        cmd.Parameters.Add("@GradType", SqlDbType.VarChar).Value = GradType ?? "";
-                        cmd.Parameters.Add("@SizeID", SqlDbType.Int).Value = Convert.ToInt32(SizeID);
-                        cmd.Parameters.Add("@ColorID", SqlDbType.Int).Value = Convert.ToInt32(ColorID);
-                        cmd.Parameters.Add("@ClarityID", SqlDbType.Int).Value = Convert.ToInt32(ClarityID);
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DataSet);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DataSet = DbHelper.ExecuteDataSet("GetData_TRN_Pricing_History",
+                    new SqlParameter("@Shape", SqlDbType.VarChar) { Value = Shape ?? "" },
+                    new SqlParameter("@GradType", SqlDbType.VarChar) { Value = GradType ?? "" },
+                    new SqlParameter("@SizeID", SqlDbType.Int) { Value = Convert.ToInt32(SizeID) },
+                    new SqlParameter("@ColorID", SqlDbType.Int) { Value = Convert.ToInt32(ColorID) },
+                    new SqlParameter("@ClarityID", SqlDbType.Int) { Value = Convert.ToInt32(ClarityID) });
 
                 if (_DataSet.Tables.Count > 0 && _DataSet.Tables[0].Rows.Count > 0)
                 {
@@ -404,19 +349,9 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(PricingDetails);
                 string xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
 
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("TRN_Pricing_Insert_Update_Delete", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xmlStr);
-                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                con.Open();
-
-                int j = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-
-                con.Close();
+                Message = DbHelper.ExecuteNonQueryWithMessage("TRN_Pricing_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
 
             }
             catch (Exception ex)
@@ -432,18 +367,7 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("GetData_For_XML", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.CommandTimeout = 300;
-                        SqlDataAdapter da = new SqlDataAdapter(cmd);
-                        da.Fill(ds);
-                    }
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("GetData_For_XML", 300);
 
                 string xml = CreateXMLFromDataSet(ds);
                 return Content(xml, "application/xml");
@@ -710,41 +634,32 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "Pricing");
-                            cmd.Parameters.AddWithValue("@ActionName", "ApprovePricing");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "Pricing"),
+                        new SqlParameter("@ActionName", "ApprovePricing"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        var row = permissionRows[0];
+                        foreach (var kvp in row)
+                        {
+                            string col = kvp.Key;
+                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        string col = reader.GetName(i);
-                                        if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canView = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canAdd = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canEdit = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canView = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canAdd = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canEdit = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -769,19 +684,7 @@ namespace Slip.Controllers
             List<object> _List = new List<object>();
             try
             {
-                DataSet _DiamondEditData = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("GetData_Price_Approved_Date_List", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DiamondEditData);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DiamondEditData = DbHelper.ExecuteDataSet("GetData_Price_Approved_Date_List");
 
                 for (int i = 0; i < _DiamondEditData.Tables[0].Rows.Count; i++)
                 {
@@ -825,21 +728,11 @@ namespace Slip.Controllers
                 }
                 int userId = SessionFacade.UserSession?.UserID ?? 0;
 
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("TRN_Approve_Pricing_Insert", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xmlStr);
-                cmd.Parameters.AddWithValue("@ApproveDate", ApproveDate);
-                cmd.Parameters.AddWithValue("@Action", Action);
-                cmd.Parameters.AddWithValue("@UserID", userId);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                con.Open();
-
-                int j = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-
-                con.Close();
+                Message = DbHelper.ExecuteNonQueryWithMessage("TRN_Approve_Pricing_Insert",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ApproveDate", ApproveDate),
+                    new SqlParameter("@Action", Action),
+                    new SqlParameter("@UserID", userId));
 
             }
             catch (Exception ex)
@@ -855,21 +748,7 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_DataList_DIAMaster", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Get_DataList_DIAMaster");
 
                 var ColorList = ds.Tables[3].AsEnumerable().AsEnumerable()
                 .Select(row => new colorList
@@ -896,27 +775,14 @@ namespace Slip.Controllers
                 }
 
 
-                DataSet _DropDownList = new DataSet();
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_TRN_Pricing_Export",
+                    new SqlParameter("@SizeXML", SqlDbType.Xml) { Value = xmlStr },
+                    new SqlParameter("@SizeType", SqlDbType.VarChar) { Value = SizeType },
+                    new SqlParameter("@Shape", SqlDbType.VarChar) { Value = Shape },
+                    new SqlParameter("@GradType", SqlDbType.VarChar) { Value = GradType },
+                    new SqlParameter("@Action", SqlDbType.VarChar) { Value = Action });
 
                 DataSet _DiamondEditData = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_TRN_Pricing_Export", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@SizeXML", SqlDbType.Xml).Value = xmlStr;
-                        cmd.Parameters.Add("@SizeType", SqlDbType.VarChar).Value = SizeType;
-                        cmd.Parameters.Add("@Shape", SqlDbType.VarChar).Value = Shape;
-                        cmd.Parameters.Add("@GradType", SqlDbType.VarChar).Value = GradType;
-                        cmd.Parameters.Add("@Action", SqlDbType.VarChar).Value = Action;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
 
                 var Sizes = _DropDownList.Tables[0].AsEnumerable().AsEnumerable()
                 .Select(row => new sizeList
@@ -967,21 +833,9 @@ namespace Slip.Controllers
                 string Data = "";
                 string headername = "Pricing" + "_" + Date;
 
-                DataSet _DropDownList = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_TRN_Approve_Pricing_Export", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@Date", SqlDbType.VarChar).Value = Date;
-                        cmd.Parameters.Add("@GradType", SqlDbType.VarChar).Value = GradType;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_TRN_Approve_Pricing_Export",
+                    new SqlParameter("@Date", SqlDbType.VarChar) { Value = Date },
+                    new SqlParameter("@GradType", SqlDbType.VarChar) { Value = GradType });
 
                 var ClarityList = _DropDownList.Tables[0].AsEnumerable().AsEnumerable()
                 .Select(row => new clarityList
@@ -1026,21 +880,7 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_DataList_DIAMaster", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Get_DataList_DIAMaster");
 
                 var ColorList = ds.Tables[3].AsEnumerable().AsEnumerable()
                 .Select(row => new colorList
@@ -1059,25 +899,12 @@ namespace Slip.Controllers
                 string Data = "";
                 string headername = "Pricing_" + Date + "_" + GradType + "_" + Shape;
 
-                DataSet _DropDownList = new DataSet();
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_TRN_Approve_Pricing_Export_V2",
+                    new SqlParameter("@Date", SqlDbType.VarChar) { Value = Date },
+                    new SqlParameter("@SizeType", SqlDbType.VarChar) { Value = SizeType },
+                    new SqlParameter("@Shape", SqlDbType.VarChar) { Value = Shape },
+                    new SqlParameter("@GradType", SqlDbType.VarChar) { Value = GradType });
                 DataSet _DiamondEditData = new DataSet();
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_TRN_Approve_Pricing_Export_V2", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@Date", SqlDbType.VarChar).Value = Date;
-                        cmd.Parameters.Add("@SizeType", SqlDbType.VarChar).Value = SizeType;
-                        cmd.Parameters.Add("@Shape", SqlDbType.VarChar).Value = Shape;
-                        cmd.Parameters.Add("@GradType", SqlDbType.VarChar).Value = GradType;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
 
                 var Sizes = _DropDownList.Tables[0].AsEnumerable().AsEnumerable()
                 .Select(row => new sizeList
@@ -1185,21 +1012,9 @@ namespace Slip.Controllers
 
                 string xmlStr = doc.ToString();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("TRN_Pricing_Insert_Using_Excel", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@XML", xmlStr);
-                        cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                Message = DbHelper.ExecuteNonQueryWithMessage("TRN_Pricing_Insert_Using_Excel",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
             }
             catch (Exception ex)
             {
@@ -1223,33 +1038,24 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "Pricing");
-                            cmd.Parameters.AddWithValue("@ActionName", "PriceComparison");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "Pricing"),
+                        new SqlParameter("@ActionName", "PriceComparison"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        var row = permissionRows[0];
+                        foreach (var kvp in row)
+                        {
+                            string col = kvp.Key;
+                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        string col = reader.GetName(i);
-                                        if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canView = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canView = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -1272,19 +1078,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_MST_Pricing_Diff", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Shape", string.IsNullOrEmpty(Shape) ? "Round" : Shape);
-                        cmd.Parameters.AddWithValue("@GradType", string.IsNullOrEmpty(GradType) ? "GR" : GradType);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                    }
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Getdata_MST_Pricing_Diff",
+                    new SqlParameter("@Shape", string.IsNullOrEmpty(Shape) ? "Round" : Shape),
+                    new SqlParameter("@GradType", string.IsNullOrEmpty(GradType) ? "GR" : GradType));
 
                 List<object> colors = new List<object>();
                 List<object> clarities = new List<object>();
@@ -1351,19 +1147,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_MST_Pricing_Diff", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@Shape", string.IsNullOrEmpty(Shape) ? "Round" : Shape);
-                        cmd.Parameters.AddWithValue("@GradType", string.IsNullOrEmpty(GradType) ? "GR" : GradType);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                    }
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Getdata_MST_Pricing_Diff",
+                    new SqlParameter("@Shape", string.IsNullOrEmpty(Shape) ? "Round" : Shape),
+                    new SqlParameter("@GradType", string.IsNullOrEmpty(GradType) ? "GR" : GradType));
 
                 string filePath = ExcelExport.ExportPriceComparisonExcel(ds, Shape, GradType);
                 if (string.IsNullOrEmpty(filePath))

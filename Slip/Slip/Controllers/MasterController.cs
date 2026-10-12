@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Services.Description;
 using System.Web.UI.WebControls;
 using System.Xml;
 using System.Xml.Linq;
@@ -34,22 +35,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list_Slip = new List<object>();
 
-
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("GetData_For_MST_Lot", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("GetData_For_MST_Lot");
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -150,19 +138,9 @@ namespace Slip.Controllers
                             xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
                         }
 
-                        SqlConnection consW = new SqlConnection(conn);
-                        SqlCommand cmdsW = new SqlCommand("LotCode_Insert_Using_Excel", consW);
-                        cmdsW.CommandType = CommandType.StoredProcedure;
-                        cmdsW.Parameters.AddWithValue("@XML", xmlStr);
-                        cmdsW.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        cmdsW.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmdsW.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        consW.Open();
-
-                        int k = cmdsW.ExecuteNonQuery();
-                        Message = Convert.ToString(cmdsW.Parameters["@MESSAGE"].Value);
-
-                        consW.Close();
+                        Message = DbHelper.ExecuteNonQueryWithMessage("LotCode_Insert_Using_Excel",
+                            new SqlParameter("@XML", xmlStr),
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
                     }
                 }
             }
@@ -173,33 +151,15 @@ namespace Slip.Controllers
             }
             return Json(new { Message });
         }
-        public JsonResult Getdata_For_DropDown()
+        public JsonResult GetBranchdata_For_DropDown()
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
-                List<object> _list_Process = new List<object>();
-                List<object> _list_Receipe = new List<object>();
-                List<object> _list_RCode = new List<object>();
-                List<object> _list_LotCode = new List<object>();
-                List<object> _list_User = new List<object>();
+                
                 List<object> _list_Branch = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_For_DropDown", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
-
-                if (_DropDownList.Tables[0].Rows.Count > 0)
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("GetBranchdata_For_DropDown");
+                if (_DropDownList.Tables.Count > 0 && _DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
                     {
@@ -208,76 +168,12 @@ namespace Slip.Controllers
                         {
                             Values.Add(_DropDownList.Tables[0].Columns[j].ToString(), _DropDownList.Tables[0].Rows[i][j].ToString());
                         }
-                        _list_Process.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables[1].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[1].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[1].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[1].Columns[j].ToString(), _DropDownList.Tables[1].Rows[i][j].ToString());
-                        }
-                        _list_Receipe.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables[2].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[2].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[2].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[2].Columns[j].ToString(), _DropDownList.Tables[2].Rows[i][j].ToString());
-                        }
-                        _list_RCode.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables[3].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[3].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[3].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[3].Columns[j].ToString(), _DropDownList.Tables[3].Rows[i][j].ToString());
-                        }
-                        _list_LotCode.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables.Count > 4 && _DropDownList.Tables[4].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[4].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[4].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[4].Columns[j].ToString(), _DropDownList.Tables[4].Rows[i][j].ToString());
-                        }
-                        _list_User.Add(Values);
-                    }
-                }
-                if (_DropDownList.Tables.Count > 5 && _DropDownList.Tables[5].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[5].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[5].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[5].Columns[j].ToString(), _DropDownList.Tables[5].Rows[i][j].ToString());
-                        }
                         _list_Branch.Add(Values);
                     }
                 }
+
                 var jsonResult = Json(new
                 {
-                    TableList = _list_Process,
-                    ReceipeList = _list_Receipe,
-                    RCodeList = _list_RCode,
-                    LotCodeList = _list_LotCode,
-                    UserList = _list_User,
                     BranchList = _list_Branch
                 }, JsonRequestBehavior.AllowGet);
                 jsonResult.MaxJsonLength = Int32.MaxValue;
@@ -303,20 +199,8 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list__DIA_Rough = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Z_Getdata_R_Rough_Add", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Z_Getdata_R_Rough_Add");
 
                 HashSet<string> uploadedJangads = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 HashSet<int> uploadedPreRoughIds = new HashSet<int>();
@@ -453,19 +337,9 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(model);
                 string xmlStr = "<DocumentElement><R_Rough_Add>" + Xmldata.DocumentElement.InnerXml + "</R_Rough_Add></DocumentElement>";
 
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("Z_R_Rough_Add_Insert_Update_Delete", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xmlStr);
-                cmd.Parameters.AddWithValue("@ACTION", Action);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                con.Open();
-
-                int j = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-
-                con.Close();
+                Message = DbHelper.ExecuteNonQueryWithMessage("Z_R_Rough_Add_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ACTION", Action));
             }
             catch (Exception ex)
             {
@@ -530,29 +404,13 @@ namespace Slip.Controllers
                         string webRelativePath = relativeDirectory + fileName;
                         savedPaths.Add(webRelativePath);
 
-                        using (SqlConnection con = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Jangad_Images_Insert", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@PreRoughID", (object)PreRoughID ?? DBNull.Value);
-                                cmd.Parameters.AddWithValue("@DistributionID", (object)DistributionID ?? DBNull.Value);
-                                cmd.Parameters.AddWithValue("@JangadNo", safeJangadNo);
-                                cmd.Parameters.AddWithValue("@ImagePath", webRelativePath);
-                                cmd.Parameters.AddWithValue("@UploadBy", uploadBy);
-                                cmd.Parameters.AddWithValue("@Status", normalizedStatus);
-
-                                SqlParameter outMsg = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 500)
-                                {
-                                    Direction = ParameterDirection.Output
-                                };
-                                cmd.Parameters.Add(outMsg);
-
-                                con.Open();
-                                cmd.ExecuteNonQuery();
-                                con.Close();
-                            }
-                        }
+                        DbHelper.ExecuteNonQueryWithMessage("Jangad_Images_Insert",
+                            new SqlParameter("@PreRoughID", (object)PreRoughID ?? DBNull.Value),
+                            new SqlParameter("@DistributionID", (object)DistributionID ?? DBNull.Value),
+                            new SqlParameter("@JangadNo", safeJangadNo),
+                            new SqlParameter("@ImagePath", webRelativePath),
+                            new SqlParameter("@UploadBy", uploadBy),
+                            new SqlParameter("@Status", normalizedStatus));
                         successCount++;
                     }
                 }
@@ -582,43 +440,32 @@ namespace Slip.Controllers
 
                 List<object> imageList = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                List<Dictionary<string, object>> imageRows = DbHelper.ExecuteReaderAsList("Get_Jangad_Images",
+                    new SqlParameter("@JangadNo", string.IsNullOrEmpty(JangadNo) ? (object)DBNull.Value : JangadNo),
+                    new SqlParameter("@PreRoughID", (object)PreRoughID ?? DBNull.Value),
+                    new SqlParameter("@DistributionID", (object)DistributionID ?? DBNull.Value),
+                    new SqlParameter("@Status", (object)normalizedStatus ?? DBNull.Value));
+
+                foreach (var row in imageRows)
                 {
-                    using (SqlCommand cmd = new SqlCommand("Get_Jangad_Images", con))
+                    string rawPath = row["ImagePath"] != null ? row["ImagePath"].ToString() : "";
+                    string resolvedUrl = rawPath;
+                    if (!string.IsNullOrEmpty(rawPath) && !rawPath.StartsWith("http") && !rawPath.StartsWith("/"))
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@JangadNo", string.IsNullOrEmpty(JangadNo) ? (object)DBNull.Value : JangadNo);
-                        cmd.Parameters.AddWithValue("@PreRoughID", (object)PreRoughID ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@DistributionID", (object)DistributionID ?? DBNull.Value);
-                        cmd.Parameters.AddWithValue("@Status", (object)normalizedStatus ?? DBNull.Value);
-
-                        con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                string rawPath = reader["ImagePath"] != DBNull.Value ? reader["ImagePath"].ToString() : "";
-                                string resolvedUrl = rawPath;
-                                if (!string.IsNullOrEmpty(rawPath) && !rawPath.StartsWith("http") && !rawPath.StartsWith("/"))
-                                {
-                                    resolvedUrl = "/" + rawPath;
-                                }
-
-                                imageList.Add(new
-                                {
-                                    ID = reader["ID"] != DBNull.Value ? Convert.ToInt32(reader["ID"]) : 0,
-                                    PreRoughID = reader["PreRoughID"] != DBNull.Value ? (int?)Convert.ToInt32(reader["PreRoughID"]) : null,
-                                    DistributionID = reader["DistributionID"] != DBNull.Value ? (int?)Convert.ToInt32(reader["DistributionID"]) : null,
-                                    JangadNo = reader["JangadNo"] != DBNull.Value ? reader["JangadNo"].ToString() : "",
-                                    ImagePath = resolvedUrl,
-                                    Created = reader["Created"] != DBNull.Value ? Convert.ToDateTime(reader["Created"]).ToString("dd-MMM-yyyy HH:mm") : "",
-                                    UploadBy = reader["UploadBy"] != DBNull.Value ? Convert.ToInt32(reader["UploadBy"]) : 0,
-                                    Status = reader["Status"] != DBNull.Value ? reader["Status"].ToString() : ""
-                                });
-                            }
-                        }
-                        con.Close();
+                        resolvedUrl = "/" + rawPath;
                     }
+
+                    imageList.Add(new
+                    {
+                        ID = row["ID"] != null ? Convert.ToInt32(row["ID"]) : 0,
+                        PreRoughID = row["PreRoughID"] != null ? (int?)Convert.ToInt32(row["PreRoughID"]) : null,
+                        DistributionID = row["DistributionID"] != null ? (int?)Convert.ToInt32(row["DistributionID"]) : null,
+                        JangadNo = row["JangadNo"] != null ? row["JangadNo"].ToString() : "",
+                        ImagePath = resolvedUrl,
+                        Created = row["Created"] != null ? Convert.ToDateTime(row["Created"]).ToString("dd-MMM-yyyy HH:mm") : "",
+                        UploadBy = row["UploadBy"] != null ? Convert.ToInt32(row["UploadBy"]) : 0,
+                        Status = row["Status"] != null ? row["Status"].ToString() : ""
+                    });
                 }
 
                 var jsonResult = Json(new
@@ -650,27 +497,10 @@ namespace Slip.Controllers
                 bool isAdmin = SessionFacade.UserSession != null && SessionFacade.UserSession.IsAdmin;
                 int userId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
 
-                string message = "";
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Jangad_Images_Insert", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@ImageID", imageId);
-                        cmd.Parameters.AddWithValue("@Action", "DELETE");
-                        cmd.Parameters.AddWithValue("@UploadBy", userId);
-                        SqlParameter outMsg = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 500)
-                        {
-                            Direction = ParameterDirection.Output
-                        };
-                        cmd.Parameters.Add(outMsg);
-
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                string message = DbHelper.ExecuteNonQueryWithMessage("Jangad_Images_Insert",
+                    new SqlParameter("@ImageID", imageId),
+                    new SqlParameter("@Action", "DELETE"),
+                    new SqlParameter("@UploadBy", userId));
 
                 bool isSuccess = !string.IsNullOrEmpty(message) && message.ToLower().Contains("success");
                 return Json(new { success = isSuccess, message = message });
@@ -704,52 +534,43 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "TRNLabour", "TRN Labour", "Labour" };
-                    
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                    foreach (string actName in possibleActions)
+                    {
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
+
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm) break;
-                                    }
+                                    if (Convert.ToBoolean(kvp.Value)) { canView = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canExport = true; foundPerm = true; }
                                 }
                             }
+                            if (foundPerm) break;
                         }
                     }
                 }
@@ -777,22 +598,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list__DIA_Rough = new List<object>();
                 List<object> DIARoughList = new List<object>();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Getdata_TRN_Labour", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Getdata_TRN_Labour");
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
@@ -854,51 +662,42 @@ namespace Slip.Controllers
                 {
                     string[] possibleActions = new string[] { "UserFileSizeMaster", "User File Size Master", "UserFileSize", "User File Size" };
 
-                    using (SqlConnection con = new SqlConnection(conn))
+                    foreach (string actName in possibleActions)
                     {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                if (Convert.ToBoolean(reader[i])) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm) break;
-                                    }
+                                    if (Convert.ToBoolean(kvp.Value)) { canView = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    if (Convert.ToBoolean(kvp.Value)) { canExport = true; foundPerm = true; }
                                 }
                             }
+                            if (foundPerm) break;
                         }
                     }
                 }
@@ -928,21 +727,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("MST_UserFileSize_Get", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("MST_UserFileSize_Get");
 
                 if (_DropDownList.Tables.Count > 0 && _DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -982,27 +769,13 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(model);
                 string xmlStr = "<DocumentElement><UserFileSizeModel>" + Xmldata.DocumentElement.InnerXml + "</UserFileSizeModel></DocumentElement>";
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("MST_UserFileSize_Insert_Update_Delete", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@XML", xmlStr);
-                        cmd.Parameters.AddWithValue("@ACTION", Action);
-                        cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                        cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                        con.Open();
+                Message = DbHelper.ExecuteNonQueryWithMessage("MST_UserFileSize_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ACTION", Action));
 
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        
-                        if (Message.ToLower().Contains("successfully"))
-                        {
-                            isSuccess = true;
-                        }
-                        
-                        con.Close();
-                    }
+                if (Message.ToLower().Contains("successfully"))
+                {
+                    isSuccess = true;
                 }
             }
             catch (Exception ex)
@@ -1031,59 +804,50 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "RoughDistributionList", "RoughDistribution", "Rough Distribution List", "Rough Distribution" };
-                    
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                    foreach (string actName in possibleActions)
+                    {
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
+
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm)
-                                        {
-                                            break;
-                                        }
-                                    }
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canView = true; foundPerm = true; }
                                 }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canExport = true; foundPerm = true; }
+                                }
+                            }
+                            if (foundPerm)
+                            {
+                                break;
                             }
                         }
                     }
@@ -1114,21 +878,9 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
                 List<object> list = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_MST_RoughDistributionList", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Get_MST_RoughDistributionList");
 
                 HashSet<int> uploadedDistIds = new HashSet<int>();
                 HashSet<string> uploadedDistJangadsWithoutDistId = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -1200,6 +952,11 @@ namespace Slip.Controllers
                             row["Priority"] = "REGULAR";
                         }
 
+                        if (row.ContainsKey("InwardDetailID") && row["InwardDetailID"] != null && !row.ContainsKey("PreRoughID"))
+                        {
+                            row["PreRoughID"] = row["InwardDetailID"];
+                        }
+
                         list.Add(row);
                     }
                 }
@@ -1225,27 +982,44 @@ namespace Slip.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetPreRoughDetails(int id = 0)
+        public JsonResult GetRoughInwardLotsForDistribution()
         {
             try
             {
-                DataSet ds = new DataSet();
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_TRN_RoughInward_GetLotsForDistribution");
+
+                var jsonResult = Json(new
+                {
+                    success = true,
+                    DIARoughList = list
+                }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                var jsonResult = Json(new
+                {
+                    success = false,
+                    message = ex.Message,
+                    DIARoughList = new List<object>()
+                }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+        }
+
+        [HttpGet]
+        public JsonResult GetRoughInwardLotDetails(int id = 0)
+        {
+            try
+            {
                 Dictionary<string, object> masterDetails = new Dictionary<string, object>();
                 List<Dictionary<string, object>> childList = new List<Dictionary<string, object>>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_PreRoughDetails_For_Distribution", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@ID", id);
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("USP_TRN_RoughInward_GetLotDetailForDistribution",
+                    new SqlParameter("@InwardDetailID", id));
 
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
                 {
@@ -1316,16 +1090,17 @@ namespace Slip.Controllers
         }
 
         [HttpPost]
-        public JsonResult SaveRoughDistribution(List<MST_RoughDistribution> list, List<int> deletedIDs = null, string Action = "INSERT")
+        public JsonResult SaveRoughDistribution(List<MST_RoughDistribution> list, List<int> deletedIDs = null, string Action = "INSERT", int SizeCodeID = 0)
         {
-            return RoughDistribution_Insert_Update_Delete(list, Action, deletedIDs);
+            return RoughDistribution_Insert_Update_Delete(list, Action, deletedIDs, SizeCodeID);
         }
 
         [HttpPost]
-        public JsonResult RoughDistribution_Insert_Update_Delete(List<MST_RoughDistribution> list, string Action = "INSERT", List<int> deletedIDs = null)
+        public JsonResult RoughDistribution_Insert_Update_Delete(List<MST_RoughDistribution> list, string Action = "INSERT", List<int> deletedIDs = null, int SizeCodeID = 0)
         {
             string Message = "";
             bool isSuccess = false;
+            List<int> newDistributionIDs = new List<int>();
             try
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
@@ -1348,10 +1123,11 @@ namespace Slip.Controllers
                             if (delId > 0)
                             {
                                 int branchId = 0;
-                                int preRoughId = 0;
+                                int inwardDetailId = 0;
                                 string rCode = "";
+                                bool isReceived = false;
 
-                                using (SqlCommand getCmd = new SqlCommand("SELECT BranchID, PreRoughID, RCode FROM MST_RoughDistribution WITH(NOLOCK) WHERE DistributionID = @DistributionID", con))
+                                using (SqlCommand getCmd = new SqlCommand("SELECT BranchID, InwardDetailID, RCode, IsReceived FROM MST_RoughDistribution WITH(NOLOCK) WHERE DistributionID = @DistributionID", con))
                                 {
                                     getCmd.Parameters.AddWithValue("@DistributionID", delId);
                                     using (SqlDataReader rdr = getCmd.ExecuteReader())
@@ -1359,20 +1135,31 @@ namespace Slip.Controllers
                                         if (rdr.Read())
                                         {
                                             branchId = Convert.ToInt32(rdr["BranchID"] != DBNull.Value ? rdr["BranchID"] : 0);
-                                            preRoughId = Convert.ToInt32(rdr["PreRoughID"] != DBNull.Value ? rdr["PreRoughID"] : 0);
+                                            inwardDetailId = Convert.ToInt32(rdr["InwardDetailID"] != DBNull.Value ? rdr["InwardDetailID"] : 0);
                                             rCode = Convert.ToString(rdr["RCode"] != DBNull.Value ? rdr["RCode"] : "");
+                                            isReceived = rdr["IsReceived"] != DBNull.Value && Convert.ToBoolean(rdr["IsReceived"]);
                                         }
                                     }
                                 }
 
+                                if (isReceived)
+                                {
+                                    con.Close();
+                                    return Json(new
+                                    {
+                                        success = false,
+                                        message = "Cannot delete: this distribution (R.Code '" + rCode + "') has already been received."
+                                    });
+                                }
+
                                 if (!string.IsNullOrEmpty(rCode) && TryParseRCodeSequence(rCode, out string prefix, out int currentSeq))
                                 {
-                                    // Fetch sibling active records for this branch under the same Jangad/PreRough lot
+                                    // Fetch sibling active records for this branch under the same Jangad/lot (InwardDetailID)
                                     List<string> siblingRCodes = new List<string>();
-                                    using (SqlCommand sibCmd = new SqlCommand("SELECT DistributionID, RCode FROM MST_RoughDistribution WITH(NOLOCK) WHERE BranchID = @BranchID AND PreRoughID = @PreRoughID AND IsActive = 1", con))
+                                    using (SqlCommand sibCmd = new SqlCommand("SELECT DistributionID, RCode FROM MST_RoughDistribution WITH(NOLOCK) WHERE BranchID = @BranchID AND InwardDetailID = @InwardDetailID AND IsActive = 1", con))
                                     {
                                         sibCmd.Parameters.AddWithValue("@BranchID", branchId);
-                                        sibCmd.Parameters.AddWithValue("@PreRoughID", preRoughId);
+                                        sibCmd.Parameters.AddWithValue("@InwardDetailID", inwardDetailId);
                                         using (SqlDataReader sibRdr = sibCmd.ExecuteReader())
                                         {
                                             while (sibRdr.Read())
@@ -1432,22 +1219,9 @@ namespace Slip.Controllers
                             delXmlBuilder.Append("</MST_RoughDistribution>");
                             delXmlBuilder.Append("</DocumentElement>");
 
-                            using (SqlConnection con = new SqlConnection(conn))
-                            {
-                                using (SqlCommand cmd = new SqlCommand("RoughDistribution_Insert_Update_Delete", con))
-                                {
-                                    cmd.CommandType = CommandType.StoredProcedure;
-                                    cmd.Parameters.AddWithValue("@XML", delXmlBuilder.ToString());
-                                    cmd.Parameters.AddWithValue("@ACTION", "DELETE");
-                                    cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 100);
-                                    cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-
-                                    con.Open();
-                                    cmd.ExecuteNonQuery();
-                                    Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                                    con.Close();
-                                }
-                            }
+                            Message = DbHelper.ExecuteNonQueryWithMessage("RoughDistribution_Insert_Update_Delete",
+                                new SqlParameter("@XML", delXmlBuilder.ToString()),
+                                new SqlParameter("@ACTION", "DELETE"));
                         }
                     }
                 }
@@ -1457,42 +1231,27 @@ namespace Slip.Controllers
 
                 if (newItems.Count > 0)
                 {
-                    // Intra-payload duplicate RCode check
-                    var duplicateInPayload = newItems
-                        .Where(x => !string.IsNullOrEmpty((x.RCode ?? "").Trim()))
-                        .GroupBy(x => x.RCode.Trim(), StringComparer.OrdinalIgnoreCase)
-                        .FirstOrDefault(g => g.Count() > 1);
-
-                    if (duplicateInPayload != null)
-                    {
-                        return Json(new
-                        {
-                            success = false,
-                            message = "Duplicate RCode '" + duplicateInPayload.Key + "' detected within the entries list! Each distribution must have a unique R.Code."
-                        });
-                    }
-
-                    // Strict Database Concurrency & Duplicate Check against MST_RoughDistribution
+                    // R.Code is generated server-side, atomically, per item - via
+                    // dbo.usp_GenerateRoughCode(@SizeID, @BranchID, @Year). This replaces
+                    // the old manual/auto entry + three-layer duplicate-check system;
+                    // the SP's UPDLOCK/HOLDLOCK increment on MST_RoughCodeGenerator makes
+                    // duplicates structurally impossible, so no pre-check is needed.
                     using (SqlConnection con = new SqlConnection(conn))
                     {
                         con.Open();
                         foreach (var item in newItems)
                         {
-                            string checkRCode = (item.RCode ?? "").Trim();
-                            if (!string.IsNullOrEmpty(checkRCode))
+                            using (SqlCommand genCmd = new SqlCommand("usp_GenerateRoughCode", con))
                             {
-                                using (SqlCommand chkCmd = new SqlCommand("SELECT COUNT(1) FROM MST_RoughDistribution WITH(NOLOCK) WHERE RCode = @RCode", con))
+                                genCmd.CommandType = CommandType.StoredProcedure;
+                                genCmd.Parameters.AddWithValue("@SizeID", SizeCodeID);
+                                genCmd.Parameters.AddWithValue("@BranchID", item.BranchID);
+                                genCmd.Parameters.AddWithValue("@Year", DateTime.Now.Year);
+                                using (SqlDataReader genRdr = genCmd.ExecuteReader())
                                 {
-                                    chkCmd.Parameters.AddWithValue("@RCode", checkRCode);
-                                    int count = Convert.ToInt32(chkCmd.ExecuteScalar() ?? 0);
-                                    if (count > 0)
+                                    if (genRdr.Read())
                                     {
-                                        con.Close();
-                                        return Json(new
-                                        {
-                                            success = false,
-                                            message = "Duplicate RCode detected! Another user/tab has already used this code (" + checkRCode + "). Please refresh and try again."
-                                        });
+                                        item.RCode = Convert.ToString(genRdr["RoughCode"]);
                                     }
                                 }
                             }
@@ -1506,7 +1265,7 @@ namespace Slip.Controllers
                     {
                         xmlBuilder.Append("<MST_RoughDistribution>");
                         xmlBuilder.Append("<DistributionID>").Append(item.DistributionID).Append("</DistributionID>");
-                        xmlBuilder.Append("<PreRoughID>").Append(item.PreRoughID).Append("</PreRoughID>");
+                        xmlBuilder.Append("<InwardDetailID>").Append(item.InwardDetailID).Append("</InwardDetailID>");
                         xmlBuilder.Append("<BranchID>").Append(item.BranchID).Append("</BranchID>");
                         xmlBuilder.Append("<RCode>").Append(System.Security.SecurityElement.Escape(item.RCode ?? "")).Append("</RCode>");
                         xmlBuilder.Append("<RoughPcs>").Append(item.RoughPcs).Append("</RoughPcs>");
@@ -1532,58 +1291,28 @@ namespace Slip.Controllers
                     }
                     xmlBuilder.Append("</DocumentElement>");
 
+                    // Raw ADO.NET here (instead of DbHelper.ExecuteNonQueryWithMessage) because
+                    // we need both the @MESSAGE output param AND the second result set the SP
+                    // returns (the DistributionID(s) just inserted, via OUTPUT INSERTED), so the
+                    // QR codes can be generated for exactly the new rows right after Save.
                     using (SqlConnection con = new SqlConnection(conn))
+                    using (SqlCommand insCmd = new SqlCommand("RoughDistribution_Insert_Update_Delete", con))
                     {
-                        using (SqlCommand cmd = new SqlCommand("RoughDistribution_Insert_Update_Delete", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@XML", xmlBuilder.ToString());
-                            cmd.Parameters.AddWithValue("@ACTION", "INSERT");
-                            cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 100);
-                            cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
+                        insCmd.CommandType = CommandType.StoredProcedure;
+                        insCmd.Parameters.AddWithValue("@XML", xmlBuilder.ToString());
+                        insCmd.Parameters.AddWithValue("@ACTION", "INSERT");
+                        var messageParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 100) { Direction = ParameterDirection.Output };
+                        insCmd.Parameters.Add(messageParam);
 
-                            con.Open();
-                            cmd.ExecuteNonQuery();
-                            Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                            con.Close();
-                        }
-                    }
-
-                    // Commit sequence counter in MST_BranchVoucherSequence for Automatic numbering branches
-                    if (string.IsNullOrEmpty(Message) || Message.ToLower().Contains("inserted") || Message.ToLower().Contains("success") || Message.ToLower().Contains("record is"))
-                    {
-                        using (SqlConnection con = new SqlConnection(conn))
+                        con.Open();
+                        using (SqlDataReader insRdr = insCmd.ExecuteReader())
                         {
-                            con.Open();
-                            foreach (var item in newItems)
+                            while (insRdr.Read())
                             {
-                                try
-                                {
-                                    using (SqlCommand chkCmd = new SqlCommand("SELECT NumericMethod FROM MST_VoucherDetails WITH(NOLOCK) WHERE BranchID = @BranchID AND VoucherType = 'Rough Distribution' AND IsActive = 1", con))
-                                    {
-                                        chkCmd.Parameters.AddWithValue("@BranchID", item.BranchID);
-                                        object methodObj = chkCmd.ExecuteScalar();
-                                        if (methodObj != null && Convert.ToString(methodObj).Trim().Equals("Automatic", StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            using (SqlCommand commitCmd = new SqlCommand("Get_RoughCodeConfig", con))
-                                            {
-                                                commitCmd.CommandType = CommandType.StoredProcedure;
-                                                commitCmd.Parameters.AddWithValue("@BranchID", item.BranchID);
-                                                commitCmd.Parameters.AddWithValue("@VoucherType", "Rough Distribution");
-                                                commitCmd.Parameters.AddWithValue("@ActionType", "COMMIT_AUTO");
-                                                commitCmd.Parameters.AddWithValue("@ManualRCode", "");
-                                                commitCmd.ExecuteNonQuery();
-                                            }
-                                        }
-                                    }
-                                }
-                                catch (Exception exSeq)
-                                {
-                                    ErrorLogger.ErrorLog(exSeq);
-                                }
+                                newDistributionIDs.Add(Convert.ToInt32(insRdr["DistributionID"]));
                             }
-                            con.Close();
                         }
+                        Message = Convert.ToString(messageParam.Value);
                     }
                 }
 
@@ -1605,7 +1334,7 @@ namespace Slip.Controllers
                 Message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
                 isSuccess = false;
             }
-            return Json(new { success = isSuccess, message = Message });
+            return Json(new { success = isSuccess, message = Message, newDistributionIDs = newDistributionIDs });
         }
 
         [HttpPost]
@@ -1637,59 +1366,50 @@ namespace Slip.Controllers
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
                     string[] possibleActions = new string[] { "RoughCodeMaster", "Rough Code Master", "RoughCode Master", "RoughCode" };
-                    
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        con.Open();
-                        foreach (string actName in possibleActions)
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", "Master");
-                                cmd.Parameters.AddWithValue("@ActionName", actName);
 
-                                using (SqlDataReader reader = cmd.ExecuteReader())
+                    foreach (string actName in possibleActions)
+                    {
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", "Master"),
+                            new SqlParameter("@ActionName", actName));
+
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            bool foundPerm = false;
+                            foreach (var kvp in row)
+                            {
+                                string col = kvp.Key;
+                                if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                                 {
-                                    if (reader.Read())
-                                    {
-                                        bool foundPerm = false;
-                                        for (int i = 0; i < reader.FieldCount; i++)
-                                        {
-                                            string col = reader.GetName(i);
-                                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canView = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canAdd = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canEdit = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canDelete = true; foundPerm = true; }
-                                            }
-                                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                            {
-                                                bool val = Convert.ToBoolean(reader[i]);
-                                                if (val) { canExport = true; foundPerm = true; }
-                                            }
-                                        }
-                                        if (foundPerm)
-                                        {
-                                            break;
-                                        }
-                                    }
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canView = true; foundPerm = true; }
                                 }
+                                else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canAdd = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Edit", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canEdit = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Delete", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canDelete = true; foundPerm = true; }
+                                }
+                                else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                                {
+                                    bool val = Convert.ToBoolean(kvp.Value);
+                                    if (val) { canExport = true; foundPerm = true; }
+                                }
+                            }
+                            if (foundPerm)
+                            {
+                                break;
                             }
                         }
                     }
@@ -2132,6 +1852,1213 @@ namespace Slip.Controllers
         }
         #endregion
 
+        #region Party Master (MST_PartyMaster)
+
+        public ActionResult PartyMaster()
+        {
+            SetModulePermissions("Master", "PartyMaster");
+            return View();
+        }
+
+        private static object SafeGetColumn(SqlDataReader rdr, string column)
+        {
+            for (int i = 0; i < rdr.FieldCount; i++)
+            {
+                if (string.Equals(rdr.GetName(i), column, StringComparison.OrdinalIgnoreCase))
+                {
+                    return rdr.IsDBNull(i) ? null : rdr.GetValue(i);
+                }
+            }
+            return null;
+        }
+
+        private MST_PartyMaster MapPartyMaster(Dictionary<string, object> rdr)
+        {
+            return new MST_PartyMaster
+            {
+                PartyId = rdr["PartyId"] != null ? (Guid)rdr["PartyId"] : Guid.Empty,
+                PartyCode = rdr["PartyCode"] != null ? Convert.ToString(rdr["PartyCode"]) : "",
+                PartyName = rdr["PartyName"] != null ? Convert.ToString(rdr["PartyName"]) : "",
+                ContactPerson = rdr["ContactPerson"] != null ? Convert.ToString(rdr["ContactPerson"]) : "",
+                IsOutSide = rdr["IsOutSide"] != null && Convert.ToBoolean(rdr["IsOutSide"]),
+                MobileNo = rdr["MobileNo"] != null ? Convert.ToString(rdr["MobileNo"]) : "",
+                Email = rdr["Email"] != null ? Convert.ToString(rdr["Email"]) : "",
+                Address = rdr["Address"] != null ? Convert.ToString(rdr["Address"]) : "",
+                CityName = rdr["CityName"] != null ? Convert.ToString(rdr["CityName"]) : "",
+                StateName = rdr["StateName"] != null ? Convert.ToString(rdr["StateName"]) : "",
+                CountryName = rdr["CountryName"] != null ? Convert.ToString(rdr["CountryName"]) : "",
+                Pincode = rdr["Pincode"] != null ? Convert.ToString(rdr["Pincode"]) : "",
+                GSTNo = rdr["GSTNo"] != null ? Convert.ToString(rdr["GSTNo"]) : "",
+                PANNo = rdr["PANNo"] != null ? Convert.ToString(rdr["PANNo"]) : "",
+                IsActive = rdr["IsActive"] != null && Convert.ToBoolean(rdr["IsActive"]),
+                Remarks = rdr["Remarks"] != null ? Convert.ToString(rdr["Remarks"]) : "",
+                CreatedOn = rdr["CreatedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                CreatedBy = rdr["CreatedBy"] != null ? (Guid?)rdr["CreatedBy"] : null,
+                ModifiedOn = rdr["ModifiedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != null ? (Guid?)rdr["ModifiedBy"] : null
+            };
+        }
+
+        public JsonResult Get_MST_PartyMasterList(string SearchText)
+        {
+            try
+            {
+                List<MST_PartyMaster> list = new List<MST_PartyMaster>();
+
+                List<Dictionary<string, object>> partyRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+
+                foreach (var row in partyRows)
+                {
+                    list.Add(MapPartyMaster(row));
+                }
+
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_PartyMaster>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_PartyMasterById(Guid PartyId)
+        {
+            try
+            {
+                MST_PartyMaster item = null;
+
+                List<Dictionary<string, object>> partyRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_GetById",
+                    new SqlParameter("@PartyId", PartyId));
+
+                if (partyRows.Count > 0)
+                {
+                    item = MapPartyMaster(partyRows[0]);
+                }
+
+                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult PartyMaster_Save(MST_PartyMaster model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.PartyId != Guid.Empty;
+
+                List<SqlParameter> saveParams = new List<SqlParameter>();
+                if (isUpdate)
+                {
+                    saveParams.Add(new SqlParameter("@PartyId", model.PartyId));
+                }
+                saveParams.Add(new SqlParameter("@PartyCode", model.PartyCode ?? ""));
+                saveParams.Add(new SqlParameter("@PartyName", model.PartyName ?? ""));
+                saveParams.Add(new SqlParameter("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@IsOutSide", model.IsOutSide));
+                saveParams.Add(new SqlParameter("@MobileNo", (object)model.MobileNo ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Email", (object)model.Email ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Address", (object)model.Address ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@CityName", (object)model.CityName ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@StateName", (object)model.StateName ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@CountryName", (object)model.CountryName ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Pincode", (object)model.Pincode ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@GSTNo", (object)model.GSTNo ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@PANNo", (object)model.PANNo ?? DBNull.Value));
+                saveParams.Add(new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value));
+                saveParams.Add(new SqlParameter(isUpdate ? "@ModifiedBy" : "@CreatedBy", DBNull.Value));
+
+                List<Dictionary<string, object>> saveRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_Save", saveParams.ToArray());
+                if (saveRows.Count > 0)
+                {
+                    var row = saveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+                else
+                {
+                    isSuccess = true;
+                }
+
+                if (isSuccess && string.IsNullOrEmpty(message))
+                {
+                    message = isUpdate ? "Party updated successfully." : "Party saved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult PartyMaster_Delete(Guid PartyId)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                List<Dictionary<string, object>> deleteRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_Delete",
+                    new SqlParameter("@PartyId", PartyId),
+                    new SqlParameter("@ModifiedBy", DBNull.Value));
+
+                if (deleteRows.Count > 0)
+                {
+                    var row = deleteRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult PartyMaster_ActiveInactive(Guid PartyId, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_PartyMaster_ActiveInactive",
+                    new SqlParameter("@PartyId", PartyId),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@ModifiedBy", DBNull.Value));
+
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        #endregion
+
+        #region Branch Master (MST_CompanyBranch)
+
+        public ActionResult BranchMaster()
+        {
+            SetModulePermissions("Master", "BranchMaster");
+            return View();
+        }
+
+        private MST_CompanyBranch MapBranch(Dictionary<string, object> rdr)
+        {
+            return new MST_CompanyBranch
+            {
+                BranchID = rdr["BranchID"] != null ? Convert.ToInt32(rdr["BranchID"]) : 0,
+                BranchCode = rdr["BranchCode"] != null ? Convert.ToString(rdr["BranchCode"]) : "",
+                BranchName = rdr["BranchName"] != null ? Convert.ToString(rdr["BranchName"]) : "",
+                BranchTypeID = rdr["CompanyBranchTypeID"] != null ? Convert.ToInt32(rdr["CompanyBranchTypeID"]) : 0,
+                BranchTypeName = rdr.ContainsKey("BranchTypeName") && rdr["BranchTypeName"] != null ? Convert.ToString(rdr["BranchTypeName"]) : "",
+                GSTIN = rdr["GSTIN"] != null ? Convert.ToString(rdr["GSTIN"]) : "",
+                StateCode = rdr["StateCode"] != null ? Convert.ToString(rdr["StateCode"]) : "",
+                Address = rdr["Address"] != null ? Convert.ToString(rdr["Address"]) : "",
+                City = rdr["City"] != null ? Convert.ToString(rdr["City"]) : "",
+                ContactPerson = rdr["ContactPerson"] != null ? Convert.ToString(rdr["ContactPerson"]) : "",
+                Phone = rdr["Phone"] != null ? Convert.ToString(rdr["Phone"]) : "",
+                IsActive = rdr["IsActive"] != null && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr["CreatedBy"] != null ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
+                CreatedOn = rdr["CreatedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != null ? (int?)Convert.ToInt32(rdr["ModifiedBy"]) : null,
+                ModifiedOn = rdr["ModifiedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null
+            };
+        }
+
+        public JsonResult Get_MST_BranchTypeList()
+        {
+            try
+            {
+                List<MST_BranchType> list = new List<MST_BranchType>();
+
+                List<Dictionary<string, object>> branchTypeRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranchType_GetList");
+                foreach (var row in branchTypeRows)
+                {
+                    list.Add(new MST_BranchType
+                    {
+                        BranchTypeID = Convert.ToInt32(row["ID"]),
+                        BranchTypeName = row["BranchTypeName"] != null ? Convert.ToString(row["BranchTypeName"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_BranchType>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_BranchList(string SearchText)
+        {
+            try
+            {
+                List<MST_CompanyBranch> list = new List<MST_CompanyBranch>();
+
+                List<Dictionary<string, object>> branchRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+
+                foreach (var row in branchRows)
+                {
+                    list.Add(MapBranch(row));
+                }
+
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_CompanyBranch>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_BranchById(int BranchID)
+        {
+            try
+            {
+                MST_CompanyBranch item = null;
+
+                List<Dictionary<string, object>> branchRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_GetById",
+                    new SqlParameter("@BranchID", BranchID));
+
+                if (branchRows.Count > 0)
+                {
+                    item = MapBranch(branchRows[0]);
+                }
+
+                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult BranchMaster_Save(MST_CompanyBranch model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.BranchID > 0;
+
+                string spName = isUpdate ? "USP_MST_CompanyBranch_Update" : "USP_MST_CompanyBranch_Insert";
+                List<SqlParameter> branchParams = new List<SqlParameter>();
+                if (isUpdate)
+                {
+                    branchParams.Add(new SqlParameter("@BranchID", model.BranchID));
+                }
+                branchParams.Add(new SqlParameter("@BranchCode", model.BranchCode ?? ""));
+                branchParams.Add(new SqlParameter("@BranchName", model.BranchName ?? ""));
+                branchParams.Add(new SqlParameter("@CompanyBranchTypeID", model.BranchTypeID));
+                branchParams.Add(new SqlParameter("@GSTIN", (object)model.GSTIN ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@StateCode", (object)model.StateCode ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@Address", (object)model.Address ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@City", (object)model.City ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@ContactPerson", (object)model.ContactPerson ?? DBNull.Value));
+                branchParams.Add(new SqlParameter("@Phone", (object)model.Phone ?? DBNull.Value));
+                branchParams.Add(new SqlParameter(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId));
+
+                List<Dictionary<string, object>> branchSaveRows = DbHelper.ExecuteReaderAsList(spName, branchParams.ToArray());
+                if (branchSaveRows.Count > 0)
+                {
+                    var row = branchSaveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+
+                if (isSuccess && string.IsNullOrEmpty(message))
+                {
+                    message = isUpdate ? "Branch updated successfully." : "Branch saved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult BranchMaster_Delete(int BranchID)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                List<Dictionary<string, object>> branchDeleteRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_Delete",
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@ModifiedBy", currentUserId));
+
+                if (branchDeleteRows.Count > 0)
+                {
+                    var row = branchDeleteRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult BranchMaster_ActiveInactive(int BranchID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_ActiveInactive",
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@ModifiedBy", currentUserId));
+
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        #endregion
+
+        #region Rough Inward (TRN_RoughInward)
+
+        public ActionResult RoughInward()
+        {
+            SetModulePermissions("Master", "RoughInward");
+            return View();
+        }
+
+        public JsonResult Get_MST_PurposeList()
+        {
+            try
+            {
+                List<MST_Purpose> list = new List<MST_Purpose>();
+
+                List<Dictionary<string, object>> purposeRows = DbHelper.ExecuteReaderAsList("USP_MST_Purpose_GetList");
+                foreach (var row in purposeRows)
+                {
+                    list.Add(new MST_Purpose
+                    {
+                        PurposeID = Convert.ToInt32(row["PurposeID"]),
+                        PurposeName = row["PurposeName"] != null ? Convert.ToString(row["PurposeName"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Purpose>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_ReceipeList()
+        {
+            try
+            {
+                List<MST_Receipe> list = new List<MST_Receipe>();
+
+                List<Dictionary<string, object>> receipeRows = DbHelper.ExecuteReaderAsList("USP_MST_Receipe_GetList");
+                foreach (var row in receipeRows)
+                {
+                    list.Add(new MST_Receipe
+                    {
+                        ReceipeID = Convert.ToInt32(row["ReceipeID"]),
+                        Receipe = row["Receipe"] != null ? Convert.ToString(row["Receipe"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Receipe>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_GradeList()
+        {
+            try
+            {
+                List<MST_Grade> list = new List<MST_Grade>();
+
+                List<Dictionary<string, object>> gradeRows = DbHelper.ExecuteReaderAsList("USP_MST_Grade_GetList");
+                foreach (var row in gradeRows)
+                {
+                    list.Add(new MST_Grade
+                    {
+                        GradeID = Convert.ToInt32(row["ID"]),
+                        Grade = row["Grade"] != null ? Convert.ToString(row["Grade"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Grade>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_FactoryCodeList()
+        {
+            try
+            {
+                List<MST_FactoryCode> list = new List<MST_FactoryCode>();
+
+                List<Dictionary<string, object>> factoryCodeRows = DbHelper.ExecuteReaderAsList("USP_MST_FactoryCode_GetList");
+                foreach (var row in factoryCodeRows)
+                {
+                    list.Add(new MST_FactoryCode
+                    {
+                        FactoryCodeID = Convert.ToInt32(row["ID"]),
+                        FactoryCode = row["FactoryCode"] != null ? Convert.ToString(row["FactoryCode"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_FactoryCode>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_SizeCodeList()
+        {
+            try
+            {
+                var list = new List<object>();
+
+                List<Dictionary<string, object>> sizeCodeRows = DbHelper.ExecuteReaderAsList("USP_MST_SizeCode_GetList");
+                foreach (var row in sizeCodeRows)
+                {
+                    list.Add(new
+                    {
+                        ID = Convert.ToInt32(row["ID"]),
+                        ShortName = row["ShortName"] != null ? Convert.ToString(row["ShortName"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_UserBranch()
+        {
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                int? branchId = null;
+                string branchName = null;
+
+                List<Dictionary<string, object>> userBranchRows = DbHelper.ExecuteReaderAsList("USP_SEC_User_GetBranch",
+                    new SqlParameter("@UserID", currentUserId));
+
+                if (userBranchRows.Count > 0)
+                {
+                    var row = userBranchRows[0];
+                    branchId = row["BranchID"] != null ? (int?)Convert.ToInt32(row["BranchID"]) : null;
+                    branchName = row["BranchName"] != null ? Convert.ToString(row["BranchName"]) : null;
+                }
+
+                return Json(new { success = branchId != null, branchId = branchId, branchName = branchName }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private TRN_RoughInward MapRoughInwardHeader(SqlDataReader rdr)
+        {
+            DateTime cDate = rdr["ChallanDate"] != DBNull.Value ? Convert.ToDateTime(rdr["ChallanDate"]) : DateTime.MinValue;
+            return new TRN_RoughInward
+            {
+                InwardID = Convert.ToInt32(rdr["InwardID"]),
+                ChallanNo = rdr["ChallanNo"] != DBNull.Value ? Convert.ToString(rdr["ChallanNo"]) : "",
+                ChallanDate = cDate,
+                ChallanDateStr = cDate > new DateTime(1753, 1, 1) ? cDate.ToString("yyyy-MM-dd") : "",
+                FactoryCodeID = rdr["FactoryCodeID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["FactoryCodeID"]) : null,
+                FactoryCodeName = SafeGetColumn(rdr, "FactoryCodeName") != null ? Convert.ToString(SafeGetColumn(rdr, "FactoryCodeName")) : "",
+                SourceType = rdr["SourceType"] != DBNull.Value ? Convert.ToString(rdr["SourceType"]) : "",
+                FromBranchID = rdr["FromBranchID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["FromBranchID"]) : null,
+                FromBranchName = SafeGetColumn(rdr, "FromBranchName") != null ? Convert.ToString(SafeGetColumn(rdr, "FromBranchName")) : "",
+                FromPartyID = rdr["FromPartyID"] != DBNull.Value ? (Guid?)rdr["FromPartyID"] : null,
+                PartyName = SafeGetColumn(rdr, "PartyName") != null ? Convert.ToString(SafeGetColumn(rdr, "PartyName")) : "",
+                ToBranchID = rdr["ToBranchID"] != DBNull.Value ? Convert.ToInt32(rdr["ToBranchID"]) : 0,
+                ToBranchName = SafeGetColumn(rdr, "ToBranchName") != null ? Convert.ToString(SafeGetColumn(rdr, "ToBranchName")) : "",
+                PurposeID = rdr["PurposeID"] != DBNull.Value ? Convert.ToInt32(rdr["PurposeID"]) : 0,
+                PurposeName = SafeGetColumn(rdr, "PurposeName") != null ? Convert.ToString(SafeGetColumn(rdr, "PurposeName")) : "",
+                SizeCode = SafeGetColumn(rdr, "SizeCode") != null ? Convert.ToString(SafeGetColumn(rdr, "SizeCode")) : "",
+                ColorType = SafeGetColumn(rdr, "ColorType") != null ? Convert.ToString(SafeGetColumn(rdr, "ColorType")) : "",
+                Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                TotalPcs = rdr["TotalPcs"] != DBNull.Value ? Convert.ToInt32(rdr["TotalPcs"]) : 0,
+                TotalCarat = rdr["TotalCarat"] != DBNull.Value ? Convert.ToDecimal(rdr["TotalCarat"]) : 0,
+                TotalAmount = rdr["TotalAmount"] != DBNull.Value ? Convert.ToDecimal(rdr["TotalAmount"]) : 0,
+                IsActive = rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr["CreatedBy"] != DBNull.Value ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
+                CreatedOn = rdr["CreatedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["ModifiedBy"]) : null,
+                ModifiedOn = rdr["ModifiedOn"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null
+            };
+        }
+
+        public JsonResult Get_TRN_RoughInwardList(string SearchText)
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_GetList", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText);
+                    cmd.Parameters.AddWithValue("@ToBranchID", DBNull.Value);
+
+                    con.Open();
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
+                    {
+                        da.Fill(dt);
+                    }
+                    con.Close();
+                }
+
+                List<Dictionary<string, object>> list = new List<Dictionary<string, object>>();
+                foreach (DataRow row in dt.Rows)
+                {
+                    var dict = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
+                    foreach (DataColumn col in dt.Columns)
+                    {
+                        object val = row[col];
+                        if (val == DBNull.Value)
+                        {
+                            dict[col.ColumnName] = null;
+                        }
+                        else if (col.DataType == typeof(DateTime))
+                        {
+                            dict[col.ColumnName] = Convert.ToDateTime(val).ToString("yyyy-MM-dd");
+                        }
+                        else if (col.DataType == typeof(string))
+                        {
+                            dict[col.ColumnName] = val.ToString().Trim();
+                        }
+                        else
+                        {
+                            dict[col.ColumnName] = val;
+                        }
+                    }
+                    list.Add(dict);
+                }
+
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_TRN_RoughInwardById(int InwardID)
+        {
+            try
+            {
+                TRN_RoughInward item = null;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInward_GetById", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@InwardID", InwardID);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        if (rdr.Read())
+                        {
+                            item = MapRoughInwardHeader(rdr);
+                        }
+
+                        if (item != null)
+                        {
+                            item.Details = new List<TRN_RoughInwardDetail>();
+                            if (rdr.NextResult())
+                            {
+                                while (rdr.Read())
+                                {
+                                    item.Details.Add(new TRN_RoughInwardDetail
+                                    {
+                                        InwardDetailID = Convert.ToInt32(rdr["InwardDetailID"]),
+                                        InwardID = Convert.ToInt32(rdr["InwardID"]),
+                                        SrNo = rdr["SrNo"] != DBNull.Value ? Convert.ToInt32(rdr["SrNo"]) : 0,
+                                        LotNo = rdr["LotNo"] != DBNull.Value ? Convert.ToString(rdr["LotNo"]) : "",
+                                        GrowthRate = rdr["GrowthRate"] != DBNull.Value ? Convert.ToString(rdr["GrowthRate"]) : "",
+                                        AvgGrowthRate = rdr["AvgGrowthRate"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["AvgGrowthRate"]) : null,
+                                        RecipeID = rdr["RecipeID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["RecipeID"]) : null,
+                                        RecipeName = SafeGetColumn(rdr, "RecipeName") != null ? Convert.ToString(SafeGetColumn(rdr, "RecipeName")) : "",
+                                        GradeID = rdr["GradeID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["GradeID"]) : null,
+                                        GradeName = SafeGetColumn(rdr, "GradeName") != null ? Convert.ToString(SafeGetColumn(rdr, "GradeName")) : "",
+                                        Pcs = rdr["Pcs"] != DBNull.Value ? Convert.ToInt32(rdr["Pcs"]) : 0,
+                                        Carat = rdr["Carat"] != DBNull.Value ? Convert.ToDecimal(rdr["Carat"]) : 0,
+                                        Rate = rdr["Rate"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["Rate"]) : null,
+                                        Amount = rdr["Amount"] != DBNull.Value ? (decimal?)Convert.ToDecimal(rdr["Amount"]) : null,
+                                        Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                                        MachineNo = SafeGetColumn(rdr, "MachineNo") != null ? Convert.ToString(SafeGetColumn(rdr, "MachineNo")) : "",
+                                        Size = SafeGetColumn(rdr, "Size") != null ? Convert.ToString(SafeGetColumn(rdr, "Size")) : "",
+                                        FromHeight = SafeGetColumn(rdr, "FromHeight") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "FromHeight")) : null,
+                                        ToHeight = SafeGetColumn(rdr, "ToHeight") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "ToHeight")) : null,
+                                        Hours = SafeGetColumn(rdr, "Hours") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "Hours")) : null,
+                                        BoxNo = SafeGetColumn(rdr, "BoxNo") != null ? Convert.ToString(SafeGetColumn(rdr, "BoxNo")) : "",
+                                        SizeCode = SafeGetColumn(rdr, "SizeCode") != null ? Convert.ToString(SafeGetColumn(rdr, "SizeCode")) : "",
+                                        SizeCodeId = SafeGetColumn(rdr, "SizeCodeId") != null ? (int?)Convert.ToInt32(SafeGetColumn(rdr, "SizeCodeId")) : null,
+                                        ColorType = SafeGetColumn(rdr, "ColorType") != null ? Convert.ToString(SafeGetColumn(rdr, "ColorType")) : "",
+                                        //NotAllow = SafeGetColumn(rdr, "NotAllow") != null ? Convert.ToBoolean(SafeGetColumn(rdr, "NotAllow")) : false,
+                                        NotAllow = SafeGetColumn(rdr, "NotAllow") != null ? (Convert.ToInt32(SafeGetColumn(rdr, "NotAllow")) == 1) : false,
+                                    });
+                                }
+                            }
+                        }
+                    }
+                    con.Close();
+                }
+
+                string cDateFormatted = "";
+                if (item != null && item.ChallanDate > new DateTime(1753, 1, 1))
+                {
+                    cDateFormatted = item.ChallanDate.ToString("yyyy-MM-dd");
+                }
+
+                return Json(new { success = item != null, item = item, challanDateFormatted = cDateFormatted }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        //[HttpPost]
+        //public JsonResult RoughInward_Save(TRN_RoughInward model, string Action = "INSERT")
+        //{
+        //    string message = "";
+        //    bool isSuccess = false;
+        //    try
+        //    {
+        //        int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+        //        bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.InwardID > 0;
+
+        //        if (string.Equals(model.SourceType, "BRANCH", StringComparison.OrdinalIgnoreCase)
+        //            && model.FromBranchID.HasValue && model.FromBranchID.Value == model.ToBranchID)
+        //        {
+        //            return Json(new { success = false, message = "From Branch and To Branch cannot be the same." });
+        //        }
+
+        //        using (SqlConnection con = new SqlConnection(conn))
+        //        {
+        //            con.Open();
+        //            using (SqlTransaction tran = con.BeginTransaction())
+        //            {
+        //                try
+        //                {
+        //                    int inwardId;
+        //                    string spName = isUpdate ? "USP_TRN_RoughInward_Update" : "USP_TRN_RoughInward_Insert";
+
+        //                    using (SqlCommand cmd = new SqlCommand(spName, con, tran))
+        //                    {
+        //                        cmd.CommandType = CommandType.StoredProcedure;
+        //                        if (isUpdate)
+        //                        {
+        //                            cmd.Parameters.AddWithValue("@InwardID", model.InwardID);
+        //                        }
+
+        //                        DateTime saveChallanDate = model.ChallanDate;
+        //                        if (!string.IsNullOrWhiteSpace(model.ChallanDateStr))
+        //                        {
+        //                            DateTime parsed;
+        //                            if (DateTime.TryParse(model.ChallanDateStr, out parsed) && parsed >= new DateTime(1753, 1, 1))
+        //                            {
+        //                                saveChallanDate = parsed;
+        //                            }
+        //                        }
+        //                        if (saveChallanDate < new DateTime(1753, 1, 1))
+        //                        {
+        //                            saveChallanDate = DateTime.Today;
+        //                        }
+
+        //                        cmd.Parameters.AddWithValue("@ChallanNo", model.ChallanNo ?? "");
+        //                        cmd.Parameters.AddWithValue("@ChallanDate", saveChallanDate);
+        //                        cmd.Parameters.AddWithValue("@FactoryCodeID", (object)model.FactoryCodeID ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue("@SourceType", model.SourceType ?? "");
+        //                        cmd.Parameters.AddWithValue("@FromBranchID", (object)model.FromBranchID ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue("@FromPartyID", (object)model.FromPartyID ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue("@ToBranchID", model.ToBranchID);
+        //                        cmd.Parameters.AddWithValue("@PurposeID", model.PurposeID);
+        //                        cmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
+        //                        cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId);
+
+        //                        using (SqlDataReader rdr = cmd.ExecuteReader())
+        //                        {
+        //                            if (!rdr.Read())
+        //                            {
+        //                                throw new Exception("No response from server while saving Rough Inward.");
+        //                            }
+        //                            object successVal = SafeGetColumn(rdr, "Success");
+        //                            isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+        //                            object msgVal = SafeGetColumn(rdr, "Message");
+        //                            message = msgVal != null ? Convert.ToString(msgVal) : "";
+        //                            object idVal = SafeGetColumn(rdr, "InwardID");
+        //                            inwardId = idVal != null ? Convert.ToInt32(idVal) : model.InwardID;
+        //                        }
+        //                    }
+
+        //                    if (!isSuccess)
+        //                    {
+        //                        tran.Rollback();
+        //                        return Json(new { success = false, message = message });
+        //                    }
+
+        //                    //if (isUpdate)
+        //                    //{
+        //                    //    using (SqlCommand delCmd = new SqlCommand("USP_TRN_RoughInwardDetail_DeleteByInward", con, tran))
+        //                    //    {
+        //                    //        delCmd.CommandType = CommandType.StoredProcedure;
+        //                    //        delCmd.Parameters.AddWithValue("@InwardID", inwardId);
+        //                    //        delCmd.ExecuteNonQuery();
+        //                    //    }
+        //                    //}
+
+        //                    if (model.Details != null)
+        //                    {
+        //                        int srNo = 1;
+        //                        foreach (var line in model.Details)
+        //                        {
+        //                            if (string.IsNullOrWhiteSpace(line.LotNo)) continue;
+
+
+        //                            if (line.InwardDetailID != 0)
+        //                            { 
+
+
+
+        //                            }
+        //                            else
+        //                            {
+        //                                using (SqlCommand lineCmd = new SqlCommand("USP_TRN_RoughInwardDetail_Insert", con, tran))
+        //                                {
+        //                                    lineCmd.CommandType = CommandType.StoredProcedure;
+        //                                    lineCmd.Parameters.AddWithValue("@InwardID", inwardId);
+        //                                    lineCmd.Parameters.AddWithValue("@SrNo", srNo);
+        //                                    lineCmd.Parameters.AddWithValue("@LotNo", line.LotNo ?? "");
+        //                                    lineCmd.Parameters.AddWithValue("@GrowthRate", (object)line.GrowthRate ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@AvgGrowthRate", (object)line.AvgGrowthRate ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@RecipeID", (object)line.RecipeID ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@GradeID", (object)line.GradeID ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Pcs", line.Pcs);
+        //                                    lineCmd.Parameters.AddWithValue("@Carat", line.Carat);
+        //                                    lineCmd.Parameters.AddWithValue("@Rate", (object)line.Rate ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Amount", (object)line.Amount ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Remarks", (object)line.Remarks ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@MachineNo", (object)line.MachineNo ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Size", (object)line.Size ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@FromHeight", (object)line.FromHeight ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@ToHeight", (object)line.ToHeight ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@Hours", (object)line.Hours ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@BoxNo", (object)line.BoxNo ?? DBNull.Value);
+        //                                    string lineSizeCode = !string.IsNullOrWhiteSpace(line.SizeCode) ? line.SizeCode : model.SizeCode;
+        //                                    string lineColorType = !string.IsNullOrWhiteSpace(line.ColorType) ? line.ColorType : model.ColorType;
+        //                                    lineCmd.Parameters.AddWithValue("@SizeCode", (object)lineSizeCode ?? DBNull.Value);
+        //                                    lineCmd.Parameters.AddWithValue("@ColorType", (object)lineColorType ?? DBNull.Value);
+        //                                    lineCmd.ExecuteNonQuery();
+        //                                }
+        //                            }
+        //                            srNo++;
+        //                        }
+        //                    }
+
+        //                    using (SqlCommand recalcCmd = new SqlCommand("USP_TRN_RoughInward_RecalcTotals", con, tran))
+        //                    {
+        //                        recalcCmd.CommandType = CommandType.StoredProcedure;
+        //                        recalcCmd.Parameters.AddWithValue("@InwardID", inwardId);
+        //                        recalcCmd.ExecuteNonQuery();
+        //                    }
+
+        //                    tran.Commit();
+        //                }
+        //                catch
+        //                {
+        //                    tran.Rollback();
+        //                    throw;
+        //                }
+        //            }
+        //        }
+
+        //        if (isSuccess && string.IsNullOrEmpty(message))
+        //        {
+        //            message = isUpdate ? "Rough Inward updated successfully." : "Rough Inward saved successfully.";
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        ErrorLogger.ErrorLog(ex);
+        //        message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+        //        isSuccess = false;
+        //    }
+        //    return Json(new { success = isSuccess, message = message });
+        //}
+
+        [HttpPost]
+        public JsonResult RoughInward_Save(TRN_RoughInward model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.InwardID > 0;
+
+                if (string.Equals(model.SourceType, "BRANCH", StringComparison.OrdinalIgnoreCase)
+                    && model.FromBranchID.HasValue && model.FromBranchID.Value == model.ToBranchID)
+                {
+                    return Json(new { success = false, message = "From Branch and To Branch cannot be the same." });
+                }
+
+                using (SqlConnection con = new SqlConnection(conn))
+                {
+                    con.Open();
+                    using (SqlTransaction tran = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            int inwardId;
+                            string spName = isUpdate ? "USP_TRN_RoughInward_Update" : "USP_TRN_RoughInward_Insert";
+
+                            using (SqlCommand cmd = new SqlCommand(spName, con, tran))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+                                if (isUpdate)
+                                {
+                                    cmd.Parameters.AddWithValue("@InwardID", model.InwardID);
+                                }
+
+                                DateTime saveChallanDate = model.ChallanDate;
+                                if (!string.IsNullOrWhiteSpace(model.ChallanDateStr))
+                                {
+                                    DateTime parsed;
+                                    if (DateTime.TryParse(model.ChallanDateStr, out parsed) && parsed >= new DateTime(1753, 1, 1))
+                                    {
+                                        saveChallanDate = parsed;
+                                    }
+                                }
+                                if (saveChallanDate < new DateTime(1753, 1, 1))
+                                {
+                                    saveChallanDate = DateTime.Today;
+                                }
+
+                                cmd.Parameters.AddWithValue("@ChallanNo", model.ChallanNo ?? "");
+                                cmd.Parameters.AddWithValue("@ChallanDate", saveChallanDate);
+                                cmd.Parameters.AddWithValue("@FactoryCodeID", (object)model.FactoryCodeID ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue("@SourceType", model.SourceType ?? "");
+                                cmd.Parameters.AddWithValue("@FromBranchID", (object)model.FromBranchID ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue("@FromPartyID", (object)model.FromPartyID ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue("@ToBranchID", model.ToBranchID);
+                                cmd.Parameters.AddWithValue("@PurposeID", model.PurposeID);
+                                cmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
+                                cmd.Parameters.AddWithValue(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId);
+
+                                using (SqlDataReader rdr = cmd.ExecuteReader())
+                                {
+                                    if (!rdr.Read())
+                                    {
+                                        throw new Exception("No response from server while saving Rough Inward.");
+                                    }
+                                    object successVal = SafeGetColumn(rdr, "Success");
+                                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                                    object msgVal = SafeGetColumn(rdr, "Message");
+                                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                                    object idVal = SafeGetColumn(rdr, "InwardID");
+                                    inwardId = idVal != null ? Convert.ToInt32(idVal) : model.InwardID;
+                                }
+                            }
+
+                            if (!isSuccess)
+                            {
+                                tran.Rollback();
+                                return Json(new { success = false, message = message });
+                            }
+
+                            if (model.Details != null)
+                            {
+                                int srNo = 1;
+                                foreach (var line in model.Details)
+                                {
+                                    using (SqlCommand lineCmd = new SqlCommand("USP_TRN_RoughInwardDetail_Save", con, tran))
+                                    {
+                                        lineCmd.CommandType = CommandType.StoredProcedure;
+                                        lineCmd.Parameters.AddWithValue("@InwardDetailID", line.InwardDetailID);
+                                        lineCmd.Parameters.AddWithValue("@InwardID", inwardId);
+                                        lineCmd.Parameters.AddWithValue("@SrNo", srNo);
+                                        lineCmd.Parameters.AddWithValue("@LotNo", line.LotNo ?? "");
+                                        lineCmd.Parameters.AddWithValue("@GrowthRate", (object)line.GrowthRate ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@AvgGrowthRate", (object)line.AvgGrowthRate ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@RecipeID", (object)line.RecipeID ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@GradeID", (object)line.GradeID ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Pcs", line.Pcs);
+                                        lineCmd.Parameters.AddWithValue("@Carat", line.Carat);
+                                        lineCmd.Parameters.AddWithValue("@Rate", (object)line.Rate ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Amount", (object)line.Amount ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Remarks", (object)line.Remarks ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@MachineNo", (object)line.MachineNo ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Size", (object)line.Size ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@FromHeight", (object)line.FromHeight ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@ToHeight", (object)line.ToHeight ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@Hours", (object)line.Hours ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@BoxNo", (object)line.BoxNo ?? DBNull.Value);
+                                        string lineSizeCode = !string.IsNullOrWhiteSpace(line.SizeCode) ? line.SizeCode : model.SizeCode;
+                                        int? lineSizeCodeId = line.SizeCodeId ?? model.SizeCodeID;
+                                        string lineColorType = !string.IsNullOrWhiteSpace(line.ColorType) ? line.ColorType : model.ColorType;
+                                        lineCmd.Parameters.AddWithValue("@SizeCode", (object)lineSizeCode ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@SizeCodeID", (object)lineSizeCodeId ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@ColorType", (object)lineColorType ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@IsDelete", line.IsDelete);
+                                        lineCmd.ExecuteNonQuery();
+                                    }
+                                    srNo++;
+                                }
+                            }
+
+                            using (SqlCommand recalcCmd = new SqlCommand("USP_TRN_RoughInward_RecalcTotals", con, tran))
+                            {
+                                recalcCmd.CommandType = CommandType.StoredProcedure;
+                                recalcCmd.Parameters.AddWithValue("@InwardID", inwardId);
+                                recalcCmd.ExecuteNonQuery();
+                            }
+
+                            tran.Commit();
+                        }
+                        catch
+                        {
+                            tran.Rollback();
+                            throw;
+                        }
+                    }
+                }
+
+                if (isSuccess && string.IsNullOrEmpty(message))
+                {
+                    message = isUpdate ? "Rough Inward updated successfully." : "Rough Inward saved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+
+        [HttpPost]
+        public JsonResult RoughInward_Delete(int? InwardID, TRN_RoughInward model)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int targetInwardId = InwardID.HasValue && InwardID.Value > 0 ? InwardID.Value : (model != null ? model.InwardID : 0);
+                if (targetInwardId <= 0)
+                {
+                    string rawId = Request["InwardID"] ?? Request["inwardID"] ?? Request["id"];
+                    int.TryParse(rawId, out targetInwardId);
+                }
+
+                if (targetInwardId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid Inward ID specified for deletion." }, JsonRequestBehavior.AllowGet);
+                }
+
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                List<Dictionary<string, object>> deleteRows = DbHelper.ExecuteReaderAsList("USP_TRN_RoughInward_Delete",
+                    new SqlParameter("@InwardID", InwardID),
+                    new SqlParameter("@ModifiedBy", currentUserId));
+
+               
+               
+                if (!isSuccess && string.IsNullOrWhiteSpace(message))
+                {
+                    message = "Cannot delete Rough Inward.";
+                }
+            }
+
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = !string.IsNullOrWhiteSpace(message) ? message : (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message }, JsonRequestBehavior.AllowGet);
+        }
+
+        
+        
+
+        [HttpPost]
+        public JsonResult RoughInwardDetail_Delete(int? InwardDetailID, int? InwardID, TRN_RoughInward model)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int targetDetailId = InwardDetailID.HasValue && InwardDetailID.Value > 0 ? InwardDetailID.Value : 0;
+                if (targetDetailId <= 0 && InwardID.HasValue && InwardID.Value > 0)
+                {
+                    targetDetailId = InwardID.Value;
+                }
+                if (targetDetailId <= 0 && model != null)
+                {
+                    targetDetailId = model.InwardID;
+                }
+                if (targetDetailId <= 0)
+                {
+                    string rawId = Request["InwardID"] ?? Request["inwardID"] ?? Request["InwardDetailID"] ?? Request["id"] ?? Request["InwardDetailId"];
+                    int.TryParse(rawId, out targetDetailId);
+                }
+
+                if (targetDetailId <= 0)
+                {
+                    return Json(new { success = false, message = "Invalid Inward Detail ID specified for deletion." }, JsonRequestBehavior.AllowGet);
+                }
+
+
+
+                using (SqlConnection con = new SqlConnection(conn))
+                using (SqlCommand cmd = new SqlCommand("USP_TRN_RoughInwardDetail_DeleteByInwardDetail", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@InwardDetailID", targetDetailId);
+
+                    con.Open();
+                    using (SqlDataReader rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                        {
+                            object successVal = SafeGetColumn(rdr, "Success");
+                            if (successVal != null)
+                            {
+                                int sVal = 0;
+                                if (int.TryParse(successVal.ToString(), out sVal))
+                                {
+                                    isSuccess = (sVal == 1);
+                                }
+                            }
+
+                            object msgVal = SafeGetColumn(rdr, "Message");
+                            if (msgVal != null)
+                            {
+                                message = msgVal.ToString().Trim();
+                            }
+                        }
+                    }
+                    con.Close();
+                }
+
+                if (!isSuccess && string.IsNullOrWhiteSpace(message))
+                {
+                    message = "Cannot delete this lot line.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message }, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
         #region Master Book
         public ActionResult MasterBook()
         {
@@ -2144,24 +3071,12 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
                 List<object> list = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_MasterBook_Data", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.AddWithValue("@FilterType", FilterType ?? "Rough Entry");
-                        cmd.Parameters.AddWithValue("@FromDate", FromDate ?? "");
-                        cmd.Parameters.AddWithValue("@ToDate", ToDate ?? "");
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet ds = DbHelper.ExecuteDataSet("Get_MasterBook_Data",
+                    new SqlParameter("@FilterType", FilterType ?? "Rough Entry"),
+                    new SqlParameter("@FromDate", FromDate ?? ""),
+                    new SqlParameter("@ToDate", ToDate ?? ""));
 
                 // Table 0: Data Rows
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -2189,9 +3104,9 @@ namespace Slip.Controllers
                         dataType = row.Field<string>("dataType"),
                         format = row.Field<string>("format"),
                         alignment = row.Field<string>("alignment"),
-                        visible = row.Field<bool>("visible")
+                        visible = row.IsNull("visible") ? false : Convert.ToBoolean(row["visible"])
                     }).ToList();
-                }
+                } 
 
                 // Table 2: Dynamic Summary Footers
                 List<object> summary = new List<object>();
@@ -2282,6 +3197,97 @@ namespace Slip.Controllers
             }
             catch (Exception ex)
             {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public ActionResult RoughDistributionQRPrint()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult GenerateRoughDistributionQRs(List<int> distributionIDs)
+        {
+            try
+            {
+                if (distributionIDs == null || distributionIDs.Count == 0)
+                    return Json(new { success = false, message = "No distribution rows selected." });
+
+                string folder = Server.MapPath("~/Upload/RDQR/");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                List<RoughDistributionQRList> qrList = new List<RoughDistributionQRList>();
+
+                foreach (var id in distributionIDs.Distinct())
+                {
+                    var rows = DbHelper.ExecuteReaderAsList("USP_MST_RoughDistribution_GetQRData",
+                        new SqlParameter("@DistributionID", id));
+
+                    if (rows == null || rows.Count == 0) continue;
+                    var row = rows[0];
+
+                    string Val(string key) => row.ContainsKey(key) && row[key] != null && row[key] != DBNull.Value ? row[key].ToString() : "";
+
+                    string Text =
+                         Val("Receipe") + "," +
+                          Val("GrowthRate") + "," +
+                       Val("RCode") + "," +
+                       Val("LotNo") + "," +
+                       Val("RoughPcs") + "," +
+                       Val("RoughWeight") + "," +
+                       Val("FromName") + "," +
+                       Val("Rate") + "," +
+                       Val("ChallanNo") + "," +
+                       Val("MachineNo") + "," +
+                       Val("Hours") + "," +
+                       Val("Height") + "," +
+                       Val("Size") + "," +
+                       Val("SourceType") + "," +
+                       Val("SizeCode") + "," +
+                       Val("FactoryCode") + "," +
+                       Val("Grade");
+
+                    string label =
+                         Val("RCode") + "\n" +
+                         Val("RoughWeight") + " (" + Val("RoughPcs") + ")" + "\n" +
+                         Val("ColorType") + " / " + Val("SizeCode") + " / " + Val("Grade") +  "\n" +
+                         Val("Receipe")  + " (" + Val("FactoryCode") + ")";
+
+                    string qrFileName = "RD" + id + ".png";
+                    string QRPath = Path.Combine(folder, qrFileName);
+
+                    BarcodeWriter writer = new BarcodeWriter
+                    {
+                        Format = BarcodeFormat.QR_CODE,
+                        Options = new EncodingOptions
+                        {
+                            Width = 100,
+                            Height = 100,
+                            Margin = 0
+                        }
+                    };
+
+                    Bitmap qrCodeBitmap = writer.Write(Text);
+                    qrCodeBitmap.Save(QRPath, System.Drawing.Imaging.ImageFormat.Png);
+
+                    qrList.Add(new RoughDistributionQRList
+                    {
+                        QRUrl = "/Upload/RDQR/" + qrFileName,
+                        LabelText = label
+                    });
+                }
+
+                SessionFacade.RoughDistributionQRList = qrList;
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
                 return Json(new { success = false, message = ex.Message });
             }
         }

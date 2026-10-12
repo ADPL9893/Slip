@@ -26,11 +26,12 @@ namespace Slip.Controllers
 
         protected void SetModulePermissions(string controllerName, string actionName)
         {
+            bool canView = false;
             bool canAdd = false;
             bool canEdit = false;
             bool canDelete = false;
             bool canExport = false;
-
+            
             try
             {
                 if (SessionFacade.UserSession != null)
@@ -41,37 +42,23 @@ namespace Slip.Controllers
                         canEdit = true;
                         canDelete = true;
                         canExport = true;
+                        canView = true;
+
                     }
                     else
                     {
-                        using (SqlConnection con = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                                cmd.Parameters.AddWithValue("@ControllerName", controllerName);
-                                cmd.Parameters.AddWithValue("@ActionName", actionName);
+                        List<Dictionary<string, object>> permRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                            new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                            new SqlParameter("@ControllerName", controllerName),
+                            new SqlParameter("@ActionName", actionName));
 
-                                con.Open();
-                                using (SqlDataReader reader = cmd.ExecuteReader())
-                                {
-                                    if (reader.Read())
-                                    {
-                                        canAdd = reader["Add"] != DBNull.Value && Convert.ToBoolean(reader["Add"]);
-                                        canEdit = reader["Edit"] != DBNull.Value && Convert.ToBoolean(reader["Edit"]);
-                                        canDelete = reader["Delete"] != DBNull.Value && Convert.ToBoolean(reader["Delete"]);
-                                        try
-                                        {
-                                            canExport = reader["Export"] != DBNull.Value && Convert.ToBoolean(reader["Export"]);
-                                        }
-                                        catch
-                                        {
-                                            canExport = canAdd;
-                                        }
-                                    }
-                                }
-                            }
+                        if (permRows.Count > 0)
+                        {
+                            var row = permRows[0];
+                            canAdd = row["Add"] != null && Convert.ToBoolean(row["Add"]);
+                            canEdit = row["Edit"] != null && Convert.ToBoolean(row["Edit"]);
+                            canDelete = row["Delete"] != null && Convert.ToBoolean(row["Delete"]);
+                            canExport = row.ContainsKey("Export") && row["Export"] != null ? Convert.ToBoolean(row["Export"]) : canAdd;
                         }
                     }
                 }
@@ -84,6 +71,8 @@ namespace Slip.Controllers
             ViewBag.CanAdd = canAdd;
             ViewBag.CanEdit = canEdit;
             ViewBag.CanDelete = canDelete;
+            ViewBag.CanView = canView;
+            ViewBag.canExport = canExport;
         }
     }
 }

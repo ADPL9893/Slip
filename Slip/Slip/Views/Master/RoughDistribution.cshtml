@@ -1,1048 +1,8 @@
 @{
     ViewBag.Title = "Rough Distribution";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
 }
 
-<style>
-    /* ==========================================================================
-       Rough Distribution - Distinct Mid-Tone Theming & Clean SaaS Styling
-       ========================================================================== */
-    @@keyframes fadeInUpSmooth {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @@keyframes dropSlideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-6px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .rough-dist-page {
-        padding: 0 !important;
-        margin-top: 0 !important;
-        margin-bottom: 0 !important;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-
-    /* Staggered Card Entrance Animations */
-    .rd-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
-    .rd-card-specs { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
-    .kpi-container { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
-    .rd-card-entry { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both; }
-    .grid-container-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
-
-    /* Page Header Top Card */
-    .rd-header-card {
-        background: #f1f5f9 !important;
-        border-radius: 12px !important;
-        padding: 12px 18px !important;
-        margin-bottom: 10px !important;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
-        border: 1px solid #cbd5e1 !important;
-        border-left: 5px solid #0284c7 !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        flex-wrap: wrap !important;
-        gap: 12px !important;
-        transition: all 0.25s ease !important;
-    }
-    .rd-header-card:hover {
-        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08) !important;
-        border-color: #94a3b8 !important;
-        border-left-color: #0369a1 !important;
-    }
-
-    .rd-header-left {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .rd-header-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
-        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .rd-header-card:hover .rd-header-icon {
-        transform: scale(1.08) rotate(4deg);
-    }
-
-    .rd-header-title {
-        font-size: 18px !important;
-        font-weight: 700 !important;
-        color: #0f172a !important;
-        margin: 0 !important;
-        line-height: 1.2 !important;
-        letter-spacing: -0.2px;
-    }
-
-    .rd-breadcrumb {
-        font-size: 11.5px;
-        color: #64748b;
-        margin-bottom: 3px;
-        font-weight: 500;
-    }
-    .rd-breadcrumb a {
-        color: #0284c7;
-        text-decoration: none;
-        transition: color 0.15s ease;
-        font-weight: 500;
-    }
-    .rd-breadcrumb a:hover {
-        color: #0369a1;
-        text-decoration: underline;
-    }
-
-    .rd-header-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .btn-rd-save-main {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-        color: #ffffff !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 9px 22px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28) !important;
-        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        cursor: pointer !important;
-    }
-    .btn-rd-save-main:hover:not(:disabled) {
-        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.40) !important;
-    }
-    .btn-rd-save-main:active:not(:disabled) {
-        transform: translateY(0) scale(0.98) !important;
-    }
-    .btn-rd-save-main:disabled {
-        opacity: 0.55 !important;
-        cursor: not-allowed !important;
-        transform: none !important;
-        box-shadow: none !important;
-        background: #94a3b8 !important;
-    }
-
-    /* Base Section Card Container */
-    .rd-card {
-        border-radius: 12px !important;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
-        margin-bottom: 14px !important;
-        overflow: visible !important;
-        position: relative !important;
-        clear: both !important;
-        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
-    }
-    .rd-card::after,
-    .rd-card::before,
-    .rd-card-body::after,
-    .rd-card-body::before {
-        content: " " !important;
-        display: table !important;
-        clear: both !important;
-    }
-    .rd-card:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
-    }
-
-    .rd-card-header {
-        padding: 12px 18px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        border-top-left-radius: 11px !important;
-        border-top-right-radius: 11px !important;
-    }
-
-    .rd-card-title {
-        font-size: 13.5px !important;
-        font-weight: 700 !important;
-        margin: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-    }
-
-    .rd-card-body {
-        padding: 18px 18px 14px !important;
-        background: transparent !important;
-        overflow: visible !important;
-        position: relative !important;
-        clear: both !important;
-    }
-
-    .rd-form-group {
-        margin-bottom: 14px !important;
-        position: relative !important;
-        overflow: visible !important;
-    }
-
-    .rd-label {
-        font-size: 12px !important;
-        font-weight: 600 !important;
-        margin-bottom: 5px !important;
-        display: block !important;
-    }
-    .rd-label .req {
-        color: #ef4444 !important;
-        margin-left: 2px !important;
-        font-weight: 700;
-    }
-    .rd-label .helper-note {
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        margin-left: 4px !important;
-    }
-
-    .rd-input {
-        width: 100% !important;
-        height: 38px !important;
-        padding: 6px 12px !important;
-        font-size: 12.5px !important;
-        color: #0f172a !important;
-        border-radius: 8px !important;
-        transition: all 0.2s ease !important;
-        outline: none !important;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-    }
-
-    .rd-input-group {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .rd-range-sep {
-        color: #64748b;
-        font-weight: bold;
-    }
-
-    /* ==========================================================================
-       1. CARD 1: SELECT JANGAD & LOT SPECS (Mid-Tone Soft Ice Blue Theme)
-       ========================================================================== */
-    .rd-card-specs {
-        z-index: 40 !important;
-        background: #e0f2fe !important;
-        border: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-specs:hover {
-        border-color: #38bdf8 !important;
-    }
-    .rd-card-specs .rd-card-header {
-        background: #bae6fd !important;
-        border-bottom: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-specs .rd-card-title {
-        color: #0369a1 !important;
-    }
-    .rd-card-specs .rd-label {
-        color: #0c4a6e !important;
-    }
-    .rd-card-specs .rd-input {
-        background-color: #ffffff !important;
-        border: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-specs .rd-input:focus {
-        border-color: #0284c7 !important;
-        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.20) !important;
-        background-color: #ffffff !important;
-    }
-    .rd-card-specs .rd-master-input,
-    .rd-card-specs .rd-input[readonly],
-    .rd-card-specs .rd-input[disabled] {
-        background: #bae6fd !important;
-        background-color: #bae6fd !important;
-        border: 1.5px solid #7dd3fc !important;
-        color: #0c4a6e !important;
-        font-weight: 700 !important;
-        cursor: not-allowed !important;
-    }
-    .rd-card-specs .chosen-container-single .chosen-single {
-        background: #ffffff !important;
-        border: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-specs .chosen-disabled .chosen-single {
-        background: #bae6fd !important;
-        background-color: #bae6fd !important;
-        border: 1.5px solid #7dd3fc !important;
-    }
-
-
-
-    /* ==========================================================================
-       2. CARD 2: ADD NEW DISTRIBUTION ENTRY (Matching Soft Ice Blue Theme)
-       ========================================================================== */
-    .rd-card-entry {
-        z-index: 20 !important;
-        background: #e0f2fe !important;
-        border: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-entry:hover {
-        border-color: #38bdf8 !important;
-    }
-    .rd-card-entry .rd-card-header {
-        background: #bae6fd !important;
-        border-bottom: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-entry .rd-card-title {
-        color: #0369a1 !important;
-    }
-    .rd-card-entry .rd-label {
-        color: #0c4a6e !important;
-    }
-    .rd-card-entry .rd-input {
-        background-color: #ffffff !important;
-        border: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-entry .rd-input:focus {
-        border-color: #0284c7 !important;
-        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.20) !important;
-        background-color: #ffffff !important;
-    }
-    .rd-card-entry .rd-master-input,
-    .rd-card-entry .rd-input[readonly],
-    .rd-card-entry .rd-input[disabled] {
-        background: #bae6fd !important;
-        background-color: #bae6fd !important;
-        border: 1.5px solid #7dd3fc !important;
-        color: #0c4a6e !important;
-        font-weight: 700 !important;
-        cursor: not-allowed !important;
-    }
-    .rd-card-entry .chosen-container-single .chosen-single {
-        background: #ffffff !important;
-        border: 1.5px solid #7dd3fc !important;
-    }
-    .rd-card-entry .btn-rd-add {
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important; /* Premium Dark Blue */
-        color: #ffffff !important;
-        border: none !important;
-        border-radius: 8px !important;
-        height: 38px !important;
-        padding: 0 14px !important;
-        font-size: 12.5px !important;
-        font-weight: 600 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 6px !important;
-        box-shadow: 0 4px 12px rgba(29, 78, 216, 0.32) !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        cursor: pointer !important;
-        width: 100% !important;
-    }
-    .rd-card-entry .btn-rd-add:hover {
-        background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%) !important;
-        box-shadow: 0 6px 18px rgba(29, 78, 216, 0.45) !important;
-        transform: translateY(-2px) !important;
-    }
-    .rd-card-entry .btn-rd-clear {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        color: #475569 !important;
-        border: 1.5px solid #94a3b8 !important;
-        border-radius: 8px !important;
-        height: 38px !important;
-        padding: 0 10px !important;
-        font-size: 12.5px !important;
-        font-weight: 600 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 5px !important;
-        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        cursor: pointer !important;
-        width: 100% !important;
-    }
-    .rd-card-entry .btn-rd-clear:hover {
-        background: #f1f5f9 !important;
-        background-color: #f1f5f9 !important;
-        border-color: #64748b !important;
-        color: #0f172a !important;
-        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12) !important;
-        transform: translateY(-2px) !important;
-    }
-
-    /* Highlight MIX */
-    .rd-input.highlight-mix {
-        background-color: #fffbeb !important;
-        border-color: #f59e0b !important;
-        color: #92400e !important;
-        font-weight: 600 !important;
-    }
-
-    /* ==========================================================================
-       3. CARD 3: DISTRIBUTION ALLOCATIONS GRID (Matching Soft Ice Blue Theme)
-       ========================================================================== */
-    .grid-container-card {
-        background: #e0f2fe !important;
-        border-radius: 12px !important;
-        padding: 16px !important;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
-        border: 1.5px solid #7dd3fc !important;
-        z-index: 10 !important;
-        position: relative !important;
-        transition: box-shadow 0.25s ease !important;
-    }
-    .grid-container-card:hover {
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
-    }
-    .grid-container-card .rd-card-title {
-        color: #0369a1 !important;
-    }
-
-    #rdGridContainer {
-        width: 100% !important;
-    }
-
-    .grid-action-btn-del {
-        color: #ef4444 !important;
-        background: #fee2e2 !important;
-        border: none !important;
-        width: 30px !important;
-        height: 30px !important;
-        border-radius: 6px !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        cursor: pointer !important;
-        transition: all 0.2s ease !important;
-    }
-    .grid-action-btn-del:hover {
-        background: #ef4444 !important;
-        color: #ffffff !important;
-        transform: scale(1.08) translateY(-1px) !important;
-    }
-
-    .staged-row {
-        background-color: #eafaf1 !important;
-    }
-
-    /* ==========================================================================
-       KPI / Adjustment Metric Cards (CLEAN NEUTRAL WHITE BACKGROUNDS - NO TINTS)
-       ========================================================================== */
-    .kpi-container {
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 12px !important;
-        margin-bottom: 14px !important;
-        z-index: 30 !important;
-        position: relative !important;
-    }
-
-    .rd-btn-action-row {
-        display: flex !important;
-        gap: 8px !important;
-        align-items: center !important;
-        width: 100% !important;
-    }
-    .rd-btn-action-row .btn-rd-add {
-        flex: 3 !important;
-    }
-    .rd-btn-action-row .btn-rd-clear {
-        flex: 2 !important;
-    }
-
-    /* Grid Container & Table Styling */
-    .uigrid3 {
-        width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
-    #rdGridContainer {
-        width: 100% !important;
-        min-height: 280px !important;
-    }
-
-    .kpi-box {
-        background: #ffffff !important;
-        background-color: #ffffff !important;
-        border: 1.5px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-        padding: 15px 18px !important;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        position: relative;
-        overflow: hidden;
-        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
-        cursor: default;
-    }
-    .kpi-box:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08) !important;
-    }
-
-    .kpi-box::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 5px;
-        height: 100%;
-    }
-
-    /* Clean White backgrounds for all 4 KPI boxes (Left Border Accents only) */
-    .kpi-box.kpi-original { background: #ffffff !important; background-color: #ffffff !important; border-color: #cbd5e1 !important; }
-    .kpi-box.kpi-original::before { background: #0284c7; }
-
-    .kpi-box.kpi-distributed { background: #ffffff !important; background-color: #ffffff !important; border-color: #cbd5e1 !important; }
-    .kpi-box.kpi-distributed::before { background: #8b5cf6; }
-
-    .kpi-box.kpi-adj-pcs { background: #ffffff !important; background-color: #ffffff !important; border-color: #cbd5e1 !important; }
-    .kpi-box.kpi-adj-pcs::before { background: #f59e0b; }
-
-    .kpi-box.kpi-adj-wt { background: #ffffff !important; background-color: #ffffff !important; border-color: #cbd5e1 !important; }
-    .kpi-box.kpi-adj-wt::before { background: #10b981; }
-
-    .kpi-box.status-match { background: #ffffff !important; background-color: #ffffff !important; border-color: #86efac !important; }
-    .kpi-box.status-match .kpi-value { color: #065f46 !important; }
-
-    .kpi-box.status-over { background: #ffffff !important; background-color: #ffffff !important; border-color: #fca5a5 !important; }
-    .kpi-box.status-over .kpi-value { color: #991b1b !important; }
-
-    .kpi-icon-wrap {
-        width: 46px;
-        height: 46px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 19px;
-        flex-shrink: 0;
-        box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
-        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .kpi-box:hover .kpi-icon-wrap {
-        transform: scale(1.08) rotate(4deg);
-    }
-
-    .kpi-original .kpi-icon-wrap { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; }
-    .kpi-distributed .kpi-icon-wrap { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: #ffffff; }
-    .kpi-adj-pcs .kpi-icon-wrap { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #ffffff; }
-    .kpi-adj-wt .kpi-icon-wrap { background: linear-gradient(135deg, #10b981 0%, #047857 100%); color: #ffffff; }
-
-    .kpi-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .kpi-label {
-        font-size: 11.5px !important;
-        font-weight: 700 !important;
-        color: #475569 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.4px !important;
-        margin-bottom: 2px !important;
-    }
-
-    .kpi-value {
-        font-size: 22px !important;
-        font-weight: 800 !important;
-        color: #0f172a !important;
-        line-height: 1.2 !important;
-    }
-
-    .kpi-sub {
-        font-size: 11.5px;
-        color: #64748b;
-        margin-top: 3px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-    }
-
-    .badge-status-pill {
-        display: inline-block;
-        padding: 3px 9px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 700;
-        line-height: 1.2;
-    }
-    .badge-pill-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-    .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-    .badge-pill-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-    .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
-
-    /* ==========================================================================
-       Chosen Dropdown Custom Styling
-       ========================================================================== */
-    .chosen-container {
-        width: 100% !important;
-        font-size: 12.5px !important;
-        position: relative !important;
-    }
-    .chosen-container.chosen-with-drop {
-        z-index: 10050 !important;
-    }
-    .chosen-container-single .chosen-single {
-        height: 38px !important;
-        line-height: 36px !important;
-        border-radius: 8px !important;
-        font-size: 12.5px !important;
-        color: #0f172a !important;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-        padding: 0 12px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: space-between !important;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-    }
-    .chosen-container-single .chosen-single span {
-        margin-right: 20px !important;
-        line-height: 36px !important;
-        color: #0f172a !important;
-        font-weight: 500 !important;
-    }
-    .chosen-container-single .chosen-single div {
-        top: 0 !important;
-        right: 0 !important;
-        height: 100% !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        width: 28px !important;
-    }
-    .chosen-container-single .chosen-single div b {
-        background-position: 0 10px !important;
-    }
-    .chosen-container-active.chosen-with-drop .chosen-single {
-        border-color: #0284c7 !important;
-        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18) !important;
-    }
-
-    .chosen-container .chosen-drop {
-        border-radius: 8px !important;
-        border: 1px solid #94a3b8 !important;
-        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18) !important;
-        font-size: 12.5px !important;
-        z-index: 10050 !important;
-        background: #ffffff !important;
-        position: absolute !important;
-        top: 100% !important;
-        left: -9999px !important;
-        min-width: 100% !important;
-        margin-top: 3px !important;
-        padding: 4px 0 !important;
-        display: block !important;
-    }
-    .chosen-container.chosen-with-drop .chosen-drop {
-        left: 0 !important;
-        right: 0 !important;
-        animation: dropSlideDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    }
-    .chosen-container .chosen-results {
-        max-height: 240px !important;
-        overflow-y: auto !important;
-        padding: 4px !important;
-        margin: 0 !important;
-    }
-    .chosen-container .chosen-results li {
-        padding: 8px 12px !important;
-        font-size: 12.5px !important;
-        color: #1e293b !important;
-        border-radius: 6px !important;
-        margin-bottom: 2px !important;
-        line-height: 1.4 !important;
-        display: none;
-        transition: background-color 0.12s ease !important;
-    }
-    .chosen-container .chosen-results li.active-result {
-        display: list-item !important;
-        cursor: pointer !important;
-    }
-    .chosen-container .chosen-results li.highlighted {
-        background: #0284c7 !important;
-        color: #ffffff !important;
-    }
-    .chosen-container .chosen-results li.no-results {
-        display: list-item !important;
-        background: #f8fafc !important;
-        color: #64748b !important;
-        font-style: italic !important;
-    }
-    .chosen-container .chosen-search {
-        padding: 6px 8px !important;
-        position: relative !important;
-        z-index: 10051 !important;
-    }
-    .chosen-container .chosen-search input[type="text"] {
-        height: 34px !important;
-        line-height: 34px !important;
-        border-radius: 6px !important;
-        border: 1px solid #cbd5e1 !important;
-        font-size: 12.5px !important;
-        padding: 0 10px 0 26px !important;
-        color: #0f172a !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    .chosen-disabled {
-        opacity: 1 !important;
-        cursor: not-allowed !important;
-    }
-    .chosen-disabled .chosen-single {
-        box-shadow: none !important;
-        cursor: not-allowed !important;
-        opacity: 1 !important;
-    }
-    .chosen-disabled .chosen-single span {
-        color: #0f172a !important;
-        -webkit-text-fill-color: #0f172a !important;
-        font-weight: 600 !important;
-        opacity: 1 !important;
-    }
-    .chosen-disabled .chosen-single div b {
-        opacity: 0.5 !important;
-    }
-
-    /* Dynamic Elevate on Open Dropdown */
-    .rd-card:focus-within,
-    .rd-card.chosen-open-card {
-        z-index: 10000 !important;
-    }
-    .rd-form-group:focus-within,
-    .rd-form-group.chosen-open-group {
-        z-index: 10050 !important;
-    }
-
-    /* Delete Confirmation Modal */
-    .delete-dialog-content {
-        text-align: center;
-        padding: 20px 10px 10px;
-    }
-    .delete-warning-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 50%;
-        background: #fef2f2;
-        color: #ef4444;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 26px;
-        margin-bottom: 12px;
-    }
-    .delete-dialog-title {
-        font-size: 17px;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0 0 6px 0;
-    }
-    .delete-dialog-text {
-        font-size: 13px;
-        color: #64748b;
-        margin: 0;
-    }
-
-    .modal-header-brand {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .modal-header-title,
-    #ConfirmDeleteModal .modal-header-title,
-    #ConfirmDeleteModal .modal-header h4,
-    #ConfirmDeleteModal h4 {
-        font-size: 15px !important;
-        font-weight: 700 !important;
-        color: #ffffff !important; /* Crisp High-Contrast Pure White */
-        margin: 0 !important;
-        letter-spacing: 0.25px !important;
-        line-height: 1.3 !important;
-    }
-    .modal-close-btn,
-    #ConfirmDeleteModal .close,
-    #ConfirmDeleteModal .modal-close-btn {
-        background: transparent !important;
-        border: none !important;
-        font-size: 24px !important;
-        font-weight: 300 !important;
-        color: #cbd5e1 !important;
-        cursor: pointer !important;
-        opacity: 0.85 !important;
-        transition: all 0.2s ease !important;
-        line-height: 1 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        text-shadow: none !important;
-    }
-    .modal-close-btn:hover,
-    #ConfirmDeleteModal .close:hover,
-    #ConfirmDeleteModal .modal-close-btn:hover {
-        color: #ffffff !important;
-        opacity: 1 !important;
-        transform: scale(1.15) !important;
-    }
-
-    .btn-modal-action {
-        border-radius: 8px;
-        padding: 7px 16px;
-        font-size: 12.5px;
-        font-weight: 600;
-        border: none;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s ease;
-    }
-    .btn-modal-action:hover {
-        transform: translateY(-2px);
-    }
-    .btn-modal-reset {
-        background: #f1f5f9;
-        color: #475569;
-    }
-    .btn-modal-reset:hover {
-        background: #e2e8f0;
-    }
-    .btn-modal-delete {
-        background: #ef4444;
-        color: #ffffff;
-    }
-    .btn-modal-delete:hover {
-        background: #dc2626;
-    }
-
-    /* Quick helper tags */
-    .quick-tag {
-        font-size: 10.5px;
-        color: #047857;
-        background: #daf2e3;
-        padding: 2px 7px;
-        border-radius: 4px;
-        cursor: pointer;
-        border: 1px solid #b2e6c7;
-        font-weight: 600;
-        margin-left: 6px;
-        transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-        display: inline-block;
-    }
-    .quick-tag:hover {
-        background: #c3ebd2;
-        color: #064e3b;
-        transform: translateY(-2px) scale(1.05);
-    }
-
-    /* Switch toggle */
-    .active-toggle-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        height: 36px;
-    }
-
-    /* R.Code Priority Dynamic Color Badges */
-    .rcode-regular {
-        color: #0284c7 !important;
-        font-weight: 700;
-    }
-    .rcode-sample {
-        color: #ea580c !important;
-        font-weight: 700;
-        background: #ffedd5;
-        padding: 2px 8px;
-        border-radius: 4px;
-        border: 1px solid #fed7aa;
-        display: inline-block;
-    }
-    .rcode-argent, .rcode-urgent {
-        color: #dc2626 !important;
-        font-weight: 700;
-        background: #fee2e2;
-        padding: 2px 8px;
-        border-radius: 4px;
-        border: 1px solid #fecaca;
-        display: inline-block;
-    }
-
-    /* ==========================================================================
-       Responsive Media Queries for Mobile & Tablet
-       ========================================================================== */
-    @@media (max-width: 991px) {
-        .kpi-container {
-            grid-template-columns: repeat(2, 1fr) !important;
-            gap: 10px !important;
-        }
-    }
-
-    @@media (max-width: 768px) {
-        .rough-dist-page {
-            padding: 0 0 20px 0 !important;
-        }
-
-        .rd-header-card {
-            flex-direction: column !important;
-            align-items: stretch !important;
-            padding: 12px 14px !important;
-            gap: 10px !important;
-        }
-
-        .rd-header-left {
-            width: 100% !important;
-        }
-
-        .rd-header-actions {
-            width: 100% !important;
-        }
-
-        .btn-rd-save-main {
-            width: 100% !important;
-            justify-content: center !important;
-            padding: 11px 18px !important;
-            font-size: 13.5px !important;
-        }
-
-        .rd-card {
-            margin-bottom: 12px !important;
-        }
-
-        .rd-card-header {
-            padding: 10px 14px !important;
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 4px !important;
-        }
-
-        .rd-card-body {
-            padding: 12px 10px 6px !important;
-        }
-
-        .rd-form-group {
-            margin-bottom: 10px !important;
-        }
-
-        .rd-label.rd-action-label {
-            display: none !important;
-        }
-
-        .rd-input {
-            height: 38px !important;
-            font-size: 13px !important;
-        }
-
-        .chosen-container-single .chosen-single {
-            height: 38px !important;
-            line-height: 36px !important;
-        }
-
-        /* Display KPI Cards One by One (1 per row, stacked vertically) */
-        .kpi-container {
-            grid-template-columns: 1fr !important;
-            gap: 12px !important;
-            margin-bottom: 14px !important;
-        }
-
-        .kpi-box {
-            padding: 14px 18px !important;
-            gap: 14px !important;
-            border-radius: 12px !important;
-        }
-
-        .kpi-icon-wrap {
-            width: 46px !important;
-            height: 46px !important;
-            font-size: 19px !important;
-            border-radius: 10px !important;
-            flex-shrink: 0 !important;
-        }
-
-        .kpi-label {
-            font-size: 11.5px !important;
-            letter-spacing: 0.3px !important;
-        }
-
-        .kpi-value {
-            font-size: 20px !important;
-        }
-
-        .kpi-sub {
-            font-size: 11.5px !important;
-            margin-top: 3px !important;
-        }
-
-        .grid-container-card {
-            padding: 12px 10px !important;
-            border-radius: 10px !important;
-        }
-
-        .grid-container-card .d-flex,
-        .grid-container-card > div:first-child {
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 8px !important;
-        }
-
-        #rdGridContainer {
-            min-height: 300px !important;
-            height: 360px !important;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        .kpi-container {
-            grid-template-columns: 1fr !important;
-            gap: 10px !important;
-        }
-
-        .kpi-box {
-            padding: 12px 14px !important;
-            gap: 12px !important;
-        }
-
-        .kpi-icon-wrap {
-            width: 42px !important;
-            height: 42px !important;
-            font-size: 17px !important;
-        }
-
-        .kpi-value {
-            font-size: 19px !important;
-        }
-
-        .kpi-sub {
-            font-size: 11px !important;
-        }
-
-        .badge-status-pill {
-            padding: 3px 8px !important;
-            font-size: 10.5px !important;
-        }
-    }
-</style>
 
 <div ng-controller="RoughDistributionCtrl" class="rough-dist-page">
     <!-- Header Banner -->
@@ -1082,26 +42,38 @@
             <div class="row">
                 <!-- Primary Jangad Dropdown (Clean Jangad No only & Clean Disabled Styling) -->
                 <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="SelectedPreRoughID">
+                    <label class="rd-label" for="SelectedJangadNo">
                         Select Jangad No <span class="req">*</span>
                     </label>
-                    <select id="SelectedPreRoughID" 
-                            chosen="PreRoughDropdownList" 
-                            ng-model="SelectedPreRoughID" 
-                            ng-change="OnJangadChange()" 
-                            ng-disabled="DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0" 
+                    <select id="SelectedJangadNo"
+                            chosen="JangadDropdownList"
+                            ng-model="SelectedJangadNo"
+                            ng-change="OnJangadNoChange()"
+                            ng-disabled="DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
                             class="form-control rd-input">
                         <option value="">-- Choose Jangad No --</option>
-                        <option ng-repeat="item in PreRoughDropdownList" value="{{item.PreRoughID}}">
+                        <option ng-repeat="item in JangadDropdownList" value="{{item.JangadNo}}">
                             {{item.JangadNo}}
                         </option>
                     </select>
                 </div>
 
-                <!-- Readonly / Auto-fetched fields with Dark, Bold styling -->
+                <!-- Lot No Dropdown (populated from the selected Jangad's lots) -->
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label">R. Name</label>
-                    <input type="text" ng-model="Master.RName" class="rd-input rd-master-input" readonly placeholder="R. Name" />
+                    <label class="rd-label" for="SelectedLotNo">
+                        Select Lot No <span class="req">*</span>
+                    </label>
+                    <select id="SelectedLotNo"
+                            chosen="LotDropdownList"
+                            ng-model="SelectedPreRoughID"
+                            ng-change="OnLotNoChange()"
+                            ng-disabled="!SelectedJangadNo || DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
+                            class="form-control rd-input">
+                        <option value="">-- Choose Lot No --</option>
+                        <option ng-repeat="item in LotDropdownList" value="{{item.PreRoughID}}">
+                            {{item.RName}}
+                        </option>
+                    </select>
                 </div>
                 <div class="clearfix visible-xs"></div>
 
@@ -1110,7 +82,7 @@
                     <input type="text" ng-model="Master.RoughPcs" class="rd-input rd-master-input" readonly placeholder="0" />
                 </div>
 
-                <div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 rd-form-group">
+                <div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 rd-form-group">
                     <label class="rd-label">Rough Weight (Cts)</label>
                     <input type="text" ng-model="Master.RoughWeight" class="rd-input rd-master-input" readonly placeholder="0.000" />
                 </div>
@@ -1134,6 +106,11 @@
                 <div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 rd-form-group">
                     <label class="rd-label">Master Grad No</label>
                     <input type="text" ng-model="Master.GradNo" class="rd-input rd-master-input" ng-class="{'highlight-mix': IsMixGrade}" readonly placeholder="Grad No" />
+                </div>
+                <div class="col-lg-1 col-md-2 col-sm-3 col-xs-6 rd-form-group">
+                    <label class="rd-label">Size Code</label>
+                    <input type="text" ng-model="Master.SizeCode" class="rd-input rd-master-input" readonly placeholder="" />
+                    <input type="hidden"   id="hdnsizeCodeid" />
                 </div>
                 <div class="clearfix"></div>
             </div>
@@ -1221,21 +198,10 @@
                     <label class="rd-label" for="BranchID">
                         Branch <span class="req">*</span>
                     </label>
-                    <select id="BranchID" chosen="BranchList" class="form-control rd-input input-sm" ng-model="NewEntry.BranchID" ng-change="OnBranchChange()" ng-options="item.id as item.value for item in BranchList">
+                    <select id="BranchID" chosen="BranchList" class="form-control rd-input input-sm" ng-model="NewEntry.BranchID" ng-options="item.id as item.value for item in BranchList">
                         <option value="">-- Select Target Branch --</option>
                     </select>
                 </div>
-
-                <!-- Task 3: Dynamic R. Code Input Field (Automatic vs Manual) -->
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="EntryRCode">
-                        R. Code <span class="req">*</span>
-                        <span class="helper-note text-primary" ng-if="IsRCodeAuto">(Auto)</span>
-                        <span class="helper-note text-muted" ng-if="!IsRCodeAuto && NewEntry.BranchID">(Manual)</span>
-                    </label>
-                    <input type="text" id="EntryRCode" ng-model="NewEntry.RCode" ng-disabled="IsRCodeAuto" placeholder="{{IsRCodeAuto ? 'Auto-Generated' : 'Enter R. Code'}}" class="rd-input" ng-class="{'rd-master-input': IsRCodeAuto}" />
-                </div>
-                <div class="clearfix visible-xs"></div>
 
                 <!-- Rough Pcs -->
                 <div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 rd-form-group">
@@ -1484,14 +450,22 @@
         $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
 
         // URL / Parameter ID
-        $scope.InitPreRoughID = parseInt('@ViewBag.PreRoughID') || 0;
+        function getQueryParam(name) {
+            try {
+                var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+                return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+            } catch (e) {
+                return null;
+            }
+        }
+        var urlId = parseInt(getQueryParam('id')) || 0;
+        $scope.InitPreRoughID = parseInt('@ViewBag.PreRoughID') || urlId || 0;
         $scope.SelectedPreRoughID = $scope.InitPreRoughID > 0 ? $scope.InitPreRoughID.toString() : '';
 
         // Master Lot Details
         $scope.Master = {
             PreRoughID: 0,
             JangadNo: '',
-            RName: '',
             RoughPcs: 0,
             RoughWeight: 0,
             Rate: 0,
@@ -1503,12 +477,11 @@
         // Condition Flag: Is MIX grade?
         $scope.IsMixGrade = false;
 
-        // R.Code Auto / Manual State from MST_VoucherDetails
-        $scope.IsRCodeAuto = false;
-        $scope.RCodeConfig = null;
-
         // Dropdown Lists
-        $scope.PreRoughDropdownList = [];
+        $scope.PreRoughDropdownList = []; // Full flat list: one entry per lot line (Jangad + Lot combined)
+        $scope.JangadDropdownList = [];   // Distinct Jangad Nos derived from PreRoughDropdownList
+        $scope.LotDropdownList = [];      // Lots belonging to the selected Jangad No
+        $scope.SelectedJangadNo = '';
         $scope.BranchList = [];
         $scope.GradeList = ['A', 'B', 'C', 'D', 'MIX'];
 
@@ -1531,13 +504,12 @@
         $scope.AdjustPcs = 0;
         $scope.AdjustWeight = 0;
 
-        // Form Model for New Entry (Kept clean / blank by default with RCode)
+        // Form Model for New Entry
         $scope.NewEntry = {
             DistributionID: 0,
             PreRoughID: 0,
             BranchID: '',
             BranchName: '',
-            RCode: '',
             RoughPcs: null,
             RoughWeight: null,
             Rate: null,
@@ -1551,114 +523,6 @@
 
         $scope.IsLoading = false;
         $scope.IsSaving = false;
-        $scope.BasePreviewRCode = '';
-
-        // Dynamic In-Memory Sequence Calculation for Automatic R.Code
-        $scope.EvaluateNextRCode = function (branchId, basePreviewRCode) {
-            if (!basePreviewRCode || typeof basePreviewRCode !== 'string') return basePreviewRCode || '';
-
-            // Collect all existing RCodes in the current lot for this branch (Staged + Saved)
-            var currentGridRows = ($scope.SavedList || []).concat($scope.StagedList || []);
-
-            // Pattern to separate prefix and trailing number (e.g. "BRN-26-1" -> prefix "BRN-26-", number "1")
-            var match = basePreviewRCode.trim().match(/^(.*?)(\d+)$/);
-            if (!match) {
-                var branchStagedCount = ($scope.StagedList || []).filter(function (x) {
-                    return parseInt(x.BranchID || 0) === branchId;
-                }).length;
-                return branchStagedCount > 0 ? (basePreviewRCode + '-' + (branchStagedCount + 1)) : basePreviewRCode;
-            }
-
-            var prefix = match[1];
-            var numStr = match[2];
-            var minDigits = numStr.length;
-            var baseNum = parseInt(numStr, 10);
-
-            // Find all used numbers in staged and saved lists that match this prefix for this branch
-            var usedNums = [];
-            angular.forEach(currentGridRows, function (row) {
-                if (row && row.RCode && (parseInt(row.BranchID || 0) === branchId)) {
-                    var rMatch = (row.RCode || '').trim().match(/^(.*?)(\d+)$/);
-                    if (rMatch && rMatch[1].toLowerCase() === prefix.toLowerCase()) {
-                        var usedN = parseInt(rMatch[2], 10);
-                        if (!isNaN(usedN)) {
-                            usedNums.push(usedN);
-                        }
-                    }
-                }
-            });
-
-            var targetNum = baseNum;
-            if (usedNums.length > 0) {
-                var maxUsed = Math.max.apply(null, usedNums);
-                if (maxUsed >= baseNum) {
-                    targetNum = maxUsed + 1;
-                }
-            }
-
-            // Zero-pad to preserve original formatting width (e.g. 001 -> 002)
-            function padNumber(n, width) {
-                var s = n + '';
-                while (s.length < width) {
-                    s = '0' + s;
-                }
-                return s;
-            }
-
-            return prefix + padNumber(targetNum, minDigits);
-        };
-
-        // Fetch R.Code Configuration on Branch Selection
-        $scope.OnBranchChange = function () {
-            var branchId = parseInt($scope.NewEntry.BranchID || 0);
-            if (!branchId || branchId <= 0) {
-                $scope.IsRCodeAuto = false;
-                $scope.RCodeConfig = null;
-                $scope.BasePreviewRCode = '';
-                $scope.NewEntry.RCode = '';
-                return;
-            }
-
-            // Call Get_RoughCodeConfig to fetch configuration for this Branch & Module
-            $http.post('@Url.Action("Get_RoughCodeConfig", "Master")', {
-                BranchID: branchId,
-                VoucherType: 'Rough Distribution',
-                ActionType: 'GET_CONFIG'
-            }).then(function (res) {
-                if (res.data && res.data.success && res.data.Config) {
-                    $scope.RCodeConfig = res.data.Config;
-                    var numMethod = ($scope.RCodeConfig.NumericMethod || '').trim();
-                    if (numMethod.toLowerCase() === 'automatic') {
-                        $scope.IsRCodeAuto = true;
-                        // Safe preview of next expected R.Code without incrementing counter
-                        $http.post('@Url.Action("Get_RoughCodeConfig", "Master")', {
-                            BranchID: branchId,
-                            VoucherType: 'Rough Distribution',
-                            ActionType: 'PREVIEW_AUTO'
-                        }).then(function (genRes) {
-                            if (genRes.data && genRes.data.success && genRes.data.GeneratedRCode) {
-                                $scope.BasePreviewRCode = genRes.data.GeneratedRCode;
-                                $scope.NewEntry.RCode = $scope.EvaluateNextRCode(branchId, $scope.BasePreviewRCode);
-                            }
-                        });
-                    } else {
-                        $scope.IsRCodeAuto = false;
-                        $scope.BasePreviewRCode = '';
-                        $scope.NewEntry.RCode = '';
-                    }
-                } else {
-                    $scope.IsRCodeAuto = false;
-                    $scope.RCodeConfig = null;
-                    $scope.BasePreviewRCode = '';
-                    $scope.NewEntry.RCode = '';
-                }
-            }, function () {
-                $scope.IsRCodeAuto = false;
-                $scope.RCodeConfig = null;
-                $scope.BasePreviewRCode = '';
-                $scope.NewEntry.RCode = '';
-            });
-        };
 
         // Reactive Changes Counter & Pending Changes Detection (For Save Button State)
         $scope.GetChangesCount = function () {
@@ -1687,7 +551,7 @@
             $scope.IsLoading = true;
 
             // Fetch Pre-Rough Lots for Dropdown
-            var p1 = $http.get('@Url.Action("Getdata_R_Rough_Add", "Master")').then(function (res) {
+            var p1 = $http.get('@Url.Action("GetRoughInwardLotsForDistribution", "Master")').then(function (res) {
                 var list = [];
                 if (res.data && res.data.DIARoughList) {
                     angular.forEach(res.data.DIARoughList, function (item) {
@@ -1708,33 +572,36 @@
                     });
                 }
                 $scope.PreRoughDropdownList = list;
+
+                // Build the distinct Jangad No list for the top-level dropdown
+                var seenJangad = {};
+                var jangadArr = [];
+                angular.forEach(list, function (item) {
+                    if (item.JangadNo && !seenJangad[item.JangadNo]) {
+                        seenJangad[item.JangadNo] = true;
+                        jangadArr.push({ JangadNo: item.JangadNo });
+                    }
+                });
+                $scope.JangadDropdownList = jangadArr;
+
                 $timeout(function () {
-                    $('#SelectedPreRoughID').trigger('chosen:updated');
+                    $('#SelectedJangadNo').trigger('chosen:updated');
+                    $('#SelectedLotNo').trigger('chosen:updated');
                 }, 100);
             });
 
             // Fetch Branch List from Getdata_For_DropDown (Table 5: MST_GeneralSetting WHERE MasterType = 'Branch')
-            var p2 = $http.post('@Url.Action("Getdata_For_DropDown", "Master")').then(function (res) {
+            var p2 = $http.post('@Url.Action("GetBranchdata_For_DropDown", "Master")').then(function (res) {
+                debugger
                 var bList = [];
                 if (res.data && res.data.BranchList && res.data.BranchList.length > 0) {
                     for (var i = 0; i < res.data.BranchList.length; i++) {
-                        var bId = res.data.BranchList[i]["ID"] || res.data.BranchList[i]["id"];
-                        var bVal = res.data.BranchList[i]["Value"] || res.data.BranchList[i]["value"];
+                        var bId = res.data.BranchList[i]["ID"] || res.data.BranchList[i]["ID"];
+                        var bVal = res.data.BranchList[i]["Name"] || res.data.BranchList[i]["Name"];
                         if (bId !== undefined && bId !== null) {
                             bList.push({
                                 id: parseInt(bId),
                                 value: bVal
-                            });
-                        }
-                    }
-                } else if (res.data && res.data.UserList && res.data.UserList.length > 0) {
-                    for (var j = 0; j < res.data.UserList.length; j++) {
-                        var uId = res.data.UserList[j]["UserID"] || res.data.UserList[j]["ID"] || res.data.UserList[j]["id"];
-                        var uVal = res.data.UserList[j]["UserName"] || res.data.UserList[j]["Value"] || res.data.UserList[j]["value"];
-                        if (uId !== undefined && uId !== null) {
-                            bList.push({
-                                id: parseInt(uId),
-                                value: uVal
                             });
                         }
                     }
@@ -1754,10 +621,8 @@
             $q.all([p1, p2]).then(function () {
                 $scope.IsLoading = false;
                 if ($scope.InitPreRoughID > 0) {
-                    $scope.SelectedPreRoughID = $scope.InitPreRoughID.toString();
-                    $timeout(function () {
-                        $('#SelectedPreRoughID').val($scope.SelectedPreRoughID).trigger('chosen:updated');
-                    }, 150);
+                    // LoadPreRoughDetails injects the lot into the dropdown lists if the
+                    // balance-filtered fetch omitted it, then syncs the Jangad/Lot selection itself.
                     $scope.LoadPreRoughDetails($scope.InitPreRoughID);
                 }
             });
@@ -1789,24 +654,49 @@
             }
 
             $scope.IsLoading = true;
-            $http.get('@Url.Action("GetPreRoughDetails", "Master")?id=' + preRoughId).then(function (res) {
+            $http.get('@Url.Action("GetRoughInwardLotDetails", "Master")?id=' + preRoughId).then(function (res) {
                 $scope.IsLoading = false;
                 if (res.data && res.data.success) {
+                    debugger
                     var m = res.data.MasterDetails || {};
                     $scope.Master = {
                         PreRoughID: parseInt(m.PreRoughID || preRoughId),
                         JangadNo: m.JangadNo || '',
-                        RName: m.RName || '',
                         RoughPcs: parseInt(m.RoughPcs || 0),
                         RoughWeight: parseFloat(m.RoughWeight || 0),
                         Rate: parseFloat(m.Rate || 0),
                         GradNo: m.GradNo || '',
                         FromHeight: m.FromHeight !== null && m.FromHeight !== undefined ? parseFloat(m.FromHeight) : null,
-                        ToHeight: m.ToHeight !== null && m.ToHeight !== undefined ? parseFloat(m.ToHeight) : null
+                        ToHeight: m.ToHeight !== null && m.ToHeight !== undefined ? parseFloat(m.ToHeight) : null,
+                        SizeCode: m.SizeCode !== null && m.FromHeight !== undefined ? m.SizeCode : null,
+                        SizeCodeId: m.SizeCodeId !== null && m.SizeCodeId !== undefined ? m.SizeCodeId: null
+
                     };
 
                     // Check if GradNo is 'MIX' (case-insensitive)
                     $scope.IsMixGrade = ($scope.Master.GradNo || '').trim().toUpperCase() === 'MIX';
+
+                    // The dropdown source only lists lots with remaining balance, so a lot that is
+                    // already fully (or partially) distributed - e.g. opened via the List page's
+                    // View/Edit link - may be missing from it. Inject it so the Jangad/Lot dropdowns
+                    // can still resolve and display the current selection.
+                    var existsInDropdown = $scope.PreRoughDropdownList.some(function (x) { return x.PreRoughID === $scope.Master.PreRoughID; });
+                    if (!existsInDropdown) {
+                        $scope.PreRoughDropdownList.push({
+                            PreRoughID: $scope.Master.PreRoughID,
+                            JangadNo: $scope.Master.JangadNo || ('Lot #' + $scope.Master.PreRoughID),
+                            RName: m.RName || '',
+                            RoughPcs: $scope.Master.RoughPcs,
+                            RoughWeight: $scope.Master.RoughWeight,
+                            GradNo: $scope.Master.GradNo,
+                            Rate: $scope.Master.Rate,
+                            FromHeight: $scope.Master.FromHeight,
+                            ToHeight: $scope.Master.ToHeight
+                        });
+                        if (!$scope.JangadDropdownList.some(function (j) { return j.JangadNo === $scope.Master.JangadNo; })) {
+                            $scope.JangadDropdownList.push({ JangadNo: $scope.Master.JangadNo });
+                        }
+                    }
 
                     // Parse Child List from DB & Resolve Accurate Branch Name, BranchID, and RCode
                     var cList = [];
@@ -1850,6 +740,7 @@
                                 Remarks: c.Remarks || '',
                                 Priority: (c.Priority || c.priority || 'REGULAR').toUpperCase(),
                                 IsActive: c.IsActive === true || c.IsActive === 'True' || c.IsActive === '1' || c.IsActive === 1,
+                                IsReceived: c.IsReceived === true || c.IsReceived === 'True' || c.IsReceived === '1' || c.IsReceived === 1,
                                 IsStaged: false,
                                 IsSaved: true
                             });
@@ -1868,8 +759,7 @@
 
                     $timeout(function () {
                         if ($scope.Master && $scope.Master.PreRoughID) {
-                            $scope.SelectedPreRoughID = $scope.Master.PreRoughID.toString();
-                            $('#SelectedPreRoughID').val($scope.SelectedPreRoughID).trigger('chosen:updated');
+                            $scope.SyncJangadLotSelection($scope.Master.PreRoughID);
                         }
                         $('#EntryGradNo').trigger('chosen:updated');
                     }, 200);
@@ -1882,8 +772,17 @@
             });
         };
 
-        // Jangad selection change handler
-        $scope.OnJangadChange = function () {
+        // Jangad No selection change handler: rebuilds the Lot No dropdown for the chosen Jangad
+        $scope.OnJangadNoChange = function () {
+            $scope.SelectedPreRoughID = '';
+            $scope.LotDropdownList = $scope.SelectedJangadNo
+                ? $scope.PreRoughDropdownList.filter(function (item) { return item.JangadNo === $scope.SelectedJangadNo; })
+                : [];
+            $scope.ResetMaster();
+        };
+
+        // Lot No selection change handler
+        $scope.OnLotNoChange = function () {
             if ($scope.SelectedPreRoughID) {
                 $scope.LoadPreRoughDetails(parseInt($scope.SelectedPreRoughID));
             } else {
@@ -1891,18 +790,34 @@
             }
         };
 
+        // Given a PreRoughID (lot line id), select its Jangad No + Lot No in both dropdowns
+        $scope.SyncJangadLotSelection = function (preRoughId) {
+            var match = $scope.PreRoughDropdownList.find(function (x) { return x.PreRoughID === parseInt(preRoughId); });
+            if (!match) return;
+            $scope.SelectedJangadNo = match.JangadNo;
+            $scope.LotDropdownList = $scope.PreRoughDropdownList.filter(function (item) {
+                return item.JangadNo === match.JangadNo;
+            });
+            $scope.SelectedPreRoughID = preRoughId.toString();
+            $timeout(function () {
+                $('#SelectedJangadNo').val($scope.SelectedJangadNo).trigger('chosen:updated');
+                $('#SelectedLotNo').val($scope.SelectedPreRoughID).trigger('chosen:updated');
+            }, 50);
+        };
+
         // Reset Master State
         $scope.ResetMaster = function () {
             $scope.Master = {
                 PreRoughID: 0,
                 JangadNo: '',
-                RName: '',
                 RoughPcs: 0,
                 RoughWeight: 0,
                 Rate: 0,
                 GradNo: '',
                 FromHeight: null,
-                ToHeight: null
+                ToHeight: null,
+                SizeCode: null,
+                SizeCodeId : null
             };
             $scope.IsMixGrade = false;
             $scope.SavedList = [];
@@ -1913,26 +828,21 @@
             $scope.DeletedIDs = [];
             $scope.DeletedDistributionIDs = $scope.DeletedIDs;
             $scope.HasChanges = false;
-            $scope.BasePreviewRCode = '';
             $scope.RecalculateBalances();
             $scope.ResetEntryForm();
             $scope.InitGrid();
             $timeout(function () {
-                $('#SelectedPreRoughID').trigger('chosen:updated');
+                $('#SelectedLotNo').trigger('chosen:updated');
             }, 50);
         };
 
         // Reset Entry Form Fields - KEPT COMPLETELY BLANK / CLEAN
         $scope.ResetEntryForm = function () {
-            $scope.IsRCodeAuto = false;
-            $scope.RCodeConfig = null;
-            $scope.BasePreviewRCode = '';
             $scope.NewEntry = {
                 DistributionID: 0,
                 PreRoughID: $scope.Master.PreRoughID || 0,
                 BranchID: '',
                 BranchName: '',
-                RCode: '',
                 RoughPcs: null,
                 RoughWeight: null,
                 Rate: $scope.IsMixGrade ? null : ($scope.Master.Rate || null),
@@ -1941,7 +851,9 @@
                 ToHeight: null,
                 Remarks: '',
                 Priority: 'REGULAR',
-                IsActive: true
+                IsActive: true,
+                SizeCode: null,
+                SizeCodeId: null
             };
             $timeout(function () {
                 $('#BranchID').val('').trigger('chosen:updated');
@@ -1994,7 +906,7 @@
             $scope.AdjustWeight = parseFloat((origWt - $scope.TotalDistributedWeight).toFixed(3));
 
             $timeout(function () {
-                $('#SelectedPreRoughID').trigger('chosen:updated');
+                $('#SelectedLotNo').trigger('chosen:updated');
             }, 50);
         };
 
@@ -2002,7 +914,7 @@
         $scope.AddDistributionRow = function () {
             if (!$scope.Master.PreRoughID || $scope.Master.PreRoughID <= 0) {
                 Noty("warning", "Please select a Jangad No first!");
-                $('#SelectedPreRoughID').trigger('chosen:open');
+                $('#SelectedLotNo').trigger('chosen:open');
                 return;
             }
 
@@ -2026,33 +938,8 @@
                 }
             }
 
-            // Refresh & Evaluate Dynamic Sequential R.Code if Automatic Numbering is Configured
-            if ($scope.IsRCodeAuto) {
-                $scope.NewEntry.RCode = $scope.EvaluateNextRCode(selectedBranchId, $scope.BasePreviewRCode || $scope.NewEntry.RCode);
-            }
-
-            // Task 1: R. Code Validation (Mandatory)
-            var rCode = ($scope.NewEntry.RCode || "").trim();
-            if (!rCode) {
-                Noty("error", "Please enter R. Code !");
-                $('#EntryRCode').focus();
-                return;
-            }
-
-            // Strict In-Memory Duplicate Check across all current rows (Saved + Staged)
-            var allCurrentRows = ($scope.SavedList || []).concat($scope.StagedList || []);
-            var isLocalDuplicateRCode = false;
-            for (var rc = 0; rc < allCurrentRows.length; rc++) {
-                if ((allCurrentRows[rc].RCode || "").trim().toLowerCase() === rCode.toLowerCase()) {
-                    isLocalDuplicateRCode = true;
-                    break;
-                }
-            }
-            if (isLocalDuplicateRCode) {
-                Noty("error", "R.Code '" + rCode + "' already exists in the distribution table! Each packet must have a unique R.Code.");
-                $('#EntryRCode').focus();
-                return;
-            }
+            // R.Code is no longer entered/known here - it's generated server-side
+            // (dbo.usp_GenerateRoughCode) at the moment each row is actually saved.
 
             // 2. Rough Pcs Validation (Strict Capacity Check)
             var pcs = parseInt($scope.NewEntry.RoughPcs);
@@ -2140,43 +1027,22 @@
                 return;
             }
 
-            // If manual R.Code entry, verify against database for uniqueness
-            if (!$scope.IsRCodeAuto) {
-                $scope.IsLoading = true;
-                $http.post('@Url.Action("Get_RoughCodeConfig", "Master")', {
-                    BranchID: selectedBranchId,
-                    VoucherType: 'Rough Distribution',
-                    ActionType: 'CHECK_DUPLICATE',
-                    ManualRCode: rCode
-                }).then(function (chkRes) {
-                    $scope.IsLoading = false;
-                    if (chkRes.data && chkRes.data.success && chkRes.data.IsExists) {
-                        Noty("error", "R.Code '" + rCode + "' already exists in database! Please enter a unique R.Code.");
-                        $('#EntryRCode').focus();
-                        return;
-                    }
-                    $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks);
-                }, function () {
-                    $scope.IsLoading = false;
-                    $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks);
-                });
-            } else {
-                $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks);
-            }
+            $scope.CommitAddDistributionRow(selectedBranchId, selectedBranchName, pcs, weight, rate, gradNo, fromH, toH, remarks);
         };
 
-        // Commit and add validated distribution row to staged list
-        $scope.CommitAddDistributionRow = function (selectedBranchId, selectedBranchName, rCode, pcs, weight, rate, gradNo, fromH, toH, remarks) {
+        // Commit and add validated distribution row to staged list.
+        // RCode is left blank here - it doesn't exist yet and is only
+        // generated server-side (usp_GenerateRoughCode) when actually saved.
+        $scope.CommitAddDistributionRow = function (selectedBranchId, selectedBranchName, pcs, weight, rate, gradNo, fromH, toH, remarks) {
             // Resolve Branch Name from MST_GeneralSetting
             var branchName = selectedBranchName || ('Branch #' + selectedBranchId);
 
-            // Build new staged object including RCode & Priority
             var stagedItem = {
                 DistributionID: 0,
-                PreRoughID: $scope.Master.PreRoughID,
+                InwardDetailID: $scope.Master.PreRoughID,
                 BranchID: selectedBranchId,
                 BranchName: branchName,
-                RCode: rCode,
+                RCode: '',
                 RoughPcs: pcs,
                 RoughWeight: parseFloat(weight.toFixed(3)),
                 Rate: rate,
@@ -2196,7 +1062,7 @@
             $scope.ResetEntryForm();
             $scope.InitGrid();
 
-            Noty("success", "Added " + pcs + " Pcs (" + weight.toFixed(3) + " Cts) for " + branchName + " (R.Code: " + rCode + ") to distribution table.");
+            Noty("success", "Added " + pcs + " Pcs (" + weight.toFixed(3) + " Cts) for " + branchName + " to distribution table.");
         };
 
         // Aliased function names
@@ -2276,6 +1142,11 @@
         $scope.PromptDelete = function (item) {
             if (!item) return;
 
+            if (item.IsReceived) {
+                Noty("error", "Cannot delete: this distribution has already been received.");
+                return;
+            }
+
             var check = $scope.ValidateSequentialDeletion(item);
             if (!check.isValid) {
                 Noty("error", check.message);
@@ -2341,12 +1212,6 @@
             $scope.RecalculateBalances();
             $scope.InitGrid();
 
-            // Re-evaluate current form R.Code if automatic for selected branch
-            var currentBranchId = parseInt($scope.NewEntry.BranchID || 0);
-            if (currentBranchId > 0 && $scope.IsRCodeAuto && $scope.BasePreviewRCode) {
-                $scope.NewEntry.RCode = $scope.EvaluateNextRCode(currentBranchId, $scope.BasePreviewRCode);
-            }
-
             $("#ConfirmDeleteModal").modal("hide");
             $scope.SelectedDeleteItem = null;
 
@@ -2376,7 +1241,8 @@
             $http.post('@Url.Action("SaveRoughDistribution", "Master")', {
                 list: $scope.StagedList,
                 deletedIDs: $scope.DeletedIDs,
-                Action: 'INSERT'
+                Action: 'INSERT',
+                SizeCodeID: $scope.Master.SizeCodeId
             }).then(function (res) {
                 $scope.IsSaving = false;
                 if (res.data && res.data.success) {
@@ -2384,6 +1250,18 @@
                     $scope.DeletedIDs = [];
                     $scope.StagedList = [];
                     Noty("success", res.data.message || "Distributions saved successfully!");
+
+                    // Generate + open QR codes (new tab) for the rows just inserted
+                    var newIDs = res.data.newDistributionIDs || [];
+                    if (newIDs.length > 0) {
+                        $http.post('@Url.Action("GenerateRoughDistributionQRs", "Master")', { distributionIDs: newIDs })
+                            .then(function (qrRes) {
+                                if (qrRes.data && qrRes.data.success) {
+                                    window.open('@Url.Action("RoughDistributionQRPrint", "Master")', '_blank');
+                                }
+                            });
+                    }
+
                     // Auto-Redirect to RoughDistributionList
                     $timeout(function () {
                         window.location.href = '@Url.Action("RoughDistributionList", "Master")';
@@ -2412,7 +1290,7 @@
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
                 allowColumnReordering: true,
-                columnChooser: { enabled: true, mode: 'select', title: 'Column Chooser' },
+                columnChooser: { enabled: false, mode: 'select', title: 'Column Chooser' },
                 columnFixing: { enabled: true },
                 hoverStateEnabled: true,
                 rowAlternationEnabled: true,
@@ -2428,16 +1306,20 @@
                 paging: { enabled: false },
                 pager: { visible: false },
                 searchPanel: {
-                    visible: true,
+                    visible: false,
                     width: isMobile ? 180 : 260,
                     placeholder: 'Search distribution...',
                     highlightCaseSensitive: false
                 },
-                filterRow: { visible: true, applyFilter: 'auto' },
+                filterRow: { visible: false, applyFilter: 'auto' },
                 headerFilter: { visible: true },
                 onRowPrepared: function (e) {
-                    if (e.rowType === "data" && e.data.IsStaged) {
-                        $(e.rowElement).addClass("staged-row");
+                    if (e.rowType === "data") {
+                        if (e.data.IsStaged) {
+                            $(e.rowElement).addClass("staged-row");
+                        }
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
                     }
                 },
                 columns: [
@@ -2496,6 +1378,12 @@
                         minWidth: 110,
                         alignment: 'center',
                         cellTemplate: function (container, options) {
+                            // Staged/unsaved rows have no RCode yet - it's only
+                            // generated server-side once the row is actually saved.
+                            if (options.data.IsStaged || !options.data.DistributionID) {
+                                return;
+                            }
+
                             var priority = (options.data.Priority || 'REGULAR').toUpperCase();
                             var priorityClass = 'rcode-regular';
 
@@ -2580,13 +1468,20 @@
                         fixed: true,
                         fixedPosition: 'right',
                         cellTemplate: function (container, options) {
-                            // STRICT CONDITION: Render delete icon ONLY for Staged (unsaved) rows
                             var isStaged = options.data.IsStaged === true || (!options.data.DistributionID && !options.data.IsSaved);
-                            if (isStaged) {
+
+                            if (options.data.IsReceived) {
+                                // Already received - locked from deletion (editing happens via delete + re-add)
+                                $("<span>")
+                                    .css({ "color": "#94a3b8", "font-size": "14px" })
+                                    .attr("title", "Received - locked from deletion")
+                                    .html('<i class="fa fa-lock"></i>')
+                                    .appendTo(container);
+                            } else if (isStaged || $scope.CanDelete) {
                                 $("<button>")
                                     .addClass("grid-action-btn-del")
                                     .attr("type", "button")
-                                    .attr("title", "Remove Staged Row")
+                                    .attr("title", isStaged ? "Remove Staged Row" : "Delete Saved Row")
                                     .html('<i class="fa fa-trash-o"></i>')
                                     .on("click", function (e) {
                                         e.stopPropagation();
@@ -2596,7 +1491,6 @@
                                     })
                                     .appendTo(container);
                             }
-                            // Saved records remain completely clean with no delete button
                         }
                     }
                 ],
@@ -2606,13 +1500,15 @@
                             column: 'RoughPcs',
                             summaryType: 'sum',
                             valueFormat: '#,##0',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         },
                         {
                             column: 'RoughWeight',
                             summaryType: 'sum',
                             valueFormat: '#,##0.000',
-                            displayFormat: '{0}'
+                            displayFormat: '{0}',
+                            alignByColumn: true
                         }
                     ]
                 }

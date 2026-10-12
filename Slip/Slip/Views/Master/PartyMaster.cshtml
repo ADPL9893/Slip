@@ -1,0 +1,521 @@
+@{
+    ViewBag.Title = "Party Master";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+<div ng-controller="PartyMasterCtrl" class="pm-page">
+    <div class="pm-header-card">
+        <div class="pm-header-left">
+            <div class="pm-header-icon"><i class="fa fa-address-book-o"></i></div>
+            <div>
+                <div class="pm-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
+                    <span>Party Master</span>
+                </div>
+                <h4 class="pm-header-title">Party Master</h4>
+            </div>
+        </div>
+        <div>
+            <button class="btn-pm-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                <i class="fa fa-plus"></i> ADD NEW PARTY
+            </button>
+        </div>
+    </div>
+
+    <div class="pm-grid-card">
+        <div class="pm-card-header">
+            <div class="pm-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Party Records</h3>
+                <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
+                    <i class="fa fa-database"></i> {{PartyList.length || 0}} Records
+                </span>
+            </div>
+        </div>
+        <div class="pm-grid-body">
+            <div id="partyGridContainer" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Modal -->
+    <div class="modal fade" id="PartyModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-address-book modal-title-icon"></i>
+                            <h4 class="modal-title">{{FormModel.PartyId && FormModel.PartyId !== emptyGuid ? 'Edit Party' : 'Add New Party'}}</h4>
+                        </div>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="pm-modal-section">
+                        <div class="pm-modal-section-title"><i class="fa fa-id-card text-primary"></i> BASIC DETAILS</div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalPartyCode">PARTY CODE <span class="req">*</span></label>
+                                <input type="text" id="ModalPartyCode" ng-model="FormModel.PartyCode" placeholder="Enter Party Code" class="pm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalPartyName">PARTY NAME <span class="req">*</span></label>
+                                <input type="text" id="ModalPartyName" ng-model="FormModel.PartyName" placeholder="Enter Party Name" class="pm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalContactPerson">CONTACT PERSON</label>
+                                <input type="text" id="ModalContactPerson" ng-model="FormModel.ContactPerson" placeholder="Enter Contact Person" class="pm-input" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalMobileNo">MOBILE NO <span class="req">*</span></label>
+                                <input type="text" id="ModalMobileNo" ng-model="FormModel.MobileNo" placeholder="Enter 10-digit Mobile No" maxlength="10" class="pm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalEmail">EMAIL <span class="req">*</span></label>
+                                <input type="email" id="ModalEmail" ng-model="FormModel.Email" placeholder="Enter Email" class="pm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label">IS OUTSIDE</label>
+                                <div class="active-toggle-wrap">
+                                    <input type="checkbox" id="ModalIsOutSide" ng-model="FormModel.IsOutSide" />
+                                    <label for="ModalIsOutSide" style="margin: 0; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                                        Is OutSide
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pm-modal-section">
+                        <div class="pm-modal-section-title"><i class="fa fa-map-marker text-primary"></i> ADDRESS</div>
+                        <div class="row">
+                            <div class="col-md-12 pm-form-group">
+                                <label class="pm-label" for="ModalAddress">ADDRESS</label>
+                                <textarea id="ModalAddress" ng-model="FormModel.Address" placeholder="Enter Address" class="pm-input"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalCityName">CITY</label>
+                                <input type="text" id="ModalCityName" ng-model="FormModel.CityName" placeholder="City" class="pm-input" />
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalStateName">STATE</label>
+                                <input type="text" id="ModalStateName" ng-model="FormModel.StateName" placeholder="State" class="pm-input" />
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalCountryName">COUNTRY</label>
+                                <input type="text" id="ModalCountryName" ng-model="FormModel.CountryName" placeholder="Country" class="pm-input" />
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalPincode">PINCODE</label>
+                                <input type="text" id="ModalPincode" ng-model="FormModel.Pincode" placeholder="Pincode" class="pm-input" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pm-modal-section" style="margin-bottom: 5px;">
+                        <div class="pm-modal-section-title"><i class="fa fa-file-text-o text-primary"></i> STATUTORY & REMARKS</div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalGSTNo">GST NO <span class="req">*</span></label>
+                                <input type="text" id="ModalGSTNo" ng-model="FormModel.GSTNo" placeholder="Enter GST No" class="pm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalPANNo">PAN NO <span class="req">*</span></label>
+                                <input type="text" id="ModalPANNo" ng-model="FormModel.PANNo" placeholder="Enter PAN No" class="pm-input" />
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 pm-form-group">
+                                <label class="pm-label" for="ModalRemarks">REMARKS</label>
+                                <input type="text" id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Enter Remarks" class="pm-input" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-pm-reset" type="button" ng-click="ResetForm()">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-pm-save" type="button" ng-click="SaveParty()" ng-disabled="IsSaving">
+                        <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                        {{FormModel.PartyId && FormModel.PartyId !== emptyGuid ? 'UPDATE' : 'SAVE'}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="PartyConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
+                    <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
+                    <p style="font-size: 13px; color: #334155; margin: 0;">
+                        Are you sure you want to delete party <strong>{{SelectedDeleteItem.PartyName}}</strong> ({{SelectedDeleteItem.PartyCode}})?
+                    </p>
+                </div>
+                <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
+                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
+                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    module.controller("PartyMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.emptyGuid = '00000000-0000-0000-0000-000000000000';
+        $scope.PartyList = [];
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.SelectedDeleteItem = null;
+
+        $scope.FormModel = {
+            PartyId: $scope.emptyGuid,
+            PartyCode: '',
+            PartyName: '',
+            ContactPerson: '',
+            IsOutSide: false,
+            MobileNo: '',
+            Email: '',
+            Address: '',
+            CityName: '',
+            StateName: '',
+            CountryName: '',
+            Pincode: '',
+            GSTNo: '',
+            PANNo: '',
+            Remarks: ''
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#PartyModal").modal("show");
+        };
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = {
+                PartyId: $scope.emptyGuid,
+                PartyCode: '',
+                PartyName: '',
+                ContactPerson: '',
+                IsOutSide: false,
+                MobileNo: '',
+                Email: '',
+                Address: '',
+                CityName: '',
+                StateName: '',
+                CountryName: '',
+                Pincode: '',
+                GSTNo: '',
+                PANNo: '',
+                Remarks: ''
+            };
+        };
+
+        $scope.EditItem = function (item) {
+            if (!item) return;
+            $scope.FormModel = {
+                PartyId: item.PartyId,
+                PartyCode: item.PartyCode || '',
+                PartyName: item.PartyName || '',
+                ContactPerson: item.ContactPerson || '',
+                IsOutSide: !!item.IsOutSide,
+                MobileNo: item.MobileNo || '',
+                Email: item.Email || '',
+                Address: item.Address || '',
+                CityName: item.CityName || '',
+                StateName: item.StateName || '',
+                CountryName: item.CountryName || '',
+                Pincode: item.Pincode || '',
+                GSTNo: item.GSTNo || '',
+                PANNo: item.PANNo || '',
+                Remarks: item.Remarks || ''
+            };
+            $("#PartyModal").modal("show");
+        };
+
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.PartyId) return;
+            $scope.SelectedDeleteItem = item;
+            $("#PartyConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem) return;
+            $http.post('@Url.Action("PartyMaster_Delete", "Master")', { PartyId: $scope.SelectedDeleteItem.PartyId })
+                .then(function (res) {
+                    $("#PartyConfirmDeleteModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        Noty("success", res.data.message || "Party deleted successfully!");
+                        $scope.LoadPartyList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to delete party.");
+                    }
+                }, function () {
+                    $("#PartyConfirmDeleteModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.ToggleActive = function (item) {
+            if (!item || !item.PartyId) return;
+            var newStatus = !item.IsActive;
+            $http.post('@Url.Action("PartyMaster_ActiveInactive", "Master")', { PartyId: item.PartyId, IsActive: newStatus })
+                .then(function (res) {
+                    if (res.data && res.data.success) {
+                        item.IsActive = newStatus;
+                        $scope.RefreshGrid();
+                        Noty("success", res.data.message || "Status updated successfully!");
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
+                }, function () {
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.GetGridInstance = function () {
+            var $el = $("#partyGridContainer");
+            if (!$el.data("dxDataGrid")) {
+                return null;
+            }
+            return $el.dxDataGrid("instance");
+        };
+
+        $scope.RefreshGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.refresh();
+            } else {
+                $scope.InitGrid();
+            }
+        };
+
+        $scope.LoadPartyList = function (searchText) {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_PartyMasterList", "Master")', { params: { SearchText: searchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.PartyList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load parties.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.mobilePattern = /^[6-9]\d{9}$/;
+        $scope.emailPattern = /^[a-zA-Z0-9._%+-]+@@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+        $scope.SaveParty = function () {
+            if (!$scope.FormModel.PartyCode) {
+                Noty("error", "Please enter Party Code!");
+                $('#ModalPartyCode').focus();
+                return;
+            }
+            if (!$scope.FormModel.PartyName) {
+                Noty("error", "Please enter Party Name!");
+                $('#ModalPartyName').focus();
+                return;
+            }
+            if (!$scope.FormModel.MobileNo) {
+                Noty("error", "Please enter Mobile No!");
+                $('#ModalMobileNo').focus();
+                return;
+            }
+            if (!$scope.mobilePattern.test($scope.FormModel.MobileNo)) {
+                Noty("error", "Please enter a valid 10-digit Mobile No!");
+                $('#ModalMobileNo').focus();
+                return;
+            }
+            if (!$scope.FormModel.Email) {
+                Noty("error", "Please enter Email!");
+                $('#ModalEmail').focus();
+                return;
+            }
+            if (!$scope.emailPattern.test($scope.FormModel.Email)) {
+                Noty("error", "Please enter a valid Email address!");
+                $('#ModalEmail').focus();
+                return;
+            }
+            if (!$scope.FormModel.GSTNo) {
+                Noty("error", "Please enter GST No!");
+                $('#ModalGSTNo').focus();
+                return;
+            }
+            if (!$scope.FormModel.PANNo) {
+                Noty("error", "Please enter PAN No!");
+                $('#ModalPANNo').focus();
+                return;
+            }
+
+            var action = ($scope.FormModel.PartyId && $scope.FormModel.PartyId !== $scope.emptyGuid) ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("PartyMaster_Save", "Master")', { model: $scope.FormModel, Action: action })
+                .then(function (res) {
+                    $scope.IsSaving = false;
+                    if (res.data && res.data.success) {
+                        $("#PartyModal").modal("hide");
+                        Noty("success", res.data.message || (action === 'UPDATE' ? "Party updated successfully!" : "Party saved successfully!"));
+                        $scope.ResetForm();
+                        $scope.LoadPartyList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to save party.");
+                    }
+                }, function () {
+                    $scope.IsSaving = false;
+                    Noty("error", "Error saving party to server.");
+                });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.PartyList);
+                return;
+            }
+            $("#partyGridContainer").dxDataGrid({
+                dataSource: $scope.PartyList,
+                keyExpr: 'PartyId',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard', rowRenderingMode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: true, width: 250, placeholder: 'Search parties...' },
+                filterRow: { visible: true },
+                headerFilter: { visible: true },
+                columns: [
+                    {
+                        caption: '#', width: 45, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Party Code', dataField: 'PartyCode', minWidth: 110,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.PartyCode).css({ "color": "#1e293b" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Party Name', dataField: 'PartyName', minWidth: 160 },
+                    { caption: 'Contact Person', dataField: 'ContactPerson', minWidth: 140 },
+                    { caption: 'Mobile No', dataField: 'MobileNo', minWidth: 110 },
+                    { caption: 'Email', dataField: 'Email', minWidth: 160 },
+                    { caption: 'City', dataField: 'CityName', minWidth: 100 },
+                    { caption: 'State', dataField: 'StateName', minWidth: 100 },
+                    { caption: 'GST No', dataField: 'GSTNo', minWidth: 120 },
+                    { caption: 'PAN No', dataField: 'PANNo', minWidth: 100 },
+                    {
+                        caption: 'Type', dataField: 'IsOutSide', width: 100, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsOutSide) {
+                                $("<span>").addClass("badge-status-pill badge-pill-warning").text("Outside").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-info").text("Local").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 120, alignment: 'center', fixed: true, fixedPosition: 'right',
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Party").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate Party" : "Activate Party")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>").addClass("grid-btn-del").attr("title", "Delete Party").html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $scope.LoadPartyList();
+    }]);
+</script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Party Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}

@@ -42,19 +42,7 @@ namespace Slip.Controllers
                     _custId = int.Parse(Request.Form.Get("party_code"));
                     if (_custId == 0)
                     {
-                        DataSet dataset = new DataSet();
-                        using (SqlConnection con = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmd = new SqlCommand("EMP_Employee_MaxIDDefine", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                con.Open();
-                                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                                adapter.Fill(dataset);
-                                cmd.Dispose();
-                            }
-                            con.Close();
-                        }
+                        DataSet dataset = DbHelper.ExecuteDataSet("EMP_Employee_MaxIDDefine");
 
                         var EmployeeID = dataset.Tables[0].Rows[0][0].ToString();
                         _custId = Convert.ToInt32(EmployeeID) + 1;
@@ -98,19 +86,7 @@ namespace Slip.Controllers
                     _custId = int.Parse(Request.Form.Get("Emp_ID"));
                     if (_custId == 0)
                     {
-                        DataSet dataset = new DataSet();
-                        using (SqlConnection con = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmd = new SqlCommand("EMP_Employee_MaxIDDefine", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                con.Open();
-                                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                                adapter.Fill(dataset);
-                                cmd.Dispose();
-                            }
-                            con.Close();
-                        }
+                        DataSet dataset = DbHelper.ExecuteDataSet("EMP_Employee_MaxIDDefine");
 
                         var EmployeeID = dataset.Tables[0].Rows[0][0].ToString();
                         _custId = Convert.ToInt32(EmployeeID) + 1;
@@ -156,19 +132,7 @@ namespace Slip.Controllers
                     _custId = int.Parse(Request.Form.Get("Emp_ID"));
                     if (_custId == 0)
                     {
-                        DataSet dataset = new DataSet();
-                        using (SqlConnection con = new SqlConnection(conn))
-                        {
-                            using (SqlCommand cmd = new SqlCommand("EMP_Employee_MaxIDDefine", con))
-                            {
-                                cmd.CommandType = CommandType.StoredProcedure;
-                                con.Open();
-                                SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                                adapter.Fill(dataset);
-                                cmd.Dispose();
-                            }
-                            con.Close();
-                        }
+                        DataSet dataset = DbHelper.ExecuteDataSet("EMP_Employee_MaxIDDefine");
 
                         var EmployeeID = dataset.Tables[0].Rows[0][0].ToString();
                         _custId = Convert.ToInt32(EmployeeID) + 1;
@@ -213,19 +177,9 @@ namespace Slip.Controllers
                 string xmlStr = "<DocumentElement><EMP_Employees>" + Xmldata.DocumentElement.InnerXml + "</EMP_Employees></DocumentElement>";
                 //   ErrorLogger.ErrorLogStr("XML Create" + xmlStr);
 
-                SqlConnection con = new SqlConnection(conn);
-                SqlCommand cmd = new SqlCommand("EMP_Employee_Insert_Update_Delete", con);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@XML", xmlStr);
-                cmd.Parameters.AddWithValue("@ACTION", Action);
-                cmd.Parameters.Add("@MESSAGE", SqlDbType.VarChar, 1000);
-                cmd.Parameters["@MESSAGE"].Direction = ParameterDirection.Output;
-                con.Open();
-
-                int j = cmd.ExecuteNonQuery();
-                Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-
-                con.Close();
+                Message = DbHelper.ExecuteNonQueryWithMessage("EMP_Employee_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ACTION", Action));
 
             }
             catch (Exception ex)
@@ -239,25 +193,11 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
                 List<object> _list__EMP_Employee = new List<object>();
-
 
                 List<object> EMPEmployeeList = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("EMP_Employee_Getdata", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("EMP_Employee_Getdata");
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
@@ -308,20 +248,9 @@ namespace Slip.Controllers
             List<object> _Party_List = new List<object>();
             try
             {
-                DataSet _PartyEditData = new DataSet();
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("EMP_Employee_GetdataEdit", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.Parameters.Add("@EmployeeID", SqlDbType.Int).Value = EmployeeID;
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_PartyEditData);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
+                DataSet _PartyEditData = DbHelper.ExecuteDataSet("EMP_Employee_GetdataEdit",
+                    new SqlParameter("@EmployeeID", SqlDbType.Int) { Value = EmployeeID });
+
                 for (int i = 0; i < _PartyEditData.Tables[0].Rows.Count; i++)
                 {
                     Dictionary<string, string> Values = new Dictionary<string, string>();
@@ -356,25 +285,12 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
-
                 List<object> _list = new List<object>();
                 List<object> _list_Role = new List<object>();
                 List<object> _list_Process = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("Get_DataList_For_Using_Common", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
+                DataSet _DropDownList = DbHelper.ExecuteDataSet("Get_DataList_For_Using_Common");
 
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
-                }
                 if (_DropDownList.Tables[0].Rows.Count > 0)
                 {
                     for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)

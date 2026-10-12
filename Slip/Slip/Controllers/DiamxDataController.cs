@@ -38,37 +38,28 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "DiamxData");
-                            cmd.Parameters.AddWithValue("@ActionName", "AvailableStock");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "DiamxData"),
+                        new SqlParameter("@ActionName", "AvailableStock"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        Dictionary<string, object> permissionRow = permissionRows[0];
+                        foreach (var kvp in permissionRow)
+                        {
+                            string col = kvp.Key;
+                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        string col = reader.GetName(i);
-                                        if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canView = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canAdd = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canView = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canAdd = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -91,24 +82,16 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
+                DataSet _DropDownList;
                 List<object> _list_Stock = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(date))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_AvailableStock_GetAll", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date))
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", date);
-                        }
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_AvailableStock_GetAll", new SqlParameter("@CreatedDate", date));
+                }
+                else
+                {
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_AvailableStock_GetAll");
                 }
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
@@ -189,23 +172,9 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(apiResponse.StoneList);
                 string xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("DMX_AvailableStock_Insert", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.CommandTimeout = 300; // 5 minutes
-                        cmd.Parameters.Add("@XML", SqlDbType.Xml).Value = xmlStr;
-                        cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        SqlParameter messageParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 1000);
-                        messageParam.Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add(messageParam);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                Message = DbHelper.ExecuteNonQueryWithMessage("DMX_AvailableStock_Insert", 300,
+                    new SqlParameter("@XML", SqlDbType.Xml) { Value = xmlStr },
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
             }
             catch (Exception ex)
             {
@@ -233,37 +202,28 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "DiamxData");
-                            cmd.Parameters.AddWithValue("@ActionName", "HOLDStock");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "DiamxData"),
+                        new SqlParameter("@ActionName", "HOLDStock"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        Dictionary<string, object> permissionRow = permissionRows[0];
+                        foreach (var kvp in permissionRow)
+                        {
+                            string col = kvp.Key;
+                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        string col = reader.GetName(i);
-                                        if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canView = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canAdd = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canView = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canAdd = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -286,24 +246,16 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
+                DataSet _DropDownList;
                 List<object> _list_Stock = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(date))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_HOLDStock_GetAll", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date))
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", date);
-                        }
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_HOLDStock_GetAll", new SqlParameter("@CreatedDate", date));
+                }
+                else
+                {
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_HOLDStock_GetAll");
                 }
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
@@ -391,23 +343,9 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(apiResponse.Transaction_List);
                 string xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("DMX_HOLDStock_Insert", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.CommandTimeout = 300; // 5 minutes
-                        cmd.Parameters.Add("@XML", SqlDbType.Xml).Value = xmlStr;
-                        cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        SqlParameter messageParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 1000);
-                        messageParam.Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add(messageParam);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                Message = DbHelper.ExecuteNonQueryWithMessage("DMX_HOLDStock_Insert", 300,
+                    new SqlParameter("@XML", SqlDbType.Xml) { Value = xmlStr },
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
             }
             catch (Exception ex)
             {
@@ -435,37 +373,28 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "DiamxData");
-                            cmd.Parameters.AddWithValue("@ActionName", "MEMOStock");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "DiamxData"),
+                        new SqlParameter("@ActionName", "MEMOStock"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        Dictionary<string, object> permissionRow = permissionRows[0];
+                        foreach (var kvp in permissionRow)
+                        {
+                            string col = kvp.Key;
+                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        string col = reader.GetName(i);
-                                        if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canView = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canAdd = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canView = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canAdd = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -488,24 +417,16 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
+                DataSet _DropDownList;
                 List<object> _list_Stock = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(date))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_MEMOStock_GetAll", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date))
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", date);
-                        }
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_MEMOStock_GetAll", new SqlParameter("@CreatedDate", date));
+                }
+                else
+                {
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_MEMOStock_GetAll");
                 }
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
@@ -593,23 +514,9 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(apiResponse.Transaction_List);
                 string xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("DMX_MEMOStock_Insert", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.CommandTimeout = 300; // 5 minutes
-                        cmd.Parameters.Add("@XML", SqlDbType.Xml).Value = xmlStr;
-                        cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        SqlParameter messageParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 1000);
-                        messageParam.Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add(messageParam);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                Message = DbHelper.ExecuteNonQueryWithMessage("DMX_MEMOStock_Insert", 300,
+                    new SqlParameter("@XML", SqlDbType.Xml) { Value = xmlStr },
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
             }
             catch (Exception ex)
             {
@@ -637,37 +544,28 @@ namespace Slip.Controllers
             {
                 if (SessionFacade.UserSession != null && !isAdmin)
                 {
-                    using (SqlConnection con = new SqlConnection(conn))
-                    {
-                        using (SqlCommand cmd = new SqlCommand("Get_UserModulePermission", con))
-                        {
-                            cmd.CommandType = CommandType.StoredProcedure;
-                            cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                            cmd.Parameters.AddWithValue("@ControllerName", "DiamxData");
-                            cmd.Parameters.AddWithValue("@ActionName", "SALESStock");
+                    List<Dictionary<string, object>> permissionRows = DbHelper.ExecuteReaderAsList("Get_UserModulePermission",
+                        new SqlParameter("@UserID", SessionFacade.UserSession.UserID),
+                        new SqlParameter("@ControllerName", "DiamxData"),
+                        new SqlParameter("@ActionName", "SALESStock"));
 
-                            con.Open();
-                            using (SqlDataReader reader = cmd.ExecuteReader())
+                    if (permissionRows.Count > 0)
+                    {
+                        Dictionary<string, object> permissionRow = permissionRows[0];
+                        foreach (var kvp in permissionRow)
+                        {
+                            string col = kvp.Key;
+                            if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
                             {
-                                if (reader.Read())
-                                {
-                                    for (int i = 0; i < reader.FieldCount; i++)
-                                    {
-                                        string col = reader.GetName(i);
-                                        if (col.Equals("View", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canView = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canAdd = Convert.ToBoolean(reader[i]);
-                                        }
-                                        else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && reader[i] != DBNull.Value)
-                                        {
-                                            canExport = Convert.ToBoolean(reader[i]);
-                                        }
-                                    }
-                                }
+                                canView = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Add", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canAdd = Convert.ToBoolean(kvp.Value);
+                            }
+                            else if (col.Equals("Export", StringComparison.OrdinalIgnoreCase) && kvp.Value != null)
+                            {
+                                canExport = Convert.ToBoolean(kvp.Value);
                             }
                         }
                     }
@@ -690,24 +588,16 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
+                DataSet _DropDownList;
                 List<object> _list_Stock = new List<object>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(date))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_SALESStock_GetAll", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date))
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", date);
-                        }
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_SALESStock_GetAll", new SqlParameter("@CreatedDate", date));
+                }
+                else
+                {
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_SALESStock_GetAll");
                 }
 
                 if (_DropDownList.Tables[0].Rows.Count > 0)
@@ -795,23 +685,9 @@ namespace Slip.Controllers
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(apiResponse.Transaction_List);
                 string xmlStr = "<DocumentElement>" + Xmldata.DocumentElement.InnerXml + "</DocumentElement>";
 
-                using (SqlConnection con = new SqlConnection(conn))
-                {
-                    using (SqlCommand cmd = new SqlCommand("DMX_SALESStock_Insert", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.CommandTimeout = 300; // 5 minutes
-                        cmd.Parameters.Add("@XML", SqlDbType.Xml).Value = xmlStr;
-                        cmd.Parameters.AddWithValue("@UserID", SessionFacade.UserSession.UserID);
-                        SqlParameter messageParam = new SqlParameter("@MESSAGE", SqlDbType.VarChar, 1000);
-                        messageParam.Direction = ParameterDirection.Output;
-                        cmd.Parameters.Add(messageParam);
-                        con.Open();
-                        cmd.ExecuteNonQuery();
-                        Message = Convert.ToString(cmd.Parameters["@MESSAGE"].Value);
-                        con.Close();
-                    }
-                }
+                Message = DbHelper.ExecuteNonQueryWithMessage("DMX_SALESStock_Insert", 300,
+                    new SqlParameter("@XML", SqlDbType.Xml) { Value = xmlStr },
+                    new SqlParameter("@UserID", SessionFacade.UserSession.UserID));
             }
             catch (Exception ex)
             {
@@ -826,30 +702,17 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
+                DataSet ds;
                 List<SalesSummaryReportItem> dataList = new List<SalesSummaryReportItem>();
                 List<SizeMasterItem> sizeList = new List<SizeMasterItem>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(date))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_SALESStock_SummaryReport", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date))
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", date);
-                        }
-                        else
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", DBNull.Value);
-                        }
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    ds = DbHelper.ExecuteDataSet("DMX_SALESStock_SummaryReport", new SqlParameter("@CreatedDate", date));
+                }
+                else
+                {
+                    ds = DbHelper.ExecuteDataSet("DMX_SALESStock_SummaryReport", new SqlParameter("@CreatedDate", DBNull.Value));
                 }
 
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -894,29 +757,16 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet ds = new DataSet();
+                DataSet ds;
                 List<SalesSellerWiseReportItem> dataList = new List<SalesSellerWiseReportItem>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(date))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_SALESStock_SellerWiseReport", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date))
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", date);
-                        }
-                        else
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", DBNull.Value);
-                        }
-
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(ds);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    ds = DbHelper.ExecuteDataSet("DMX_SALESStock_SellerWiseReport", new SqlParameter("@CreatedDate", date));
+                }
+                else
+                {
+                    ds = DbHelper.ExecuteDataSet("DMX_SALESStock_SellerWiseReport", new SqlParameter("@CreatedDate", DBNull.Value));
                 }
 
                 if (ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
@@ -986,25 +836,13 @@ namespace Slip.Controllers
                     }
                 }
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(sqlDateStr))
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_AvailableStock_SummaryReport", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(sqlDateStr))
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", sqlDateStr);
-                        }
-                        else
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", DBNull.Value);
-                        }
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_AvailableStock_SummaryReport", new SqlParameter("@CreatedDate", sqlDateStr));
+                }
+                else
+                {
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_AvailableStock_SummaryReport", new SqlParameter("@CreatedDate", DBNull.Value));
                 }
 
                 if (_DropDownList.Tables.Count >= 6)
@@ -1132,36 +970,27 @@ namespace Slip.Controllers
             {
                 List<DmxStockAndSaleSummary> list = new List<DmxStockAndSaleSummary>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                List<Dictionary<string, object>> avlStockWithSalesRows;
+                if (!string.IsNullOrEmpty(date) && date != "NaN-NaN-NaN")
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_StockAndSalesReport_Export", con))
+                    avlStockWithSalesRows = DbHelper.ExecuteReaderAsList("DMX_StockAndSalesReport_Export", new SqlParameter("@ReportDate", date));
+                }
+                else
+                {
+                    avlStockWithSalesRows = DbHelper.ExecuteReaderAsList("DMX_StockAndSalesReport_Export", new SqlParameter("@ReportDate", DBNull.Value));
+                }
+
+                foreach (var row in avlStockWithSalesRows)
+                {
+                    list.Add(new DmxStockAndSaleSummary
                     {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date) && date != "NaN-NaN-NaN")
-                        {
-                            cmd.Parameters.AddWithValue("@ReportDate", date);
-                        }
-                        else
-                        {
-                            cmd.Parameters.AddWithValue("@ReportDate", DBNull.Value);
-                        }
-                        con.Open();
-                        using (SqlDataReader reader = cmd.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                list.Add(new DmxStockAndSaleSummary
-                                {
-                                    Location = reader["Location"] != DBNull.Value ? Convert.ToString(reader["Location"]) : "",
-                                    SizeBucket = reader["SizeBucket"] != DBNull.Value ? Convert.ToString(reader["SizeBucket"]) : "",
-                                    Color = reader["Color"] != DBNull.Value ? Convert.ToString(reader["Color"]) : "",
-                                    Clarity = reader["Clarity"] != DBNull.Value ? Convert.ToString(reader["Clarity"]) : "",
-                                    StockPcs = reader["StockPcs"] != DBNull.Value ? Convert.ToInt32(reader["StockPcs"]) : 0,
-                                    SalePcs = reader["SalePcs"] != DBNull.Value ? Convert.ToInt32(reader["SalePcs"]) : 0
-                                });
-                            }
-                        }
-                    }
+                        Location = row["Location"] != null ? Convert.ToString(row["Location"]) : "",
+                        SizeBucket = row["SizeBucket"] != null ? Convert.ToString(row["SizeBucket"]) : "",
+                        Color = row["Color"] != null ? Convert.ToString(row["Color"]) : "",
+                        Clarity = row["Clarity"] != null ? Convert.ToString(row["Clarity"]) : "",
+                        StockPcs = row["StockPcs"] != null ? Convert.ToInt32(row["StockPcs"]) : 0,
+                        SalePcs = row["SalePcs"] != null ? Convert.ToInt32(row["SalePcs"]) : 0
+                    });
                 }
 
                 string displayDate = DateTime.Now.ToString("dd-MM-yyyy");
@@ -1192,28 +1021,16 @@ namespace Slip.Controllers
         {
             try
             {
-                DataSet _DropDownList = new DataSet();
+                DataSet _DropDownList;
                 List<DmxMemoHoldSummaryItem> List = new List<DmxMemoHoldSummaryItem>();
 
-                using (SqlConnection con = new SqlConnection(conn))
+                if (!string.IsNullOrEmpty(date) && date != "NaN-NaN-NaN")
                 {
-                    using (SqlCommand cmd = new SqlCommand("DMX_MemoHold_SummaryReport", con))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        if (!string.IsNullOrEmpty(date) && date != "NaN-NaN-NaN")
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", date);
-                        }
-                        else
-                        {
-                            cmd.Parameters.AddWithValue("@CreatedDate", DBNull.Value);
-                        }
-                        con.Open();
-                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
-                        adapter.Fill(_DropDownList);
-                        cmd.Dispose();
-                    }
-                    con.Close();
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_MemoHold_SummaryReport", new SqlParameter("@CreatedDate", date));
+                }
+                else
+                {
+                    _DropDownList = DbHelper.ExecuteDataSet("DMX_MemoHold_SummaryReport", new SqlParameter("@CreatedDate", DBNull.Value));
                 }
 
                 if (_DropDownList.Tables.Count > 0)
