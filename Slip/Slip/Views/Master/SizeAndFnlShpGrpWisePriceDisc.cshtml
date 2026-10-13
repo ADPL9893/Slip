@@ -1,0 +1,374 @@
+@{
+    ViewBag.Title = "Size & ShapeGroup Wise Price Discount";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<div ng-controller="SizeAndFnlShpGrpWisePriceDiscCtrl" class="sgd-page">
+    <div class="sgd-header-card">
+        <div class="sgd-header-left">
+            <div class="sgd-header-icon">
+                <i class="fa fa-percent"></i>
+            </div>
+            <div>
+                <div class="sgd-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
+                    <span>Size &amp; ShapeGroup Wise Price Discount</span>
+                </div>
+                <h4 class="sgd-header-title">Size &amp; ShapeGroup Wise Price Discount</h4>
+            </div>
+        </div>
+        <div class="sgd-header-actions">
+            <button class="btn-sgd-save" type="button" ng-disabled="!IsGridLoaded || IsSaving" ng-click="SaveData()">
+                <i class="fa fa-save" ng-class="{'fa-spin': IsSaving}"></i> Save
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="sgd-card">
+        <div class="sgd-card-header">
+            <h5 class="sgd-card-title"><i class="fa fa-filter text-primary"></i> 1. Select ShapeType &amp; Type</h5>
+        </div>
+        <div class="sgd-card-body">
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 sgd-form-group">
+                    <label class="sgd-label" for="SelectedShapeType">ShapeType <span class="req">*</span></label>
+                    <select id="SelectedShapeType"
+                            chosen="ShapeTypeList"
+                            ng-model="SelectedShapeType"
+                            ng-change="OnFilterChange()"
+                            class="form-control sgd-input">
+                        <option value="">-- Select ShapeType --</option>
+                        <option ng-repeat="item in ShapeTypeList" value="{{item.ShapeType}}">{{item.ShapeType}}</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 sgd-form-group">
+                    <label class="sgd-label" for="SelectedType">Type <span class="req">*</span></label>
+                    <select id="SelectedType"
+                            chosen="TypeList"
+                            ng-model="SelectedType"
+                            ng-change="OnFilterChange()"
+                            class="form-control sgd-input">
+                        <option value="">-- Select Type --</option>
+                        <option ng-repeat="item in TypeList" value="{{item.Value}}">{{item.Label}}</option>
+                    </select>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Fill Card -->
+    <div class="sgd-card" ng-show="IsGridLoaded">
+        <div class="sgd-card-header">
+            <h5 class="sgd-card-title"><i class="fa fa-magic text-primary"></i> 2. Bulk Fill Discount By ShapeGroup</h5>
+        </div>
+        <div class="sgd-card-body">
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 sgd-form-group">
+                    <label class="sgd-label" for="BulkShapeGroupID">ShapeGroup</label>
+                    <select id="BulkShapeGroupID"
+                            chosen="ShapeGroupList"
+                            ng-model="BulkShapeGroupID"
+                            class="form-control sgd-input">
+                        <option value="">-- Select ShapeGroup --</option>
+                        <option ng-repeat="item in ShapeGroupList" value="{{item.ID}}">{{item.ShapeGroup}}</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 sgd-form-group">
+                    <label class="sgd-label" for="BulkDiscountPer">Discount %</label>
+                    <input type="text" id="BulkDiscountPer" ng-model="BulkDiscountPer" placeholder="0.00" class="sgd-input allownumericwithdecimal" />
+                </div>
+
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 sgd-form-group">
+                    <label class="sgd-label">&nbsp;</label>
+                    <button type="button" class="btn-sgd-apply" ng-click="ApplyBulkDiscount()">
+                        <i class="fa fa-check"></i> Apply To Column
+                    </button>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid Card -->
+    <div class="sgd-card" ng-show="IsGridLoaded">
+        <div class="sgd-card-header">
+            <h5 class="sgd-card-title"><i class="fa fa-table text-primary"></i> 3. Pointer Wise ShapeGroup Discount</h5>
+        </div>
+        <div class="sgd-card-body">
+            <div id="sgdGridContainer"></div>
+        </div>
+    </div>
+
+    <div class="sgd-card" ng-show="!IsGridLoaded">
+        <div class="sgd-card-body sgd-empty-state">
+            <i class="fa fa-info-circle"></i> Please select ShapeType and Type to load the Pointer list.
+        </div>
+    </div>
+</div>
+
+<style>
+    .sgd-page { padding: 15px; }
+    .sgd-header-card { display: flex; justify-content: space-between; align-items: center; background: #fff; border-radius: 6px; padding: 15px 20px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .sgd-header-left { display: flex; align-items: center; gap: 15px; }
+    .sgd-header-icon { font-size: 28px; color: #5b6ee1; }
+    .sgd-breadcrumb { font-size: 12px; color: #8795a8; margin-bottom: 4px; }
+    .sgd-breadcrumb a { color: #8795a8; }
+    .sgd-header-title { margin: 0; font-weight: 600; }
+    .btn-sgd-save { background: #5b6ee1; color: #fff; border: none; border-radius: 4px; padding: 8px 18px; font-weight: 600; }
+    .btn-sgd-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-sgd-apply { background: #2fb380; color: #fff; border: none; border-radius: 4px; padding: 8px 14px; font-weight: 600; width: 100%; }
+    .sgd-card { background: #fff; border-radius: 6px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .sgd-card-header { padding: 12px 20px; border-bottom: 1px solid #eef1f5; }
+    .sgd-card-title { margin: 0; font-size: 14px; font-weight: 600; }
+    .sgd-card-body { padding: 15px 20px; }
+    .sgd-form-group { margin-bottom: 10px; }
+    .sgd-label { display: block; font-size: 12px; font-weight: 600; color: #4a5568; margin-bottom: 4px; }
+    .sgd-input { height: 34px; }
+    .req { color: #e53e3e; }
+    .sgd-empty-state { text-align: center; color: #8795a8; padding: 30px; }
+</style>
+
+<script>
+    var appModule;
+    try {
+        appModule = angular.module('app');
+    } catch (e) {
+        appModule = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid', 'angularjs-dropdown-multiselect']);
+    }
+
+    appModule.directive('chosen', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var updateChosen = function () {
+                    $timeout(function () {
+                        element.trigger('chosen:updated');
+                    }, 50);
+                };
+
+                var list = attrs['chosen'];
+                if (list) {
+                    scope.$watchCollection(list, function () {
+                        updateChosen();
+                    });
+                }
+                if (attrs['ngModel']) {
+                    scope.$watch(attrs['ngModel'], function () {
+                        updateChosen();
+                    });
+                }
+
+                scope.$watch(function () {
+                    return element.find('option').length;
+                }, function (newVal, oldVal) {
+                    if (newVal !== oldVal) {
+                        updateChosen();
+                    }
+                });
+
+                element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+            }
+        };
+    }]);
+
+    appModule.controller("SizeAndFnlShpGrpWisePriceDiscCtrl", ['$scope', '$http', function ($scope, $http) {
+
+        $scope.ShapeTypeList = [];
+        $scope.ShapeGroupList = [];
+        $scope.TypeList = [
+            { Value: 'CT DOWN', Label: 'NGR (Ct Down)' },
+            { Value: 'CT UP', Label: 'GR (Ct Up)' }
+        ];
+
+        $scope.SelectedShapeType = '';
+        $scope.SelectedType = '';
+        $scope.GridData = [];
+        $scope.IsGridLoaded = false;
+        $scope.IsSaving = false;
+
+        $scope.BulkShapeGroupID = '';
+        $scope.BulkDiscountPer = '';
+
+        // Load lookups
+        $http.get('@Url.Action("Get_MST_Size_ShapeTypeList", "Master")').then(function (res) {
+            if (res.data && res.data.success) {
+                $scope.ShapeTypeList = res.data.list;
+            }
+        });
+
+        $http.get('@Url.Action("Get_Mst_ShapeFinalGroupList", "Master")').then(function (res) {
+            if (res.data && res.data.success) {
+                $scope.ShapeGroupList = res.data.list;
+            }
+        });
+
+        $scope.OnFilterChange = function () {
+            if ($scope.SelectedShapeType && $scope.SelectedType) {
+                $scope.LoadGrid();
+            }
+        };
+
+        $scope.LoadGrid = function () {
+            $http.get('@Url.Action("Get_SizeAndFnlShpGrpWisePriceDisc_GridData", "Master")', {
+                params: { shapeType: $scope.SelectedShapeType, type: $scope.SelectedType }
+            }).then(function (res) {
+                if (!res.data || !res.data.success) {
+                    Noty("error", (res.data && res.data.message) || "Failed to load Pointer list.");
+                    return;
+                }
+
+                var sizeList = res.data.sizeList || [];
+                var discList = res.data.discList || [];
+
+                if (sizeList.length === 0) {
+                    $scope.GridData = [];
+                    $scope.IsGridLoaded = false;
+                    Noty("warning", "No Pointer found for the selected ShapeType / Type.");
+                    return;
+                }
+
+                var gridData = [];
+                for (var i = 0; i < sizeList.length; i++) {
+                    var size = sizeList[i];
+                    var row = {
+                        SizeID: size.SizeID,
+                        Pointer: Number(size.FromSize).toFixed(3) + ' - ' + Number(size.ToSize).toFixed(3)
+                    };
+
+                    for (var g = 0; g < $scope.ShapeGroupList.length; g++) {
+                        var sg = $scope.ShapeGroupList[g];
+                        var existing = null;
+                        for (var d = 0; d < discList.length; d++) {
+                            if (discList[d].MstSizeID === size.SizeID && discList[d].MStFinalShapGroupID === sg.ID) {
+                                existing = discList[d].DiscountPer;
+                                break;
+                            }
+                        }
+                        row['SG_' + sg.ID] = existing;
+                    }
+
+                    gridData.push(row);
+                }
+
+                $scope.GridData = gridData;
+                $scope.IsGridLoaded = true;
+                $scope.InitGrid();
+            }, function () {
+                Noty("error", "Error loading Pointer list from server.");
+            });
+        };
+
+        $scope.InitGrid = function () {
+            var columns = [
+                { dataField: 'Pointer', caption: 'Pointer', allowEditing: false, fixed: true, fixedPosition: 'left', width: 140 }
+            ];
+
+            for (var g = 0; g < $scope.ShapeGroupList.length; g++) {
+                var sg = $scope.ShapeGroupList[g];
+                columns.push({
+                    dataField: 'SG_' + sg.ID,
+                    caption: sg.ShapeGroup,
+                    dataType: 'number',
+                    format: { type: 'fixedPoint', precision: 2 },
+                    editorOptions: { format: '#0.##' },
+                    width: 110
+                });
+            }
+
+            $("#sgdGridContainer").dxDataGrid({
+                dataSource: $scope.GridData,
+                keyExpr: 'SizeID',
+                columns: columns,
+                editing: { mode: 'cell', allowUpdating: true },
+                columnAutoWidth: false,
+                allowColumnResizing: true,
+                columnFixing: { enabled: true },
+                showBorders: true,
+                showColumnLines: true,
+                showRowLines: true,
+                rowAlternationEnabled: true,
+                height: 460,
+                scrolling: { mode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                onCellPrepared: function (e) {
+                    if (e.rowType === 'data' && e.column.dataField !== 'Pointer') {
+                        e.cellElement.addClass('sgd-editable-cell');
+                    }
+                }
+            });
+        };
+
+        $scope.ApplyBulkDiscount = function () {
+            if (!$scope.BulkShapeGroupID) {
+                Noty("warning", "Please select a ShapeGroup first!");
+                return;
+            }
+
+            var pct = parseFloat($scope.BulkDiscountPer);
+            if ($scope.BulkDiscountPer === '' || $scope.BulkDiscountPer === null || isNaN(pct)) {
+                Noty("warning", "Please enter a valid Discount %!");
+                return;
+            }
+
+            var field = 'SG_' + $scope.BulkShapeGroupID;
+            for (var i = 0; i < $scope.GridData.length; i++) {
+                $scope.GridData[i][field] = pct;
+            }
+
+            var gridInst = $("#sgdGridContainer").dxDataGrid('instance');
+            if (gridInst) {
+                gridInst.refresh();
+            }
+
+            Noty("success", "Discount applied to the selected ShapeGroup column.");
+        };
+
+        $scope.SaveData = function () {
+            if (!$scope.IsGridLoaded || $scope.GridData.length === 0) {
+                Noty("warning", "Please load the Pointer list first!");
+                return;
+            }
+
+            var list = [];
+            for (var i = 0; i < $scope.GridData.length; i++) {
+                var row = $scope.GridData[i];
+                for (var g = 0; g < $scope.ShapeGroupList.length; g++) {
+                    var sg = $scope.ShapeGroupList[g];
+                    var val = row['SG_' + sg.ID];
+                    if (val !== null && val !== undefined && val !== '') {
+                        list.push({
+                            MstSizeID: row.SizeID,
+                            MStFinalShapGroupID: sg.ID,
+                            FinalShapGroup: sg.ShapeGroup,
+                            DiscountPer: parseFloat(val)
+                        });
+                    }
+                }
+            }
+
+            if (list.length === 0) {
+                Noty("warning", "Please enter at least one Discount % before saving!");
+                return;
+            }
+
+            $scope.IsSaving = true;
+            $http.post('@Url.Action("Save_SizeAndFnlShpGrpWisePriceDisc", "Master")', { list: list }).then(function (res) {
+                $scope.IsSaving = false;
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Saved successfully!");
+                    $scope.LoadGrid();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to save.");
+                }
+            }, function () {
+                $scope.IsSaving = false;
+                Noty("error", "Error saving to server.");
+            });
+        };
+    }]);
+</script>

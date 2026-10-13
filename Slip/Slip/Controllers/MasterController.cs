@@ -2419,6 +2419,137 @@ namespace Slip.Controllers
             }
         }
 
+        #region Size And Final ShapeGroup Wise Price Discount
+
+        public ActionResult SizeAndFnlShpGrpWisePriceDisc()
+        {
+            SetModulePermissions("Master", "SizeAndFnlShpGrpWisePriceDisc");
+            return View();
+        }
+
+        public JsonResult Get_MST_Size_ShapeTypeList()
+        {
+            try
+            {
+                var list = new List<object>();
+
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_Mst_Size_GetShapeTypeList");
+                foreach (var row in rows)
+                {
+                    list.Add(new
+                    {
+                        ShapeType = row["ShapeType"] != null ? Convert.ToString(row["ShapeType"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_Mst_ShapeFinalGroupList()
+        {
+            try
+            {
+                var list = new List<object>();
+
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_Mst_ShapeFinalGroup_GetList");
+                foreach (var row in rows)
+                {
+                    list.Add(new
+                    {
+                        ID = Convert.ToInt32(row["ID"]),
+                        ShapeGroup = row["ShapeGroup"] != null ? Convert.ToString(row["ShapeGroup"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_SizeAndFnlShpGrpWisePriceDisc_GridData(string shapeType, string type)
+        {
+            try
+            {
+                var sizeList = new List<object>();
+                var discList = new List<object>();
+
+                DataSet ds = DbHelper.ExecuteDataSet("USP_Mst_SizeAndFnlShpGrpWisePriceDisc_GetGridData",
+                    new SqlParameter("@ShapeType", shapeType),
+                    new SqlParameter("@Type", type));
+
+                if (ds.Tables.Count > 0)
+                {
+                    foreach (DataRow row in ds.Tables[0].Rows)
+                    {
+                        sizeList.Add(new
+                        {
+                            SizeID = Convert.ToInt32(row["SizeID"]),
+                            FromSize = row["FromSize"] != DBNull.Value ? Convert.ToDecimal(row["FromSize"]) : 0,
+                            ToSize = row["ToSize"] != DBNull.Value ? Convert.ToDecimal(row["ToSize"]) : 0
+                        });
+                    }
+                }
+
+                if (ds.Tables.Count > 1)
+                {
+                    foreach (DataRow row in ds.Tables[1].Rows)
+                    {
+                        discList.Add(new
+                        {
+                            MstSizeID = Convert.ToInt32(row["MstSizeID"]),
+                            MStFinalShapGroupID = Convert.ToInt32(row["MStFinalShapGroupID"]),
+                            DiscountPer = row["DiscountPer"] != DBNull.Value ? Convert.ToDecimal(row["DiscountPer"]) : (decimal?)null
+                        });
+                    }
+                }
+
+                return Json(new { success = true, sizeList = sizeList, discList = discList }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, sizeList = new List<object>(), discList = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Save_SizeAndFnlShpGrpWisePriceDisc(List<MST_SizeAndFnlShpGrpWisePriceDisc> list)
+        {
+            string message;
+            try
+            {
+                string xmlStr = "";
+                if (list != null && list.Count > 0)
+                {
+                    XmlDocument xmlData = CommonMethods.ConvertToXml(list);
+                    xmlStr = "<DocumentElement>" + xmlData.DocumentElement.InnerXml + "</DocumentElement>";
+                }
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_Mst_SizeAndFnlShpGrpWisePriceDisc_Save",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@CreatedBy", SessionFacade.UserSession.UserID));
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + ex.Message;
+            }
+
+            return Json(new { success = message.ToLower().Contains("success"), message = message });
+        }
+
+        #endregion
+
         public JsonResult Get_UserBranch()
         {
             try

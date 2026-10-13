@@ -351,6 +351,7 @@
     <Compile Include="Models\TRN_RoughInward.cs" />
     <Compile Include="Models\TRN_RoughInwardDetail.cs" />
     <Compile Include="Models\MST_RoughDistribution.cs" />
+    <Compile Include="Models\MST_SizeAndFnlShpGrpWisePriceDisc.cs" />
     <Compile Include="Models\MST_VoucherDetails.cs" />
     <Compile Include="Models\PriceXML.cs" />
     <Compile Include="Models\Pridiction.cs" />
@@ -1319,6 +1320,7 @@
     <Content Include="Views\Pricing\PriceComparison.cshtml" />
     <Content Include="Views\Master\UserFileSizeMaster.cshtml" />
     <Content Include="Views\Master\RoughDistribution.cshtml" />
+    <Content Include="Views\Master\SizeAndFnlShpGrpWisePriceDisc.cshtml" />
     <Content Include="Views\Master\RoughDistributionList.cshtml" />
     <Content Include="Views\Master\RoughCodeMaster.cshtml" />
     <Content Include="Views\Master\PartyMaster.cshtml" />
