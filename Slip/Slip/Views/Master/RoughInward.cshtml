@@ -6,31 +6,38 @@
 
 @if (ViewBag.CanView != null && (bool)ViewBag.CanView)
 {
-<div ng-controller="RoughInwardCtrl" class="ri-page">
-    <div class="ri-header-card">
-        <div class="ri-header-left">
-            <div class="ri-header-icon"><i class="fa fa-truck"></i></div>
-            <div>
-                <div class="ri-breadcrumb">
-                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
-                    <span>Rough Inward</span>
-
+<div ng-controller="RoughInwardCtrl" class="rough-dist-list-page">
+    <div class="rdl-grid-card">
+        <div class="rdl-card-header">
+            <div class="rdl-card-title-left">
+                <i class="fa fa-truck"></i>
+                <h3>Rough Inward (Jangad)</h3>
+                <span class="badge-status-pill badge-pill-info">
+                    <i class="fa fa-database"></i> {{InwardList.length || 0}} Total Records
+                </span>
+            </div>
+            <div class="rdl-card-actions">
+                <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                    <i class="fa fa-plus"></i> NEW INWARD
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                    <i class="fa fa-columns"></i>
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                    <i class="fa fa-file-excel-o"></i>
+                </button>
+                <div class="field-select-wrap" style="width: 220px;">
+                    <input type="text"
+                           ng-model="SearchText"
+                           ng-change="OnSearchChange()"
+                           placeholder="Search inward records..."
+                           class="form-control ri-input"
+                           style="height: 32px; padding: 4px 10px;" />
                 </div>
-                <h4 class="ri-header-title">Rough Inward (Jangad)</h4>
-                @*<i class="fa fa-database"></i> {{InwardList.length || 0}} Records*@
-                
             </div>
         </div>
-        <div>
-            <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
-                <i class="fa fa-plus"></i> NEW INWARD
-            </button>
-        </div>
-    </div>
 
-    <div class="ri-grid-card">
-        
-        <div class="ri-grid-body">
+        <div class="rdl-grid-body">
             <div id="inwardGridContainer" style="width: 100%;"></div>
         </div>
     </div>
@@ -70,15 +77,19 @@
                                     </div>
                                     <div class="col-md-7 col-sm-7 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'BRANCH'">
                                         <label class="ri-label" for="ModalFromBranchID">BRANCH <span class="req">*</span></label>
-                                        <select id="ModalFromBranchID" chosen="FromBranchList" class="form-control ri-input" ng-model="FormModel.FromBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in FromBranchList">
-                                            <option value="">Select Branch</option>
-                                        </select>
+                                        <div class="field-select-wrap">
+                                            <select id="ModalFromBranchID" chosen="FromBranchList" class="form-control ri-input" ng-model="FormModel.FromBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in FromBranchList">
+                                                <option value="">Select Branch</option>
+                                            </select>
+                                        </div>
                                     </div>
                                     <div class="col-md-7 col-sm-7 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'PARTY'">
                                         <label class="ri-label" for="ModalFromPartyID">PARTY <span class="req">*</span></label>
-                                        <select id="ModalFromPartyID" chosen="PartyList" class="form-control ri-input" ng-model="FormModel.FromPartyID" ng-options="item.PartyId as item.PartyName for item in PartyList">
-                                            <option value="">Select Party</option>
-                                        </select>
+                                        <div class="field-select-wrap">
+                                            <select id="ModalFromPartyID" chosen="PartyList" class="form-control ri-input" ng-model="FormModel.FromPartyID" ng-options="item.PartyId as item.PartyName for item in PartyList">
+                                                <option value="">Select Party</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </fieldset>
@@ -89,9 +100,11 @@
                                 <div class="row">
                                     <div class="col-md-12 ri-form-group">
                                         <label class="ri-label" for="ModalToBranchID">COMPANY BRANCH <span class="req">*</span></label>
-                                        <select id="ModalToBranchID" chosen="ToBranchList" class="form-control ri-input" ng-model="FormModel.ToBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in ToBranchList">
-                                            <option value="">Select Branch</option>
-                                        </select>
+                                        <div class="field-select-wrap">
+                                            <select id="ModalToBranchID" chosen="ToBranchList" class="form-control ri-input" ng-model="FormModel.ToBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in ToBranchList">
+                                                <option value="">Select Branch</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </fieldset>
@@ -118,29 +131,37 @@
                         <div class="row">
                             <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalPurposeID">PURPOSE <span class="req">*</span></label>
-                                <select id="ModalPurposeID" chosen="PurposeList" class="form-control ri-input" ng-model="FormModel.PurposeID" ng-options="item.PurposeID as item.PurposeName for item in PurposeList">
-                                    <option value="">Select Purpose</option>
-                                </select>
+                                <div class="field-select-wrap">
+                                    <select id="ModalPurposeID" chosen="PurposeList" class="form-control ri-input" ng-model="FormModel.PurposeID" ng-options="item.PurposeID as item.PurposeName for item in PurposeList">
+                                        <option value="">Select Purpose</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalFactoryCodeID">FACTORY CODE <span class="req">*</span></label>
-                                <select id="ModalFactoryCodeID" chosen="FactoryCodeList" class="form-control ri-input" ng-model="FormModel.FactoryCodeID" ng-options="item.FactoryCodeID as item.FactoryCode for item in FactoryCodeList">
-                                    <option value="">Select Factory Code</option>
-                                </select>
+                                <div class="field-select-wrap">
+                                    <select id="ModalFactoryCodeID" chosen="FactoryCodeList" class="form-control ri-input" ng-model="FormModel.FactoryCodeID" ng-options="item.FactoryCodeID as item.FactoryCode for item in FactoryCodeList">
+                                        <option value="">Select Factory Code</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalSizeCode">SIZE CODE <span class="req">*</span></label>
-                                <select id="ModalSizeCode" chosen="SizeCodeList" class="form-control ri-input" ng-model="FormModel.SizeCodeID" ng-change="OnHeaderSizeCodeChange()" ng-options="item.ID as item.ShortName for item in SizeCodeList">
-                                    <option value="">Select Size Code</option>
-                                </select>
+                                <div class="field-select-wrap">
+                                    <select id="ModalSizeCode" chosen="SizeCodeList" class="form-control ri-input" ng-model="FormModel.SizeCodeID" ng-change="OnHeaderSizeCodeChange()" ng-options="item.ID as item.ShortName for item in SizeCodeList">
+                                        <option value="">Select Size Code</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-2 col-sm-4 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalColorType">COLOR TYPE <span class="req">*</span></label>
-                                <select id="ModalColorType" chosen="ColorTypeList" class="form-control ri-input" ng-model="FormModel.ColorType" ng-change="OnHeaderColorTypeChange()">
-                                    <option value="">Select Color Type</option>
-                                    <option value="White">White</option>
-                                    <option value="Color">Color</option>
-                                </select>
+                                <div class="field-select-wrap">
+                                    <select id="ModalColorType" chosen="ColorTypeList" class="form-control ri-input" ng-model="FormModel.ColorType" ng-change="OnHeaderColorTypeChange()">
+                                        <option value="">Select Color Type</option>
+                                        <option value="White">White</option>
+                                        <option value="Color">Color</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="col-md-4 col-sm-8 col-xs-12 ri-form-group">
                                 <label class="ri-label" for="ModalRemarks">REMARKS</label>
@@ -641,6 +662,33 @@
                 });
         };
 
+        $scope.SearchText = '';
+        $scope.OnSearchChange = function () {
+            var gridInstance = $("#inwardGridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $("#inwardGridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $("#inwardGridContainer").dxDataGrid("instance");
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('RoughInward');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RoughInward.xlsx');
+                });
+            });
+        };
+
         $scope.PromptDelete = function (item) {
             if (!item) return;
             var inwardId = item.InwardID || item.inwardID || (typeof item === 'number' ? item : 0);
@@ -975,7 +1023,7 @@
             }
             $("#inwardGridContainer").dxDataGrid({
                 dataSource: $scope.InwardList,
-                height: 'calc(106vh - 210px)',
+                height: '100%',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
@@ -996,13 +1044,19 @@
                 scrolling: { mode: 'standard' },
                 paging: { enabled: false },
                 pager: { visible: false },
-                searchPanel: { visible: true, width: 280, placeholder: 'Search inward records...' },
+                searchPanel: { visible: false },
                 filterRow: { visible: false, applyFilter: 'auto' },
                 headerFilter: { visible: true },
+                onToolbarPreparing: function (e) {
+                    // Column chooser / export / search are rendered in the
+                    // header card above instead of the grid's own toolbar row.
+                    e.toolbarOptions.items = [];
+                },
                 onRowPrepared: function (e) {
                     if (e.rowType === "data") {
                         e.rowElement.addClass("ri-row-animate");
                         e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css("border-bottom", "1px solid #e2e8f0");
                     }
                 },
                 onCellPrepared: function (e) {
@@ -1078,28 +1132,7 @@
                         }
                     ]
                 },
-                export: {
-                    enabled: true,
-                    formats: ['xlsx'],
-                    allowExportSelectedData: false
-                },
-                onExporting: function (e) {
-                    if (e.format === 'xlsx') {
-                        if (typeof ExcelJS !== 'undefined') {
-                            const workbook = new ExcelJS.Workbook();
-                            const worksheet = workbook.addWorksheet('RoughInward');
-                            DevExpress.excelExporter.exportDataGrid({
-                                component: e.component,
-                                worksheet: worksheet,
-                                autoFilterEnabled: true,
-                            }).then(function () {
-                                workbook.xlsx.writeBuffer().then(function (buffer) {
-                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RoughInward.xlsx');
-                                });
-                            });
-                        }
-                    }
-                },
+                export: { enabled: false },
                 columns: [
                     {
                         caption: '#', width: 45, alignment: 'center', allowReordering: false, allowFiltering: false, allowSorting: false,

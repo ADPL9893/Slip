@@ -340,6 +340,7 @@
     <Compile Include="Models\FourP_Pridiction.cs" />
     <Compile Include="Models\MainRoughSummary.cs" />
     <Compile Include="Models\MST_Lot.cs" />
+    <Compile Include="Models\MST_LotMaster.cs" />
     <Compile Include="Models\MST_Role.cs" />
     <Compile Include="Models\MST_CompanyBranch.cs" />
     <Compile Include="Models\MST_BranchType.cs" />
@@ -359,6 +360,7 @@
     <Compile Include="Models\Process_Wise_Issue_Receive_Loss.cs" />
     <Compile Include="Models\QRList.cs" />
     <Compile Include="Models\RoughDistributionQRList.cs" />
+    <Compile Include="Models\LotQRList.cs" />
     <Compile Include="Models\RoughTo4POk_Loss.cs" />
     <Compile Include="Models\Rp_Prd_Summary.cs" />
     <Compile Include="Models\RP_Slip_Entry.cs" />
@@ -1289,6 +1291,7 @@
     <Content Include="Views\Slip\Vipulbhai.cshtml" />
     <Content Include="Views\Slip\AddReports.cshtml" />
     <Content Include="Views\Master\Lot.cshtml" />
+    <Content Include="Views\Master\LotEntry.cshtml" />
     <Content Include="Views\Print\FourP_Daily_SlipPrint.cshtml" />
     <Content Include="Views\Print\Scanning_STNPrint.cshtml" />
     <Content Include="Views\Print\Slip_Sawing_MachinePrint.cshtml" />
@@ -1330,6 +1333,7 @@
     <Content Include="Views\Master\QRPrint.cshtml" />
     <Content Include="Views\Master\QRGenerator.cshtml" />
     <Content Include="Views\Master\RoughDistributionQRPrint.cshtml" />
+    <Content Include="Views\Master\LotQRPrint.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

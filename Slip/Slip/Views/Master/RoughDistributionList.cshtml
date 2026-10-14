@@ -7,38 +7,35 @@
 @if (ViewBag.IsAdmin == true || (ViewBag.CanView != null && (bool)ViewBag.CanView) || (ViewBag.CanAdd != null && (bool)ViewBag.CanAdd) || (ViewBag.CanEdit != null && (bool)ViewBag.CanEdit) || (ViewBag.CanDelete != null && (bool)ViewBag.CanDelete))
 {
 <div ng-controller="RoughDistributionListCtrl" class="rough-dist-list-page">
-    <!-- Header Banner -->
-    <div class="rdl-header-card">
-        <div class="rdl-header-left">
-            <div class="rdl-header-icon">
-                <i class="fa fa-list-alt"></i>
-            </div>
-            <div>
-                <div class="rdl-breadcrumb">
-                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
-                    <span>RoughDistributionList</span>
-                </div>
-                <h4 class="rdl-header-title">Rough Distribution List</h4>
-            </div>
-        </div>
-        <div class="rdl-header-actions">
-            <button class="btn-rdl-add" ng-show="CanAdd" ng-click="OpenAddNew()" title="Open Rough Distribution Entry in new tab">
-                <i class="fa fa-plus-circle"></i> Add New
-            </button>
-        </div>
-    </div>
 
     <!-- DataGrid Container Card -->
     <div class="rdl-grid-card">
         <div class="rdl-card-header">
             <div class="rdl-card-title-left">
                 <i class="fa fa-table"></i>
-                <h3>Distribution Records ({{List.length}} Records)</h3>
-            </div>
-            <div class="rdl-card-actions">
+                <h3>Rough Distribution List</h3>
                 <span class="badge-status-pill badge-pill-info">
                     <i class="fa fa-database"></i> {{List.length}} Total Records
                 </span>
+            </div>
+            <div class="rdl-card-actions">
+                <button class="btn-rdl-add" ng-show="CanAdd" ng-click="OpenAddNew()" title="Open Rough Distribution Entry in new tab">
+                    <i class="fa fa-plus-circle"></i> Add New
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                    <i class="fa fa-columns"></i>
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-show="@(ViewBag.IsAdmin == true || (ViewBag.CanExport != null && (bool)ViewBag.CanExport) || (ViewBag.CanAdd != null && (bool)ViewBag.CanAdd) ? "true" : "false")" ng-click="ExportGrid()">
+                    <i class="fa fa-file-excel-o"></i>
+                </button>
+                <div class="field-select-wrap" style="width: 220px;">
+                    <input type="text"
+                           ng-model="SearchText"
+                           ng-change="OnSearchChange()"
+                           placeholder="Search all distributions..."
+                           class="form-control rd-input"
+                           style="height: 32px; padding: 4px 10px;" />
+                </div>
             </div>
         </div>
         <div class="rdl-grid-body">
@@ -544,6 +541,33 @@ else
             });
         };
 
+        $scope.SearchText = '';
+        $scope.OnSearchChange = function () {
+            var gridInstance = $("#gridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $("#gridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $("#gridContainer").dxDataGrid("instance");
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('RoughDistribution');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RoughDistributionList.xlsx');
+                });
+            });
+        };
+
         // Show QR code for a single saved distribution row
         $scope.ShowQRCode = function (item) {
             if (!item || !item.DistributionID) return;
@@ -601,9 +625,10 @@ else
                     if (e.rowType === "data") {
                         e.rowElement.addClass("ri-row-animate");
                         e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css("border-bottom", "1px solid #e2e8f0");
                     }
                 },
-                height: 'calc(100vh - 210px)',
+                height: '100%',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
@@ -630,37 +655,17 @@ else
                 pager: { 
                     visible: false 
                 },
-                searchPanel: {
+                searchPanel: { visible: false },
+                filterRow: {
                     visible: true,
-                    width: 280,
-                    placeholder: 'Search all distributions...'
-                },
-                filterRow: { 
-                    visible: true, 
                     applyFilter: 'auto'
                 },
                 headerFilter: { visible: true },
-                export: {
-                    enabled: @(ViewBag.IsAdmin == true || (ViewBag.CanExport != null && (bool)ViewBag.CanExport) || (ViewBag.CanAdd != null && (bool)ViewBag.CanAdd) ? "true" : "false"),
-                    formats: ['xlxs'],
-                    allowExportSelectedData: false
-                },
-                onExporting: function (e) {
-                    if (e.format === 'xlxs') {
-                        if (typeof ExcelJS !== 'undefined') {
-                            var workbook = new ExcelJS.Workbook();
-                            var worksheet = workbook.addWorksheet('RoughDistribution');
-                            DevExpress.excelExporter.exportDataGrid({
-                                component: e.component,
-                                worksheet: worksheet,
-                                autoFilterEnabled: true
-                            }).then(function () {
-                                workbook.xlsx.writeBuffer().then(function (buffer) {
-                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RoughDistributionList.xlsx');
-                                });
-                            });
-                        }
-                    }
+                export: { enabled: false },
+                onToolbarPreparing: function (e) {
+                    // Column chooser / export / search are rendered in the
+                    // card header above instead of the grid's own toolbar row.
+                    e.toolbarOptions.items = [];
                 },
                 columns: [
                     {
@@ -878,7 +883,7 @@ else
                     },
                     {
                         caption: 'Action',
-                        width: 125,
+                        width: 165,
                         alignment: 'center',
                         fixed: true,
                         fixedPosition: 'right',
@@ -895,6 +900,21 @@ else
                                     e.stopPropagation();
                                     $scope.$apply(function () {
                                         $scope.ShowQRCode(options.data);
+                                    });
+                                })
+                                .appendTo(group);
+
+                            // Upload Images button - always available (the VIEW column only
+                            // shows once IsImageUpload is already true, so this is the only
+                            // way to upload the *first* image for a distribution).
+                            $("<button>")
+                                .addClass("grid-action-btn-edit")
+                                .attr("title", "Upload Images")
+                                .html('<i class="fa fa-cloud-upload"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () {
+                                        $scope.OpenUploadModal(options.data);
                                     });
                                 })
                                 .appendTo(group);

@@ -3,312 +3,604 @@
     Layout = "~/Views/Shared/_MainLayout.cshtml";
 }
 
-
-<div ng-controller="Diamond" class="lot-page">
-    <!-- Header Banner Card (Clean Title & Breadcrumb without Action Buttons) -->
-    <div class="lot-header-card">
-        <div class="lot-header-left">
-            <div class="lot-header-icon">
-                <i class="fa fa-cubes"></i>
+<div ng-controller="LotMasterCtrl" class="rough-dist-list-page">
+    <!-- DataGrid Container Card -->
+    <div class="rdl-grid-card">
+        <div class="rdl-card-header">
+            <div class="rdl-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Lot Master</h3>
+                <span class="badge-status-pill badge-pill-info">
+                    <i class="fa fa-database"></i> {{List.length}} Total Records
+                </span>
             </div>
-            <div>
-                <div class="lot-breadcrumb">
-                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
-                    <span>Master</span> / 
-                    <span>Lot Master</span>
+            <div class="rdl-card-actions" style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn-rdl-add" ng-click="OpenAddNew()" title="Open Lot Entry in new tab">
+                    <i class="fa fa-plus-circle"></i> New Lot
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                    <i class="fa fa-columns"></i>
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                    <i class="fa fa-file-excel-o"></i>
+                </button>
+                <div class="field-select-wrap" style="width: 220px;">
+                    <input type="text"
+                           ng-model="SearchText"
+                           ng-change="OnSearchChange()"
+                           placeholder="Search lot records..."
+                           class="form-control rd-input"
+                           style="height: 32px; padding: 4px 10px;" />
                 </div>
-                <h4 class="lot-header-title">Lot Master</h4>
+            </div>
+        </div>
+        <div class="rdl-grid-body">
+            <div class="uigrid">
+                <div id="lotGridContainer" style="width: 100%;"></div>
             </div>
         </div>
     </div>
 
-    <!-- DataGrid Container Card with Left-Aligned Actions Toolbar Above Grid -->
-    <div class="lot-grid-card">
-        <div class="lot-card-header">
-            <div class="lot-toolbar-left">
-                <!-- Title & Record Count -->
-                <div class="lot-title-badge-wrap">
-                    <i class="fa fa-table lot-title-icon"></i>
-                    <h3 class="lot-card-title">Lot Records</h3>
-                    <span class="badge-status-pill badge-pill-info">
-                        <i class="fa fa-database"></i> {{List.length || 0}} Total
-                    </span>
-                </div>
-
-                <!-- Left-Aligned Actions Toolbar -->
-                <div class="lot-actions-toolbar">
-                    <div class="lot-upload-group">
-                        <input id="LotExcel" 
-                               type="file" 
-                               accept=".xlsx,.csv" 
-                               file-model="Diamond.LotExcel" 
-                               ng-model="Diamond.LotExcel" 
-                               style="display:none;" 
-                               onchange="angular.element(this).scope().onFileSelected(this)" />
-                        <label for="LotExcel" class="btn-lot-choose" title="Click to choose Excel or CSV file">
-                            <i class="fa fa-file-excel-o" style="color: #10b981; font-size: 13px;"></i> 
-                            <span>{{selectedFileName || 'Choose File'}}</span>
-                        </label>
-                        <button type="button" class="btn-lot-upload" ng-click="LotUpload()" title="Upload selected Excel file">
-                            <i class="fa fa-cloud-upload"></i> Upload
-                        </button>
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="ConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-exclamation-triangle" style="color: #ef4444; font-size: 18px;"></i>
+                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important;">Confirm Delete Lot</h4>
                     </div>
-                    <button type="button" class="btn-lot-refresh" ng-click="FatchData()" title="Reload Lot records">
-                        <i class="fa fa-refresh"></i> Refresh
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #ffffff;">
+                    <div class="delete-dialog-content">
+                        <div class="delete-warning-icon">
+                            <i class="fa fa-trash-o"></i>
+                        </div>
+                        <h4 class="delete-dialog-title">Remove Lot?</h4>
+                        <p class="delete-dialog-text">
+                            Are you sure you want to delete Lot <strong>{{SelectedDeleteItem.LotCode}}</strong>
+                            ({{SelectedDeleteItem.Lot_Pcs}} Pcs, {{SelectedDeleteItem.Lot_Carat}} Cts)?
+                            <br /><br />
+                            <small class="text-muted"><i class="fa fa-info-circle"></i> Its pcs/carat will be returned to the parent distribution's pending balance.</small>
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button">
+                        <i class="fa fa-trash"></i> Yes, Delete
                     </button>
                 </div>
             </div>
         </div>
-        <div class="lot-grid-body">
-            <div class="uigrid">
-                <div id="gridContainer" style="width:100%;"></div>
+    </div>
+
+    <!-- Upload Lot Images Modal -->
+    <div class="modal fade" id="UploadLotImageModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content" style="border-radius: 12px; border: 1px solid #334155; box-shadow: 0 20px 45px rgba(0,0,0,0.35); overflow: hidden; background: #ffffff;">
+                <div class="modal-header" style="background: #0f172a; color: #ffffff; padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="modal-header-brand" style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa fa-cloud-upload" style="color: #38bdf8; font-size: 18px;"></i>
+                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important; font-size: 15px;">Upload Lot Images</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #f8fafc; padding: 20px;">
+                    <div style="background: #ffffff; border-radius: 10px; padding: 14px; margin-bottom: 14px; border: 1px solid #e2e8f0;">
+                        <div class="row">
+                            <div class="col-xs-12 rdl-modal-form-group" style="margin-bottom: 0;">
+                                <label class="rdl-modal-label">Selected Lot Code</label>
+                                <input type="text" class="rdl-modal-input" ng-model="UploadModel.LotCode" readonly style="background: #f1f5f9; font-weight: 700; color: #0369a1;" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="image-dropzone">
+                        <input type="file" id="lotImageFiles" multiple accept="image/*" onchange="angular.element(this).scope().OnFileSelected(this)" />
+                        <div class="dropzone-icon">
+                            <i class="fa fa-cloud-upload"></i>
+                        </div>
+                        <div class="dropzone-text">Click or Drag &amp; Drop Images Here</div>
+                        <div class="dropzone-hint">Supports multiple JPG, PNG, WEBP files (Max 10MB per image)</div>
+                    </div>
+
+                    <div class="selected-files-list" ng-if="UploadModel.Files && UploadModel.Files.length > 0">
+                        <div class="selected-file-item" ng-repeat="f in UploadModel.Files">
+                            <div class="selected-file-name">
+                                <i class="fa fa-file-image-o" style="color: #0284c7;"></i>
+                                <span>{{f.name}}</span>
+                            </div>
+                            <span class="selected-file-size">{{f.size}}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #ffffff; padding: 12px 20px; border-top: 1px solid #e2e8f0;">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsUploading">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-rdl-add" ng-click="SubmitUploadImages()" type="button" style="padding: 7px 18px !important; font-size: 12.5px !important;" ng-disabled="IsUploading || !UploadModel.Files || UploadModel.Files.length === 0">
+                        <span ng-if="!IsUploading"><i class="fa fa-upload"></i> UPLOAD</span>
+                        <span ng-if="IsUploading"><i class="fa fa-spinner fa-spin"></i> Uploading...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Lot Images Modal -->
+    <div class="modal fade" id="ViewLotImageModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden; background: #0f172a;">
+                <div class="modal-header" style="background: #0f172a; color: #ffffff; padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="modal-header-brand" style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa fa-picture-o" style="color: #38bdf8; font-size: 18px;"></i>
+                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important; font-size: 15px;">Lot Images - {{ActiveLotCode}}</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                </div>
+                <div class="modal-body" style="background: #0b1320; padding: 16px;">
+                    <div ng-if="IsLoadingImages" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                        <i class="fa fa-spinner fa-spin" style="font-size: 32px; color: #38bdf8; margin-bottom: 12px;"></i>
+                        <div>Loading Lot Images...</div>
+                    </div>
+
+                    <div ng-if="!IsLoadingImages && (!ImageList || ImageList.length === 0)" style="text-align: center; padding: 50px 20px; color: #94a3b8;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.06); display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #64748b; margin-bottom: 14px;">
+                            <i class="fa fa-picture-o"></i>
+                        </div>
+                        <h4 style="color: #f8fafc; font-size: 16px; margin-bottom: 6px;">No Images Found</h4>
+                        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">There are no uploaded images for Lot {{ActiveLotCode}} yet.</p>
+                        <button class="btn btn-rdl-add" style="font-size: 12px; padding: 7px 14px;" ng-click="OpenUploadModal(ActiveViewRow)" data-dismiss="modal">
+                            <i class="fa fa-cloud-upload"></i> Upload Images Now
+                        </button>
+                    </div>
+
+                    <div ng-if="!IsLoadingImages && ImageList && ImageList.length > 0">
+                        <div class="image-viewer-container">
+                            <button class="viewer-nav-btn viewer-prev-btn" ng-click="PrevImage()" ng-if="ImageList.length > 1" title="Previous Image (Left Arrow)">
+                                <i class="fa fa-chevron-left"></i>
+                            </button>
+
+                            <div class="viewer-main-img-wrap">
+                                <img ng-src="{{ImageList[ActiveImageIndex].ImagePath}}"
+                                     alt="Lot Image"
+                                     class="viewer-main-img"
+                                     onerror="this.src='/Content/images/Symbol1.png';" />
+                            </div>
+
+                            <button class="viewer-nav-btn viewer-next-btn" ng-click="NextImage()" ng-if="ImageList.length > 1" title="Next Image (Right Arrow)">
+                                <i class="fa fa-chevron-right"></i>
+                            </button>
+
+                            <div class="preview-counter-pill" ng-if="ImageList.length > 0">
+                                {{ActiveImageIndex + 1}} / {{ImageList.length}}
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 4px 4px 4px; color: #94a3b8; font-size: 12px; flex-wrap: wrap; gap: 8px;">
+                            <div>
+                                <i class="fa fa-clock-o"></i> Uploaded: <strong style="color: #e2e8f0;">{{ImageList[ActiveImageIndex].Created || '-'}}</strong>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" target="_blank" class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);" title="Open original in new tab">
+                                    <i class="fa fa-external-link"></i> Full View
+                                </a>
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" download class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3);" title="Download image">
+                                    <i class="fa fa-download"></i> Download
+                                </a>
+                                <button type="button"
+                                        class="btn btn-xs"
+                                        style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); margin-left: 6px;"
+                                        ng-click="DeleteCurrentImage()"
+                                        title="Delete this image">
+                                    <i class="fa fa-trash-o"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="viewer-thumb-strip" ng-if="ImageList.length > 1">
+                            <div class="viewer-thumb-item"
+                                 ng-repeat="img in ImageList"
+                                 ng-class="{'active': $index === ActiveImageIndex}"
+                                 ng-click="SelectImage($index)">
+                                <img ng-src="{{img.ImagePath}}" class="viewer-thumb-img" onerror="this.src='/Content/images/Symbol1.png';" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #0f172a; border-top: 1px solid #1e293b; padding: 12px 20px;">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" style="background: #1e293b; color: #cbd5e1; border-color: #334155;">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    let DataField = [];
-    let DataFieldSummary = [];
-    let List = [];
-
-    var module;
+    var appModule;
     try {
-        module = angular.module('app');
+        appModule = angular.module('app');
     } catch (e) {
-        module = angular.module('app', ['frapontillo.bootstrap-duallistbox', 'ngTouch', 'angularjs-dropdown-multiselect']);
+        appModule = angular.module('app', ['ngAnimate', 'ngTouch', 'angularjs-dropdown-multiselect']);
     }
 
-    module.directive('chosen', function () {
-        return {
-            restrict: 'A',
-            link(scope, element, attrs) {
-                scope.$watch(attrs.ngModel, () => element.trigger('chosen:updated'));
-                element.chosen();
+    appModule.controller("LotMasterCtrl", ['$scope', '$http', function ($scope, $http) {
+        $scope.List = [];
+        $scope.IsLoading = false;
+        $scope.SelectedDeleteItem = null;
+
+        // Image Upload & Viewer State
+        $scope.UploadModel = { LotID: null, LotCode: '', Files: [] };
+        $scope.IsUploading = false;
+        $scope.ActiveLotCode = '';
+        $scope.ActiveViewRow = null;
+        $scope.ImageList = [];
+        $scope.ActiveImageIndex = 0;
+        $scope.IsLoadingImages = false;
+
+        $scope.OpenAddNew = function () {
+            var url = '@Url.Action("LotEntry", "Master")';
+            if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
+                window.top.ChromeTabs.openTab({ title: 'Lot Entry', url: url, forceReload: true });
+            } else {
+                window.open(url, '_blank');
             }
         };
-    });
 
-    module.controller("Diamond", ['$scope', '$http', function ($scope, $http) {
-        $scope.Diamond = {};
-        $scope.List = [];
-        $scope.selectedFileName = "";
+        $scope.OpenEdit = function (row) {
+            var id = row ? (row.LotID || 0) : 0;
+            var url = '@Url.Action("LotEntry", "Master")';
+            if (id && parseInt(id) > 0) {
+                url += '?id=' + parseInt(id);
+            }
+            if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
+                window.top.ChromeTabs.openTab({ title: 'Lot Entry', url: url, forceReload: true });
+            } else {
+                window.open(url, '_blank');
+            }
+        };
 
-        $scope.onFileSelected = function (input) {
+        $scope.FetchData = function () {
+            $scope.IsLoading = true;
+            if (typeof show_loader === 'function') show_loader();
+
+            $http.get('@Url.Action("GetData_For_MST_Lot", "Master")').then(function (response) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                $scope.List = (response.data && response.data.List) ? response.data.List : [];
+                $scope.InitGrid();
+            }, function () {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                Noty("error", "Error loading lot list from server.");
+            });
+        };
+
+        $scope.SearchText = '';
+        $scope.OnSearchChange = function () {
+            var gridInstance = $("#lotGridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $("#lotGridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $("#lotGridContainer").dxDataGrid("instance");
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('Lot');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Lot.xlsx');
+                });
+            });
+        };
+
+        $scope.OpenUploadModal = function (row) {
+            $scope.UploadModel = {
+                LotID: row ? row.LotID : null,
+                LotCode: row ? (row.LotCode || '') : '',
+                Files: []
+            };
+            $('#lotImageFiles').val('');
+            $('#UploadLotImageModal').modal('show');
+        };
+
+        $scope.OnFileSelected = function (element) {
             $scope.$apply(function () {
-                if (input.files && input.files.length > 0) {
-                    $scope.selectedFileName = input.files[0].name;
-                } else {
-                    $scope.selectedFileName = "";
+                $scope.UploadModel.Files = [];
+                if (element.files && element.files.length > 0) {
+                    for (var i = 0; i < element.files.length; i++) {
+                        $scope.UploadModel.Files.push({
+                            name: element.files[i].name,
+                            size: (element.files[i].size / 1024).toFixed(1) + ' KB'
+                        });
+                    }
                 }
             });
         };
 
-        $scope.FatchData = function () {
-            if (typeof show_loader === 'function') show_loader();
-            $http({
-                method: "POST",
-                url: '@Url.Action("GetData_For_MST_Lot", "Master")',
-            }).then(function (response) {
-                if (typeof hide_loader === 'function') hide_loader();
-                List = response.data.List || [];
-                $scope.List = List;
-                DataField = response.data.DataField || [];
-                DataFieldSummary = response.data.DataFieldSummary || [];
-                DataFieldSummary.forEach(function (s) { s.alignByColumn = true; });
+        $scope.SubmitUploadImages = function () {
+            var fileInput = document.getElementById('lotImageFiles');
+            if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                Noty("error", "Please select at least one image to upload.");
+                return;
+            }
 
-                $scope.BuildGridColumns(DataField);
+            var formData = new FormData();
+            formData.append("LotID", $scope.UploadModel.LotID);
+            for (var i = 0; i < fileInput.files.length; i++) {
+                formData.append("file_" + i, fileInput.files[i]);
+            }
+
+            $scope.IsUploading = true;
+            $http.post('@Url.Action("Upload_Lot_Images", "Master")', formData, {
+                transformRequest: angular.identity,
+                headers: { 'Content-Type': undefined }
+            }).then(function (res) {
+                $scope.IsUploading = false;
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Images uploaded successfully!");
+                    $('#UploadLotImageModal').modal('hide');
+                    $('#lotImageFiles').val('');
+                    $scope.UploadModel.Files = [];
+                    $scope.FetchData();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Upload failed.");
+                }
+            }, function () {
+                $scope.IsUploading = false;
+                Noty("error", "Error uploading images to server.");
+            });
+        };
+
+        $scope.OpenViewModal = function (row) {
+            $scope.ActiveViewRow = row;
+            $scope.ActiveLotCode = row ? (row.LotCode || '') : '';
+            $scope.ImageList = [];
+            $scope.ActiveImageIndex = 0;
+            $scope.IsLoadingImages = true;
+
+            $('#ViewLotImageModal').modal('show');
+
+            $http.get('@Url.Action("Get_Lot_Images", "Master")?LotID=' + (row ? row.LotID : 0)).then(function (res) {
+                $scope.IsLoadingImages = false;
+                if (res.data && res.data.list) {
+                    $scope.ImageList = res.data.list;
+                    $scope.ActiveImageIndex = 0;
+                }
+            }, function () {
+                $scope.IsLoadingImages = false;
+                Noty("error", "Failed to load images from server.");
+            });
+        };
+
+        $scope.PrevImage = function () {
+            if ($scope.ImageList && $scope.ImageList.length > 1) {
+                $scope.ActiveImageIndex = ($scope.ActiveImageIndex - 1 + $scope.ImageList.length) % $scope.ImageList.length;
+            }
+        };
+
+        $scope.NextImage = function () {
+            if ($scope.ImageList && $scope.ImageList.length > 1) {
+                $scope.ActiveImageIndex = ($scope.ActiveImageIndex + 1) % $scope.ImageList.length;
+            }
+        };
+
+        $scope.SelectImage = function (index) {
+            if (index >= 0 && index < $scope.ImageList.length) {
+                $scope.ActiveImageIndex = index;
+            }
+        };
+
+        $scope.DeleteCurrentImage = function () {
+            var currentImg = $scope.ImageList[$scope.ActiveImageIndex];
+            if (!currentImg || !currentImg.ID) return;
+            if (!confirm("Are you sure you want to permanently delete this image?")) return;
+
+            $http.post('@Url.Action("Delete_Lot_Image", "Master")', { imageId: currentImg.ID }).then(function (res) {
+                if (res.data && res.data.success) {
+                    Noty("success", "Image deleted successfully!");
+                    $scope.ImageList.splice($scope.ActiveImageIndex, 1);
+                    if ($scope.ImageList.length > 0) {
+                        if ($scope.ActiveImageIndex >= $scope.ImageList.length) {
+                            $scope.ActiveImageIndex = $scope.ImageList.length - 1;
+                        }
+                    } else {
+                        $('#ViewLotImageModal').modal('hide');
+                        $scope.FetchData();
+                    }
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to delete image.");
+                }
+            }, function () {
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        $scope.ShowQRCode = function (item) {
+            if (!item || !item.LotID) return;
+            if (typeof show_loader === 'function') show_loader();
+            $http.post('@Url.Action("GenerateLotQRs", "Master")', { lotIDs: [item.LotID] }).then(function (res) {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (res.data && res.data.success) {
+                    window.open('@Url.Action("LotQRPrint", "Master")', '_blank');
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to generate QR code.");
+                }
             }, function () {
                 if (typeof hide_loader === 'function') hide_loader();
-                if (typeof Noty === 'function') {
-                    Noty("error", "Failed to fetch lot data.");
-                }
+                Noty("error", "Error connecting to server.");
             });
         };
 
-        // Format Grid Columns (Exact same structure as EmployeeDetail.cshtml)
-        $scope.BuildGridColumns = function (dataFields) {
-            var gridColumns = [];
+        $scope.PromptDelete = function (item) {
+            $scope.SelectedDeleteItem = item;
+            $("#ConfirmDeleteModal").modal("show");
+        };
 
-            // 1. Index / Serial # Column
-            gridColumns.push({
-                caption: '#',
-                width: 55,
-                alignment: 'center',
-                allowReordering: false,
-                fixed: true,
-                fixedPosition: 'left',
-                cellTemplate: function (container, options) {
-                    $("<span>")
-                        .text(options.rowIndex + 1)
-                        .css({ "font-weight": "600", "color": "#64748b" })
-                        .appendTo(container);
-                }
-            });
-
-            // 2. Dynamic Backend Columns
-            if (dataFields && dataFields.length > 0) {
-                angular.forEach(dataFields, function (field) {
-                    var col = angular.copy(field);
-                    var fieldKey = (col.dataField || '').toLowerCase();
-
-                    // Minimum column width for aesthetic readability
-                    if (!col.minWidth && !col.width) {
-                        col.minWidth = 110;
-                    }
-
-                    // Special formatting for Dates
-                    if (fieldKey.indexOf('date') !== -1) {
-                        col.minWidth = 120;
-                        col.dataType = 'date';
-                        col.format = 'dd-MMM-yyyy';
-                        col.alignment = 'center';
-                    }
-
-                    gridColumns.push(col);
-                });
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem || !$scope.SelectedDeleteItem.LotID) {
+                $("#ConfirmDeleteModal").modal("hide");
+                return;
             }
 
-            $scope.InitGrid(gridColumns);
+            $scope.IsLoading = true;
+            $http.post('@Url.Action("Lot_Delete", "Master")', { LotID: $scope.SelectedDeleteItem.LotID }).then(function (res) {
+                $scope.IsLoading = false;
+                $("#ConfirmDeleteModal").modal("hide");
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Lot deleted successfully.");
+                    $scope.FetchData();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to delete lot.");
+                }
+            }, function () {
+                $scope.IsLoading = false;
+                $("#ConfirmDeleteModal").modal("hide");
+                Noty("error", "Error connecting to server.");
+            });
         };
 
-        // DevExtreme Grid Initialization (Identical Configuration to EmployeeDetail.cshtml)
-        $scope.InitGrid = function (columns) {
-            $("#gridContainer").dxDataGrid({
+        $scope.InitGrid = function () {
+            $("#lotGridContainer").dxDataGrid({
                 dataSource: $scope.List,
-                keyExpr: 'ID',
-                columns: columns,
+                keyExpr: 'LotID',
                 onRowPrepared: function (e) {
                     if (e.rowType === "data") {
                         e.rowElement.addClass("ri-row-animate");
                         e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
                     }
                 },
-                height: 'calc(100vh - 210px)',
+                height: '100%',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
                 allowColumnReordering: true,
-                columnChooser: {
-                    enabled: true,
-                    mode: 'select'
-                },
-                columnFixing: {
-                    enabled: true
-                },
+                columnChooser: { enabled: true, mode: 'select' },
+                columnFixing: { enabled: true },
                 showColumnLines: true,
                 showRowLines: true,
                 showBorders: true,
                 rowAlternationEnabled: true,
                 wordWrapEnabled: false,
-                sorting: { mode: "multiple" },
-                scrolling: {
-                    mode: 'virtual'
-                },
-                paging: { 
-                    enabled: false 
-                },
-                pager: { 
-                    visible: false 
-                },
-                searchPanel: { 
-                    visible: true, 
-                    width: 280, 
-                    placeholder: 'Search lot records...' 
-                },
-                filterRow: { 
-                    visible: true, 
-                    applyFilter: 'auto' 
-                },
+                sorting: { mode: "single" },
+                scrolling: { mode: 'virtual' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: false },
+                filterRow: { visible: true, applyFilter: 'auto' },
                 headerFilter: { visible: true },
-                selection: {
-                    mode: 'single'
+                export: { enabled: false },
+                onToolbarPreparing: function (e) {
+                    // Column chooser / export / search are rendered in the card
+                    // header above the grid instead of the grid's own toolbar row.
+                    e.toolbarOptions.items = [];
                 },
-                summary: {
-                    totalItems: DataFieldSummary
-                },
-                export: {
-                    enabled: true,
-                    formats: ['xlxs'],
-                    allowExportSelectedData: false
-                },
-                onExporting: function (e) {
-                    if (e.format === 'xlxs') {
-                        if (typeof ExcelJS !== 'undefined') {
-                            var workbook = new ExcelJS.Workbook();
-                            var worksheet = workbook.addWorksheet('Lot Details');
+                columns: [
+                    {
+                        caption: '#',
+                        width: 55,
+                        alignment: 'center',
+                        allowReordering: false,
+                        fixed: true,
+                        fixedPosition: 'left',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'R.Code', dataField: 'RCode', minWidth: 110 },
+                    { caption: 'Branch', dataField: 'BranchName', minWidth: 110 },
+                    { caption: 'Department', dataField: 'DepartmentShortName', minWidth: 100 },
+                    { caption: 'Lot Code', dataField: 'LotCode', minWidth: 120 },
+                    { caption: 'Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 80, alignment: 'center' },
+                    { caption: 'Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 90, alignment: 'center' },
+                    { caption: 'Priority', dataField: 'LotPriority', minWidth: 90 },
+                    { caption: 'Created Date', dataField: 'CreatedDate', minWidth: 110, alignment: 'center' },
+                    { caption: 'Factory Code', dataField: 'FactoryCode', minWidth: 100 },
+                    { caption: 'Color Type', dataField: 'ColorType', minWidth: 100 },
+                    { caption: 'Size Code', dataField: 'SizeCodeType', minWidth: 100 },
+                    { caption: 'Rough Rate', dataField: 'RoughRate', dataType: 'number', minWidth: 90, alignment: 'center' },
+                    { caption: 'Remarks', dataField: 'Remarks', minWidth: 140 },
+                    {
+                        caption: 'Action',
+                        width: 200,
+                        alignment: 'center',
+                        fixed: true,
+                        fixedPosition: 'right',
+                        allowReordering: false,
+                        cellTemplate: function (container, options) {
+                            var group = $("<div>").addClass("grid-btn-group");
 
-                            DevExpress.excelExporter.exportDataGrid({
-                                component: e.component,
-                                worksheet: worksheet,
-                                autoFilterEnabled: true
-                            }).then(function () {
-                                workbook.xlsx.writeBuffer().then(function (buffer) {
-                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Lot.xlsx');
-                                });
-                            });
+                            $("<button>")
+                                .addClass("grid-action-btn-edit")
+                                .attr("title", "Open in Lot Entry")
+                                .html('<i class="fa fa-external-link"></i>')
+                                .on("click", function () {
+                                    $scope.$apply(function () { $scope.OpenEdit(options.data); });
+                                })
+                                .appendTo(group);
+
+                            $("<button>")
+                                .addClass("grid-action-btn-edit")
+                                .attr("title", "Show QR Code")
+                                .html('<i class="fa fa-qrcode"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () { $scope.ShowQRCode(options.data); });
+                                })
+                                .appendTo(group);
+
+                            $("<button>")
+                                .addClass("grid-action-btn-edit")
+                                .attr("title", "Upload Images")
+                                .html('<i class="fa fa-cloud-upload"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () { $scope.OpenUploadModal(options.data); });
+                                })
+                                .appendTo(group);
+
+                            $("<button>")
+                                .addClass("grid-action-btn-edit")
+                                .attr("title", "View Images")
+                                .html('<i class="fa fa-picture-o"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () { $scope.OpenViewModal(options.data); });
+                                })
+                                .appendTo(group);
+
+                            $("<button>")
+                                .addClass("grid-action-btn-del")
+                                .attr("title", "Delete Lot")
+                                .html('<i class="fa fa-trash"></i>')
+                                .on("click", function () {
+                                    $scope.$apply(function () { $scope.PromptDelete(options.data); });
+                                })
+                                .appendTo(group);
+
+                            group.appendTo(container);
                         }
                     }
-                }
+                ]
             });
         };
 
-        $scope.FatchData();
-
-        $scope.LotUpload = function () {
-            var fileElem = document.getElementById('LotExcel');
-            var file = fileElem ? fileElem.files : [];
-
-            if (file.length > 0) {
-                var formData = new FormData();
-                for (var i = 0; i < file.length; i++) {
-                    formData.append("excelFile", file[i]);
-                }
-                if (typeof show_loader === 'function') show_loader();
-
-                $http({
-                    method: 'POST',
-                    asyc: false,
-                    url: '@Url.Action("LotCode_Insert_Using_Excel", "Master")',
-                    headers: { 'Content-Type': undefined },
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                }).then(function (ret) {
-                    if (typeof hide_loader === 'function') hide_loader();
-                    if (ret.data && ret.data.Message == "Records inserted successfully") {
-                        if (typeof Noty === 'function') {
-                            Noty("success", ret.data.Message);
-                        } else {
-                            alert(ret.data.Message);
-                        }
-                        $scope.FatchData();
-                        if (fileElem) fileElem.value = "";
-                        $scope.selectedFileName = "";
-                    }
-                    else {
-                        var msg = (ret.data && ret.data.Message) ? ret.data.Message : "Error inserting records.";
-                        if (typeof Noty === 'function') {
-                            Noty("error", msg);
-                        } else {
-                            alert(msg);
-                        }
-                    }
-                }, function () {
-                    if (typeof hide_loader === 'function') hide_loader();
-                    if (typeof Noty === 'function') {
-                        Noty("error", "Error uploading file.");
-                    } else {
-                        alert("Error uploading file.");
-                    }
-                });
-            } else {
-                if (typeof Noty === 'function') {
-                    Noty("warning", "Please select an Excel / CSV file to upload.");
-                } else {
-                    alert("Please select an Excel / CSV file to upload.");
-                }
-            }
-        };
+        $scope.FetchData();
     }]);
 </script>

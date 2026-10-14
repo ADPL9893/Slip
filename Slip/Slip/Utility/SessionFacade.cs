@@ -17,6 +17,7 @@ namespace Slip.Utility
         private const string _FormPermissionsGroup = "FormPermissionsGroup";
         private const string _QRGenerateNew = "QRGenerateNew";
         private const string _RoughDistributionQRNew = "RoughDistributionQRNew";
+        private const string _LotQRNew = "LotQRNew";
         #endregion
 
         #region::Public Property::
@@ -128,6 +129,18 @@ namespace Slip.Utility
             set
             {
                 HttpContext.Current.Session[_RoughDistributionQRNew] = value;
+            }
+        }
+
+        public static List<LotQRList> LotQRList
+        {
+            get
+            {
+                return (List<LotQRList>)HttpContext.Current.Session[_LotQRNew];
+            }
+            set
+            {
+                HttpContext.Current.Session[_LotQRNew] = value;
             }
         }
     }

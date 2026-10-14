@@ -5,9 +5,17 @@
 
 
 <div ng-controller="Diamond" class="pricing-container">
-    <div class="page-title">
-        <div style="flex: 1 1 auto;">
-            <h4 class="font-green-sharp"><b>Stock Pricing</b></h4>
+    <div class="field-page-header">
+        <div class="field-page-header-left">
+            <div class="field-page-header-icon">
+                <i class="fa fa-diamond"></i>
+            </div>
+            <div>
+                <div class="field-page-header-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / <span>Stock Pricing</span>
+                </div>
+                <h4>Stock Pricing</h4>
+            </div>
         </div>
     </div>
     <div class="row">
@@ -18,7 +26,7 @@
                         <!-- Grad (Hidden from direct view in screenshot but needed for logic, kept visible for functionality) -->
                         <div class="filter-group">
                             <label>Grad</label>
-                            <div class="filter-select-wrap" style="width: 120px;">
+                            <div class="filter-select-wrap field-select-wrap" style="width: 120px;">
                                 <select id="GradType" tabindex="3" chosen="GetGradType" class="form-control input-sm" ng-change="GetSize(Diamond.Shape,Diamond.GradType);removeGrid()" ng-model="Diamond.GradType">
                                     <option value="">Select</option>
                                     <option value="GR">GR</option>
@@ -29,7 +37,7 @@
                         <!-- Shape -->
                         <div class="filter-group">
                             <label>Shape</label>
-                            <div class="filter-select-wrap" style="width: 150px;">
+                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
                                 <select id="Shape" tabindex="2" chosen="GetDIAShapeList" class="form-control input-sm" ng-change="GetSize(Diamond.Shape,Diamond.GradType);removeGrid()" ng-options="item.id as item.value for item in GetDIAShapeList" ng-model="Diamond.Shape">
                                     <option value="">Select</option>
                                 </select>
@@ -39,7 +47,7 @@
                         <!-- Size -->
                         <div class="filter-group">
                             <label>Size</label>
-                            <div class="filter-select-wrap" style="width: 350px;">
+                            <div class="filter-select-wrap field-select-wrap" style="width: 350px;">
                                 <select id="SizeID" tabindex="1" chosen="GetDIASizeList" class="form-control input-sm" ng-options="item.id as item.value for item in GetDIASizeList" ng-change="removeGrid()" ng-model="Diamond.SizeID" multiple="multiple">
                                     <option value="">Select</option>
                                 </select>
@@ -92,33 +100,35 @@
                                 <i class="fa" ng-class="{'fa-caret-down': group.Expanded, 'fa-caret-right': !group.Expanded}" style="margin-right: 5px;"></i>
                                 GroupName: {{group.Name}} - Shape: {{group.ShapeName}}
                             </div>
-                            <table class="custom-table" border="1" ng-show="group.Expanded">
-                                <thead>
-                                    <tr>
-                                        <th class="col-header-color">Color</th>
-                                        <th ng-repeat="item in GetMSTClarityWithClarityList">
-                                            {{item.value}}
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr ng-repeat="row in group.Rows">
-                                        <td style="font-weight:bold;">{{row.ColorName}}</td>
-                                        <!-- Clarity Columns -->
-                                        <td contenteditable='{{isEditable}}'
-                                            ng-class="{'editable': isEditable}"
-                                            ng-repeat="clarityCol in GetMSTClarityWithClarityList"
-                                            id="cell-{{$parent.$index}}-{{$index}}"
-                                            ng-right-click="GetPriceHistory(group, row.id, clarityCol.id)"
-                                            ng-keydown="HandleKeydown($event, $parent.$index, $index, group, row.id, clarityCol.id)"
-                                            ng-blur="UpdateRate(group, row.id, clarityCol.id, $event)"
-                                            ng-focus="SelectAllText($event)"
-                                            ng-init="rate = GetRate(group, row.id, clarityCol.id)">
-                                            {{rate}}
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <div class="field-table-wrapper" ng-show="group.Expanded">
+                                <table class="custom-table" border="1">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-header-color">Color</th>
+                                            <th ng-repeat="item in GetMSTClarityWithClarityList">
+                                                {{item.value}}
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="row in group.Rows">
+                                            <td style="font-weight:bold;">{{row.ColorName}}</td>
+                                            <!-- Clarity Columns -->
+                                            <td contenteditable='{{isEditable}}'
+                                                ng-class="{'editable': isEditable}"
+                                                ng-repeat="clarityCol in GetMSTClarityWithClarityList"
+                                                id="cell-{{$parent.$index}}-{{$index}}"
+                                                ng-right-click="GetPriceHistory(group, row.id, clarityCol.id)"
+                                                ng-keydown="HandleKeydown($event, $parent.$index, $index, group, row.id, clarityCol.id)"
+                                                ng-blur="UpdateRate(group, row.id, clarityCol.id, $event)"
+                                                ng-focus="SelectAllText($event)"
+                                                ng-init="rate = GetRate(group, row.id, clarityCol.id)">
+                                                {{rate}}
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -142,14 +152,15 @@
                     <h5 class="modal-title" id="priceHistoryModalLabel" style="font-weight: bold; margin:0;">Price History</h5>
                 </div>
                 <div class="modal-body">
+                    <div class="field-table-wrapper">
                     <table class="table table-bordered custom-table">
                         <thead>
                             <tr>
-                                <th style="background-color: #e2eaf4;">Rate</th>
-                                <th style="background-color: #e2eaf4;">Entry Type</th>
-                                <th style="background-color: #e2eaf4;">Created Date</th>
-                                <th style="background-color: #e2eaf4;">Entry By</th>
-                                <th style="background-color: #e2eaf4;">Remarks</th>
+                                <th>Rate</th>
+                                <th>Entry Type</th>
+                                <th>Created Date</th>
+                                <th>Entry By</th>
+                                <th>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -165,6 +176,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

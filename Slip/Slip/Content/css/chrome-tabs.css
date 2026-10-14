@@ -29,18 +29,16 @@ html.in-tab-iframe .chrome-tabs-dropdown-menu {
     display: none !important;
 }
 
-/* Make child page content take full viewport height cleanly */
-html.in-tab-iframe .content-wrapper,
-html.in-tab-iframe body.fixed .content-wrapper,
-html.in-tab-iframe div.content-wrapper {
-    margin: 0 !important;
-    padding: 10px 14px 10px 14px !important;
-    min-height: 100vh !important;
-    height: auto !important;
-    background-color: #f1f5f9 !important;
-    box-sizing: border-box !important;
-}
-
+    html.in-tab-iframe .content-wrapper,
+    html.in-tab-iframe body.fixed .content-wrapper,
+    html.in-tab-iframe div.content-wrapper {
+        margin: 0 !important;
+        padding: 0px 4px 0px 4px !important;
+        min-height: 100vh !important;
+        height: auto !important;
+        background-color: #f1f5f9 !important;
+        box-sizing: border-box !important;
+    }
 /* Dark mode support inside iframe */
 html.in-tab-iframe[data-theme="dark"],
 html.in-tab-iframe[data-theme="dark"] body,
@@ -79,16 +77,16 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
 .chrome-tab-bar {
     display: flex;
     align-items: stretch;
-    height: 38px;
-    min-height: 38px;
-    max-height: 38px;
-    background: var(--topbar-bg, linear-gradient(180deg, #2A3F8F, #1C2B6B)) !important;
-    border-bottom: 1px solid var(--topbar-border, rgba(255, 255, 255, 0.1));
+    height: 26px;
+    min-height: 23px;
+    max-height: 28px;
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0;
     position: relative;
     z-index: 9999;
-    padding: 0 8px 0 10px;
+    padding: 0 6px 0 8px;
     user-select: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.28);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     box-sizing: border-box;
 }
 
@@ -97,22 +95,22 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     display: none;
     align-items: center;
     justify-content: center;
-    width: 24px;
-    height: 28px;
+    width: 18px;
+    height: 22px;
     align-self: center;
     background: transparent;
     border: none;
     color: #94a3b8;
     cursor: pointer;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 10px;
     flex-shrink: 0;
     transition: all 0.15s ease;
 }
 
 .chrome-tab-scroll-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #38bdf8;
+    background: rgba(0, 0, 0, 0.06);
+    color: #1C2B6B;
 }
 
 .chrome-tab-scroll-btn.visible {
@@ -134,7 +132,7 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     align-items: flex-end;
     height: 100%;
     gap: 2px;
-    padding-top: 4px;
+    padding-top: 2px;
     transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1);
     will-change: transform;
 }
@@ -145,21 +143,26 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
 .chrome-tab {
     display: inline-flex;
     align-items: center;
-    height: 34px;
-    max-width: 220px;
-    min-width: 110px;
-    padding: 0 10px 0 12px;
-    border-radius: 8px 8px 0 0;
+    height: 25px;
+    max-width: 165px;
+    min-width: 75px;
+    padding: 0 8px 0 10px;
+    border-radius: 6px 19px 0px 0px;
+    /* Right edge: flat top -> concave (inner) curve -> straight diagonal ->
+       convex (outer) curve -> flat bottom, mimicking the old Chrome tab cut.
+       x must move monotonically toward 100% as y increases - no reversals,
+       or the cut renders as a jagged notch instead of a smooth curve. */
+    clip-path: polygon( 0 0, calc(100% - 10px) 0, calc(100% - 9.6px) 3px, calc(100% - 8px) 6px, calc(100% - 2.5px) 19px, calc(100% - 0.8px) 22px, 100% 25px, 0 100% );
     cursor: pointer;
     position: relative;
-    color: #ffff;
-    font-family: var(--font-ui, 'Inter', -apple-system, sans-serif);
-    font-size: 14px;
-    font-weight: 500;
+    color: #000000;
+    font-family: var(--font-ui, 'Segoe UI', -apple-system, sans-serif);
+    font-size: 11px;
+    font-weight: normal;
     transition: background 0.16s ease, color 0.16s ease, max-width 0.16s ease;
-    border: 1px solid #4f504b;
+    border: 1px solid rgba(0, 0, 0, 0.08);
     border-bottom: none;
-    background: transparent;
+    background: #e5e7eb;
     box-sizing: border-box;
     flex-shrink: 1;
 }
@@ -169,31 +172,31 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     content: "";
     position: absolute;
     right: -2px;
-    top: 9px;
-    bottom: 7px;
+    top: 5px;
+    bottom: 5px;
     width: 1px;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.1);
     pointer-events: none;
     transition: opacity 0.15s ease;
 }
 
 /* Inactive Hover */
 .chrome-tab:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #f1f5f9;
+    background: #d1d5db;
+    color: #000000;
 }
 
 .chrome-tab:hover::after {
     opacity: 0;
 }
 
-/* ACTIVE CHROME TAB (Seamless light background connecting with content) */
+/* ACTIVE CHROME TAB (Seamless dark navy background connecting with content) */
 .chrome-tab.active {
-    background: #f1f5f9 !important;
-    color: #0f172a !important;
-    font-weight: 600 !important;
-    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.18);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: #1C2B6B !important;
+    color: #ffffff !important;
+    font-weight: normal !important;
+    box-shadow: 0 -1px 4px rgba(0, 0, 0, 0.12);
+    border-color: #1C2B6B;
     z-index: 2;
 }
 
@@ -221,9 +224,9 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
 
 /* Pinned Home Tab */
 .chrome-tab.pinned {
-    min-width: 44px;
-    max-width: 90px;
-    padding: 0 10px;
+    min-width: 36px;
+    max-width: 75px;
+    padding: 0 8px;
 }
 
 /* --------------------------------------------------------------------------
@@ -233,17 +236,17 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
-    margin-right: 7px;
+    width: 13px;
+    height: 13px;
+    margin-right: 5px;
     flex-shrink: 0;
-    font-size: 13px;
-    color: #ffff;
+    font-size: 11px;
+    color: #236cbf;
     transition: color 0.15s ease;
 }
 
 .chrome-tab.active .chrome-tab-icon {
-    color: #0284c7;
+    color: #ffffff;
 }
 
 [data-theme="dark"] .chrome-tab.active .chrome-tab-icon {
@@ -251,8 +254,8 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
 }
 
 .chrome-tab-icon svg {
-    width: 14px;
-    height: 14px;
+    width: 12px;
+    height: 12px;
     stroke: currentColor;
     fill: none;
 }
@@ -262,11 +265,11 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     display: none;
     align-items: center;
     justify-content: center;
-    width: 14px;
-    height: 14px;
-    margin-right: 7px;
+    width: 12px;
+    height: 12px;
+    margin-right: 5px;
     flex-shrink: 0;
-    font-size: 12px;
+    font-size: 11px;
     color: #0284c7;
 }
 
@@ -298,12 +301,12 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
-    margin-left: 6px;
+    width: 14px;
+    height: 14px;
+    margin-left: 4px;
     border-radius: 50%;
-    color: #ffff;
-    font-size: 14px;
+    color: #374151;
+    font-size: 11px;
     flex-shrink: 0;
     background: transparent;
     border: none;
@@ -325,7 +328,7 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
 }
 
 .chrome-tab.active .chrome-tab-close {
-    color: #64748b;
+    color: #cbd5e1;
 }
 
 .chrome-tab.pinned .chrome-tab-close {
@@ -339,27 +342,27 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     background: transparent;
     border: none;
     color: #94a3b8;
     cursor: pointer;
     align-self: center;
-    margin-left: 6px;
+    margin-left: 4px;
     flex-shrink: 0;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .chrome-tab-add-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #38bdf8;
+    background: rgba(0, 0, 0, 0.06);
+    color: #1C2B6B;
     transform: scale(1.08);
 }
 
 .chrome-tab-add-btn i {
-    font-size: 12px;
+    font-size: 11px;
 }
 
 /* --------------------------------------------------------------------------
@@ -368,10 +371,10 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
 .chrome-tabs-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 3px;
     margin-left: auto;
-    padding-left: 8px;
-    border-left: 1px solid var(--topbar-border, rgba(255, 255, 255, 0.12));
+    padding-left: 6px;
+    border-left: 1px solid #e2e8f0;
     flex-shrink: 0;
     align-self: center;
 }
@@ -380,21 +383,21 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 4px;
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: #475569;
     cursor: pointer;
-    font-size: 12.5px;
+    font-size: 11px;
     padding: 0;
     transition: all 0.15s ease;
 }
 
 .chrome-tab-act-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #38bdf8;
+    background: rgba(0, 0, 0, 0.06);
+    color: #1C2B6B;
 }
 
 .chrome-tab-act-btn:active {

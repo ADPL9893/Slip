@@ -45,17 +45,19 @@
                     <label class="rd-label" for="SelectedJangadNo">
                         Select Jangad No <span class="req">*</span>
                     </label>
-                    <select id="SelectedJangadNo"
-                            chosen="JangadDropdownList"
-                            ng-model="SelectedJangadNo"
-                            ng-change="OnJangadNoChange()"
-                            ng-disabled="DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
-                            class="form-control rd-input">
-                        <option value="">-- Choose Jangad No --</option>
-                        <option ng-repeat="item in JangadDropdownList" value="{{item.JangadNo}}">
-                            {{item.JangadNo}}
-                        </option>
-                    </select>
+                    <div class="field-select-wrap">
+                        <select id="SelectedJangadNo"
+                                chosen="JangadDropdownList"
+                                ng-model="SelectedJangadNo"
+                                ng-change="OnJangadNoChange()"
+                                ng-disabled="DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
+                                class="form-control rd-input">
+                            <option value="">-- Choose Jangad No --</option>
+                            <option ng-repeat="item in JangadDropdownList" value="{{item.JangadNo}}">
+                                {{item.JangadNo}}
+                            </option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Lot No Dropdown (populated from the selected Jangad's lots) -->
@@ -63,17 +65,19 @@
                     <label class="rd-label" for="SelectedLotNo">
                         Select Lot No <span class="req">*</span>
                     </label>
-                    <select id="SelectedLotNo"
-                            chosen="LotDropdownList"
-                            ng-model="SelectedPreRoughID"
-                            ng-change="OnLotNoChange()"
-                            ng-disabled="!SelectedJangadNo || DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
-                            class="form-control rd-input">
-                        <option value="">-- Choose Lot No --</option>
-                        <option ng-repeat="item in LotDropdownList" value="{{item.PreRoughID}}">
-                            {{item.RName}}
-                        </option>
-                    </select>
+                    <div class="field-select-wrap">
+                        <select id="SelectedLotNo"
+                                chosen="LotDropdownList"
+                                ng-model="SelectedPreRoughID"
+                                ng-change="OnLotNoChange()"
+                                ng-disabled="!SelectedJangadNo || DistributionList.length > 0 || MasterLot.DistributedPcs > 0 || AllDistributionsList.length > 0 || TotalDistributedPcs > 0"
+                                class="form-control rd-input">
+                            <option value="">-- Choose Lot No --</option>
+                            <option ng-repeat="item in LotDropdownList" value="{{item.PreRoughID}}">
+                                {{item.RName}}
+                            </option>
+                        </select>
+                    </div>
                 </div>
                 <div class="clearfix visible-xs"></div>
 
@@ -198,9 +202,11 @@
                     <label class="rd-label" for="BranchID">
                         Branch <span class="req">*</span>
                     </label>
-                    <select id="BranchID" chosen="BranchList" class="form-control rd-input input-sm" ng-model="NewEntry.BranchID" ng-options="item.id as item.value for item in BranchList">
-                        <option value="">-- Select Target Branch --</option>
-                    </select>
+                    <div class="field-select-wrap">
+                        <select id="BranchID" chosen="BranchList" class="form-control rd-input input-sm" ng-model="NewEntry.BranchID" ng-options="item.id as item.value for item in BranchList">
+                            <option value="">-- Select Target Branch --</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Rough Pcs -->
@@ -239,7 +245,7 @@
                         <span class="helper-note" ng-if="IsMixGrade">(MIX Custom)</span>
                         <span class="helper-note text-muted" ng-if="!IsMixGrade">(Locked)</span>
                     </label>
-                    <div ng-show="IsMixGrade">
+                    <div ng-show="IsMixGrade" class="field-select-wrap">
                         <select id="EntryGradNo" chosen="GradeList" ng-model="NewEntry.GradNo" class="form-control rd-input">
                             <option value="">-- Select Grade --</option>
                             <option value="A">A</option>

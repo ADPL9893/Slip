@@ -31,65 +31,224 @@ namespace Slip.Controllers
         {
             return View();
         }
+
+        public ActionResult LotEntry(int id = 0)
+        {
+            ViewBag.LotID = id;
+            return View();
+        }
+
         public JsonResult GetData_For_MST_Lot()
         {
             try
             {
-                List<object> _list_Slip = new List<object>();
-
-                DataSet _DropDownList = DbHelper.ExecuteDataSet("GetData_For_MST_Lot");
-
-                if (_DropDownList.Tables[0].Rows.Count > 0)
-                {
-                    for (int i = 0; i < _DropDownList.Tables[0].Rows.Count; i++)
-                    {
-                        Dictionary<string, string> Values = new Dictionary<string, string>();
-                        for (int j = 0; j < _DropDownList.Tables[0].Columns.Count; j++)
-                        {
-                            Values.Add(_DropDownList.Tables[0].Columns[j].ToString(), _DropDownList.Tables[0].Rows[i][j].ToString());
-                        }
-                        _list_Slip.Add(Values);
-                    }
-                }
-
-                var DataField = _DropDownList.Tables[1].AsEnumerable()
-               .Select(row => new DataFields
-               {
-                   dataField = row.Field<string>("dataField"),
-                   dataType = row.Field<string>("dataType"),
-                   format = row.Field<string>("format"),
-                   alignment = row.Field<string>("alignment"),
-                   visible = row.Field<bool>("visible"),
-               })
-               .ToList();
-
-                var DataFieldSummary = _DropDownList.Tables[2].AsEnumerable()
-                .Select(row => new DataFields
-                {
-                    column = row.Field<string>("column"),
-                    valueFormat = row.Field<string>("valueFormat"),
-                    summaryType = row.Field<string>("summaryType"),
-                    displayFormat = row.Field<string>("displayFormat")
-                })
-                .ToList();
-
-                var jsonResult = Json(new
-                {
-                    List = _list_Slip,
-                    DataField = DataField,
-                    DataFieldSummary = DataFieldSummary
-                }, JsonRequestBehavior.AllowGet);
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_Lot_GetList");
+                var jsonResult = Json(new { success = true, List = list }, JsonRequestBehavior.AllowGet);
                 jsonResult.MaxJsonLength = Int32.MaxValue;
                 return jsonResult;
             }
             catch (Exception ex)
             {
                 ErrorLogger.ErrorLog(ex);
-                var jsonResult = Json(new
-                {
-                }, JsonRequestBehavior.AllowGet);
+                var jsonResult = Json(new { success = false, List = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
                 jsonResult.MaxJsonLength = Int32.MaxValue;
                 return jsonResult;
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_MST_LotByID(int id)
+        {
+            try
+            {
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_GetByID", new SqlParameter("@LotID", id));
+                var item = rows.FirstOrDefault();
+                var jsonResult = Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_MST_RoughDistributionListForLot(int BranchID)
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_RoughDistribution_GetListForLot", new SqlParameter("@BranchID", BranchID));
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_MST_DepartmentList(int BranchID)
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_Department_GetList", new SqlParameter("@BranchID", BranchID));
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Lot_Save(MST_LotMaster model, string Action = "INSERT")
+        {
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                bool isUpdate = Action == "UPDATE" && model.LotID > 0;
+                List<Dictionary<string, object>> rows;
+
+                if (!isUpdate)
+                {
+                    // LotCode / DistributionPartNo are generated server-side (RCode + next
+                    // split letter), never taken from the client - mirrors how RCode itself
+                    // is generated server-side via usp_GenerateRoughCode in Rough Distribution.
+                    using (SqlConnection con = new SqlConnection(conn))
+                    using (SqlCommand genCmd = new SqlCommand("usp_GenerateLotCode", con))
+                    {
+                        genCmd.CommandType = CommandType.StoredProcedure;
+                        genCmd.Parameters.AddWithValue("@RoughDistributionID", model.RoughDistributionID);
+                        genCmd.Parameters.AddWithValue("@RCode", model.RCode ?? "");
+                        con.Open();
+                        using (SqlDataReader rdr = genCmd.ExecuteReader())
+                        {
+                            if (rdr.Read())
+                            {
+                                model.LotCode = Convert.ToString(rdr["LotCode"]);
+                                model.DistributionPartNo = Convert.ToInt32(rdr["DistributionPartNo"]);
+                            }
+                        }
+                    }
+
+                    rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_Insert",
+                        new SqlParameter("@RoughDistributionID", model.RoughDistributionID),
+                        new SqlParameter("@RCode", (object)model.RCode ?? DBNull.Value),
+                        new SqlParameter("@LotCode", (object)model.LotCode ?? DBNull.Value),
+                        new SqlParameter("@DistributionPartNo", model.DistributionPartNo),
+                        new SqlParameter("@Lot_Pcs", model.Lot_Pcs),
+                        new SqlParameter("@Lot_Carat", model.Lot_Carat),
+                        new SqlParameter("@ValuePerCT", (object)model.ValuePerCT ?? DBNull.Value),
+                        new SqlParameter("@FactoryCodeID", (object)model.FactoryCodeID ?? DBNull.Value),
+                        new SqlParameter("@FactoryCode", (object)model.FactoryCode ?? DBNull.Value),
+                        new SqlParameter("@ColorType", (object)model.ColorType ?? DBNull.Value),
+                        new SqlParameter("@SizeCodeID", (object)model.SizeCodeID ?? DBNull.Value),
+                        new SqlParameter("@SizeCodeType", (object)model.SizeCodeType ?? DBNull.Value),
+                        new SqlParameter("@LotType", (object)model.LotType ?? DBNull.Value),
+                        new SqlParameter("@OGName", (object)model.OGName ?? DBNull.Value),
+                        new SqlParameter("@MachineNo", (object)model.MachineNo ?? DBNull.Value),
+                        new SqlParameter("@Hours", (object)model.Hours ?? DBNull.Value),
+                        new SqlParameter("@Height", (object)model.Height ?? DBNull.Value),
+                        new SqlParameter("@Size", (object)model.Size ?? DBNull.Value),
+                        new SqlParameter("@Receipe", (object)model.Receipe ?? DBNull.Value),
+                        new SqlParameter("@BoxNo", (object)model.BoxNo ?? DBNull.Value),
+                        new SqlParameter("@RoughRate", (object)model.RoughRate ?? DBNull.Value),
+                        new SqlParameter("@LotPurpose", (object)model.LotPurpose ?? DBNull.Value),
+                        new SqlParameter("@LotPriority", (object)model.LotPriority ?? DBNull.Value),
+                        new SqlParameter("@GrowthRate", (object)model.GrowthRate ?? DBNull.Value),
+                        new SqlParameter("@CompareNo", (object)model.CompareNo ?? DBNull.Value),
+                        new SqlParameter("@NewHeight", (object)model.NewHeight ?? DBNull.Value),
+                        new SqlParameter("@CakePcs", (object)model.CakePcs ?? DBNull.Value),
+                        new SqlParameter("@CakeWeight", (object)model.CakeWeight ?? DBNull.Value),
+                        new SqlParameter("@RejPcs", (object)model.RejPcs ?? DBNull.Value),
+                        new SqlParameter("@RejCarat", (object)model.RejCarat ?? DBNull.Value),
+                        new SqlParameter("@OGPcs", (object)model.OGPcs ?? DBNull.Value),
+                        new SqlParameter("@OGCarat", (object)model.OGCarat ?? DBNull.Value),
+                        new SqlParameter("@DepartmentID", (object)model.DepartmentID ?? DBNull.Value),
+                        new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
+                        new SqlParameter("@IsActive", model.IsActive),
+                        new SqlParameter("@CreatedBy", currentUserId));
+                }
+                else
+                {
+                    rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_Update",
+                        new SqlParameter("@LotID", model.LotID),
+                        new SqlParameter("@Lot_Pcs", model.Lot_Pcs),
+                        new SqlParameter("@Lot_Carat", model.Lot_Carat),
+                        new SqlParameter("@ValuePerCT", (object)model.ValuePerCT ?? DBNull.Value),
+                        new SqlParameter("@LotType", (object)model.LotType ?? DBNull.Value),
+                        new SqlParameter("@OGName", (object)model.OGName ?? DBNull.Value),
+                        new SqlParameter("@MachineNo", (object)model.MachineNo ?? DBNull.Value),
+                        new SqlParameter("@Hours", (object)model.Hours ?? DBNull.Value),
+                        new SqlParameter("@Height", (object)model.Height ?? DBNull.Value),
+                        new SqlParameter("@Size", (object)model.Size ?? DBNull.Value),
+                        new SqlParameter("@Receipe", (object)model.Receipe ?? DBNull.Value),
+                        new SqlParameter("@BoxNo", (object)model.BoxNo ?? DBNull.Value),
+                        new SqlParameter("@RoughRate", (object)model.RoughRate ?? DBNull.Value),
+                        new SqlParameter("@LotPurpose", (object)model.LotPurpose ?? DBNull.Value),
+                        new SqlParameter("@LotPriority", (object)model.LotPriority ?? DBNull.Value),
+                        new SqlParameter("@GrowthRate", (object)model.GrowthRate ?? DBNull.Value),
+                        new SqlParameter("@CompareNo", (object)model.CompareNo ?? DBNull.Value),
+                        new SqlParameter("@NewHeight", (object)model.NewHeight ?? DBNull.Value),
+                        new SqlParameter("@CakePcs", (object)model.CakePcs ?? DBNull.Value),
+                        new SqlParameter("@CakeWeight", (object)model.CakeWeight ?? DBNull.Value),
+                        new SqlParameter("@RejPcs", (object)model.RejPcs ?? DBNull.Value),
+                        new SqlParameter("@RejCarat", (object)model.RejCarat ?? DBNull.Value),
+                        new SqlParameter("@OGPcs", (object)model.OGPcs ?? DBNull.Value),
+                        new SqlParameter("@OGCarat", (object)model.OGCarat ?? DBNull.Value),
+                        new SqlParameter("@DepartmentID", (object)model.DepartmentID ?? DBNull.Value),
+                        new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
+                        new SqlParameter("@IsActive", model.IsActive),
+                        new SqlParameter("@ModifiedBy", currentUserId));
+                }
+
+                var r = rows.FirstOrDefault();
+                bool success = r != null && r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
+                string message = r != null && r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
+
+                return Json(new
+                {
+                    success = success,
+                    message = message,
+                    LotID = r != null && r.ContainsKey("LotID") ? r["LotID"] : null,
+                    LotCode = model.LotCode
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message) });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Lot_Delete(int LotID)
+        {
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_Delete",
+                    new SqlParameter("@LotID", LotID),
+                    new SqlParameter("@ModifiedBy", currentUserId));
+
+                var r = rows.FirstOrDefault();
+                bool success = r != null && r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
+                string message = r != null && r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
+
+                return Json(new { success = success, message = message });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message) });
             }
         }
         public JsonResult LotCode_Insert_Using_Excel(HttpPostedFileBase excelFile)
@@ -2451,13 +2610,14 @@ namespace Slip.Controllers
             }
         }
 
-        public JsonResult Get_Mst_ShapeFinalGroupList()
+        public JsonResult Get_Mst_ShapeFinalGroupList(string shapeType)
         {
             try
             {
                 var list = new List<object>();
 
-                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_Mst_ShapeFinalGroup_GetList");
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_Mst_ShapeFinalGroup_GetList",
+                    new SqlParameter("@ShapeType", shapeType));
                 foreach (var row in rows)
                 {
                     list.Add(new
@@ -3416,6 +3576,230 @@ namespace Slip.Controllers
                 SessionFacade.RoughDistributionQRList = qrList;
 
                 return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public ActionResult LotQRPrint()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult GenerateLotQRs(List<int> lotIDs)
+        {
+            try
+            {
+                if (lotIDs == null || lotIDs.Count == 0)
+                    return Json(new { success = false, message = "No lot rows selected." });
+
+                string folder = Server.MapPath("~/Upload/LotQR/");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                List<LotQRList> qrList = new List<LotQRList>();
+
+                foreach (var id in lotIDs.Distinct())
+                {
+                    var rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_GetQRData",
+                        new SqlParameter("@LotID", id));
+
+                    if (rows == null || rows.Count == 0) continue;
+                    var row = rows[0];
+
+                    string Val(string key) => row.ContainsKey(key) && row[key] != null && row[key] != DBNull.Value ? row[key].ToString() : "";
+
+                    string Text =
+                        Val("LotCode") + "," +
+                        Val("RCode") + "," +
+                        Val("LotType") + "," +
+                        Val("OGName") + "," +
+                        Val("Lot_Pcs") + "," +
+                        Val("Lot_Carat") + "," +
+                        Val("ValuePerCT") + "," +
+                        Val("ColorType") + "," +
+                        Val("FactoryCode") + "," +
+                        Val("SizeCodeType") + "," +
+                        Val("MachineNo") + "," +
+                        Val("Hours") + "," +
+                        Val("Height") + "," +
+                        Val("NewHeight") + "," +
+                        Val("Size") + "," +
+                        //Val("RejPcs") + "," +
+                        //Val("RejCarat") + "," +
+                        //Val("CakePcs") + "," +
+                        //Val("CakeWeight") + "," +
+                        //Val("OGPcs") + "," +
+                        //Val("OGCarat") + "," +
+                        Val("BoxNo") + "," +
+                        Val("RoughRate") + "," +
+                        Val("Receipe") + "," +
+                        Val("GrowthRate") + "," +
+                        Val("LotPurpose") + "," +
+                        Val("LotPriority") + "," +
+                        Val("CompareNo") + "," +
+                        Val("DepartmentShortName") + "," +
+                        Val("BranchName") + "," +
+                        Val("Remarks");
+
+                    string label =
+                        Val("LotCode") + "\n" +
+                        Val("Receipe") + "\n" +
+                        Val("Lot_Carat") + " Cts (" + Val("Lot_Pcs") + " Pcs)" + "\n" +
+                        Val("ColorType") + " / " + Val("SizeCodeType") + " / " + Val("FactoryCode") + "\n" +
+                        Val("DepartmentShortName") + " - " + Val("LotPriority");
+
+                    string qrFileName = "LOT" + id + ".png";
+                    string QRPath = Path.Combine(folder, qrFileName);
+
+                    // Updating a lot changes its field data, so drop the stale
+                    // QR image before writing the regenerated one in its place.
+                    if (System.IO.File.Exists(QRPath))
+                    {
+                        System.IO.File.Delete(QRPath);
+                    }
+
+                    BarcodeWriter writer = new BarcodeWriter
+                    {
+                        Format = BarcodeFormat.QR_CODE,
+                        Options = new EncodingOptions
+                        {
+                            Width = 100,
+                            Height = 100,
+                            Margin = 0
+                        }
+                    };
+
+                    Bitmap qrCodeBitmap = writer.Write(Text);
+                    qrCodeBitmap.Save(QRPath, System.Drawing.Imaging.ImageFormat.Png);
+
+                    qrList.Add(new LotQRList
+                    {
+                        QRUrl = "/Upload/LotQR/" + qrFileName,
+                        LabelText = label
+                    });
+                }
+
+                SessionFacade.LotQRList = qrList;
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public JsonResult Upload_Lot_Images(int LotID)
+        {
+            try
+            {
+                if (LotID <= 0)
+                {
+                    return Json(new { success = false, message = "LotID is required." });
+                }
+
+                if (Request.Files.Count == 0)
+                {
+                    return Json(new { success = false, message = "No files selected for upload." });
+                }
+
+                string relativeDirectory = $"/Upload/LotImages/{LotID}/";
+                string physicalDirectory = Server.MapPath("~" + relativeDirectory);
+                if (!Directory.Exists(physicalDirectory))
+                {
+                    Directory.CreateDirectory(physicalDirectory);
+                }
+
+                int uploadBy = SessionFacade.UserSession != null && SessionFacade.UserSession.UserID > 0
+                    ? SessionFacade.UserSession.UserID : 1;
+
+                string timestamp = DateTime.Now.ToString("yyyyMMddHHmmss");
+                List<string> savedPaths = new List<string>();
+
+                for (int i = 0; i < Request.Files.Count; i++)
+                {
+                    HttpPostedFileBase file = Request.Files[i];
+                    if (file != null && file.ContentLength > 0)
+                    {
+                        string ext = Path.GetExtension(file.FileName);
+                        if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+
+                        string fileName = $"LOT{LotID}_{timestamp}_{i}{ext}";
+                        string fullPhysicalPath = Path.Combine(physicalDirectory, fileName);
+                        file.SaveAs(fullPhysicalPath);
+
+                        string webRelativePath = relativeDirectory + fileName;
+                        savedPaths.Add(webRelativePath);
+
+                        DbHelper.ExecuteNonQueryWithMessage("USP_MST_LotImage_Insert",
+                            new SqlParameter("@LotID", LotID),
+                            new SqlParameter("@ImagePath", webRelativePath),
+                            new SqlParameter("@UploadBy", uploadBy));
+                    }
+                }
+
+                return Json(new { success = true, message = "Images uploaded successfully", files = savedPaths });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "Upload failed: " + ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_Lot_Images(int LotID)
+        {
+            try
+            {
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_LotImage_GetList",
+                    new SqlParameter("@LotID", LotID));
+
+                List<object> imageList = new List<object>();
+                foreach (var row in rows)
+                {
+                    string rawPath = row["ImagePath"] != null ? row["ImagePath"].ToString() : "";
+                    string resolvedUrl = (!string.IsNullOrEmpty(rawPath) && !rawPath.StartsWith("http") && !rawPath.StartsWith("/"))
+                        ? "/" + rawPath : rawPath;
+
+                    imageList.Add(new
+                    {
+                        ID = row["ID"] != null ? Convert.ToInt32(row["ID"]) : 0,
+                        LotID = row["LotID"] != null ? Convert.ToInt32(row["LotID"]) : 0,
+                        ImagePath = resolvedUrl,
+                        Created = row["Created"] != null && row["Created"] != DBNull.Value ? Convert.ToDateTime(row["Created"]).ToString("dd-MMM-yyyy HH:mm") : ""
+                    });
+                }
+
+                var jsonResult = Json(new { success = true, list = imageList }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "Error fetching images: " + ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Delete_Lot_Image(int imageId)
+        {
+            try
+            {
+                string message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_LotImage_Delete",
+                    new SqlParameter("@ImageID", imageId));
+
+                bool isSuccess = !string.IsNullOrEmpty(message) && message.ToLower().Contains("success");
+                return Json(new { success = isSuccess, message = message });
             }
             catch (Exception ex)
             {

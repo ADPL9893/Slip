@@ -8,9 +8,17 @@
 @if (ViewBag.IsAdmin == true || ViewBag.CanView == true || ViewBag.CanAdd == true || ViewBag.CanEdit == true)
 {
 <div ng-controller="Diamond" class="pricing-container">
-    <div class="pricing-header-card">
-        <div class="pricing-header-title">
-            <h4 class="font-green-sharp"><b>Stock Pricing</b></h4>
+    <div class="field-page-header">
+        <div class="field-page-header-left">
+            <div class="field-page-header-icon">
+                <i class="fa fa-diamond"></i>
+            </div>
+            <div>
+                <div class="field-page-header-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / <span>Stock Pricing</span>
+                </div>
+                <h4>Stock Pricing</h4>
+            </div>
         </div>
         <div class="pricing-header-actions" ng-if="IsAdmin || CanAdd">
             <button class="btn btn-primary btn-header-action" ng-click="CreateXML()">
@@ -29,7 +37,7 @@
                         <!-- Shape -->
                         <div class="filter-group">
                             <label>Shape</label>
-                            <div class="filter-select-wrap" style="width: 150px;">
+                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
                                 <select id="Shape" tabindex="2" chosen="GetDIAShapeList" class="form-control input-sm" ng-change="removeGrid()" ng-options="item.id as item.value for item in GetDIAShapeList" ng-model="Diamond.Shape">
                                     <option value="">Select</option>
                                 </select>
@@ -39,7 +47,7 @@
                         <!-- Cut -->
                         <div class="filter-group">
                             <label>Grad</label>
-                            <div class="filter-select-wrap" style="width: 120px;">
+                            <div class="filter-select-wrap field-select-wrap" style="width: 120px;">
                                 <select id="GradType" tabindex="3" chosen="GetGradType" class="form-control input-sm" ng-change="GetType(Diamond.GradType);removeGrid()" ng-model="Diamond.GradType">
                                     <option value="">Select</option>
                                     <option value="GR">GR</option>
@@ -51,7 +59,7 @@
                         <!-- Size Type -->
                         <div class="filter-group">
                             <label>Type</label>
-                            <div class="filter-select-wrap" style="width: 150px;">
+                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
                                 <select id="Type" tabindex="1" chosen="GetSizeTypeList" class="form-control input-sm" ng-change="removeGrid()" ng-model="Diamond.Type" disabled>
                                     <option value="CT UP">CT UP</option>
                                     <option value="CT DOWN">CT DOWN</option>
@@ -62,7 +70,7 @@
                         <!-- Grid Type -->
                         <div class="filter-group">
                             <label>GridType</label>
-                            <div class="filter-select-wrap" style="width: 150px;">
+                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
                                 <select id="GridType" tabindex="1" chosen="GetGridType" class="form-control input-sm" ng-change="removeGrid()" ng-model="Diamond.GridType">
                                     <option value="Size">Size</option>
                                     <option value="Color">Color</option>
@@ -89,7 +97,7 @@
                 <div class="section-header-red">Pricing</div>
 
                 <!-- Dynamic Grid Groups -->
-                <div class="hide1">
+                <div class="hide1 field-table-wrapper">
                     <div ng-if="GridGroups.length > 0">
                         <div class="grid-group" ng-repeat="group in GridGroups" ng-init="grpIndex = $index">
                             <table class="custom-table" border="1" style="width: 100%;">
@@ -131,7 +139,7 @@
                     </div>
                 </div>
 
-                <div class="hide2">
+                <div class="hide2 field-table-wrapper">
                     <div ng-if="GridGroups.length > 0" style="display: flex; gap: 10px 24px; flex-wrap: wrap; ">
                         <div class="grid-group" ng-repeat="group in GridGroups" style="width:24%;">
                             <div class="group-header" ng-click="toggleGroup(group)" style="cursor: pointer;">

@@ -1,0 +1,679 @@
+@{
+    ViewBag.Title = "Lot Entry";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<div ng-controller="LotEntryCtrl" class="rough-dist-page">
+    <!-- Header Banner -->
+    <div class="rd-header-card">
+        <div class="rd-header-left">
+            <div class="rd-header-icon">
+                <i class="fa fa-cubes"></i>
+            </div>
+            <div>
+                <div class="rd-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
+                    <a href="@Url.Action("Lot", "Master")">Lot Master</a> /
+                    <span>Lot Entry</span>
+                </div>
+                <h4 class="rd-header-title">{{FormModel.LotID > 0 ? 'Edit Lot' : 'New Lot'}}</h4>
+            </div>
+        </div>
+        <div class="rd-header-actions">
+            <button class="btn-rd-save-main" type="button" ng-disabled="IsSaving" ng-click="SaveLot()">
+                <i class="fa fa-save" ng-class="{'fa-spin': IsSaving}"></i> {{FormModel.LotID > 0 ? 'Update Lot' : 'Save Lot'}}
+            </button>
+        </div>
+    </div>
+
+    <!-- Select Branch & Distribution Bag -->
+    <div class="rd-card rd-card-specs">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title">
+                <i class="fa fa-share-alt text-primary"></i> 1. Select Branch &amp; Distribution Bag
+            </h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="SelectedBranchID">
+                        Branch <span class="req">*</span>
+                    </label>
+                    <div class="field-select-wrap">
+                        <select id="SelectedBranchID"
+                                chosen="BranchList"
+                                ng-model="SelectedBranchID"
+                                ng-change="OnBranchChange()"
+                                ng-disabled="FormModel.LotID > 0"
+                                class="form-control rd-input">
+                            <option value="">-- Select Branch --</option>
+                            <option ng-repeat="item in BranchList" value="{{item.id}}">{{item.value}}</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="col-lg-5 col-md-6 col-sm-8 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="SelectedDistributionID">
+                        R.Code / Distribution Bag <span class="req">*</span>
+                    </label>
+                    <div class="field-select-wrap">
+                        <select id="SelectedDistributionID"
+                                chosen="DistributionList"
+                                ng-model="SelectedDistributionID"
+                                ng-change="OnDistributionChange()"
+                                ng-disabled="!SelectedBranchID || FormModel.LotID > 0"
+                                class="form-control rd-input">
+                            <option value="">-- Select Distribution Bag --</option>
+                            <option ng-repeat="item in DistributionList" value="{{item.DistributionID}}">
+                                {{item.RCode}} / {{item.ColorType}} / {{item.FactoryCode}} &mdash; Pending {{item.PendingPcs}} Pcs / {{item.PendingWeight}} Cts
+                            </option>
+                        </select>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Balance KPI Cards -->
+    <div class="kpi-container" ng-show="Selected.RoughDistributionID">
+        <div class="kpi-box kpi-original">
+            <div class="kpi-icon-wrap"><i class="fa fa-cubes"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Pending Pcs</div>
+                <div class="kpi-value">{{(Selected.PendingPcs || 0) | number:0}} <span style="font-size:13px; font-weight:600; color:#64748b;">Pcs</span></div>
+            </div>
+        </div>
+        <div class="kpi-box kpi-distributed">
+            <div class="kpi-icon-wrap"><i class="fa fa-balance-scale"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Pending Carat</div>
+                <div class="kpi-value">{{(Selected.PendingWeight || 0) | number:3}} <span style="font-size:13px; font-weight:600; color:#64748b;">Cts</span></div>
+            </div>
+        </div>
+        <div class="kpi-box kpi-adj-pcs">
+            <div class="kpi-icon-wrap"><i class="fa fa-barcode"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">Next Lot Code</div>
+                <div class="kpi-value" style="font-size: 20px;">{{PreviewLotCode || '-'}}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lot Details -->
+    <div class="rd-card rd-card-entry" ng-show="Selected.RoughDistributionID">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title"><i class="fa fa-info-circle text-primary"></i> 2. Lot Details</h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormDepartmentID">Department <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="FormDepartmentID" chosen="DepartmentList" ng-model="FormModel.DepartmentID" class="form-control rd-input">
+                            <option value="">-- Select --</option>
+                            <option ng-repeat="item in DepartmentList" value="{{item.ID}}">{{item.ShortName}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormFactoryCodeID">Factory Code <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="FormFactoryCodeID" chosen="FactoryCodeList" ng-model="FormModel.FactoryCodeID" ng-change="OnFactoryCodeChange()" class="form-control rd-input">
+                            <option value="">-- Select --</option>
+                            <option ng-repeat="item in FactoryCodeList" value="{{item.FactoryCodeID}}">{{item.FactoryCode}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label">Color Type <span class="req">*</span></label>
+                    <input type="text" ng-model="FormModel.ColorType" class="rd-input rd-master-input" readonly />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label">Size Code <span class="req">*</span></label>
+                    <input type="text" ng-model="FormModel.SizeCodeType" class="rd-input rd-master-input" readonly />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormLotType">Lot Type</label>
+                    <input type="text" id="FormLotType" ng-model="FormModel.LotType" placeholder="Lot Type" class="rd-input" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormOGName">OG Name</label>
+                    <input type="text" id="FormOGName" ng-model="FormModel.OGName" placeholder="OG Name" class="rd-input" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormLotPcs">Pcs <span class="req">*</span></label>
+                    <input type="text" id="FormLotPcs" ng-model="FormModel.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormLotCarat">Carat <span class="req">*</span></label>
+                    <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormValuePerCT">Value/CT</label>
+                    <input type="text" id="FormValuePerCT" ng-model="FormModel.ValuePerCT" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormRoughRate">Rough Rate</label>
+                    <input type="text" id="FormRoughRate" ng-model="FormModel.RoughRate" placeholder="0.00" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormReceipe">Receipe <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="FormReceipe" chosen="ReceipeList" ng-model="FormModel.Receipe" class="form-control rd-input">
+                            <option value="">-- Select --</option>
+                            <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormBoxNo">Box No</label>
+                    <input type="text" id="FormBoxNo" ng-model="FormModel.BoxNo" placeholder="Box No" class="rd-input" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormMachineNo">Machine No</label>
+                    <input type="text" id="FormMachineNo" ng-model="FormModel.MachineNo" placeholder="Machine No" class="rd-input" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormHours">Hours</label>
+                    <input type="text" id="FormHours" ng-model="FormModel.Hours" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormHeight">Height</label>
+                    <input type="text" id="FormHeight" ng-model="FormModel.Height" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormNewHeight">New Height</label>
+                    <input type="text" id="FormNewHeight" ng-model="FormModel.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormSize">Size</label>
+                    <input type="text" id="FormSize" ng-model="FormModel.Size" placeholder="Size" class="rd-input" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cake / Rejection / OG -->
+    <div class="rd-card rd-card-entry" ng-show="Selected.RoughDistributionID">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title"><i class="fa fa-cube text-primary"></i> 3. Cake / Rejection / OG</h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormCakePcs">Cake Pcs</label>
+                    <input type="text" id="FormCakePcs" ng-model="FormModel.CakePcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormCakeWeight">Cake Carat</label>
+                    <input type="text" id="FormCakeWeight" ng-model="FormModel.CakeWeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormRejPcs">Rej. Pcs</label>
+                    <input type="text" id="FormRejPcs" ng-model="FormModel.RejPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormRejCarat">Rej. Carat</label>
+                    <input type="text" id="FormRejCarat" ng-model="FormModel.RejCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormOGPcs">OG Pcs</label>
+                    <input type="text" id="FormOGPcs" ng-model="FormModel.OGPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormOGCarat">OG Carat</label>
+                    <input type="text" id="FormOGCarat" ng-model="FormModel.OGCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority & Notes -->
+    <div class="rd-card rd-card-entry" ng-show="Selected.RoughDistributionID">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title"><i class="fa fa-flag text-primary"></i> 4. Priority &amp; Notes</h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormLotPriority">Priority <span class="req">*</span></label>
+                    <select id="FormLotPriority" class="form-control rd-input" ng-model="FormModel.LotPriority">
+                        <option value="REGULAR">REGULAR</option>
+                        <option value="SAMPLE">SAMPLE</option>
+                        <option value="ARGENT">ARGENT</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormGrowthRate">Growth Rate <span class="req">*</span></label>
+                    <input type="text" id="FormGrowthRate" ng-model="FormModel.GrowthRate" placeholder="Growth Rate" class="rd-input" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormCompareNo">Compare No</label>
+                    <input type="text" id="FormCompareNo" ng-model="FormModel.CompareNo" placeholder="Compare No" class="rd-input" />
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="FormLotPurpose">Lot Purpose <span class="req">*</span></label>
+                    <input type="text" id="FormLotPurpose" ng-model="FormModel.LotPurpose" placeholder="Lot Purpose" class="rd-input" />
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="FormRemarks">Remarks</label>
+                    <input type="text" id="FormRemarks" ng-model="FormModel.Remarks" placeholder="Remarks" class="rd-input" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 rd-form-group">
+                    <label class="rd-label">Status</label>
+                    <div class="active-toggle-wrap">
+                        <input type="checkbox" id="FormIsActive" ng-model="FormModel.IsActive" />
+                        <label for="FormIsActive" style="margin: 0; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                            <span ng-if="FormModel.IsActive" class="text-success"><i class="fa fa-check-circle"></i> Active</span>
+                            <span ng-if="!FormModel.IsActive" class="text-danger"><i class="fa fa-times-circle"></i> Inactive</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var appModule;
+    try {
+        appModule = angular.module('app');
+    } catch (e) {
+        appModule = angular.module('app', ['ngAnimate', 'ngTouch', 'angularjs-dropdown-multiselect']);
+    }
+
+    appModule.directive('chosen', ['$timeout', function ($timeout) {
+        return {
+            restrict: 'A',
+            link: function (scope, element, attrs) {
+                var updateChosen = function () {
+                    $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                };
+                var list = attrs['chosen'];
+                if (list) { scope.$watchCollection(list, function () { updateChosen(); }); }
+                if (attrs['ngModel']) { scope.$watch(attrs['ngModel'], function () { updateChosen(); }); }
+                if (attrs['ngDisabled']) {
+                    scope.$watch(attrs['ngDisabled'], function (newVal) {
+                        $timeout(function () { element.prop('disabled', !!newVal).trigger('chosen:updated'); }, 50);
+                    });
+                }
+                element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+            }
+        };
+    }]);
+
+    appModule.controller("LotEntryCtrl", ['$scope', '$http', '$timeout', '$q', function ($scope, $http, $timeout, $q) {
+        $scope.InitLotID = parseInt('@ViewBag.LotID') || 0;
+
+        $scope.BranchList = [];
+        $scope.DistributionList = [];
+        $scope.ReceipeList = [];
+        $scope.FactoryCodeList = [];
+        $scope.DepartmentList = [];
+        $scope.SelectedBranchID = '';
+        $scope.SelectedDistributionID = '';
+        $scope.Selected = {};
+        $scope.PreviewLotCode = '';
+        $scope.IsSaving = false;
+        $scope.IsLoading = false;
+
+        $scope.FormModel = {
+            LotID: 0,
+            RoughDistributionID: 0,
+            RCode: '',
+            LotCode: '',
+            DistributionPartNo: 0,
+            FactoryCodeID: null,
+            FactoryCode: '',
+            ColorType: '',
+            SizeCodeID: null,
+            SizeCodeType: '',
+            LotType: '',
+            OGName: '',
+            Lot_Pcs: null,
+            Lot_Carat: null,
+            ValuePerCT: null,
+            RoughRate: null,
+            Receipe: '',
+            BoxNo: '',
+            MachineNo: '',
+            Hours: null,
+            Height: null,
+            NewHeight: null,
+            Size: '',
+            CakePcs: null,
+            CakeWeight: null,
+            RejPcs: null,
+            RejCarat: null,
+            OGPcs: null,
+            OGCarat: null,
+            LotPriority: 'REGULAR',
+            GrowthRate: '',
+            CompareNo: '',
+            LotPurpose: '',
+            DepartmentID: '',
+            Remarks: '',
+            IsActive: true
+        };
+
+        $('.allownumericwithoutdecimal').on('keypress', function (e) {
+            if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) return false;
+        });
+        $('.allownumericwithdecimal').on('keypress', function (e) {
+            if (e.which !== 8 && e.which !== 0 && (e.which !== 46 || $(this).val().indexOf('.') !== -1) && (e.which < 48 || e.which > 57)) return false;
+        });
+
+        $scope.LoadBranches = function () {
+            return $http.post('@Url.Action("GetBranchdata_For_DropDown", "Master")').then(function (res) {
+                var bList = [];
+                if (res.data && res.data.BranchList && res.data.BranchList.length > 0) {
+                    for (var i = 0; i < res.data.BranchList.length; i++) {
+                        var bId = res.data.BranchList[i]["ID"];
+                        var bVal = res.data.BranchList[i]["Name"];
+                        if (bId !== undefined && bId !== null) {
+                            bList.push({ id: parseInt(bId), value: bVal });
+                        }
+                    }
+                }
+                $scope.BranchList = bList;
+                $timeout(function () { $('#SelectedBranchID').trigger('chosen:updated'); }, 100);
+            });
+        };
+
+        $scope.LoadRecipes = function () {
+            return $http.get('@Url.Action("Get_MST_ReceipeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.ReceipeList = res.data.list || [];
+                    $timeout(function () { $('#FormReceipe').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadFactoryCodes = function () {
+            return $http.get('@Url.Action("Get_MST_FactoryCodeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.FactoryCodeList = res.data.list || [];
+                    $timeout(function () { $('#FormFactoryCodeID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadDepartments = function (branchId) {
+            if (!branchId) {
+                $scope.DepartmentList = [];
+                $timeout(function () { $('#FormDepartmentID').trigger('chosen:updated'); }, 100);
+                return $q.when();
+            }
+            return $http.get('@Url.Action("Get_MST_DepartmentList", "Master")?BranchID=' + branchId).then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.DepartmentList = res.data.list || [];
+                    $timeout(function () { $('#FormDepartmentID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.OnFactoryCodeChange = function () {
+            var match = ($scope.FactoryCodeList || []).find(function (x) { return parseInt(x.FactoryCodeID) === parseInt($scope.FormModel.FactoryCodeID); });
+            $scope.FormModel.FactoryCode = match ? match.FactoryCode : '';
+        };
+
+        $scope.BuildPreviewCode = function () {
+            var partNo = (Selected_NextPartNoPreview()) || 1;
+            $scope.PreviewLotCode = $scope.Selected.RCode ? ($scope.Selected.RCode + String.fromCharCode(64 + partNo)) : '';
+        };
+        function Selected_NextPartNoPreview() {
+            return $scope.Selected ? $scope.Selected.NextPartNoPreview : null;
+        }
+
+        $scope.OnBranchChange = function () {
+            $scope.SelectedDistributionID = '';
+            $scope.Selected = {};
+            $scope.DistributionList = [];
+            $scope.PreviewLotCode = '';
+            $scope.FormModel.DepartmentID = '';
+            $scope.LoadDepartments($scope.SelectedBranchID);
+            if (!$scope.SelectedBranchID) return;
+
+            $http.get('@Url.Action("Get_MST_RoughDistributionListForLot", "Master")?BranchID=' + $scope.SelectedBranchID).then(function (res) {
+                $scope.DistributionList = (res.data && res.data.list) ? res.data.list : [];
+                $timeout(function () { $('#SelectedDistributionID').trigger('chosen:updated'); }, 100);
+            });
+        };
+
+        $scope.OnDistributionChange = function () {
+            var match = ($scope.DistributionList || []).find(function (x) { return parseInt(x.DistributionID) === parseInt($scope.SelectedDistributionID); });
+            if (!match) {
+                $scope.Selected = {};
+                $scope.PreviewLotCode = '';
+                return;
+            }
+            $scope.Selected = match;
+            $scope.Selected.RoughDistributionID = match.DistributionID;
+            $scope.FormModel.RoughDistributionID = match.DistributionID;
+            $scope.FormModel.RCode = match.RCode;
+            $scope.FormModel.FactoryCodeID = match.FactoryCodeID;
+            $scope.FormModel.FactoryCode = match.FactoryCode;
+            $scope.FormModel.ColorType = match.ColorType;
+            $scope.FormModel.SizeCodeID = match.SizeCodeID;
+            $scope.FormModel.SizeCodeType = match.SizeCodeType;
+
+            // Carried over from the Rough Distribution / Rough Inward detail as a
+            // starting point - still user-editable afterward.
+            $scope.FormModel.MachineNo = match.MachineNo || '';
+            $scope.FormModel.BoxNo = match.BoxNo || '';
+            $scope.FormModel.Receipe = match.Receipe || '';
+            $scope.FormModel.Hours = match.Hours;
+            $scope.FormModel.NewHeight = match.NewHeight;
+            $scope.FormModel.GrowthRate = match.GrowthRate || '';
+            $scope.FormModel.LotPurpose = match.LotPurpose || '';
+
+            $timeout(function () {
+                $('#FormFactoryCodeID').trigger('chosen:updated');
+                $('#FormReceipe').trigger('chosen:updated');
+            }, 100);
+
+            $scope.BuildPreviewCode();
+        };
+
+        $scope.LoadForEdit = function (lotId) {
+            $scope.IsLoading = true;
+            if (typeof show_loader === 'function') show_loader();
+            $http.get('@Url.Action("Get_MST_LotByID", "Master")?id=' + lotId).then(function (res) {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                if (!res.data || !res.data.success || !res.data.item) {
+                    Noty("error", "Failed to load lot.");
+                    return;
+                }
+                var m = res.data.item;
+                $scope.FormModel = {
+                    LotID: parseInt(m.LotID),
+                    RoughDistributionID: parseInt(m.RoughDistributionID),
+                    RCode: m.RCode,
+                    LotCode: m.LotCode,
+                    DistributionPartNo: m.DistributionPartNo,
+                    FactoryCodeID: m.FactoryCodeID,
+                    FactoryCode: m.FactoryCode,
+                    ColorType: m.ColorType,
+                    SizeCodeID: m.SizeCodeID,
+                    SizeCodeType: m.SizeCodeType,
+                    LotType: m.LotType,
+                    OGName: m.OGName,
+                    Lot_Pcs: m.Lot_Pcs,
+                    Lot_Carat: m.Lot_Carat,
+                    ValuePerCT: m.ValuePerCT,
+                    RoughRate: m.RoughRate,
+                    Receipe: m.Receipe,
+                    BoxNo: m.BoxNo,
+                    MachineNo: m.MachineNo,
+                    Hours: m.Hours,
+                    Height: m.Height,
+                    NewHeight: m.NewHeight,
+                    Size: m.Size,
+                    CakePcs: m.CakePcs,
+                    CakeWeight: m.CakeWeight,
+                    RejPcs: m.RejPcs,
+                    RejCarat: m.RejCarat,
+                    OGPcs: m.OGPcs,
+                    OGCarat: m.OGCarat,
+                    LotPriority: m.LotPriority || 'REGULAR',
+                    GrowthRate: m.GrowthRate,
+                    CompareNo: m.CompareNo,
+                    LotPurpose: m.LotPurpose,
+                    DepartmentID: m.DepartmentID || '',
+                    Remarks: m.Remarks,
+                    IsActive: m.IsActive === true || m.IsActive === 1 || m.IsActive === '1' || m.IsActive === 'True'
+                };
+                $scope.Selected = {
+                    RoughDistributionID: m.RoughDistributionID,
+                    RCode: m.RCode,
+                    PendingPcs: m.AvailablePcs,
+                    PendingWeight: m.AvailableWeight
+                };
+                $scope.PreviewLotCode = m.LotCode;
+
+                // Branch/Distribution selects are disabled in edit mode (the bag
+                // can't be changed after creation), but still need to *display*
+                // the lot's actual bag - the branch-filtered dropdown list won't
+                // necessarily contain it anymore (e.g. its pending balance may now
+                // be 0), so inject a synthetic single-item list for it here.
+                $scope.SelectedBranchID = m.BranchID ? m.BranchID.toString() : '';
+                $scope.DistributionList = [{
+                    DistributionID: m.RoughDistributionID,
+                    RCode: m.RCode,
+                    ColorType: m.ColorType,
+                    FactoryCode: m.FactoryCode,
+                    PendingPcs: m.AvailablePcs,
+                    PendingWeight: m.AvailableWeight
+                }];
+                $scope.SelectedDistributionID = m.RoughDistributionID ? m.RoughDistributionID.toString() : '';
+                $scope.LoadDepartments(m.BranchID).then(function () { SyncChosenValue('#FormDepartmentID', m.DepartmentID); });
+
+                // Force the native <select> value directly rather than relying on
+                // Angular digest timing to have already applied the binding before
+                // chosen:updated fires - otherwise Chosen can render blank even
+                // though the underlying model value is correct.
+                function SyncChosenValue(selector, value) {
+                    $timeout(function () {
+                        $(selector).val(value != null ? value.toString() : '').trigger('chosen:updated');
+                    }, 200);
+                }
+                SyncChosenValue('#SelectedBranchID', $scope.SelectedBranchID);
+                SyncChosenValue('#SelectedDistributionID', $scope.SelectedDistributionID);
+                SyncChosenValue('#FormFactoryCodeID', m.FactoryCodeID);
+                SyncChosenValue('#FormReceipe', m.Receipe);
+            }, function () {
+                $scope.IsLoading = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                Noty("error", "Error loading lot from server.");
+            });
+        };
+
+        $scope.ValidateForm = function () {
+            if (!$scope.FormModel.RoughDistributionID) {
+                Noty("error", "Please select Branch and R.Code / Distribution Bag!");
+                return false;
+            }
+            var pcs = parseInt($scope.FormModel.Lot_Pcs);
+            var carat = parseFloat($scope.FormModel.Lot_Carat);
+            if (isNaN(pcs) || pcs < 0 || isNaN(carat) || carat < 0) {
+                Noty("error", "Please enter valid Pcs and Carat!");
+                return false;
+            }
+            if ((pcs === 0 && carat > 0) || (pcs > 0 && carat === 0)) {
+                Noty("error", "Pcs and Carat must both be zero or both be greater than zero!");
+                return false;
+            }
+            var availPcs = parseFloat($scope.Selected.PendingPcs || 0);
+            var availWt = parseFloat($scope.Selected.PendingWeight || 0);
+            if (pcs > availPcs) {
+                Noty("error", "Pcs (" + pcs + ") exceeds the bag's pending balance (" + availPcs + ")!");
+                return false;
+            }
+            if (carat > availWt + 0.0001) {
+                Noty("error", "Carat (" + carat.toFixed(3) + ") exceeds the bag's pending balance (" + availWt.toFixed(3) + ")!");
+                return false;
+            }
+            if (!$scope.FormModel.DepartmentID) { Noty("error", "Please select Department!"); return false; }
+            if (!$scope.FormModel.FactoryCodeID) { Noty("error", "Please select Factory Code!"); return false; }
+            if (!($scope.FormModel.Receipe || '').trim()) { Noty("error", "Please select Receipe!"); return false; }
+            if (!($scope.FormModel.LotPriority || '').trim()) { Noty("error", "Please select Priority!"); return false; }
+            if (!($scope.FormModel.GrowthRate || '').trim()) { Noty("error", "Please enter Growth Rate!"); return false; }
+            if (!($scope.FormModel.LotPurpose || '').trim()) { Noty("error", "Please enter Lot Purpose!"); return false; }
+            return true;
+        };
+
+        $scope.GenerateAndShowQR = function (lotId) {
+            if (!lotId) return $q.when();
+            return $http.post('@Url.Action("GenerateLotQRs", "Master")', { lotIDs: [lotId] }).then(function (res) {
+                if (res.data && res.data.success) {
+                    window.open('@Url.Action("LotQRPrint", "Master")', '_blank');
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to generate QR code.");
+                }
+            }, function () {
+                Noty("error", "Error connecting to server while generating QR code.");
+            });
+        };
+
+        $scope.SaveLot = function () {
+            if (!$scope.ValidateForm()) return;
+
+            $scope.IsSaving = true;
+            var action = $scope.FormModel.LotID > 0 ? 'UPDATE' : 'INSERT';
+            $http.post('@Url.Action("Lot_Save", "Master")', { model: $scope.FormModel, Action: action }).then(function (res) {
+                $scope.IsSaving = false;
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Lot saved successfully.");
+                    var savedLotId = res.data.LotID || $scope.FormModel.LotID;
+
+                    // Wait for the QR tab to actually open before switching/closing,
+                    // otherwise leaving this tab cancels the in-flight QR request.
+                    $scope.GenerateAndShowQR(savedLotId).then(function () {
+                        var lotListUrl = '@Url.Action("Lot", "Master")';
+                        if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
+                            window.top.ChromeTabs.openTab({ title: 'Lot Master', url: lotListUrl, forceReload: true });
+                        }
+                        if (typeof window.closeCurrentTab === 'function') {
+                            window.closeCurrentTab();
+                        } else {
+                            window.location.href = lotListUrl;
+                        }
+                    });
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to save lot.");
+                }
+            }, function () {
+                $scope.IsSaving = false;
+                Noty("error", "Error saving lot to server.");
+            });
+        };
+
+        // Load all dropdown sources first, then load the lot for edit (if any) -
+        // guarantees the option lists already exist before FormModel values are
+        // set, so the selects/chosen widgets resolve to the right text instead
+        // of showing blank.
+        $q.all([
+            $scope.LoadBranches(),
+            $scope.LoadRecipes(),
+            $scope.LoadFactoryCodes()
+        ]).then(function () {
+            if ($scope.InitLotID > 0) {
+                $scope.LoadForEdit($scope.InitLotID);
+            }
+        });
+    }]);
+</script>
