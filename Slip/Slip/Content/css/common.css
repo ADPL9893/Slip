@@ -17792,17 +17792,35 @@ div.datepicker {
 }
 
 /* Visible vertical column separator lines (showColumnLines:true alone is
-   too faint on these grids, same issue as the row lines earlier). */
+   too faint on these grids, same issue as the row lines earlier). Scoped to
+   :not(.dx-freespace-row) - that's DevExtreme's internal filler row used to
+   pad unused height below the last real row (standard scrolling mode), and
+   it carries the same .dx-row class - without this exclusion the column/row
+   lines (and hover highlight) bleed into the empty space below the data. */
 .rdl-grid-card .dx-datagrid-headers .dx-header-row > td,
-.rdl-grid-card .dx-datagrid-rowsview .dx-row > td {
+.rdl-grid-card .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td {
     border-right: 1px solid #e2e8f0 !important;
 }
 
+.rdl-grid-card .dx-datagrid-rowsview .dx-freespace-row,
+.rdl-grid-card .dx-datagrid-rowsview .dx-freespace-row > td {
+    border: none !important;
+    background: transparent !important;
+}
+
+.rdl-grid-card .dx-datagrid-rowsview .dx-freespace-row:hover,
+.rdl-grid-card .dx-datagrid-rowsview .dx-freespace-row:hover > td,
+.rdl-grid-card .dx-datagrid-rowsview tr:hover .dx-freespace-row,
+.rdl-grid-card .dx-datagrid-rowsview .dx-freespace-row.dx-row-hover,
+.rdl-grid-card .dx-datagrid-rowsview .dx-freespace-row.dx-state-hover {
+    background: transparent !important;
+}
+
 /* Visible row separator lines (showRowLines:true alone is too faint on
-   these grids' white rows) */
-.rdl-grid-card #gridContainer .dx-datagrid-rowsview .dx-row > td,
-.rdl-grid-card #lotGridContainer .dx-datagrid-rowsview .dx-row > td,
-.rdl-grid-card #inwardGridContainer .dx-datagrid-rowsview .dx-row > td {
+   these grids' white rows) - excludes .dx-freespace-row, see note above. */
+.rdl-grid-card #gridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td,
+.rdl-grid-card #lotGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td,
+.rdl-grid-card #inwardGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td {
     border-bottom: 1px solid #e2e8f0 !important;
 }
 

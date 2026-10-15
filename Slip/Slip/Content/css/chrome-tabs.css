@@ -80,7 +80,7 @@ html:not(.in-tab-iframe) .wrapper > .content-wrapper {
     height: 26px;
     min-height: 23px;
     max-height: 28px;
-    background: #ffffff !important;
+    background: #ffffffb0 !important;
     border-bottom: 1px solid #e2e8f0;
     position: relative;
     z-index: 9999;

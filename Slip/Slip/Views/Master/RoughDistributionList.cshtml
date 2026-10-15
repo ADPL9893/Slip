@@ -625,7 +625,7 @@ else
                     if (e.rowType === "data") {
                         e.rowElement.addClass("ri-row-animate");
                         e.rowElement.css("--ri-row-i", e.rowIndex);
-                        e.rowElement.find("> td").css("border-bottom", "1px solid #e2e8f0");
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
                     }
                 },
                 height: '100%',
