@@ -14,9 +14,9 @@
                     <i class="fa fa-database"></i> {{List.length}} Total Records
                 </span>
             </div>
-            <div class="rdl-card-actions" style="display: flex; align-items: center; gap: 8px;">
-                <button class="btn-rdl-add" ng-click="OpenAddNew()" title="Open Lot Entry in new tab">
-                    <i class="fa fa-plus-circle"></i> New Lot
+            <div class="rdl-card-actions">
+                <button class="btn-ri-add-main" ng-click="OpenAddNew()" title="Open Lot Entry in new tab">
+                    <i class="fa fa-plus"></i>
                 </button>
                 <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
                     <i class="fa fa-columns"></i>
@@ -24,13 +24,12 @@
                 <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
                     <i class="fa fa-file-excel-o"></i>
                 </button>
-                <div class="field-select-wrap" style="width: 220px;">
+                <div class="field-select-wrap field-select-wrap--search">
                     <input type="text"
                            ng-model="SearchText"
                            ng-change="OnSearchChange()"
                            placeholder="Search lot records..."
-                           class="form-control rd-input"
-                           style="height: 32px; padding: 4px 10px;" />
+                           class="form-control rd-input search-input-compact" />
                 </div>
             </div>
         </div>
@@ -47,12 +46,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="modal-header-brand">
-                        <i class="fa fa-exclamation-triangle" style="color: #ef4444; font-size: 18px;"></i>
-                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important;">Confirm Delete Lot</h4>
+                        <i class="fa fa-exclamation-triangle modal-icon-danger"></i>
+                        <h4 class="modal-header-title">Confirm Delete Lot</h4>
                     </div>
-                    <button type="button" class="close modal-close-btn" data-dismiss="modal" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
                 </div>
-                <div class="modal-body" style="background: #ffffff;">
+                <div class="modal-body">
                     <div class="delete-dialog-content">
                         <div class="delete-warning-icon">
                             <i class="fa fa-trash-o"></i>
@@ -81,20 +80,20 @@
     <!-- Upload Lot Images Modal -->
     <div class="modal fade" id="UploadLotImageModal" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-md">
-            <div class="modal-content" style="border-radius: 12px; border: 1px solid #334155; box-shadow: 0 20px 45px rgba(0,0,0,0.35); overflow: hidden; background: #ffffff;">
-                <div class="modal-header" style="background: #0f172a; color: #ffffff; padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
-                    <div class="modal-header-brand" style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fa fa-cloud-upload" style="color: #38bdf8; font-size: 18px;"></i>
-                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important; font-size: 15px;">Upload Lot Images</h4>
+            <div class="modal-content img-modal-shell-light">
+                <div class="modal-header img-modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-cloud-upload modal-icon-info"></i>
+                        <h4 class="modal-header-title img-modal-title">Upload Lot Images</h4>
                     </div>
-                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">&times;</button>
                 </div>
-                <div class="modal-body" style="background: #f8fafc; padding: 20px;">
-                    <div style="background: #ffffff; border-radius: 10px; padding: 14px; margin-bottom: 14px; border: 1px solid #e2e8f0;">
+                <div class="modal-body img-modal-body-light">
+                    <div class="img-info-card">
                         <div class="row">
                             <div class="col-xs-12 rdl-modal-form-group" style="margin-bottom: 0;">
                                 <label class="rdl-modal-label">Selected Lot Code</label>
-                                <input type="text" class="rdl-modal-input" ng-model="UploadModel.LotCode" readonly style="background: #f1f5f9; font-weight: 700; color: #0369a1;" />
+                                <input type="text" class="rdl-modal-input img-info-readonly-strong" ng-model="UploadModel.LotCode" readonly />
                             </div>
                         </div>
                     </div>
@@ -111,18 +110,18 @@
                     <div class="selected-files-list" ng-if="UploadModel.Files && UploadModel.Files.length > 0">
                         <div class="selected-file-item" ng-repeat="f in UploadModel.Files">
                             <div class="selected-file-name">
-                                <i class="fa fa-file-image-o" style="color: #0284c7;"></i>
+                                <i class="fa fa-file-image-o modal-icon-file"></i>
                                 <span>{{f.name}}</span>
                             </div>
                             <span class="selected-file-size">{{f.size}}</span>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer" style="background: #ffffff; padding: 12px 20px; border-top: 1px solid #e2e8f0;">
+                <div class="modal-footer img-modal-footer-light">
                     <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsUploading">
                         <i class="fa fa-times"></i> Cancel
                     </button>
-                    <button class="btn-modal-action btn-rdl-add" ng-click="SubmitUploadImages()" type="button" style="padding: 7px 18px !important; font-size: 12.5px !important;" ng-disabled="IsUploading || !UploadModel.Files || UploadModel.Files.length === 0">
+                    <button class="btn-modal-action btn-rdl-add btn-upload-compact" ng-click="SubmitUploadImages()" type="button" ng-disabled="IsUploading || !UploadModel.Files || UploadModel.Files.length === 0">
                         <span ng-if="!IsUploading"><i class="fa fa-upload"></i> UPLOAD</span>
                         <span ng-if="IsUploading"><i class="fa fa-spinner fa-spin"></i> Uploading...</span>
                     </button>
@@ -134,27 +133,27 @@
     <!-- View Lot Images Modal -->
     <div class="modal fade" id="ViewLotImageModal" role="dialog">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content" style="border-radius: 12px; border: 1px solid #1e293b; box-shadow: 0 25px 50px rgba(0,0,0,0.5); overflow: hidden; background: #0f172a;">
-                <div class="modal-header" style="background: #0f172a; color: #ffffff; padding: 14px 20px; border-bottom: 1px solid #1e293b; display: flex; justify-content: space-between; align-items: center;">
-                    <div class="modal-header-brand" style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fa fa-picture-o" style="color: #38bdf8; font-size: 18px;"></i>
-                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important; font-size: 15px;">Lot Images - {{ActiveLotCode}}</h4>
+            <div class="modal-content img-modal-shell-dark">
+                <div class="modal-header img-modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-picture-o modal-icon-info"></i>
+                        <h4 class="modal-header-title img-modal-title">Lot Images - {{ActiveLotCode}}</h4>
                     </div>
-                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal" aria-label="Close">&times;</button>
                 </div>
-                <div class="modal-body" style="background: #0b1320; padding: 16px;">
-                    <div ng-if="IsLoadingImages" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
-                        <i class="fa fa-spinner fa-spin" style="font-size: 32px; color: #38bdf8; margin-bottom: 12px;"></i>
+                <div class="modal-body img-modal-body-dark">
+                    <div ng-if="IsLoadingImages" class="img-loading-state">
+                        <i class="fa fa-spinner fa-spin modal-loading-icon"></i>
                         <div>Loading Lot Images...</div>
                     </div>
 
-                    <div ng-if="!IsLoadingImages && (!ImageList || ImageList.length === 0)" style="text-align: center; padding: 50px 20px; color: #94a3b8;">
-                        <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,0.06); display: inline-flex; align-items: center; justify-content: center; font-size: 26px; color: #64748b; margin-bottom: 14px;">
+                    <div ng-if="!IsLoadingImages && (!ImageList || ImageList.length === 0)" class="img-empty-state">
+                        <div class="img-empty-icon">
                             <i class="fa fa-picture-o"></i>
                         </div>
-                        <h4 style="color: #f8fafc; font-size: 16px; margin-bottom: 6px;">No Images Found</h4>
-                        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">There are no uploaded images for Lot {{ActiveLotCode}} yet.</p>
-                        <button class="btn btn-rdl-add" style="font-size: 12px; padding: 7px 14px;" ng-click="OpenUploadModal(ActiveViewRow)" data-dismiss="modal">
+                        <h4 class="img-empty-title">No Images Found</h4>
+                        <p class="img-empty-text">There are no uploaded images for Lot {{ActiveLotCode}} yet.</p>
+                        <button class="btn btn-rdl-add btn-img-empty-upload" ng-click="OpenUploadModal(ActiveViewRow)" data-dismiss="modal">
                             <i class="fa fa-cloud-upload"></i> Upload Images Now
                         </button>
                     </div>
@@ -181,20 +180,19 @@
                             </div>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 4px 4px 4px; color: #94a3b8; font-size: 12px; flex-wrap: wrap; gap: 8px;">
+                        <div class="img-meta-bar">
                             <div>
-                                <i class="fa fa-clock-o"></i> Uploaded: <strong style="color: #e2e8f0;">{{ImageList[ActiveImageIndex].Created || '-'}}</strong>
+                                <i class="fa fa-clock-o"></i> Uploaded: <strong class="img-meta-date">{{ImageList[ActiveImageIndex].Created || '-'}}</strong>
                             </div>
-                            <div style="display: flex; gap: 8px;">
-                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" target="_blank" class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);" title="Open original in new tab">
+                            <div class="img-action-group">
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" target="_blank" class="btn btn-xs btn-img-view" title="Open original in new tab">
                                     <i class="fa fa-external-link"></i> Full View
                                 </a>
-                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" download class="btn btn-xs" style="background: rgba(255,255,255,0.1); color: #4ade80; border: 1px solid rgba(74,222,128,0.3);" title="Download image">
+                                <a ng-href="{{ImageList[ActiveImageIndex].ImagePath}}" download class="btn btn-xs btn-img-download" title="Download image">
                                     <i class="fa fa-download"></i> Download
                                 </a>
                                 <button type="button"
-                                        class="btn btn-xs"
-                                        style="background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); margin-left: 6px;"
+                                        class="btn btn-xs btn-img-delete"
                                         ng-click="DeleteCurrentImage()"
                                         title="Delete this image">
                                     <i class="fa fa-trash-o"></i> Delete
@@ -212,8 +210,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer" style="background: #0f172a; border-top: 1px solid #1e293b; padding: 12px 20px;">
-                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" style="background: #1e293b; color: #cbd5e1; border-color: #334155;">
+                <div class="modal-footer img-modal-footer-dark">
+                    <button class="btn-modal-action btn-modal-reset btn-img-modal-close-dark" data-dismiss="modal" type="button">
                         <i class="fa fa-times"></i> Close
                     </button>
                 </div>
@@ -523,10 +521,53 @@
                             $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
                         }
                     },
-                    { caption: 'R.Code', dataField: 'RCode', minWidth: 110 },
-                    { caption: 'Branch', dataField: 'BranchName', minWidth: 110 },
+                    {
+                        caption: 'R.Code',
+                        dataField: 'RCode',
+                        minWidth: 110,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var priority = (options.data.LotPriority || 'REGULAR').toUpperCase();
+                            var cls = 'rcode-regular';
+                            if (priority === 'SAMPLE') {
+                                cls = 'rcode-sample';
+                            } else if (priority === 'ARGENT' || priority === 'URGENT') {
+                                cls = 'rcode-argent';
+                            }
+
+                            $("<span>")
+                                .addClass(cls)
+                                .text(options.data.RCode || '-')
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Branch',
+                        dataField: 'BranchName',
+                        minWidth: 110,
+                        cellTemplate: function (container, options) {
+                            $("<strong>")
+                                .text(options.data.BranchName || '-')
+                                .appendTo(container);
+                        }
+                    },
                     { caption: 'Department', dataField: 'DepartmentShortName', minWidth: 100 },
                     { caption: 'Lot Code', dataField: 'LotCode', minWidth: 120 },
+                    {
+                        caption: 'LotNo',
+                        dataField: 'LotNo',
+                        minWidth: 140,
+                        alignment: 'center',
+                        calculateCellValue: function (data) {
+                            return (data.LotCode || '') + '-' + (data.DepartmentShortName || '');
+                        },
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .addClass("badge-status-pill badge-pill-info")
+                                .text((options.data.LotCode || '-') + '-' + (options.data.DepartmentShortName || '-'))
+                                .appendTo(container);
+                        }
+                    },
                     { caption: 'Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 80, alignment: 'center' },
                     { caption: 'Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 90, alignment: 'center' },
                     { caption: 'Priority', dataField: 'LotPriority', minWidth: 90 },

@@ -19,6 +19,8 @@ namespace Slip.Models
         public string ColorType { get; set; }
         public int? SizeCodeID { get; set; }
         public string SizeCodeType { get; set; }
+        public int? GradeID { get; set; }
+        public string Grade { get; set; }
 
         public string LotType { get; set; }
         public string OGName { get; set; }

@@ -19,6 +19,9 @@
         public string Remarks { get; set; }
         public string MachineNo { get; set; }
         public string Size { get; set; }
+        public int? DimensionID { get; set; }
+        public string DimensionName { get; set; }
+        public decimal? PerPcsCarat { get; set; }
         public decimal? FromHeight { get; set; }
         public decimal? ToHeight { get; set; }
         public decimal? Hours { get; set; }

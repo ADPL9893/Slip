@@ -152,6 +152,8 @@ namespace Slip.Controllers
                         new SqlParameter("@ColorType", (object)model.ColorType ?? DBNull.Value),
                         new SqlParameter("@SizeCodeID", (object)model.SizeCodeID ?? DBNull.Value),
                         new SqlParameter("@SizeCodeType", (object)model.SizeCodeType ?? DBNull.Value),
+                        new SqlParameter("@GradeID", (object)model.GradeID ?? DBNull.Value),
+                        new SqlParameter("@Grade", (object)model.Grade ?? DBNull.Value),
                         new SqlParameter("@LotType", (object)model.LotType ?? DBNull.Value),
                         new SqlParameter("@OGName", (object)model.OGName ?? DBNull.Value),
                         new SqlParameter("@MachineNo", (object)model.MachineNo ?? DBNull.Value),
@@ -184,6 +186,8 @@ namespace Slip.Controllers
                         new SqlParameter("@Lot_Pcs", model.Lot_Pcs),
                         new SqlParameter("@Lot_Carat", model.Lot_Carat),
                         new SqlParameter("@ValuePerCT", (object)model.ValuePerCT ?? DBNull.Value),
+                        new SqlParameter("@GradeID", (object)model.GradeID ?? DBNull.Value),
+                        new SqlParameter("@Grade", (object)model.Grade ?? DBNull.Value),
                         new SqlParameter("@LotType", (object)model.LotType ?? DBNull.Value),
                         new SqlParameter("@OGName", (object)model.OGName ?? DBNull.Value),
                         new SqlParameter("@MachineNo", (object)model.MachineNo ?? DBNull.Value),
@@ -1232,21 +1236,6 @@ namespace Slip.Controllers
             }
         }
 
-        private static bool TryParseRCodeSequence(string rCode, out string prefix, out int seqNum)
-        {
-            prefix = "";
-            seqNum = 0;
-            if (string.IsNullOrWhiteSpace(rCode)) return false;
-
-            var match = System.Text.RegularExpressions.Regex.Match(rCode.Trim(), @"^(.*?)(\d+)$");
-            if (match.Success)
-            {
-                prefix = match.Groups[1].Value;
-                seqNum = int.Parse(match.Groups[2].Value);
-                return true;
-            }
-            return false;
-        }
 
         [HttpPost]
         public JsonResult SaveRoughDistribution(List<MST_RoughDistribution> list, List<int> deletedIDs = null, string Action = "INSERT", int SizeCodeID = 0)
@@ -1311,10 +1300,16 @@ namespace Slip.Controllers
                                     });
                                 }
 
-                                if (!string.IsNullOrEmpty(rCode) && TryParseRCodeSequence(rCode, out string prefix, out int currentSeq))
+                                if (!string.IsNullOrEmpty(rCode))
                                 {
-                                    // Fetch sibling active records for this branch under the same Jangad/lot (InwardDetailID)
-                                    List<string> siblingRCodes = new List<string>();
+                                    // Fetch sibling active records for this branch under the same Jangad/lot (InwardDetailID).
+                                    // Ordering by DistributionID (always-increasing identity) instead of parsing a
+                                    // sequence number out of the RCode text - the new RCode format shares one serial
+                                    // across branches for the same row and reuses it verbatim across repeat splits
+                                    // (DistributionPartNo), so the trailing digits of RCode are no longer a reliable
+                                    // "created later" indicator.
+                                    string higherRCode = null;
+                                    int maxHigherId = delId;
                                     using (SqlCommand sibCmd = new SqlCommand("SELECT DistributionID, RCode FROM MST_RoughDistribution WITH(NOLOCK) WHERE BranchID = @BranchID AND InwardDetailID = @InwardDetailID AND IsActive = 1", con))
                                     {
                                         sibCmd.Parameters.AddWithValue("@BranchID", branchId);
@@ -1325,27 +1320,10 @@ namespace Slip.Controllers
                                             {
                                                 int sibId = Convert.ToInt32(sibRdr["DistributionID"]);
                                                 string sibRCode = Convert.ToString(sibRdr["RCode"] ?? "");
-                                                if (!deletedIDs.Contains(sibId) && !string.IsNullOrEmpty(sibRCode))
+                                                if (!deletedIDs.Contains(sibId) && sibId > maxHigherId)
                                                 {
-                                                    siblingRCodes.Add(sibRCode);
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // Verify if any remaining sibling record has a higher sequence
-                                    string higherRCode = null;
-                                    int maxHigherSeq = currentSeq;
-                                    foreach (string sCode in siblingRCodes)
-                                    {
-                                        if (TryParseRCodeSequence(sCode, out string sPrefix, out int sSeq))
-                                        {
-                                            if (sPrefix.Equals(prefix, StringComparison.OrdinalIgnoreCase) && sSeq > currentSeq)
-                                            {
-                                                if (sSeq > maxHigherSeq)
-                                                {
-                                                    maxHigherSeq = sSeq;
-                                                    higherRCode = sCode;
+                                                    maxHigherId = sibId;
+                                                    higherRCode = sibRCode;
                                                 }
                                             }
                                         }
@@ -1391,10 +1369,15 @@ namespace Slip.Controllers
                 if (newItems.Count > 0)
                 {
                     // R.Code is generated server-side, atomically, per item - via
-                    // dbo.usp_GenerateRoughCode(@SizeID, @BranchID, @Year). This replaces
-                    // the old manual/auto entry + three-layer duplicate-check system;
-                    // the SP's UPDLOCK/HOLDLOCK increment on MST_RoughCodeGenerator makes
-                    // duplicates structurally impossible, so no pre-check is needed.
+                    // dbo.usp_GenerateRoughCode(@SizeID, @BranchID, @InwardDetailID, @Year).
+                    // The SP shares one serial per InwardDetailID across branches and reuses
+                    // a branch's existing RCode (bumping DistributionPartNo) on repeat splits
+                    // of the same row+branch - see usp_GenerateRoughCode for the full rule.
+                    // Sibling new items for the SAME InwardDetailID in THIS batch aren't in the
+                    // DB yet (the bulk insert happens after this loop), so the SP can't see them
+                    // via its own lookup - rowSerialCache carries the first-generated Year/Serial
+                    // for a row forward to any later item in the batch sharing that row.
+                    var rowSerialCache = new Dictionary<int, Tuple<int, int>>();
                     using (SqlConnection con = new SqlConnection(conn))
                     {
                         con.Open();
@@ -1405,14 +1388,28 @@ namespace Slip.Controllers
                                 genCmd.CommandType = CommandType.StoredProcedure;
                                 genCmd.Parameters.AddWithValue("@SizeID", SizeCodeID);
                                 genCmd.Parameters.AddWithValue("@BranchID", item.BranchID);
+                                genCmd.Parameters.AddWithValue("@InwardDetailID", item.InwardDetailID);
                                 genCmd.Parameters.AddWithValue("@Year", DateTime.Now.Year);
+                                if (rowSerialCache.TryGetValue(item.InwardDetailID, out var known))
+                                {
+                                    genCmd.Parameters.AddWithValue("@KnownYear", known.Item1);
+                                    genCmd.Parameters.AddWithValue("@KnownSerial", known.Item2);
+                                }
                                 using (SqlDataReader genRdr = genCmd.ExecuteReader())
                                 {
                                     if (genRdr.Read())
                                     {
                                         item.RCode = Convert.ToString(genRdr["RoughCode"]);
+                                        item.RCodeYear = Convert.ToInt32(genRdr["RCodeYear"]);
+                                        item.RCodeSerial = Convert.ToInt32(genRdr["RCodeSerial"]);
+                                        item.DistributionPartNo = Convert.ToInt32(genRdr["DistributionPartNo"]);
                                     }
                                 }
+                            }
+
+                            if (!rowSerialCache.ContainsKey(item.InwardDetailID) && item.RCodeYear.HasValue && item.RCodeSerial.HasValue)
+                            {
+                                rowSerialCache[item.InwardDetailID] = Tuple.Create(item.RCodeYear.Value, item.RCodeSerial.Value);
                             }
                         }
                         con.Close();
@@ -1427,6 +1424,9 @@ namespace Slip.Controllers
                         xmlBuilder.Append("<InwardDetailID>").Append(item.InwardDetailID).Append("</InwardDetailID>");
                         xmlBuilder.Append("<BranchID>").Append(item.BranchID).Append("</BranchID>");
                         xmlBuilder.Append("<RCode>").Append(System.Security.SecurityElement.Escape(item.RCode ?? "")).Append("</RCode>");
+                        xmlBuilder.Append("<RCodeYear>").Append(item.RCodeYear ?? 0).Append("</RCodeYear>");
+                        xmlBuilder.Append("<RCodeSerial>").Append(item.RCodeSerial ?? 0).Append("</RCodeSerial>");
+                        xmlBuilder.Append("<DistributionPartNo>").Append(item.DistributionPartNo ?? 1).Append("</DistributionPartNo>");
                         xmlBuilder.Append("<RoughPcs>").Append(item.RoughPcs).Append("</RoughPcs>");
                         xmlBuilder.Append("<RoughWeight>").Append(item.RoughWeight.ToString("0.000", System.Globalization.CultureInfo.InvariantCulture)).Append("</RoughWeight>");
                         if (item.Rate.HasValue)
@@ -2578,6 +2578,31 @@ namespace Slip.Controllers
             }
         }
 
+        public JsonResult Get_MST_DimensionList()
+        {
+            try
+            {
+                var list = new List<object>();
+
+                List<Dictionary<string, object>> dimensionRows = DbHelper.ExecuteReaderAsList("USP_MST_Dimension_GetList");
+                foreach (var row in dimensionRows)
+                {
+                    list.Add(new
+                    {
+                        ID = Convert.ToInt32(row["ID"]),
+                        DimensionName = row["DimensionName"] != null ? Convert.ToString(row["DimensionName"]) : ""
+                    });
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         #region Size And Final ShapeGroup Wise Price Discount
 
         public ActionResult SizeAndFnlShpGrpWisePriceDisc()
@@ -3180,6 +3205,7 @@ namespace Slip.Controllers
                                         lineCmd.Parameters.AddWithValue("@Remarks", (object)line.Remarks ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@MachineNo", (object)line.MachineNo ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@Size", (object)line.Size ?? DBNull.Value);
+                                        lineCmd.Parameters.AddWithValue("@DimensionID", (object)line.DimensionID ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@FromHeight", (object)line.FromHeight ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@ToHeight", (object)line.ToHeight ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@Hours", (object)line.Hours ?? DBNull.Value);

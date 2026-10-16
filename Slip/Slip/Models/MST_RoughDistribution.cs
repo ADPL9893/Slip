@@ -9,6 +9,9 @@ namespace Slip.Models
         public int BranchID { get; set; }
         public string BranchName { get; set; }
         public string RCode { get; set; }
+        public int? RCodeYear { get; set; }
+        public int? RCodeSerial { get; set; }
+        public int? DistributionPartNo { get; set; }
         public int RoughPcs { get; set; }
         public decimal RoughWeight { get; set; }
         public decimal? Rate { get; set; }

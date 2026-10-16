@@ -123,31 +123,25 @@
 
     <!-- SEPARATE DYNAMIC ADJUSTMENT & KPI CARDS -->
     <div class="kpi-container">
-        <!-- 1. Original Lot Card -->
+        <!-- 1. Org Pcs of selected Lot -->
         <div class="kpi-box kpi-original">
             <div class="kpi-icon-wrap">
                 <i class="fa fa-cubes"></i>
             </div>
             <div class="kpi-content">
-                <div class="kpi-label">Original Pre-Rough Lot</div>
-                <div class="kpi-value">{{(Master.RoughPcs || 0) | number:0}} <span style="font-size:13px; font-weight:600; color:#64748b;">Pcs</span></div>
-                <div class="kpi-sub">
-                    <i class="fa fa-balance-scale"></i> Total Weight: <strong>{{(Master.RoughWeight || 0) | number:3}} Cts</strong>
-                </div>
+                <div class="kpi-label">Org Pcs</div>
+                <div class="kpi-value">{{(Master.RoughPcs || 0) | number:0}} <span class="kpi-unit-label">Pcs</span></div>
             </div>
         </div>
 
-        <!-- 2. Total Distributed Card -->
+        <!-- 2. Org Carat of selected Lot -->
         <div class="kpi-box kpi-distributed">
             <div class="kpi-icon-wrap">
-                <i class="fa fa-pie-chart"></i>
+                <i class="fa fa-balance-scale"></i>
             </div>
             <div class="kpi-content">
-                <div class="kpi-label">Total Distributed</div>
-                <div class="kpi-value">{{TotalDistributedPcs | number:0}} <span style="font-size:13px; font-weight:600; color:#64748b;">Pcs</span></div>
-                <div class="kpi-sub">
-                    <i class="fa fa-check-circle"></i> Distributed Weight: <strong>{{TotalDistributedWeight | number:3}} Cts</strong>
-                </div>
+                <div class="kpi-label">Org Carat</div>
+                <div class="kpi-value">{{(Master.RoughWeight || 0) | number:3}} <span class="kpi-unit-label">Cts</span></div>
             </div>
         </div>
 
@@ -158,7 +152,7 @@
             </div>
             <div class="kpi-content">
                 <div class="kpi-label">Adjust Pcs (Remaining)</div>
-                <div class="kpi-value">{{AdjustPcs | number:0}} <span style="font-size:13px; font-weight:600; color:#64748b;">Pcs</span></div>
+                <div class="kpi-value">{{AdjustPcs | number:0}} <span class="kpi-unit-label">Pcs</span></div>
                 <div class="kpi-sub">
                     <span ng-if="AdjustPcs === 0" class="badge-status-pill badge-pill-success"><i class="fa fa-check"></i> Pcs Balanced</span>
                     <span ng-if="AdjustPcs > 0" class="badge-status-pill badge-pill-warning"><i class="fa fa-clock-o"></i> {{AdjustPcs}} Pcs Remaining</span>
@@ -174,7 +168,7 @@
             </div>
             <div class="kpi-content">
                 <div class="kpi-label">Adjust Weight (Remaining)</div>
-                <div class="kpi-value">{{AdjustWeight | number:3}} <span style="font-size:13px; font-weight:600; color:#64748b;">Cts</span></div>
+                <div class="kpi-value">{{AdjustWeight | number:3}} <span class="kpi-unit-label">Cts</span></div>
                 <div class="kpi-sub">
                     <span ng-if="AdjustWeight === 0" class="badge-status-pill badge-pill-success"><i class="fa fa-check"></i> Weight Balanced</span>
                     <span ng-if="AdjustWeight > 0" class="badge-status-pill badge-pill-warning"><i class="fa fa-clock-o"></i> {{AdjustWeight | number:3}} Cts Remaining</span>
@@ -298,7 +292,7 @@
                     <label class="rd-label">Status</label>
                     <div class="active-toggle-wrap">
                         <input type="checkbox" id="EntryIsActive" ng-model="NewEntry.IsActive" />
-                        <label for="EntryIsActive" style="margin: 0; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                        <label for="EntryIsActive" class="status-toggle-label">
                             <span ng-if="NewEntry.IsActive" class="text-success"><i class="fa fa-check-circle"></i> Active</span>
                             <span ng-if="!NewEntry.IsActive" class="text-danger"><i class="fa fa-times-circle"></i> Inactive</span>
                         </label>
@@ -352,12 +346,12 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="modal-header-brand">
-                        <i class="fa fa-exclamation-triangle" style="color: #ef4444; font-size: 18px;"></i>
-                        <h4 class="modal-header-title" style="color: #ffffff !important; font-weight: 700 !important; margin: 0 !important;">Confirm Remove Distribution</h4>
+                        <i class="fa fa-exclamation-triangle modal-icon-danger"></i>
+                        <h4 class="modal-header-title">Confirm Remove Distribution</h4>
                     </div>
-                    <button type="button" class="close modal-close-btn" data-dismiss="modal" style="color: #cbd5e1 !important; opacity: 0.9 !important;">&times;</button>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
                 </div>
-                <div class="modal-body" style="background: #ffffff;">
+                <div class="modal-body">
                     <div class="delete-dialog-content">
                         <div class="delete-warning-icon">
                             <i class="fa fa-trash-o"></i>
@@ -737,6 +731,7 @@
                                 BranchID: bId,
                                 BranchName: bName || ('Branch #' + bId),
                                 RCode: c.RCode || c.R_Code || '',
+                                DistributionPartNo: parseInt(c.DistributionPartNo || 1),
                                 RoughPcs: parseInt(c.RoughPcs || 0),
                                 RoughWeight: parseFloat(c.RoughWeight || 0),
                                 Rate: c.Rate !== null && c.Rate !== undefined ? parseFloat(c.Rate) : null,
@@ -1043,11 +1038,14 @@
             // Resolve Branch Name from MST_GeneralSetting
             var branchName = selectedBranchName || ('Branch #' + selectedBranchId);
 
+            $scope._stagedSeqCounter = ($scope._stagedSeqCounter || 0) + 1;
+
             var stagedItem = {
                 DistributionID: 0,
                 InwardDetailID: $scope.Master.PreRoughID,
                 BranchID: selectedBranchId,
                 BranchName: branchName,
+                _clientSeq: $scope._stagedSeqCounter,
                 RCode: '',
                 RoughPcs: pcs,
                 RoughWeight: parseFloat(weight.toFixed(3)),
@@ -1074,17 +1072,20 @@
         // Aliased function names
         $scope.AddEntryToGrid = $scope.AddDistributionRow;
 
-        // Numerical Suffix & Prefix Extraction Helpers for LIFO Sequential Enforcement
-        $scope.GetRCodeSequenceNumber = function (rcode) {
-            if (!rcode || typeof rcode !== 'string') return 0;
-            var match = rcode.trim().match(/(\d+)$/);
-            return match ? parseInt(match[1], 10) : 0;
-        };
-
-        $scope.GetRCodePrefix = function (rcode) {
-            if (!rcode || typeof rcode !== 'string') return '';
-            var match = rcode.trim().match(/^(.*?)(\d+)$/);
-            return match ? match[1].toLowerCase() : rcode.trim().toLowerCase();
+        // Creation-order key for LIFO enforcement: saved rows use their
+        // DistributionID (always-increasing), staged rows use a client-side
+        // push-order counter offset above any real DistributionID so they
+        // always sort as "newer" than anything already saved. Replaces the
+        // old approach of parsing a sequence number out of the RCode text -
+        // the new RCode format shares one serial across branches for the
+        // same row and reuses it verbatim across repeat splits
+        // (DistributionPartNo), so the trailing digits of RCode are no
+        // longer a reliable "created later" indicator.
+        $scope.GetRowOrderKey = function (row) {
+            if (!row) return 0;
+            var distId = parseInt(row.DistributionID || 0);
+            if (distId > 0) return distId;
+            return 1000000000 + (row._clientSeq || 0);
         };
 
         // LIFO Sequential Deletion Validation Helper
@@ -1092,10 +1093,9 @@
             if (!item || !item.RCode) return { isValid: true };
 
             var branchId = parseInt(item.BranchID || 0);
-            var currentSeq = $scope.GetRCodeSequenceNumber(item.RCode);
-            var itemPrefix = $scope.GetRCodePrefix(item.RCode);
+            var currentKey = $scope.GetRowOrderKey(item);
 
-            if (branchId <= 0 || currentSeq <= 0) {
+            if (branchId <= 0) {
                 return { isValid: true };
             }
 
@@ -1119,19 +1119,15 @@
                 // Ignore if already marked in deferred DeletedIDs
                 if (rowDelId > 0 && ($scope.DeletedIDs || []).indexOf(rowDelId) !== -1) continue;
 
-                // Match prefix family
-                var rowPrefix = $scope.GetRCodePrefix(row.RCode);
-                if (rowPrefix !== itemPrefix) continue;
-
-                var rowSeq = $scope.GetRCodeSequenceNumber(row.RCode);
-                if (rowSeq > currentSeq) {
-                    higherRows.push({ row: row, seq: rowSeq });
+                var rowKey = $scope.GetRowOrderKey(row);
+                if (rowKey > currentKey) {
+                    higherRows.push({ row: row, key: rowKey });
                 }
             }
 
             if (higherRows.length > 0) {
                 higherRows.sort(function (a, b) {
-                    return b.seq - a.seq;
+                    return b.key - a.key;
                 });
                 var highestRCode = higherRows[0].row.RCode;
                 return {
@@ -1403,6 +1399,18 @@
                                 .addClass(priorityClass)
                                 .text(options.data.RCode || '-')
                                 .appendTo(container);
+
+                            var partNo = parseInt(options.data.DistributionPartNo || 1);
+                            if (partNo > 1) {
+                                $("<span>")
+                                    .text('Part ' + partNo)
+                                    .css({
+                                        "display": "inline-block", "margin-left": "6px", "padding": "1px 7px",
+                                        "border-radius": "10px", "font-size": "10px", "font-weight": "700",
+                                        "background": "#fef3c7", "color": "#b45309", "vertical-align": "middle"
+                                    })
+                                    .appendTo(container);
+                            }
                         }
                     },
                     {

@@ -65,7 +65,7 @@
                                 class="form-control rd-input">
                             <option value="">-- Select Distribution Bag --</option>
                             <option ng-repeat="item in DistributionList" value="{{item.DistributionID}}">
-                                {{item.RCode}} / {{item.ColorType}} / {{item.FactoryCode}} &mdash; Pending {{item.PendingPcs}} Pcs / {{item.PendingWeight}} Cts
+                                {{GetDistributionLabel(item)}}
                             </option>
                         </select>
                     </div>
@@ -77,18 +77,32 @@
 
     <!-- Pending Balance KPI Cards -->
     <div class="kpi-container" ng-show="Selected.RoughDistributionID">
+        <div class="kpi-box kpi-org">
+            <div class="kpi-icon-wrap"><i class="fa fa-cube"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">ORG Pcs</div>
+                <div class="kpi-value">{{(Selected.RoughPcs || 0) | number:0}} <span class="kpi-unit-label">Pcs</span></div>
+            </div>
+        </div>
+        <div class="kpi-box kpi-adj-wt">
+            <div class="kpi-icon-wrap"><i class="fa fa-diamond"></i></div>
+            <div class="kpi-content">
+                <div class="kpi-label">ORG Crts</div>
+                <div class="kpi-value">{{(Selected.RoughWeight || 0) | number:3}} <span class="kpi-unit-label">Cts</span></div>
+            </div>
+        </div>
         <div class="kpi-box kpi-original">
             <div class="kpi-icon-wrap"><i class="fa fa-cubes"></i></div>
             <div class="kpi-content">
                 <div class="kpi-label">Pending Pcs</div>
-                <div class="kpi-value">{{(Selected.PendingPcs || 0) | number:0}} <span style="font-size:13px; font-weight:600; color:#64748b;">Pcs</span></div>
+                <div class="kpi-value">{{(Selected.PendingPcs || 0) | number:0}} <span class="kpi-unit-label">Pcs</span></div>
             </div>
         </div>
         <div class="kpi-box kpi-distributed">
             <div class="kpi-icon-wrap"><i class="fa fa-balance-scale"></i></div>
             <div class="kpi-content">
                 <div class="kpi-label">Pending Carat</div>
-                <div class="kpi-value">{{(Selected.PendingWeight || 0) | number:3}} <span style="font-size:13px; font-weight:600; color:#64748b;">Cts</span></div>
+                <div class="kpi-value">{{(Selected.PendingWeight || 0) | number:3}} <span class="kpi-unit-label">Cts</span></div>
             </div>
         </div>
         <div class="kpi-box kpi-adj-pcs">
@@ -108,6 +122,14 @@
         <div class="rd-card-body">
             <div class="row">
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormLotPcs">Pcs <span class="req">*</span></label>
+                    <input type="text" id="FormLotPcs" ng-model="FormModel.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormLotCarat">Carat <span class="req">*</span></label>
+                    <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label" for="FormDepartmentID">Department <span class="req">*</span></label>
                     <div class="field-select-wrap">
                         <select id="FormDepartmentID" chosen="DepartmentList" ng-model="FormModel.DepartmentID" class="form-control rd-input">
@@ -117,14 +139,21 @@
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormFactoryCodeID">Factory Code <span class="req">*</span></label>
+                    <label class="rd-label" for="FormGradeID">Grade</label>
                     <div class="field-select-wrap">
-                        <select id="FormFactoryCodeID" chosen="FactoryCodeList" ng-model="FormModel.FactoryCodeID" ng-change="OnFactoryCodeChange()" class="form-control rd-input">
+                        <select id="FormGradeID" chosen="GradeList" ng-model="FormModel.GradeID" ng-change="OnGradeChange()" class="form-control rd-input">
                             <option value="">-- Select --</option>
-                            <option ng-repeat="item in FactoryCodeList" value="{{item.FactoryCodeID}}">{{item.FactoryCode}}</option>
+                            <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
                         </select>
                     </div>
                 </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label">Factory Code <span class="req">*</span></label>
+                    <input type="text" ng-model="FormModel.FactoryCode" class="rd-input rd-master-input" readonly />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="row">
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label">Color Type <span class="req">*</span></label>
                     <input type="text" ng-model="FormModel.ColorType" class="rd-input rd-master-input" readonly />
@@ -141,17 +170,6 @@
                     <label class="rd-label" for="FormOGName">OG Name</label>
                     <input type="text" id="FormOGName" ng-model="FormModel.OGName" placeholder="OG Name" class="rd-input" />
                 </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormLotPcs">Pcs <span class="req">*</span></label>
-                    <input type="text" id="FormLotPcs" ng-model="FormModel.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormLotCarat">Carat <span class="req">*</span></label>
-                    <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label" for="FormValuePerCT">Value/CT</label>
                     <input type="text" id="FormValuePerCT" ng-model="FormModel.ValuePerCT" placeholder="0.000" class="rd-input allownumericwithdecimal" />
@@ -160,6 +178,9 @@
                     <label class="rd-label" for="FormRoughRate">Rough Rate</label>
                     <input type="text" id="FormRoughRate" ng-model="FormModel.RoughRate" placeholder="0.00" class="rd-input allownumericwithdecimal" />
                 </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="row">
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label" for="FormReceipe">Receipe <span class="req">*</span></label>
                     <div class="field-select-wrap">
@@ -173,9 +194,6 @@
                     <label class="rd-label" for="FormBoxNo">Box No</label>
                     <input type="text" id="FormBoxNo" ng-model="FormModel.BoxNo" placeholder="Box No" class="rd-input" />
                 </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="row">
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label" for="FormMachineNo">Machine No</label>
                     <input type="text" id="FormMachineNo" ng-model="FormModel.MachineNo" placeholder="Machine No" class="rd-input" />
@@ -192,6 +210,9 @@
                     <label class="rd-label" for="FormNewHeight">New Height</label>
                     <input type="text" id="FormNewHeight" ng-model="FormModel.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
                 </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="row">
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label" for="FormSize">Size</label>
                     <input type="text" id="FormSize" ng-model="FormModel.Size" placeholder="Size" class="rd-input" />
@@ -249,7 +270,7 @@
                     <select id="FormLotPriority" class="form-control rd-input" ng-model="FormModel.LotPriority">
                         <option value="REGULAR">REGULAR</option>
                         <option value="SAMPLE">SAMPLE</option>
-                        <option value="ARGENT">ARGENT</option>
+                        <option value="URGENT">URGENT</option>
                     </select>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
@@ -275,7 +296,7 @@
                     <label class="rd-label">Status</label>
                     <div class="active-toggle-wrap">
                         <input type="checkbox" id="FormIsActive" ng-model="FormModel.IsActive" />
-                        <label for="FormIsActive" style="margin: 0; font-size: 12.5px; font-weight: 600; cursor: pointer;">
+                        <label for="FormIsActive" class="status-toggle-label">
                             <span ng-if="FormModel.IsActive" class="text-success"><i class="fa fa-check-circle"></i> Active</span>
                             <span ng-if="!FormModel.IsActive" class="text-danger"><i class="fa fa-times-circle"></i> Inactive</span>
                         </label>
@@ -321,7 +342,7 @@
         $scope.BranchList = [];
         $scope.DistributionList = [];
         $scope.ReceipeList = [];
-        $scope.FactoryCodeList = [];
+        $scope.GradeList = [];
         $scope.DepartmentList = [];
         $scope.SelectedBranchID = '';
         $scope.SelectedDistributionID = '';
@@ -357,7 +378,7 @@
             CakePcs: null,
             CakeWeight: null,
             RejPcs: null,
-            RejCarat: null,
+            RejCarat: null, 
             OGPcs: null,
             OGCarat: null,
             LotPriority: 'REGULAR',
@@ -402,11 +423,11 @@
             });
         };
 
-        $scope.LoadFactoryCodes = function () {
-            return $http.get('@Url.Action("Get_MST_FactoryCodeList", "Master")').then(function (res) {
+        $scope.LoadGrades = function () {
+            return $http.get('@Url.Action("Get_MST_GradeList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
-                    $scope.FactoryCodeList = res.data.list || [];
-                    $timeout(function () { $('#FormFactoryCodeID').trigger('chosen:updated'); }, 100);
+                    $scope.GradeList = res.data.list || [];
+                    $timeout(function () { $('#FormGradeID').trigger('chosen:updated'); }, 100);
                 }
             });
         };
@@ -425,11 +446,6 @@
             });
         };
 
-        $scope.OnFactoryCodeChange = function () {
-            var match = ($scope.FactoryCodeList || []).find(function (x) { return parseInt(x.FactoryCodeID) === parseInt($scope.FormModel.FactoryCodeID); });
-            $scope.FormModel.FactoryCode = match ? match.FactoryCode : '';
-        };
-
         $scope.BuildPreviewCode = function () {
             var partNo = (Selected_NextPartNoPreview()) || 1;
             $scope.PreviewLotCode = $scope.Selected.RCode ? ($scope.Selected.RCode + String.fromCharCode(64 + partNo)) : '';
@@ -437,6 +453,14 @@
         function Selected_NextPartNoPreview() {
             return $scope.Selected ? $scope.Selected.NextPartNoPreview : null;
         }
+
+        $scope.GetDistributionLabel = function (item) {
+            if (!item) return '';
+            var partNo = parseInt(item.RoughDistributionPartNo || 1);
+            var rCode = (item.RCode || '') + (partNo > 1 ? ('-' + partNo) : '');
+            return rCode + ' / ' + (item.Receipe || '-') + ' / ' + (item.ColorType || '-') + ' / ' + (item.FactoryCode || '-')
+                + ' \u2014 Pending ' + (item.PendingPcs || 0) + ' Pcs / ' + (item.PendingWeight || 0) + ' Cts';
+        };
 
         $scope.OnBranchChange = function () {
             $scope.SelectedDistributionID = '';
@@ -454,6 +478,7 @@
         };
 
         $scope.OnDistributionChange = function () {
+            debugger
             var match = ($scope.DistributionList || []).find(function (x) { return parseInt(x.DistributionID) === parseInt($scope.SelectedDistributionID); });
             if (!match) {
                 $scope.Selected = {};
@@ -464,6 +489,8 @@
             $scope.Selected.RoughDistributionID = match.DistributionID;
             $scope.FormModel.RoughDistributionID = match.DistributionID;
             $scope.FormModel.RCode = match.RCode;
+            // Factory Code / Color Type / Size Code always match the originating
+            // Rough Distribution - read-only, not independently editable.
             $scope.FormModel.FactoryCodeID = match.FactoryCodeID;
             $scope.FormModel.FactoryCode = match.FactoryCode;
             $scope.FormModel.ColorType = match.ColorType;
@@ -472,6 +499,8 @@
 
             // Carried over from the Rough Distribution / Rough Inward detail as a
             // starting point - still user-editable afterward.
+            $scope.FormModel.GradeID = match.GradeID || null;
+            $scope.FormModel.Grade = match.Grade || '';
             $scope.FormModel.MachineNo = match.MachineNo || '';
             $scope.FormModel.BoxNo = match.BoxNo || '';
             $scope.FormModel.Receipe = match.Receipe || '';
@@ -481,11 +510,16 @@
             $scope.FormModel.LotPurpose = match.LotPurpose || '';
 
             $timeout(function () {
-                $('#FormFactoryCodeID').trigger('chosen:updated');
+                $('#FormGradeID').trigger('chosen:updated');
                 $('#FormReceipe').trigger('chosen:updated');
             }, 100);
 
             $scope.BuildPreviewCode();
+        };
+
+        $scope.OnGradeChange = function () {
+            var match = ($scope.GradeList || []).find(function (x) { return parseInt(x.GradeID) === parseInt($scope.FormModel.GradeID); });
+            $scope.FormModel.Grade = match ? match.Grade : '';
         };
 
         $scope.LoadForEdit = function (lotId) {
@@ -510,6 +544,8 @@
                     ColorType: m.ColorType,
                     SizeCodeID: m.SizeCodeID,
                     SizeCodeType: m.SizeCodeType,
+                    GradeID: m.GradeID,
+                    Grade: m.Grade,
                     LotType: m.LotType,
                     OGName: m.OGName,
                     Lot_Pcs: m.Lot_Pcs,
@@ -540,6 +576,8 @@
                 $scope.Selected = {
                     RoughDistributionID: m.RoughDistributionID,
                     RCode: m.RCode,
+                    RoughPcs: m.RoughPcs,
+                    RoughWeight: m.RoughWeight,
                     PendingPcs: m.AvailablePcs,
                     PendingWeight: m.AvailableWeight
                 };
@@ -554,8 +592,12 @@
                 $scope.DistributionList = [{
                     DistributionID: m.RoughDistributionID,
                     RCode: m.RCode,
+                    RoughDistributionPartNo: m.RoughDistributionPartNo,
+                    Receipe: m.Receipe,
                     ColorType: m.ColorType,
                     FactoryCode: m.FactoryCode,
+                    RoughPcs: m.RoughPcs,
+                    RoughWeight: m.RoughWeight,
                     PendingPcs: m.AvailablePcs,
                     PendingWeight: m.AvailableWeight
                 }];
@@ -573,7 +615,7 @@
                 }
                 SyncChosenValue('#SelectedBranchID', $scope.SelectedBranchID);
                 SyncChosenValue('#SelectedDistributionID', $scope.SelectedDistributionID);
-                SyncChosenValue('#FormFactoryCodeID', m.FactoryCodeID);
+                SyncChosenValue('#FormGradeID', m.GradeID);
                 SyncChosenValue('#FormReceipe', m.Receipe);
             }, function () {
                 $scope.IsLoading = false;
@@ -669,7 +711,7 @@
         $q.all([
             $scope.LoadBranches(),
             $scope.LoadRecipes(),
-            $scope.LoadFactoryCodes()
+            $scope.LoadGrades()
         ]).then(function () {
             if ($scope.InitLotID > 0) {
                 $scope.LoadForEdit($scope.InitLotID);

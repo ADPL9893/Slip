@@ -14465,19 +14465,25 @@ header.main-header {
        ".rdl-*" rules further down) - only its modal/form-specific .ri-*
        classes (form groups, inputs, line-items table, etc.) remain here. */
 
-    .btn-ri-add-main {
-        background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%) !important;
-        color: #ffffff !important; border: none !important; border-radius: 8px !important;
-        padding: 9px 18px !important; font-size: 13px !important; font-weight: 700 !important;
-        display: inline-flex !important; align-items: center !important; gap: 7px !important;
-        box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35) !important;
-        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important; cursor: pointer !important; text-decoration: none !important;
-    }
+.btn-ri-add-main {
+    background: #e0f2fe !important;
+    color: #1e46b7 !important;
+    border: none !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+}
     .btn-ri-add-main:hover {
-        background: linear-gradient(135deg, #1e40af 0%, #172554 100%) !important;
-        transform: translateY(-2px) !important; box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45) !important; color: #ffffff !important;
+        background: #0284c7 !important;
+        color: #ffffff !important;
+        transform: scale(1.08) translateY(-1px) !important;
     }
-    .btn-ri-add-main:active { transform: translateY(0) !important; }
 
     .grid-btn-group { display: inline-flex; align-items: center; gap: 6px; }
 
@@ -14503,26 +14509,22 @@ header.main-header {
     .badge-pill-info { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
     .badge-pill-warning { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
 
-    @media (max-width: 768px) {
-        .btn-ri-add-main { width: 100% !important; justify-content: center !important; }
-    }
-
     /* Modal */
-    #InwardModal .modal-dialog { max-width: min(1400px, calc(100vw - 32px)); width: 97%; margin: 20px auto; }
+    #InwardModal .modal-dialog { max-width: min(1680px, calc(100vw - 16px)); width: 98%; margin: 12px auto; }
     #InwardModal .modal-content { border-radius: 12px; border: none; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28); overflow: visible; background: #ffffff; }
-    #InwardModal .modal-header { background: #111827 !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #1f2937; position: relative; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+    #InwardModal .modal-header { background: var(--topbar-bg-solid, #1C2B6B) !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #15215a; position: relative; border-top-left-radius: 12px; border-top-right-radius: 12px; }
     #InwardModal .modal-header:before, #InwardModal .modal-header:after { display: none !important; }
     .modal-header-flex { display: flex; justify-content: space-between; align-items: center; width: 100%; }
     .modal-header-title-left { display: flex; align-items: center; gap: 9px; }
     #InwardModal .modal-title { font-size: 15px; font-weight: 700; color: #ffffff; margin: 0; letter-spacing: 0.3px; line-height: 1.3; }
-    #InwardModal .modal-title-icon { color: #10b981; font-size: 17px; }
+    #InwardModal .modal-title-icon { color: #38bdf8; font-size: 17px; }
     #InwardModal .btn-close-header {
-        color: #94a3b8; opacity: 1; font-size: 24px; font-weight: 300; text-shadow: none; margin: 0; padding: 0 4px;
+        color: #c7d2fe; opacity: 1; font-size: 24px; font-weight: 300; text-shadow: none; margin: 0; padding: 0 4px;
         transition: color 0.15s ease; line-height: 1; background: transparent; border: none; outline: none; cursor: pointer;
     }
     #InwardModal .btn-close-header:hover { color: #ffffff; }
 
-    #InwardModal .modal-body { padding: 20px 26px 10px 30px; background: #f8fafc; max-height: calc(85vh - 120px); overflow-y: auto; overflow-x: visible; }
+    #InwardModal .modal-body { padding: 20px 26px 10px 30px; background: #f8fafc; max-height: calc(92vh - 110px); overflow-y: auto; overflow-x: visible; }
 
     .ri-modal-section { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 18px 4px 18px; margin-bottom: 16px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03); }
     .ri-modal-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: #2563eb; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
@@ -14533,9 +14535,9 @@ header.main-header {
     .ri-label .req { color: #ef4444; margin-left: 2px; font-weight: bold; }
 
     .ri-input {
-        width: 100%; height: 38px; padding: 6px 12px; font-size: 12.5px; color: #1e293b;
+        width: 100%; height: 38px !important; padding: 6px 12px !important; font-size: 12.5px; color: #1e293b;
         background-color: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; transition: all 0.2s ease; outline: none;
-        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02); margin: 1px 10px;
     }
     .ri-input::placeholder { color: #94a3b8; font-size: 12px; }
     .ri-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
@@ -14582,9 +14584,10 @@ header.main-header {
     /* Line items table */
     .ri-lines-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
     .ri-lines-table th {
-        background: #f1f5f9; color: #334155; font-weight: 700; text-transform: uppercase; font-size: 10.5px;
-        letter-spacing: 0.3px; padding: 8px 6px; border: 1px solid #e2e8f0; text-align: center;
+        background: #1C5F8F; color: #ffffff; font-weight: 700; text-transform: uppercase; font-size: 10.5px;
+        letter-spacing: 0.3px; padding: 8px 6px; border: 1px solid #15496F; text-align: center;
     }
+    .ri-lines-table th .req { color: #ef4444; }
     .ri-lines-table td { padding: 4px; border: 1px solid #e2e8f0; text-align: center; vertical-align: middle; }
     .ri-lines-table input, .ri-lines-table select { width: 100%; height: 34px; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 8px; font-size: 12.5px; text-align: center; }
     .ri-lines-table input.ri-lot-input { text-align: left; }
@@ -15669,122 +15672,12 @@ header.main-header {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
-    /* Staggered Entrance Animations */
-    .mb-header-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
-    .mb-filter-toolbar { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
-    .mb-grid-card { animation: fadeInUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
-
-    /* Top Page Header Card (Clean White Neutral Header Card) */
-    .mb-header-card {
-        background: #ffffff !important;
-        border-radius: 12px !important;
-        padding: 12px 18px !important;
-        margin-bottom: 10px !important;
-        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
-        border: 1.5px solid #cbd5e1 !important;
-        border-left: 5px solid #0284c7 !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        flex-wrap: wrap !important;
-        gap: 10px !important;
-        transition: all 0.25s ease !important;
-    }
-    .mb-header-card:hover {
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
-        border-color: #94a3b8 !important;
-        border-left-color: #0369a1 !important;
-    }
-
-    .mb-header-left {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .mb-header-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-        color: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.28);
-        transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-    .mb-header-card:hover .mb-header-icon {
-        transform: scale(1.08) rotate(4deg);
-    }
-
-    .mb-header-title-wrap {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .mb-breadcrumb {
-        font-size: 11.5px;
-        color: #64748b;
-        margin-bottom: 3px;
-        font-weight: 500;
-    }
-    .mb-breadcrumb a {
-        color: #0284c7;
-        text-decoration: none;
-        transition: color 0.15s ease;
-        font-weight: 500;
-    }
-    .mb-breadcrumb a:hover {
-        color: #0369a1;
-        text-decoration: underline;
-    }
-
-    .mb-title-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .mb-header-title {
-        font-size: 18px !important;
-        font-weight: 700 !important;
-        color: #0f172a !important;
-        margin: 0 !important;
-        line-height: 1.2 !important;
-        letter-spacing: -0.2px;
-    }
-
-    .mb-count-pill {
-        background: #f1f5f9 !important;
-        color: #475569 !important;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 2px 9px;
-        border-radius: 20px;
-        border: 1px solid #cbd5e1 !important;
-    }
-
-    /* Single-Line Top Toolbar Flex Container (Entire Card View Solid Ice Blue) */
-    .mb-filter-toolbar {
-        background: #d0e7f7 !important;
-        border-radius: 12px !important;
-        padding: 10px 16px !important;
-        margin-bottom: 10px !important;
-        box-shadow: 0 3px 12px rgba(2, 132, 199, 0.12) !important;
-        border: 1.5px solid #7dd3fc !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 12px !important;
-        flex-wrap: nowrap !important;
-        position: relative !important;
-        transition: all 0.25s ease !important;
-    }
-    .mb-filter-toolbar:hover {
-        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.18) !important;
-        border-color: #38bdf8 !important;
-    }
+    /* Master Book now shares the common .rough-dist-list-page / .rdl-grid-card
+       grid classes with the other masters (see the ".rdl-*" rules further
+       down). The Module Type / Date Range filters and the 8 stage buttons
+       now live directly in the shared rdl-card-header row - only their
+       field/input/button styles remain here, the old ice-blue
+       .mb-filter-toolbar wrapper itself is gone. */
 
     .mb-filter-field {
         display: flex;
@@ -15861,66 +15754,50 @@ header.main-header {
 .mb-btn-group-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-left: auto;
+    gap: 6px;
     flex-shrink: 0;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: 6px 8px;
+    padding: 0 4px;
+    border-right: 1.5px solid #e2e8f0;
+    margin-right: 4px;
 }
 
 .mb-stage-square-btn {
-    width: 82px;
-    height: 50px;
-    border-radius: 9px;
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
     border: none;
     color: #ffffff !important;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    padding: 4px 2px;
-    text-align: center;
+    padding: 0;
     position: relative;
-    overflow: visible;
-    opacity: 0.95;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+    opacity: 0.9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
     flex-shrink: 0;
-    margin: 2px 2px;
 }
 
     .mb-stage-square-btn:hover {
         opacity: 1;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 14px rgba(0, 0, 0, 0.22);
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
     }
 
     .mb-stage-square-btn.active {
         opacity: 1;
-        transform: translateY(-2px);
-        box-shadow: 0 0 0 2.5px #d0e7f7, 0 0 0 5px #0284c7, 0 4px 14px rgba(2, 132, 199, 0.45) !important;
-        font-weight: 700;
+        box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #0284c7, 0 2px 8px rgba(2, 132, 199, 0.45) !important;
         z-index: 5;
     }
 
     .mb-stage-square-btn i {
-        font-size: 15px;
+        font-size: 13px;
         transition: transform 0.2s ease;
     }
 
     .mb-stage-square-btn:hover i {
         transform: scale(1.1);
-    }
-
-    .mb-stage-square-btn span {
-        font-size: 10px;
-        line-height: 1.1;
-        white-space: nowrap;
-        letter-spacing: -0.1px;
-        font-weight: 600;
     }
 
 /* Distinct & Grouped Gradients for Stage Buttons */
@@ -15956,35 +15833,9 @@ header.main-header {
     background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
 }
 
-/* Single Clean Grid Card Container (No Extra Nested Borders) */
-.mb-grid-card {
-    background: #ffffff !important;
-    border-radius: 12px !important;
-    border: 1.5px solid #cbd5e1 !important;
-    padding: 0 !important;
-    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
-    min-height: calc(100vh - 215px);
-    overflow: hidden !important;
-    position: relative !important;
-    transition: all 0.25s ease !important;
-}
-
-    .mb-grid-card:hover {
-        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
-        border-color: #94a3b8 !important;
-    }
-
-    .mb-grid-card .uigrid,
-    .mb-grid-card #masterBookGridContainer {
-        width: 100% !important;
-        background: transparent !important;
-        border: none !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-        min-height: calc(100vh - 215px);
-    }
-
+/* Master Book's grid card is now the shared .rdl-grid-card (see the
+   ".rdl-*" rules further down), which already handles
+   #masterBookGridContainer sizing. */
 #masterBookGridContainer {
     width: 100% !important;
 }
@@ -16159,50 +16010,6 @@ div.datepicker {
 .datepicker .next:hover,
 .datepicker tfoot tr th:hover {
     background: #f1f5f9 !important;
-}
-
-/* Custom Responsive Behavior */
-@media (max-width: 1280px) {
-    .mb-filter-toolbar {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .mb-btn-group-row {
-        margin-left: 0;
-        width: 100%;
-        overflow-x: auto;
-        padding-bottom: 8px;
-    }
-}
-
-@media (max-width: 768px) {
-    .mb-header-card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .mb-filter-toolbar {
-        flex-direction: column;
-        align-items: stretch;
-        overflow: visible !important;
-    }
-
-    .mb-filter-field {
-        width: 100% !important;
-    }
-
-    .date-range-wrap {
-        width: 100%;
-    }
-
-        .date-range-wrap input {
-            flex: 1;
-        }
-
-    .mb-btn-group-row {
-        justify-content: flex-start;
-    }
 }
 
 /* Grid Action Menu Button */
@@ -16536,7 +16343,7 @@ div.datepicker {
 
 .grid-action-btn-edit,
 .grid-btn-edit {
-    color: #0284c7 !important;
+    color: #1e46b7 !important;
     background: #e0f2fe !important;
     border: none !important;
     width: 30px !important;
@@ -16550,6 +16357,15 @@ div.datepicker {
     text-decoration: none !important;
 }
 
+
+.grid-action-btn-edit,
+.grid-spn-lock {
+    color: #f59e0b; 
+   font-size: 15px; 
+   padding: 4px 8px; 
+   display: inline-flex; 
+   align-items: center;
+}
     .grid-action-btn-edit:hover,
     .grid-btn-edit:hover {
         background: #0284c7 !important;
@@ -17693,10 +17509,10 @@ div.datepicker {
 /* Grid Card Container (Clean Neutral White Background with Distinct Border) */
 .rdl-grid-card {
     background: #ffffff !important;
-    border-radius: 12px !important;
+    /* border-radius: 12px !important; */
     padding: 0 !important;
     box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
-    border: 1.5px solid #cbd5e1 !important;
+    /* border: 1.5px solid #cbd5e1 !important; */
     height: calc(100vh - 16px);
     max-height: calc(100vh - 16px);
     display: flex !important;
@@ -17818,9 +17634,10 @@ div.datepicker {
 
 /* Visible row separator lines (showRowLines:true alone is too faint on
    these grids' white rows) - excludes .dx-freespace-row, see note above. */
-.rdl-grid-card #gridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td,
+.rdl-grid-card #distributionGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td,
 .rdl-grid-card #lotGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td,
-.rdl-grid-card #inwardGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td {
+.rdl-grid-card #inwardGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td,
+.rdl-grid-card #masterBookGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td {
     border-bottom: 1px solid #e2e8f0 !important;
 }
 
@@ -17835,10 +17652,11 @@ div.datepicker {
     min-height: 0 !important;
 }
 
-.rdl-grid-card #gridContainer,
+.rdl-grid-card #distributionGridContainer,
 .rdl-grid-card #lotGridContainer,
 .rdl-grid-card #inwardGridContainer,
-.rdl-grid-card #sgdGridContainer {
+.rdl-grid-card #sgdGridContainer,
+.rdl-grid-card #masterBookGridContainer {
     width: 100% !important;
     height: 100% !important;
     background: transparent !important;
@@ -17850,6 +17668,232 @@ div.datepicker {
 
 #gridContainer {
     width: 100% !important;
+}
+
+/* ===========================================================================
+   Shared modal / image-modal / KPI classes - de-duplicated from inline
+   styles repeated almost verbatim across RoughInward, RoughDistributionList
+   (+ RoughDistribution entry), and Lot (+ LotEntry). Any future master page
+   needing an Upload/View Images modal, a KPI card row, or a delete-confirm
+   header icon should reuse these instead of re-inlining them.
+   =========================================================================== */
+
+/* Search box used in each list page's header toolbar */
+.field-select-wrap--search {
+    width: 220px;
+}
+
+.search-input-compact {
+    height: 32px !important;
+    padding: 4px 10px !important;
+}
+
+/* Delete-confirm / generic modal header icon accents */
+.modal-icon-danger {
+    color: #ef4444;
+    font-size: 18px;
+}
+
+.modal-icon-info {
+    color: #38bdf8;
+    font-size: 18px;
+}
+
+.modal-icon-file {
+    color: #0284c7;
+}
+
+.modal-loading-icon {
+    font-size: 32px;
+    color: #38bdf8;
+    margin-bottom: 12px;
+}
+
+/* Upload/View Images modal shell - light (Upload) and dark (View/Carousel) variants */
+.img-modal-shell-light {
+    border-radius: 12px;
+    border: 1px solid #334155;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.img-modal-shell-dark {
+    border-radius: 12px;
+    border: 1px solid #1e293b;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    background: #0f172a;
+}
+
+.img-modal-header {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 14px 20px;
+    border-bottom: 1px solid #1e293b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.img-modal-title {
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    font-size: 15px;
+}
+
+.img-modal-body-light {
+    background: #f8fafc;
+    padding: 20px;
+}
+
+.img-modal-body-dark {
+    background: #0b1320;
+    padding: 16px;
+}
+
+.img-modal-footer-light {
+    background: #ffffff;
+    padding: 12px 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.img-modal-footer-dark {
+    background: #0f172a;
+    border-top: 1px solid #1e293b;
+    padding: 12px 20px;
+}
+
+.btn-img-modal-close-dark {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+    border-color: #334155 !important;
+}
+
+.btn-upload-compact {
+    padding: 7px 18px !important;
+    font-size: 12.5px !important;
+}
+
+/* Readonly "selected record" info card shown at the top of the Upload modal */
+.img-info-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 14px;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+}
+
+.img-info-readonly-strong {
+    background: #f1f5f9 !important;
+    font-weight: 700 !important;
+    color: #0369a1 !important;
+}
+
+.img-info-readonly-muted {
+    background: #f1f5f9 !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+}
+
+/* Loading / empty states inside the View Images modal */
+.img-loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+}
+
+.img-empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: #94a3b8;
+}
+
+.img-empty-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+.img-empty-title {
+    color: #f8fafc;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.img-empty-text {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 16px;
+}
+
+.btn-img-empty-upload {
+    font-size: 12px !important;
+    padding: 7px 14px !important;
+}
+
+/* Image metadata / action bar under the carousel viewer */
+.img-meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 4px 4px 4px;
+    color: #94a3b8;
+    font-size: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.img-meta-date {
+    color: #e2e8f0;
+}
+
+.img-action-group {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-img-view {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+.btn-img-download {
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #4ade80 !important;
+    border: 1px solid rgba(74, 222, 128, 0.3) !important;
+}
+
+.btn-img-delete {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.4) !important;
+    margin-left: 6px;
+}
+
+/* KPI card unit-label (the small "Pcs"/"Cts" suffix inside .kpi-value) and
+   the Active/Inactive status toggle label - repeated identically across
+   RoughDistribution and LotEntry. */
+.kpi-unit-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.status-toggle-label {
+    margin: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 /* Badges */
@@ -17894,7 +17938,7 @@ div.datepicker {
 }
 
 .grid-action-btn-edit {
-    color: #0284c7 !important;
+    color: #1e46b7 !important;
     background: #e0f2fe !important;
     border: none !important;
     width: 30px !important;
@@ -19839,7 +19883,7 @@ div.datepicker {
        ========================================================================== */
 .kpi-container {
     display: grid !important;
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(5, 1fr) !important;
     gap: 12px !important;
     margin-bottom: 14px !important;
     z-index: 30 !important;
@@ -19944,6 +19988,16 @@ div.datepicker {
             background: #10b981;
         }
 
+    .kpi-box.kpi-org {
+        background: #ffffff !important;
+        background-color: #ffffff !important;
+        border-color: #cbd5e1 !important;
+    }
+
+        .kpi-box.kpi-org::before {
+            background: #0ea5a0;
+        }
+
     .kpi-box.status-match {
         background: #ffffff !important;
         background-color: #ffffff !important;
@@ -19993,6 +20047,11 @@ div.datepicker {
 
 .kpi-adj-pcs .kpi-icon-wrap {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #ffffff;
+}
+
+.kpi-org .kpi-icon-wrap {
+    background: linear-gradient(135deg, #0ea5a0 0%, #0b7a76 100%);
     color: #ffffff;
 }
 

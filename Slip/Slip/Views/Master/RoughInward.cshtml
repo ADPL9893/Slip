@@ -18,7 +18,7 @@
             </div>
             <div class="rdl-card-actions">
                 <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
-                    <i class="fa fa-plus"></i> NEW INWARD
+                    <i class="fa fa-plus"></i>
                 </button>
                 <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
                     <i class="fa fa-columns"></i>
@@ -26,13 +26,13 @@
                 <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
                     <i class="fa fa-file-excel-o"></i>
                 </button>
-                <div class="field-select-wrap" style="width: 220px;">
+                <div class="field-select-wrap field-select-wrap--search">
                     <input type="text"
                            ng-model="SearchText"
                            ng-change="OnSearchChange()"
                            placeholder="Search inward records..."
                            class="form-control ri-input"
-                           style="height: 32px; padding: 4px 10px;" />
+                            />
                 </div>
             </div>
         </div>
@@ -173,18 +173,19 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 36px;">#</th>
-                                        <th style="min-width: 120px;">Lot No <span class="req" style="color: #ef4444;">*</span></th>
-                                        <th style="width: 115px;">Growth Rate</th>
-                                        <th style="width: 120px;">Avg Growth Rate</th>
-                                        <th style="width: 100px;">Machine No</th>
-                                        <th style="width: 80px;">Size <span class="req" style="color: #ef4444;">*</span></th>
-                                        <th style="min-width: 150px;">Height (From - To) <span class="req" style="color: #ef4444;">*</span></th>
+                                        <th style="min-width: 130px;">Lot No <span class="req">*</span></th>
+                                        <th style="width: 70px;">Growth Rate</th>
+                                        <th style="width: 100px;">Avg. Growth Rate</th>
+                                        <th style="width: 70px;">Machine No</th>
+                                        <th style="width: 90px;">Dimension <span class="req">*</span></th>
+                                        <th style="min-width: 90px;">Height (From - To) <span class="req">*</span></th>
                                         <th style="width: 75px;">Hours</th>
-                                        <th style="width: 85px;">Box No <span class="req" style="color: #ef4444;">*</span></th>
-                                        <th style="width: 110px;">Recipe <span class="req" style="color: #ef4444;">*</span></th>
-                                        <th style="width: 95px;">Grade <span class="req" style="color: #ef4444;">*</span></th>
-                                        <th style="width: 65px;">Pcs</th>
-                                        <th style="width: 85px;">Carat</th>
+                                        <th style="width: 85px;">Box No <span class="req">*</span></th>
+                                        <th style="width: 120px;">Recipe <span class="req">*</span></th>
+                                        <th style="width: 65px;">Grade <span class="req">*</span></th>
+                                        <th style="width: 80px;">Pcs</th>
+                                        <th style="width: 100px;">Carat</th>
+                                        <th style="width: 90px;">Avg.Crts (Crts/Pcs)</th>
                                         <th style="width: 85px;">Rate</th>
                                         <th style="width: 95px;">Amount</th>
                                         <th style="width: 40px;"></th>
@@ -197,7 +198,11 @@
                                         <td><input type="text" ng-model="line.GrowthRate" placeholder="Rate" ng-disabled="line.NotAllow" /></td>
                                         <td><input type="number" ng-model="line.AvgGrowthRate" min="0" step="0.001" placeholder="Avg rate" ng-disabled="line.NotAllow" /></td>
                                         <td><input type="text" ng-model="line.MachineNo" placeholder="M/C No" ng-disabled="line.NotAllow" /></td>
-                                        <td><input type="text" ng-model="line.Size" placeholder="Size" ng-disabled="line.NotAllow" /></td>
+                                        <td>
+                                            <select ng-model="line.DimensionID" ng-options="item.ID as item.DimensionName for item in DimensionList" ng-disabled="line.NotAllow">
+                                                <option value="">Select</option>
+                                            </select>
+                                        </td>
                                         <td>
                                             <div class="ri-range-cell">
                                                 <input type="number" ng-model="line.FromHeight" min="0" step="0.001" placeholder="From" ng-disabled="line.NotAllow" />
@@ -219,10 +224,11 @@
                                         </td>
                                         <td><input type="number" ng-model="line.Pcs" min="0" ng-disabled="line.NotAllow"/></td>
                                         <td><input type="number" ng-model="line.Carat" min="0" step="0.001" ng-change="RecalcLine(line)" ng-disabled="line.NotAllow" /></td>
+                                        <td class="ri-amount-cell">{{(line.Pcs > 0 ? (line.Carat / line.Pcs) : 0) | number:3}}</td>
                                         <td><input type="number" ng-model="line.Rate" min="0" step="0.01" ng-change="RecalcLine(line)" ng-disabled="line.NotAllow" /></td>
                                         <td class="ri-amount-cell">{{(line.Amount || 0) | number:2}}</td>
                                         <td>
-                                            <span ng-if="line.NotAllow === true || line.IsLocked === true" title="Locked: Already distributed in Rough Distribution" style="color: #f59e0b; font-size: 15px; font-weight: bold; display: inline-block; padding: 4px;">
+                                            <span class="grid-spn-lock" ng-if="line.NotAllow === true || line.IsLocked === true" title="Locked: Already distributed in Rough Distribution" >
                                                 <i class="fa fa-lock"></i>
                                             </span>
                                             @*<button type="button" class="btn-ri-del-row" ng-click="RemoveLine($index)" title="Remove row">
@@ -278,22 +284,31 @@
     <div class="modal fade" id="InwardConfirmDeleteModal" role="dialog" data-backdrop="static">
         <div class="modal-dialog modal-sm">
             <div class="modal-content">
-                <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
-                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-exclamation-triangle modal-icon-danger"></i>
+                        <h4 class="modal-header-title">Confirm Delete</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-dialog-content">
+                        <div class="delete-warning-icon">
+                            <i class="fa fa-trash-o"></i>
+                        </div>
+                        <h4 class="delete-dialog-title">Delete Rough Inward?</h4>
+                        <p class="delete-dialog-text">
+                            Are you sure you want to delete Rough Inward <strong>{{SelectedDeleteItem.ChallanNo}}</strong>?
+                        </p>
                     </div>
                 </div>
-                <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
-                    <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
-                    <p style="font-size: 13px; color: #334155; margin: 0;">
-                        Are you sure you want to delete Rough Inward <strong>{{SelectedDeleteItem.ChallanNo}}</strong>?
-                    </p>
-                </div>
-                <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
-                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;" ng-disabled="IsDeleting">Cancel</button>
-                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;" ng-disabled="IsDeleting">
-                        <i class="fa fa-spinner fa-spin" ng-show="IsDeleting"></i> Delete
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsDeleting">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button" ng-disabled="IsDeleting">
+                        <i class="fa fa-spinner fa-spin" ng-show="IsDeleting"></i>
+                        <i class="fa fa-trash" ng-hide="IsDeleting"></i> Delete
                     </button>
                 </div>
             </div>
@@ -345,6 +360,7 @@
         $scope.ToBranchList = [];
         $scope.RecipeList = [];
         $scope.GradeList = [];
+        $scope.DimensionList = [];
         $scope.FactoryCodeList = [];
         $scope.SizeCodeList = ['JC', 'JW', 'SW', 'SC', 'G2'];
         $scope.ColorTypeList = ['White', 'Color'];
@@ -360,7 +376,7 @@
                 GrowthRate: '',
                 AvgGrowthRate: null,
                 MachineNo: '',
-                Size: '',
+                DimensionID: null,
                 FromHeight: null,
                 ToHeight: null,
                 Hours: null,
@@ -599,7 +615,8 @@
                                 GrowthRate: d.GrowthRate || '',
                                 AvgGrowthRate: (d.AvgGrowthRate !== null && d.AvgGrowthRate !== undefined) ? parseFloat(d.AvgGrowthRate) : null,
                                 MachineNo: d.MachineNo || '',
-                                Size: d.Size || '',
+                                DimensionID: d.DimensionID || null,
+                                DimensionName: d.DimensionName || '',
                                 FromHeight: (d.FromHeight !== null && d.FromHeight !== undefined) ? parseFloat(d.FromHeight) : null,
                                 ToHeight: (d.ToHeight !== null && d.ToHeight !== undefined) ? parseFloat(d.ToHeight) : null,
                                 Hours: (d.Hours !== null && d.Hours !== undefined && d.Hours !== '') ? parseFloat(d.Hours) : null,
@@ -834,6 +851,14 @@
             });
         };
 
+        $scope.LoadDimensions = function () {
+            $http.get('@Url.Action("Get_MST_DimensionList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.DimensionList = res.data.list || [];
+                }
+            });
+        };
+
         $scope.LoadFactoryCodes = function () {
             $http.get('@Url.Action("Get_MST_FactoryCodeList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
@@ -951,8 +976,8 @@
                     Noty("error", "Please enter Lot No in row #" + rowNum + "!");
                     return;
                 }
-                if (!line.Size || line.Size.trim() === '') {
-                    Noty("error", "Please enter Size in row #" + rowNum + "!");
+                if (!line.DimensionID) {
+                    Noty("error", "Please select Dimension in row #" + rowNum + "!");
                     return;
                 }
                 if (line.FromHeight === null || line.FromHeight === undefined || line.FromHeight === '') {
@@ -979,7 +1004,6 @@
 
             angular.forEach($scope.FormModel.Details, function (line) {
                 line.MachineNo = line.MachineNo ? line.MachineNo.trim() : '';
-                line.Size = line.Size ? line.Size.trim() : '';
                 line.BoxNo = line.BoxNo ? line.BoxNo.trim() : '';
                 line.SizeCode = line.SizeCode ? line.SizeCode.trim() : '';
                 line.ColorType = line.ColorType ? line.ColorType.trim() : '';
@@ -1162,6 +1186,9 @@
                         caption: 'Carat', dataField: 'Carat', width: 90, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
                     },
                     {
+                        caption: 'PerPcs Carat', dataField: 'PerPcsCarat', width: 100, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
                         caption: 'Rate', dataField: 'Rate', width: 85, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 2 }
                     },
                     {
@@ -1177,7 +1204,7 @@
                         caption: 'Machine No', dataField: 'MachineNo', width: 125, alignment: 'center'
                     },
                     {
-                        caption: 'Size', dataField: 'Size', width: 80, alignment: 'center'
+                        caption: 'Dimension', dataField: 'DimensionName', width: 100, alignment: 'center'
                     },
                     {
                         caption: 'From Height', dataField: 'FromHeight', width: 125, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
@@ -1247,7 +1274,8 @@
                             if (isLocked) {
                                 $("<span>")
                                     .attr("title", "Locked: This Inward lot has already been distributed in Rough Distribution!")
-                                    .css({ "color": "#f59e0b", "font-size": "15px", "padding": "4px 8px", "display": "inline-flex", "align-items": "center" })
+                                    .attr("class", "grid-spn-lock")
+                                    // .css({ "color": "#f59e0b", "font-size": "15px", "padding": "4px 8px", "display": "inline-flex", "align-items": "center" })
                                     .html('<i class="fa fa-lock"></i>')
                                     .appendTo(div);
                             } else {
@@ -1270,6 +1298,7 @@
         $scope.LoadParties();
         $scope.LoadRecipes();
         $scope.LoadGrades();
+        $scope.LoadDimensions();
         $scope.LoadFactoryCodes();
         $scope.LoadSizeCodes();
         $scope.LoadInwardList();

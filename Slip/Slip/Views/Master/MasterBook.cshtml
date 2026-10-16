@@ -4,93 +4,85 @@
 }
 
 
-<div ng-controller="MasterBookCtrl" class="masterbook-page-wrapper">
-    <!-- Top Page Header Card -->
-    <div class="mb-header-card">
-        <div class="mb-header-left">
-            <div class="mb-header-icon">
+<div ng-controller="MasterBookCtrl" class="rough-dist-list-page">
+    <div class="rdl-grid-card">
+        <div class="rdl-card-header">
+            <div class="rdl-card-title-left">
                 <i class="fa fa-book"></i>
-            </div>
-            <div class="mb-header-title-wrap">
-                <div class="mb-breadcrumb">
-                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / <span>Master</span> / <span>Master Book</span>
-                </div>
-                <div class="mb-title-row">
-                    <h4 class="mb-header-title">Master Book</h4>
-                    <span class="mb-count-pill" ng-show="!IsLoading">{{List.length}} Records</span>
-                    <span class="badge-status-pill" ng-class="GetStageBadgeClass(ActiveFilter)" ng-show="ActiveFilter">{{ActiveFilter}}</span>
-                </div>
-            </div>
-        </div>
-    </div>
+                <h3>Master Book</h3>
+                <span class="badge-status-pill badge-pill-info" ng-show="!IsLoading">{{List.length}} Records</span>
+                <span class="badge-status-pill" ng-class="GetStageBadgeClass(ActiveFilter)" ng-show="ActiveFilter">{{ActiveFilter}}</span>
 
-    <!-- Single-Line Filter Toolbar Card -->
-    <div class="mb-filter-toolbar">
-        <!-- Module Type Dropdown -->
-        <div class="mb-filter-field" style="width: 165px;">
-            <label class="mb-filter-label" for="FilterModuleType">Module Type</label>
-            <select id="FilterModuleType" class="mb-filter-input" ng-model="SelectedModuleType" ng-change="OnModuleTypeChange()">
-                <option value="Pre Rough">Pre Rough</option>
-                <option value="Distribution">Distribution</option>
-                <option value="CLV Chart">CLV Chart</option>
-                <option value="MFG Chart">MFG Chart</option>
-                <option value="Mumbai Submit">Mumbai Submit</option>
-            </select>
-        </div>
+                <!-- Module Type Dropdown -->
+                <div class="mb-filter-field" style="width: 150px;">
+                    <select id="FilterModuleType" class="mb-filter-input" ng-model="SelectedModuleType" ng-change="OnModuleTypeChange()">
+                        <option value="Pre Rough">Pre Rough</option>
+                        <option value="Distribution">Distribution</option>
+                        <option value="CLV Chart">CLV Chart</option>
+                        <option value="MFG Chart">MFG Chart</option>
+                        <option value="Mumbai Submit">Mumbai Submit</option>
+                    </select>
+                </div>
 
-        <!-- Date Range Filter -->
-        <div class="mb-filter-field">
-            <label class="mb-filter-label">Date Range</label>
-            <div class="date-range-wrap">
-                <input type="text" id="FromDate" class="mb-filter-input" style="width: 110px;" placeholder="From Date" readonly autocomplete="off" ng-model="FromDate" />
-                <span class="date-range-sep">-</span>
-                <input type="text" id="ToDate" class="mb-filter-input" style="width: 110px;" placeholder="To Date" readonly autocomplete="off" ng-model="ToDate" />
-                <button class="btn-date-search" type="button" ng-click="SearchByDate()" title="Search with Date Filter">
-                    <i class="fa fa-search"></i>
+                <!-- Date Range Filter -->
+                <div class="date-range-wrap">
+                    <input type="text" id="FromDate" class="mb-filter-input" style="width: 100px;" placeholder="From Date" readonly autocomplete="off" ng-model="FromDate" />
+                    <span class="date-range-sep">-</span>
+                    <input type="text" id="ToDate" class="mb-filter-input" style="width: 100px;" placeholder="To Date" readonly autocomplete="off" ng-model="ToDate" />
+                    <button class="btn-date-search" type="button" ng-click="SearchByDate()" title="Search with Date Filter">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="rdl-card-actions">
+                <!-- 8 Stage Filter Buttons - icon-only, tooltip carries the label -->
+                <div class="mb-btn-group-row">
+                    <button type="button" class="mb-stage-square-btn btn-rough-entry" ng-class="{'active': ActiveFilter === 'Rough Entry'}" ng-click="SelectFilter('Rough Entry')" title="Rough Entry (All Data)">
+                        <i class="fa fa-diamond"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-branch-assign" ng-class="{'active': ActiveFilter === 'Branch Assign'}" ng-click="SelectFilter('Branch Assign')" title="Branch Assign (All Data)">
+                        <i class="fa fa-code-fork"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-planning" ng-class="{'active': ActiveFilter === 'Planning'}" ng-click="SelectFilter('Planning')" title="Planning (All Data)">
+                        <i class="fa fa-calculator"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-clv-running" ng-class="{'active': ActiveFilter === 'CLV Running'}" ng-click="SelectFilter('CLV Running')" title="CLV Running (All Data)">
+                        <i class="fa fa-cogs"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-clv-complete" ng-class="{'active': ActiveFilter === 'CLV Complte'}" ng-click="SelectFilter('CLV Complte')" title="CLV Complete (All Data)">
+                        <i class="fa fa-check-square"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-mfg-running" ng-class="{'active': ActiveFilter === 'MFG Running'}" ng-click="SelectFilter('MFG Running')" title="MFG Running (All Data)">
+                        <i class="fa fa-wrench"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-mfg-complete" ng-class="{'active': ActiveFilter === 'MFG Complte'}" ng-click="SelectFilter('MFG Complte')" title="MFG Complete (All Data)">
+                        <i class="fa fa-flag-checkered"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-mumbai-submit" ng-class="{'active': ActiveFilter === 'Mumbai Submit'}" ng-click="SelectFilter('Mumbai Submit')" title="Mumbai Submit (All Data)">
+                        <i class="fa fa-send"></i>
+                    </button>
+                </div>
+
+                <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                    <i class="fa fa-columns"></i>
                 </button>
+                <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                    <i class="fa fa-file-excel-o"></i>
+                </button>
+                <div class="field-select-wrap" style="width: 220px;">
+                    <input type="text"
+                           ng-model="SearchText"
+                           ng-change="OnSearchChange()"
+                           placeholder="Search Master Book..."
+                           class="form-control rd-input"
+                           style="height: 32px; padding: 4px 10px;" />
+                </div>
             </div>
         </div>
 
-        <!-- 8 Square Filter Buttons (Choras Shape) -->
-        <div class="mb-btn-group-row">
-            <button type="button" class="mb-stage-square-btn btn-rough-entry" ng-class="{'active': ActiveFilter === 'Rough Entry'}" ng-click="SelectFilter('Rough Entry')" title="Filter: Rough Entry (All Data)">
-                <i class="fa fa-diamond"></i>
-                <span>Rough Entry</span>
-            </button>
-            <button type="button" class="mb-stage-square-btn btn-branch-assign" ng-class="{'active': ActiveFilter === 'Branch Assign'}" ng-click="SelectFilter('Branch Assign')" title="Filter: Branch Assign (All Data)">
-                <i class="fa fa-code-fork"></i>
-                <span>Branch Assign</span>
-            </button>
-            <button type="button" class="mb-stage-square-btn btn-planning" ng-class="{'active': ActiveFilter === 'Planning'}" ng-click="SelectFilter('Planning')" title="Filter: Planning (All Data)">
-                <i class="fa fa-calculator"></i>
-                <span>Planning</span>
-            </button>
-            <button type="button" class="mb-stage-square-btn btn-clv-running" ng-class="{'active': ActiveFilter === 'CLV Running'}" ng-click="SelectFilter('CLV Running')" title="Filter: CLV Running (All Data)">
-                <i class="fa fa-cogs"></i>
-                <span>CLV Running</span>
-            </button>
-            <button type="button" class="mb-stage-square-btn btn-clv-complete" ng-class="{'active': ActiveFilter === 'CLV Complte'}" ng-click="SelectFilter('CLV Complte')" title="Filter: CLV Complete (All Data)">
-                <i class="fa fa-check-square"></i>
-                <span>CLV Complte</span>
-            </button>
-            <button type="button" class="mb-stage-square-btn btn-mfg-running" ng-class="{'active': ActiveFilter === 'MFG Running'}" ng-click="SelectFilter('MFG Running')" title="Filter: MFG Running (All Data)">
-                <i class="fa fa-wrench"></i>
-                <span>MFG Running</span>
-            </button>
-            <button type="button" class="mb-stage-square-btn btn-mfg-complete" ng-class="{'active': ActiveFilter === 'MFG Complte'}" ng-click="SelectFilter('MFG Complte')" title="Filter: MFG Complete (All Data)">
-                <i class="fa fa-flag-checkered"></i>
-                <span>MFG Complte</span>
-            </button>
-            <button type="button" class="mb-stage-square-btn btn-mumbai-submit" ng-class="{'active': ActiveFilter === 'Mumbai Submit'}" ng-click="SelectFilter('Mumbai Submit')" title="Filter: Mumbai Submit (All Data)">
-                <i class="fa fa-send"></i>
-                <span>Mumbai Submit</span>
-            </button>
+        <div class="rdl-grid-body">
+            <div id="masterBookGridContainer" style="width: 100%; height: 100%;"></div>
         </div>
-    </div>
-
-    <!-- DataGrid Container Card (Single Clean Card) -->
-    <div class="mb-grid-card">
-        <div id="masterBookGridContainer" style="width: 100%;"></div>
     </div>
 
     <!-- Floating Context Menu for Reports & Charts -->
@@ -137,6 +129,34 @@
         $scope.SelectedRowItem = null;
         $scope.ShowReportMenu = false;
         $scope.ReportMenuStyle = {};
+        $scope.SearchText = '';
+
+        $scope.OnSearchChange = function () {
+            var gridInstance = $("#masterBookGridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $("#masterBookGridContainer").dxDataGrid("instance");
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $("#masterBookGridContainer").dxDataGrid("instance");
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('MasterBook');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    var cleanFilter = ($scope.ActiveFilter || 'All').replace(/\s+/g, '_');
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'MasterBook_' + cleanFilter + '.xlsx');
+                });
+            });
+        };
 
         // Dynamic Header Badge Class based on Active Stage
         $scope.GetStageBadgeClass = function (stage) {
@@ -476,13 +496,18 @@
                     if (e.rowType === "data") {
                         e.rowElement.addClass("ri-row-animate");
                         e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
                     }
                 },
-                height: 'calc(100vh - 215px)',
+                height: '100%',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
                 allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
                 columnFixing: {
                     enabled: true
                 },
@@ -497,38 +522,17 @@
                 },
                 paging: { enabled: false },
                 pager: { visible: false },
-                filterRow: { 
+                filterRow: {
                     visible: true,
                     applyFilter: 'auto'
                 },
                 headerFilter: { visible: true },
-                searchPanel: {
-                    visible: true,
-                    width: 280,
-                    placeholder: 'Search Master Book...'
-                },
-                export: {
-                    enabled: true,
-                    formats: ['xlxs'],
-                    allowExportSelectedData: false
-                },
-                onExporting: function (e) {
-                    if (e.format === 'xlxs') {
-                        if (typeof ExcelJS !== 'undefined') {
-                            var workbook = new ExcelJS.Workbook();
-                            var worksheet = workbook.addWorksheet('MasterBook');
-                            DevExpress.excelExporter.exportDataGrid({
-                                component: e.component,
-                                worksheet: worksheet,
-                                autoFilterEnabled: true
-                            }).then(function () {
-                                workbook.xlsx.writeBuffer().then(function (buffer) {
-                                    var cleanFilter = ($scope.ActiveFilter || 'All').replace(/\s+/g, '_');
-                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'MasterBook_' + cleanFilter + '.xlsx');
-                                });
-                            });
-                        }
-                    }
+                searchPanel: { visible: false },
+                export: { enabled: false },
+                onToolbarPreparing: function (e) {
+                    // Column chooser / export / search are rendered in the
+                    // card header above instead of the grid's own toolbar row.
+                    e.toolbarOptions.items = [];
                 },
                 summary: {
                     totalItems: summaryItems
