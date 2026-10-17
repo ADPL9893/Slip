@@ -7,95 +7,111 @@
 
 @if (ViewBag.IsAdmin == true || ViewBag.CanView == true || ViewBag.CanAdd == true || ViewBag.CanEdit == true)
 {
-<div ng-controller="Diamond" class="pricing-container">
-    <div class="field-page-header">
-        <div class="field-page-header-left">
-            <div class="field-page-header-icon">
+<div ng-controller="Diamond" class="pricing-container rough-dist-page">
+    <!-- Header Banner -->
+    <div class="rd-header-card">
+        <div class="rd-header-left">
+            <div class="rd-header-icon">
                 <i class="fa fa-diamond"></i>
             </div>
             <div>
-                <div class="field-page-header-breadcrumb">
+                <div class="rd-breadcrumb">
                     <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / <span>Stock Pricing</span>
                 </div>
-                <h4>Stock Pricing</h4>
+                <h4 class="rd-header-title">Stock Pricing</h4>
             </div>
         </div>
-        <div class="pricing-header-actions" ng-if="IsAdmin || CanAdd">
-            <button class="btn btn-primary btn-header-action" ng-click="CreateXML()">
+        <div class="rd-header-actions" ng-if="IsAdmin || CanAdd">
+            <button class="btn-ri-save" ng-click="CreateXML()">
                 <i class="fa fa-file-code-o"></i> XML
             </button>
-            <button class="btn btn-primary btn-header-action" ng-click="SavePricing()">
+            <button class="btn-rd-save-main" ng-click="SavePricing()">
                 <i class="fa fa-save"></i> Save
             </button>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="filter-bar">
-                    <div class="filter-row">
-                        <!-- Shape -->
-                        <div class="filter-group">
-                            <label>Shape</label>
-                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
-                                <select id="Shape" tabindex="2" chosen="GetDIAShapeList" class="form-control input-sm" ng-change="removeGrid()" ng-options="item.id as item.value for item in GetDIAShapeList" ng-model="Diamond.Shape">
-                                    <option value="">Select</option>
-                                </select>
-                            </div>
-                        </div>
 
-                        <!-- Cut -->
-                        <div class="filter-group">
-                            <label>Grad</label>
-                            <div class="filter-select-wrap field-select-wrap" style="width: 120px;">
-                                <select id="GradType" tabindex="3" chosen="GetGradType" class="form-control input-sm" ng-change="GetType(Diamond.GradType);removeGrid()" ng-model="Diamond.GradType">
-                                    <option value="">Select</option>
-                                    <option value="GR">GR</option>
-                                    <option value="NGR">NGR</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Size Type -->
-                        <div class="filter-group">
-                            <label>Type</label>
-                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
-                                <select id="Type" tabindex="1" chosen="GetSizeTypeList" class="form-control input-sm" ng-change="removeGrid()" ng-model="Diamond.Type" disabled>
-                                    <option value="CT UP">CT UP</option>
-                                    <option value="CT DOWN">CT DOWN</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Grid Type -->
-                        <div class="filter-group">
-                            <label>GridType</label>
-                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
-                                <select id="GridType" tabindex="1" chosen="GetGridType" class="form-control input-sm" ng-change="removeGrid()" ng-model="Diamond.GridType">
-                                    <option value="Size">Size</option>
-                                    <option value="Color">Color</option>
-                                </select>
-                            </div>
-                        </div>
+    <!-- Filter Card -->
+    <div class="rd-card rd-card-specs">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title">
+                <i class="fa fa-filter text-primary"></i> 1. Select Shape, Grad &amp; Type
+            </h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="row">
+                <!-- Shape -->
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="Shape">Shape <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="Shape" tabindex="2" chosen="GetDIAShapeList" class="form-control rd-input" ng-change="removeGrid()" ng-options="item.id as item.value for item in GetDIAShapeList" ng-model="Diamond.Shape">
+                            <option value="">Select</option>
+                        </select>
                     </div>
+                </div>
 
-                    <!-- Toolbar Buttons -->
-                    <div class="toolbar-row">
-                        <button class="btn-tool btn-search" ng-click="GetdataTRNRap()">
+                <!-- Cut -->
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="GradType">Grad <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="GradType" tabindex="3" chosen="GetGradType" class="form-control rd-input" ng-change="GetType(Diamond.GradType);removeGrid()" ng-model="Diamond.GradType">
+                            <option value="">Select</option>
+                            <option value="GR">GR</option>
+                            <option value="NGR">NGR</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Size Type -->
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="Type">Type <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="Type" tabindex="1" chosen="GetSizeTypeList" class="form-control rd-input" ng-change="removeGrid()" ng-model="Diamond.Type" disabled>
+                            <option value="CT UP">CT UP</option>
+                            <option value="CT DOWN">CT DOWN</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Grid Type -->
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="GridType">Grid Type</label>
+                    <div class="field-select-wrap">
+                        <select id="GridType" tabindex="1" chosen="GetGridType" class="form-control rd-input" ng-change="removeGrid()" ng-model="Diamond.GridType">
+                            <option value="Size">Size</option>
+                            <option value="Color">Color</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="col-lg-3 col-md-3 col-sm-8 col-xs-12 rd-form-group">
+                    <label class="rd-label rd-action-label">&nbsp;</label>
+                    <div class="rd-btn-action-row">
+                        <button class="btn-ri-save" ng-click="GetdataTRNRap()">
                             <i class="fa fa-search"></i> Search
                         </button>
-                        <button class="btn-tool btn-export" ng-click="ExcelExport()" ng-if="IsAdmin || CanExport" style="color: #28a745; border-color: #28a745; background-color: #eef6ff;">
+                        <button class="btn-ri-save" ng-click="ExcelExport()" ng-if="IsAdmin || CanExport">
                             <i class="fa fa-file-excel-o"></i> Export
                         </button>
-                        <button class="btn-tool btn-reset" ng-click="Clear()">
+                        <button class="btn-ri-save" ng-click="Clear()">
                             <i class="fa fa-refresh"></i> Reset
                         </button>
                     </div>
-
                 </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
 
-                <div class="section-header-red">Pricing</div>
-
+    <!-- Pricing Grid Card -->
+    <div class="rd-card rd-card-entry">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title">
+                <i class="fa fa-table text-primary"></i> 2. Pricing Grid
+            </h5>
+        </div>
+        <div class="rd-card-body">
                 <!-- Dynamic Grid Groups -->
                 <div class="hide1 field-table-wrapper">
                     <div ng-if="GridGroups.length > 0">
@@ -178,7 +194,6 @@
 
             </div>
         </div>
-    </div>
 </div>
 }
 else

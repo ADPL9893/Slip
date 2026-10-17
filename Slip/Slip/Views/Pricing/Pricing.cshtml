@@ -4,139 +4,144 @@
 }
 
 
-<div ng-controller="Diamond" class="pricing-container">
-    <div class="field-page-header">
-        <div class="field-page-header-left">
-            <div class="field-page-header-icon">
+<div ng-controller="Diamond" class="pricing-container rough-dist-page">
+    <!-- Header Banner -->
+    <div class="rd-header-card">
+        <div class="rd-header-left">
+            <div class="rd-header-icon">
                 <i class="fa fa-diamond"></i>
             </div>
             <div>
-                <div class="field-page-header-breadcrumb">
+                <div class="rd-breadcrumb">
                     <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / <span>Stock Pricing</span>
                 </div>
-                <h4>Stock Pricing</h4>
+                <h4 class="rd-header-title">Stock Pricing</h4>
+            </div>
+        </div>
+        <div class="rd-header-actions">
+            <button type="button" class="btn-ri-save" ng-click="ExportExcel()" ng-if="IsAdmin || CanExport">
+                <i class="fa fa-file-excel-o"></i> Export
+            </button>
+            <button type="button" class="btn-ri-save" ng-click="OpenUploadModal()" ng-if="CanModify">
+                <i class="fa fa-upload"></i> Upload Excel
+            </button>
+            <button type="button" class="btn-ri-save" ng-click="ToggleEdit()" ng-if="CanModify">
+                <i class="fa fa-pencil"></i> Edit
+            </button>
+            <button type="button" class="btn-rd-save-main" ng-click="DataSave()" ng-if="CanModify">
+                <i class="fa fa-save"></i> Stock Pricing (Save)
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="rd-card rd-card-specs">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title">
+                <i class="fa fa-filter text-primary"></i> 1. Select Grad, Shape &amp; Size
+            </h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="row">
+                <!-- Grad (Hidden from direct view in screenshot but needed for logic, kept visible for functionality) -->
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="GradType">Grad <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="GradType" tabindex="3" chosen="GetGradType" class="form-control rd-input" ng-change="GetSize(Diamond.Shape,Diamond.GradType);removeGrid()" ng-model="Diamond.GradType">
+                            <option value="">Select</option>
+                            <option value="GR">GR</option>
+                            <option value="NGR">NGR</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Shape -->
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="Shape">Shape <span class="req">*</span></label>
+                    <div class="field-select-wrap">
+                        <select id="Shape" tabindex="2" chosen="GetDIAShapeList" class="form-control rd-input" ng-change="GetSize(Diamond.Shape,Diamond.GradType);removeGrid()" ng-options="item.id as item.value for item in GetDIAShapeList" ng-model="Diamond.Shape">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Size -->
+                <div class="col-lg-4 col-md-4 col-sm-8 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="SizeID">Size</label>
+                    <div class="field-select-wrap">
+                        <select id="SizeID" tabindex="1" chosen="GetDIASizeList" class="form-control rd-input" ng-options="item.id as item.value for item in GetDIASizeList" ng-change="removeGrid()" ng-model="Diamond.SizeID" multiple="multiple">
+                            <option value="">Select</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="col-lg-2 col-md-2 col-sm-8 col-xs-12 rd-form-group">
+                    <label class="rd-label rd-action-label">&nbsp;</label>
+                    <div class="rd-btn-action-row">
+                        <button type="button" class="btn-ri-save" ng-click="GetdataTRNRap()">
+                            <i class="fa fa-search"></i> Search
+                        </button>
+                        <button type="button" class="btn-ri-save" ng-click="Clear()">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="filter-bar">
-                    <div class="filter-row">
-                        <!-- Grad (Hidden from direct view in screenshot but needed for logic, kept visible for functionality) -->
-                        <div class="filter-group">
-                            <label>Grad</label>
-                            <div class="filter-select-wrap field-select-wrap" style="width: 120px;">
-                                <select id="GradType" tabindex="3" chosen="GetGradType" class="form-control input-sm" ng-change="GetSize(Diamond.Shape,Diamond.GradType);removeGrid()" ng-model="Diamond.GradType">
-                                    <option value="">Select</option>
-                                    <option value="GR">GR</option>
-                                    <option value="NGR">NGR</option>
-                                </select>
-                            </div>
+
+    <!-- Pricing Grid Card -->
+    <div class="rd-card rd-card-entry">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title">
+                <i class="fa fa-table text-primary"></i> 2. Pricing Grid
+            </h5>
+        </div>
+        <div class="rd-card-body">
+            <!-- Dynamic Grid Groups -->
+            <div>
+                <div ng-if="GridGroups.length > 0" class="grid-groups-wrapper">
+                    <div class="grid-group" ng-repeat="group in GridGroups">
+                        <div class="group-header" ng-click="toggleGroup(group)" style="cursor: pointer;">
+                            <i class="fa" ng-class="{'fa-caret-down': group.Expanded, 'fa-caret-right': !group.Expanded}" style="margin-right: 5px;"></i>
+                            GroupName: {{group.Name}} - Shape: {{group.ShapeName}}
                         </div>
-                        <!-- Shape -->
-                        <div class="filter-group">
-                            <label>Shape</label>
-                            <div class="filter-select-wrap field-select-wrap" style="width: 150px;">
-                                <select id="Shape" tabindex="2" chosen="GetDIAShapeList" class="form-control input-sm" ng-change="GetSize(Diamond.Shape,Diamond.GradType);removeGrid()" ng-options="item.id as item.value for item in GetDIAShapeList" ng-model="Diamond.Shape">
-                                    <option value="">Select</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Size -->
-                        <div class="filter-group">
-                            <label>Size</label>
-                            <div class="filter-select-wrap field-select-wrap" style="width: 350px;">
-                                <select id="SizeID" tabindex="1" chosen="GetDIASizeList" class="form-control input-sm" ng-options="item.id as item.value for item in GetDIASizeList" ng-change="removeGrid()" ng-model="Diamond.SizeID" multiple="multiple">
-                                    <option value="">Select</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Toolbar Buttons -->
-                    <div class="toolbar-row">
-                        <!-- Group 1: Search and Export -->
-                        <div class="toolbar-btn-group">
-                            <button type="button" class="btn-tool" ng-click="GetdataTRNRap()">
-                                <i class="fa fa-search"></i> Search
-                            </button>
-                            <button type="button" class="btn-tool" ng-click="ExportExcel()" ng-if="IsAdmin || CanExport" style="color: #28a745; border-color: #28a745; background-color: #eef6ff;">
-                                <i class="fa fa-file-excel-o"></i> Export
-                            </button>
-                        </div>
-
-                        <!-- Group 2: Stock Pricing (Save) and Upload Excel -->
-                        <div class="toolbar-btn-group" ng-if="CanModify">
-                            <button type="button" class="btn-tool" ng-click="DataSave()" ng-if="CanModify" style="background-color: #eef6ff; border-color: #007bff; color: #0056b3;">
-                                <i class="fa fa-upload btn-icon-text"></i> Stock Pricing (Save)
-                            </button>
-                            <button type="button" class="btn-tool" ng-click="OpenUploadModal()" ng-if="CanModify" style="color: #17a2b8; border-color: #17a2b8; background-color: #eef6ff;">
-                                <i class="fa fa-upload"></i> Upload Excel
-                            </button>
-                        </div>
-
-                        <!-- Group 3: Edit and Reset -->
-                        <div class="toolbar-btn-group">
-                            <button type="button" class="btn-tool" ng-click="ToggleEdit()" ng-if="CanModify">
-                                <i class="fa fa-pencil"></i> Edit
-                            </button>
-                            <button type="button" class="btn-tool" ng-click="Clear()">
-                                <i class="fa fa-refresh"></i> Reset
-                            </button>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="section-header-red">Pricing</div>
-
-                <!-- Dynamic Grid Groups -->
-                <div>
-                    <div ng-if="GridGroups.length > 0" class="grid-groups-wrapper">
-                        <div class="grid-group" ng-repeat="group in GridGroups">
-                            <div class="group-header" ng-click="toggleGroup(group)" style="cursor: pointer;">
-                                <i class="fa" ng-class="{'fa-caret-down': group.Expanded, 'fa-caret-right': !group.Expanded}" style="margin-right: 5px;"></i>
-                                GroupName: {{group.Name}} - Shape: {{group.ShapeName}}
-                            </div>
-                            <div class="field-table-wrapper" ng-show="group.Expanded">
-                                <table class="custom-table" border="1">
-                                    <thead>
-                                        <tr>
-                                            <th class="col-header-color">Color</th>
-                                            <th ng-repeat="item in GetMSTClarityWithClarityList">
-                                                {{item.value}}
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr ng-repeat="row in group.Rows">
-                                            <td style="font-weight:bold;">{{row.ColorName}}</td>
-                                            <!-- Clarity Columns -->
-                                            <td contenteditable='{{isEditable}}'
-                                                ng-class="{'editable': isEditable}"
-                                                ng-repeat="clarityCol in GetMSTClarityWithClarityList"
-                                                id="cell-{{$parent.$index}}-{{$index}}"
-                                                ng-right-click="GetPriceHistory(group, row.id, clarityCol.id)"
-                                                ng-keydown="HandleKeydown($event, $parent.$index, $index, group, row.id, clarityCol.id)"
-                                                ng-blur="UpdateRate(group, row.id, clarityCol.id, $event)"
-                                                ng-focus="SelectAllText($event)"
-                                                ng-init="rate = GetRate(group, row.id, clarityCol.id)">
-                                                {{rate}}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="field-table-wrapper" ng-show="group.Expanded">
+                            <table class="custom-table" border="1">
+                                <thead>
+                                    <tr>
+                                        <th class="col-header-color">Color</th>
+                                        <th ng-repeat="item in GetMSTClarityWithClarityList">
+                                            {{item.value}}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr ng-repeat="row in group.Rows">
+                                        <td style="font-weight:bold;">{{row.ColorName}}</td>
+                                        <!-- Clarity Columns -->
+                                        <td contenteditable='{{isEditable}}'
+                                            ng-class="{'editable': isEditable}"
+                                            ng-repeat="clarityCol in GetMSTClarityWithClarityList"
+                                            id="cell-{{$parent.$index}}-{{$index}}"
+                                            ng-right-click="GetPriceHistory(group, row.id, clarityCol.id)"
+                                            ng-keydown="HandleKeydown($event, $parent.$index, $index, group, row.id, clarityCol.id)"
+                                            ng-blur="UpdateRate(group, row.id, clarityCol.id, $event)"
+                                            ng-focus="SelectAllText($event)"
+                                            ng-init="rate = GetRate(group, row.id, clarityCol.id)">
+                                            {{rate}}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div ng-if="GridGroups.length == 0" style="text-align:center; padding: 20px; color:#777;">
-                    No data loaded. Select Shape, Size, and Cut then click Search.
-                </div>
-
+            <div ng-if="GridGroups.length == 0" style="text-align:center; padding: 20px; color:#777;">
+                No data loaded. Select Shape, Size, and Cut then click Search.
             </div>
         </div>
     </div>
@@ -145,11 +150,14 @@
     <div class="modal fade" id="priceHistoryModal" tabindex="-1" role="dialog" aria-labelledby="priceHistoryModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
-                <div class="modal-header" style="background-color: #f1f5f9;">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h5 class="modal-title" id="priceHistoryModalLabel" style="font-weight: bold; margin:0;">Price History</h5>
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-history modal-title-icon"></i>
+                            <h4 class="modal-title" id="priceHistoryModalLabel">Price History</h4>
+                        </div>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
                 </div>
                 <div class="modal-body">
                     <div class="field-table-wrapper">

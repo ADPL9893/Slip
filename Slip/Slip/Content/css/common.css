@@ -14626,12 +14626,26 @@ header.main-header {
     }
     .btn-ri-reset:hover { background: #f1f5f9; border-color: #94a3b8; }
 
-    .btn-ri-save {
-        background: #2563eb; color: #ffffff !important; border: 1px solid #1d4ed8; border-radius: 6px; height: 36px; padding: 0 22px;
-        font-size: 12.5px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3); transition: all 0.15s ease;
-    }
-    .btn-ri-save:hover { background: #1d4ed8; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4); }
+.btn-ri-save {
+    background: #337ab7;
+    color: #ffffff !important;
+    border: 1px solid #337ab7;
+    border-radius: 6px;
+    height: 36px;
+    padding: 0 22px;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+    transition: all 0.15s ease;
+}
+        .btn-ri-save:hover {
+            background: #337ab7;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.4);
+        }
     .btn-ri-save:disabled, .btn-ri-save[disabled] { opacity: 0.7; cursor: not-allowed; }
 
 /* ================= From Views/Master/TRNLabour.cshtml ================= */
@@ -17530,9 +17544,12 @@ div.datepicker {
         box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08) !important;
         border-color: #94a3b8 !important;
     }
+    .rdl-grid-card .row {
+        padding-bottom: 10px;
+    }
 .rdl-card-header {
     background: #ffffff !important;
-    padding: 0px 18px !important;
+    padding: 5px 18px !important;
     border-bottom: 1.5px solid #e2e8f0 !important;
     display: flex !important;
     align-items: center !important;
@@ -19738,6 +19755,11 @@ div.datepicker {
     .rd-card-entry .rd-card-title {
         color: #ffff !important;
     }
+
+.nav > li > a:hover, .nav > li > a:focus {
+    text-decoration: none;
+    background-color: transparent !important
+}
 
 i.text-primary {
     color: #ffff;
