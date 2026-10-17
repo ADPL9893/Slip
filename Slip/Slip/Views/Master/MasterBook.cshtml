@@ -16,6 +16,7 @@
                 <!-- Module Type Dropdown -->
                 <div class="mb-filter-field" style="width: 150px;">
                     <select id="FilterModuleType" class="mb-filter-input" ng-model="SelectedModuleType" ng-change="OnModuleTypeChange()">
+                        <option value="All Data">All Data</option>
                         <option value="Pre Rough">Pre Rough</option>
                         <option value="Distribution">Distribution</option>
                         <option value="CLV Chart">CLV Chart</option>
@@ -37,6 +38,9 @@
             <div class="rdl-card-actions">
                 <!-- 8 Stage Filter Buttons - icon-only, tooltip carries the label -->
                 <div class="mb-btn-group-row">
+                    <button type="button" class="mb-stage-square-btn btn-all-data" ng-class="{'active': ActiveFilter === 'All Data'}" ng-click="SelectFilter('All Data')" title="All Data (Reset Filter)">
+                        <i class="fa fa-th-list"></i>
+                    </button>
                     <button type="button" class="mb-stage-square-btn btn-rough-entry" ng-class="{'active': ActiveFilter === 'Rough Entry'}" ng-click="SelectFilter('Rough Entry')" title="Rough Entry (All Data)">
                         <i class="fa fa-diamond"></i>
                     </button>
@@ -117,9 +121,9 @@
     }
 
     module.controller("MasterBookCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
-        // Default page load pre-selection: 'Branch Assign' / 'Distribution'
-        $scope.SelectedModuleType = 'Distribution';
-        $scope.ActiveFilter = 'Branch Assign';
+        // Default page load pre-selection: 'All Data' (no stage/date narrowing)
+        $scope.SelectedModuleType = 'All Data';
+        $scope.ActiveFilter = 'All Data';
         $scope.FromDate = '';
         $scope.ToDate = '';
         $scope.List = [];
@@ -161,6 +165,7 @@
         // Dynamic Header Badge Class based on Active Stage
         $scope.GetStageBadgeClass = function (stage) {
             if (!stage) return 'badge-pill-info';
+            if (stage === 'All Data') return 'badge-pill-slate';
             if (stage === 'Rough Entry') return 'badge-stage-rough-entry';
             if (stage === 'Branch Assign') return 'badge-stage-branch-assign';
             if (stage === 'Planning') return 'badge-stage-planning';
@@ -170,7 +175,15 @@
             return 'badge-pill-info';
         };
 
-        // Initialize DatePickers & Trigger Initial Default Load (Branch Assign with ALL data)
+        // Clears the date-range inputs back to blank (used by the "All Data" reset)
+        $scope.ResetDateFilters = function () {
+            $('#FromDate').datepicker("clearDates");
+            $('#ToDate').datepicker("clearDates");
+            $scope.FromDate = '';
+            $scope.ToDate = '';
+        };
+
+        // Initialize DatePickers & Trigger Initial Default Load (All Data, no date restriction)
         $timeout(function () {
             $('#FromDate').datepicker({
                 format: "dd-M-yyyy",
@@ -190,18 +203,16 @@
                 $scope.ToDate = $(this).val();
             });
 
-            $("#FromDate").datepicker("setDate", "-1m");
-            $("#ToDate").datepicker("setDate", "0d");
-            $scope.FromDate = $('#FromDate').val();
-            $scope.ToDate = $('#ToDate').val();
-
-            // Default initial fetch: 'Branch Assign' with blank dates (ALL data)
-            $scope.FetchData('Branch Assign', true);
+            // Default initial fetch: 'All Data', dates left blank (ALL data)
+            $scope.FetchData('All Data', true);
         }, 100);
 
         // Module Type dropdown change handler
         $scope.OnModuleTypeChange = function () {
-            if ($scope.SelectedModuleType === 'Pre Rough') {
+            if ($scope.SelectedModuleType === 'All Data') {
+                $scope.ActiveFilter = 'All Data';
+                $scope.ResetDateFilters();
+            } else if ($scope.SelectedModuleType === 'Pre Rough') {
                 $scope.ActiveFilter = 'Rough Entry';
             } else if ($scope.SelectedModuleType === 'Distribution') {
                 $scope.ActiveFilter = 'Branch Assign';
@@ -212,6 +223,8 @@
             } else if ($scope.SelectedModuleType === 'Mumbai Submit') {
                 $scope.ActiveFilter = 'Mumbai Submit';
             }
+
+            $scope.FetchData($scope.ActiveFilter, true);
         };
 
         // Scenario A: Search Button Click (Type Dropdown / Active Filter + Date Range)
@@ -224,7 +237,10 @@
             $scope.ActiveFilter = filterName;
 
             // Sync Module Type dropdown
-            if (filterName === 'Rough Entry') {
+            if (filterName === 'All Data') {
+                $scope.SelectedModuleType = 'All Data';
+                $scope.ResetDateFilters();
+            } else if (filterName === 'Rough Entry') {
                 $scope.SelectedModuleType = 'Pre Rough';
             } else if (filterName === 'Branch Assign' || filterName === 'Planning') {
                 $scope.SelectedModuleType = 'Distribution';
@@ -383,12 +399,22 @@
                             .text(val)
                             .appendTo(container);
                     };
-                } else if (dfLower === 'jangadno' || dfLower === 'jangad') {
+                } else if (dfLower === 'jangadno' || dfLower === 'jangad' || dfLower === 'challanno') {
                     c.minWidth = 105;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
-                        var val = options.data[col.dataField] || options.data.JangadNo || '-';
+                        var val = options.data[col.dataField] || options.data.ChallanNo || options.data.JangadNo || '-';
                         $("<span>").addClass("badge-status-pill badge-pill-slate").text(val).appendTo(container);
+                    };
+                } else if (dfLower === 'recordtype') {
+                    c.width = 100;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var val = options.data.RecordType || '-';
+                        var pillClass = 'badge-pill-info';
+                        if (val === 'Lot') pillClass = 'badge-pill-success';
+                        else if (val === 'Distribution') pillClass = 'badge-pill-warning';
+                        $("<span>").addClass("badge-status-pill " + pillClass).text(val).appendTo(container);
                     };
                 } else if (dfLower === 'branchname' || dfLower === 'br' || dfLower === 'branchshortname') {
                     c.alignment = 'center';
@@ -491,7 +517,7 @@
             gridElement.dxDataGrid({
                 dataSource: $scope.List,
                 columns: gridCols,
-                keyExpr: 'ID',
+                keyExpr: 'RowKey',
                 onRowPrepared: function (e) {
                     if (e.rowType === "data") {
                         e.rowElement.addClass("ri-row-animate");

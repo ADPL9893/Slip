@@ -268,18 +268,8 @@
                     </div>
                 </div>
 
-                <!-- Priority Selection Dropdown (REGULAR, SAMPLE, ARGENT) -->
-                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="EntryPriority">Priority <span class="req">*</span></label>
-                    <select id="EntryPriority" class="form-control rd-input" ng-model="NewEntry.Priority">
-                        <option value="REGULAR">REGULAR</option>
-                        <option value="SAMPLE">SAMPLE</option>
-                        <option value="ARGENT">ARGENT</option>
-                    </select>
-                </div>
-
                 <!-- Remarks (Mandatory) -->
-                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                <div class="col-lg-5 col-md-3 col-sm-6 col-xs-12 rd-form-group">
                     <label class="rd-label" for="EntryRemarks">
                         Remarks <span class="req">*</span>
                     </label>
@@ -317,28 +307,33 @@
     </div>
 
     <!-- Child Grid Container (DevExtreme DataGrid) -->
-    <div class="grid-container-card">
-        <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center;">
+ 
+    <div class="rd-card rd-card-entry">
+        <div class="rd-card-header">
             <h5 class="rd-card-title">
                 <i class="fa fa-table text-primary"></i> 3. Distribution Allocations ({{DistributionList.length}} Records)
             </h5>
-            <div>
-                <span class="badge-status-pill badge-pill-success" ng-if="SavedList.length > 0">
-                    <i class="fa fa-database"></i> {{SavedList.length}} Saved
-                </span>
-                <span class="badge-status-pill badge-pill-warning" ng-if="StagedList.length > 0" style="margin-left: 5px;">
-                    <i class="fa fa-pencil-square-o"></i> {{StagedList.length}} Staged (Unsaved)
-                </span>
-                <span class="badge-status-pill badge-pill-danger" ng-if="DeletedIDs.length > 0" style="margin-left: 5px;">
-                    <i class="fa fa-trash"></i> {{DeletedIDs.length}} Marked Deleted
-                </span>
-            </div>
         </div>
 
+
+        <div>
+            <span class="badge-status-pill badge-pill-success" ng-if="SavedList.length > 0">
+                <i class="fa fa-database"></i> {{SavedList.length}} Saved
+            </span>
+            <span class="badge-status-pill badge-pill-warning" ng-if="StagedList.length > 0" style="margin-left: 5px;">
+                <i class="fa fa-pencil-square-o"></i> {{StagedList.length}} Staged (Unsaved)
+            </span>
+            <span class="badge-status-pill badge-pill-danger" ng-if="DeletedIDs.length > 0" style="margin-left: 5px;">
+                <i class="fa fa-trash"></i> {{DeletedIDs.length}} Marked Deleted
+            </span>
+        </div>
         <div class="uigrid3">
             <div id="rdGridContainer" style="width: 100%;"></div>
         </div>
     </div>
+
+        
+ 
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="ConfirmDeleteModal" role="dialog" data-backdrop="static">

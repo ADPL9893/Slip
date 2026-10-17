@@ -343,6 +343,7 @@
     <Compile Include="Models\MST_LotMaster.cs" />
     <Compile Include="Models\MST_Role.cs" />
     <Compile Include="Models\MST_CompanyBranch.cs" />
+    <Compile Include="Models\MST_Priority.cs" />
     <Compile Include="Models\MST_BranchType.cs" />
     <Compile Include="Models\MST_FactoryCode.cs" />
     <Compile Include="Models\MST_Grade.cs" />
@@ -1328,6 +1329,7 @@
     <Content Include="Views\Master\RoughCodeMaster.cshtml" />
     <Content Include="Views\Master\PartyMaster.cshtml" />
     <Content Include="Views\Master\BranchMaster.cshtml" />
+    <Content Include="Views\Master\PriorityMaster.cshtml" />
     <Content Include="Views\Master\RoughInward.cshtml" />
     <Content Include="Views\Master\MasterBook.cshtml" />
     <Content Include="Views\Master\QRPrint.cshtml" />

@@ -155,6 +155,19 @@
                         </select>
                     </div>
                 </div>
+                <!-- Is Head Manager -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Head Manager Eligible</label>
+                        <div class="active-toggle-wrap">
+                            <input type="checkbox" id="EmployeeIsHead" ng-model="EmployeeMaster.IsHead" />
+                            <label for="EmployeeIsHead" class="status-toggle-label">
+                                <span ng-if="EmployeeMaster.IsHead" class="text-success"><i class="fa fa-check-circle"></i> Yes</span>
+                                <span ng-if="!EmployeeMaster.IsHead" class="text-muted"><i class="fa fa-times-circle"></i> No</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 <!-- Reference Name -->
                 <div class="emp-form-col col-lg-6 col-md-12 col-sm-12 col-xs-12">
                     <div class="emp-form-group">
@@ -524,6 +537,7 @@
                         $scope.EmployeeMaster = empData;
                         $scope.EmployeeMaster.Age = parseInt(empData.Age) || 0;
                         $scope.EmployeeMaster.IsActive = (empData.IsActive == "True" || empData.IsActive === true);
+                        $scope.EmployeeMaster.IsHead = (empData.IsHead == "True" || empData.IsHead === true);
                         $scope.EmployeeMaster.PhotoPath = empData.PhotoPath;
                         $scope.EmployeeMaster.IDProofPhotoPath = empData.IDProofPhotoPath;
                         $scope.EmployeeMaster.PhotoPath2 = empData.PhotoPath2;

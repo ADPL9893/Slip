@@ -15801,6 +15801,10 @@ header.main-header {
     }
 
 /* Distinct & Grouped Gradients for Stage Buttons */
+.btn-all-data {
+    background: linear-gradient(135deg, #334155 0%, #64748b 100%) !important;
+}
+
 .btn-rough-entry {
     background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
 }
@@ -19666,12 +19670,12 @@ div.datepicker {
     }
 
     .rd-card-specs .rd-card-header {
-        background: #bae6fd !important;
+        background: #1c5f8f !important;
         border-bottom: 1.5px solid #7dd3fc !important;
     }
 
     .rd-card-specs .rd-card-title {
-        color: #0369a1 !important;
+        color: #ffff !important;
     }
 
     .rd-card-specs .rd-label {
@@ -19727,14 +19731,17 @@ div.datepicker {
     }
 
     .rd-card-entry .rd-card-header {
-        background: #bae6fd !important;
+        background: #1c5f8f !important;
         border-bottom: 1.5px solid #7dd3fc !important;
     }
 
     .rd-card-entry .rd-card-title {
-        color: #0369a1 !important;
+        color: #ffff !important;
     }
 
+i.text-primary {
+    color: #ffff;
+}
     .rd-card-entry .rd-label {
         color: #0c4a6e !important;
     }

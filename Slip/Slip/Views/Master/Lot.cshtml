@@ -473,6 +473,11 @@
             });
         };
 
+        function ApplyPriorityStyle($el, color) {
+            if (!color) return;
+            $el.css({ "color": color, "background": color + "22", "border": "1px solid " + color, "font-weight": 700, "padding": "2px 8px", "border-radius": "4px", "display": "inline-block" });
+        }
+
         $scope.InitGrid = function () {
             $("#lotGridContainer").dxDataGrid({
                 dataSource: $scope.List,
@@ -527,18 +532,20 @@
                         minWidth: 110,
                         alignment: 'center',
                         cellTemplate: function (container, options) {
-                            var priority = (options.data.LotPriority || 'REGULAR').toUpperCase();
-                            var cls = 'rcode-regular';
-                            if (priority === 'SAMPLE') {
-                                cls = 'rcode-sample';
-                            } else if (priority === 'ARGENT' || priority === 'URGENT') {
-                                cls = 'rcode-argent';
+                            var $span = $("<span>").text(options.data.RCode || '-');
+                            if (options.data.PriorityColor) {
+                                ApplyPriorityStyle($span, options.data.PriorityColor);
+                            } else {
+                                var priority = (options.data.LotPriority || 'REGULAR').toUpperCase();
+                                var cls = 'rcode-regular';
+                                if (priority === 'SAMPLE') {
+                                    cls = 'rcode-sample';
+                                } else if (priority === 'ARGENT' || priority === 'URGENT') {
+                                    cls = 'rcode-argent';
+                                }
+                                $span.addClass(cls);
                             }
-
-                            $("<span>")
-                                .addClass(cls)
-                                .text(options.data.RCode || '-')
-                                .appendTo(container);
+                            $span.appendTo(container);
                         }
                     },
                     {
@@ -552,6 +559,7 @@
                         }
                     },
                     { caption: 'Department', dataField: 'DepartmentShortName', minWidth: 100 },
+                    { caption: 'Head Manager', dataField: 'HeadManagerName', minWidth: 120 },
                     { caption: 'Lot Code', dataField: 'LotCode', minWidth: 120 },
                     {
                         caption: 'LotNo',
@@ -559,18 +567,34 @@
                         minWidth: 140,
                         alignment: 'center',
                         calculateCellValue: function (data) {
-                            return (data.LotCode || '') + '-' + (data.DepartmentShortName || '');
+                            if (data.DepartmentShortName == null)
+                                return data.LotCode;
+                            else
+                                return (data.LotCode || '') + '-' + (data.DepartmentShortName || '');
                         },
                         cellTemplate: function (container, options) {
+                            var data = options.data;
+                            var text = (data.DepartmentShortName == null)
+                                ? data.LotCode
+                                : (data.LotCode || '') + '-' + (data.DepartmentShortName || '');
                             $("<span>")
                                 .addClass("badge-status-pill badge-pill-info")
-                                .text((options.data.LotCode || '-') + '-' + (options.data.DepartmentShortName || '-'))
+                                .text(text || '-')
                                 .appendTo(container);
                         }
                     },
                     { caption: 'Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 80, alignment: 'center' },
                     { caption: 'Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 90, alignment: 'center' },
-                    { caption: 'Priority', dataField: 'LotPriority', minWidth: 90 },
+                    {
+                        caption: 'Priority', dataField: 'LotPriority', minWidth: 90, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var $span = $("<span>").text(options.data.LotPriority || '-');
+                            if (options.data.PriorityColor) {
+                                ApplyPriorityStyle($span, options.data.PriorityColor);
+                            }
+                            $span.appendTo(container);
+                        }
+                    },
                     { caption: 'Created Date', dataField: 'CreatedDate', minWidth: 110, alignment: 'center' },
                     { caption: 'Factory Code', dataField: 'FactoryCode', minWidth: 100 },
                     { caption: 'Color Type', dataField: 'ColorType', minWidth: 100 },

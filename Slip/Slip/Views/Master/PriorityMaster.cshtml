@@ -1,0 +1,409 @@
+@{
+    ViewBag.Title = "Priority Master";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+<div ng-controller="PriorityMasterCtrl" class="bm-page">
+    <div class="bm-header-card">
+        <div class="bm-header-left">
+            <div class="bm-header-icon"><i class="fa fa-flag"></i></div>
+            <div>
+                <div class="bm-breadcrumb">
+                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
+                    <span>Priority Master</span>
+                </div>
+                <h4 class="bm-header-title">Priority Master</h4>
+            </div>
+        </div>
+        <div>
+            <button class="btn-bm-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                <i class="fa fa-plus"></i> ADD NEW PRIORITY
+            </button>
+        </div>
+    </div>
+
+    <div class="bm-grid-card">
+        <div class="bm-card-header">
+            <div class="bm-card-title-left">
+                <i class="fa fa-table"></i>
+                <h3>Priority Records</h3>
+                <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
+                    <i class="fa fa-database"></i> {{PriorityList.length || 0}} Records
+                </span>
+            </div>
+        </div>
+        <div class="bm-grid-body">
+            <div id="priorityGridContainer" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- Add / Edit Modal -->
+    <div class="modal fade" id="PriorityModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-flag modal-title-icon"></i>
+                            <h4 class="modal-title">{{FormModel.PriorityID > 0 ? 'Edit Priority' : 'Add New Priority'}}</h4>
+                        </div>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="bm-modal-section">
+                        <div class="row">
+                            <div class="col-md-12 bm-form-group">
+                                <label class="bm-label" for="ModalPriorityName">PRIORITY NAME <span class="req">*</span></label>
+                                <input type="text" id="ModalPriorityName" ng-model="FormModel.PriorityName" placeholder="e.g. REGULAR, SAMPLE, URGENT" class="bm-input" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label" for="ModalColorHex">HIGHLIGHT COLOR <span class="req">*</span></label>
+                                <input type="color" id="ModalColorHex" ng-model="FormModel.ColorHex" class="bm-input" style="height: 38px; padding: 4px; cursor: pointer;" />
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
+                                <label class="bm-label">PREVIEW</label>
+                                <span class="badge-status-pill" style="display: inline-block; border: 1px solid {{FormModel.ColorHex}}; color: {{FormModel.ColorHex}}; background: {{FormModel.ColorHex}}22; font-weight: 700;">
+                                    {{FormModel.PriorityName || 'PRIORITY'}}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 bm-form-group">
+                                <div class="active-toggle-wrap">
+                                    <input type="checkbox" id="ModalIsDefault" ng-model="FormModel.IsDefault" />
+                                    <label for="ModalIsDefault" class="status-toggle-label">
+                                        <span ng-if="FormModel.IsDefault" class="text-success"><i class="fa fa-check-circle"></i> Default priority for new Lots</span>
+                                        <span ng-if="!FormModel.IsDefault" class="text-muted"><i class="fa fa-times-circle"></i> Not the default</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-bm-reset" type="button" ng-click="ResetForm()">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-bm-save" type="button" ng-click="SavePriority()" ng-disabled="IsSaving">
+                        <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                        {{FormModel.PriorityID > 0 ? 'UPDATE' : 'SAVE'}}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="PriorityConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+                <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
+                    <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
+                    <p style="font-size: 13px; color: #334155; margin: 0;">
+                        Are you sure you want to delete priority <strong>{{SelectedDeleteItem.PriorityName}}</strong>?
+                    </p>
+                </div>
+                <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
+                    <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
+                    <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    module.controller("PriorityMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.PriorityList = [];
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.SelectedDeleteItem = null;
+
+        $scope.FormModel = {
+            PriorityID: 0,
+            PriorityName: '',
+            ColorHex: '#0284c7',
+            IsDefault: false
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#PriorityModal").modal("show");
+        };
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = {
+                PriorityID: 0,
+                PriorityName: '',
+                ColorHex: '#0284c7',
+                IsDefault: false
+            };
+        };
+
+        $scope.EditItem = function (item) {
+            if (!item) return;
+            $scope.FormModel = {
+                PriorityID: item.PriorityID,
+                PriorityName: item.PriorityName || '',
+                ColorHex: item.ColorHex || '#0284c7',
+                IsDefault: !!item.IsDefault
+            };
+            $("#PriorityModal").modal("show");
+        };
+
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.PriorityID) return;
+            $scope.SelectedDeleteItem = item;
+            $("#PriorityConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem) return;
+            $http.post('@Url.Action("PriorityMaster_Delete", "Master")', { PriorityID: $scope.SelectedDeleteItem.PriorityID })
+                .then(function (res) {
+                    $("#PriorityConfirmDeleteModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        Noty("success", res.data.message || "Priority deleted successfully!");
+                        $scope.LoadPriorityList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to delete priority.");
+                    }
+                }, function () {
+                    $("#PriorityConfirmDeleteModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.GetGridInstance = function () {
+            var $el = $("#priorityGridContainer");
+            if (!$el.data("dxDataGrid")) {
+                return null;
+            }
+            return $el.dxDataGrid("instance");
+        };
+
+        $scope.RefreshGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.refresh();
+            } else {
+                $scope.InitGrid();
+            }
+        };
+
+        $scope.ToggleActive = function (item) {
+            if (!item || !item.PriorityID) return;
+            var newStatus = !item.IsActive;
+            $http.post('@Url.Action("PriorityMaster_ActiveInactive", "Master")', { PriorityID: item.PriorityID, IsActive: newStatus })
+                .then(function (res) {
+                    if (res.data && res.data.success) {
+                        item.IsActive = newStatus;
+                        $scope.RefreshGrid();
+                        Noty("success", res.data.message || "Status updated successfully!");
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
+                }, function () {
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadPriorityList = function (searchText) {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_PriorityList", "Master")', { params: { SearchText: searchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.PriorityList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load priorities.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.SavePriority = function () {
+            if (!($scope.FormModel.PriorityName || '').trim()) {
+                Noty("error", "Please enter Priority Name!");
+                $('#ModalPriorityName').focus();
+                return;
+            }
+            if (!$scope.FormModel.ColorHex) {
+                Noty("error", "Please pick a highlight color!");
+                return;
+            }
+
+            var action = ($scope.FormModel.PriorityID > 0) ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("PriorityMaster_Save", "Master")', { model: $scope.FormModel, Action: action })
+                .then(function (res) {
+                    $scope.IsSaving = false;
+                    if (res.data && res.data.success) {
+                        $("#PriorityModal").modal("hide");
+                        Noty("success", res.data.message || (action === 'UPDATE' ? "Priority updated successfully!" : "Priority saved successfully!"));
+                        $scope.ResetForm();
+                        $scope.LoadPriorityList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to save priority.");
+                    }
+                }, function () {
+                    $scope.IsSaving = false;
+                    Noty("error", "Error saving priority to server.");
+                });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.PriorityList);
+                return;
+            }
+            $("#priorityGridContainer").dxDataGrid({
+                dataSource: $scope.PriorityList,
+                keyExpr: 'PriorityID',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard', rowRenderingMode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: true, width: 250, placeholder: 'Search priorities...' },
+                filterRow: { visible: true },
+                headerFilter: { visible: true },
+                columns: [
+                    {
+                        caption: '#', width: 45, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Priority', dataField: 'PriorityName', minWidth: 160,
+                        cellTemplate: function (container, options) {
+                            var color = options.data.ColorHex || '#0284c7';
+                            $("<span>")
+                                .addClass("badge-status-pill")
+                                .css({ "color": color, "background": color + "22", "border": "1px solid " + color, "font-weight": 700 })
+                                .text(options.data.PriorityName)
+                                .appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Color', dataField: 'ColorHex', width: 110, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .css({
+                                    "display": "inline-block", "width": "18px", "height": "18px", "border-radius": "4px",
+                                    "background": options.data.ColorHex || '#0284c7', "border": "1px solid rgba(0,0,0,0.15)", "vertical-align": "middle"
+                                })
+                                .appendTo(container);
+                            $("<span>").text(" " + (options.data.ColorHex || '')).css({ "margin-left": "6px", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Default', dataField: 'IsDefault', width: 100, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsDefault) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Default").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 120, alignment: 'center', fixed: true, fixedPosition: 'right',
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Priority").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate Priority" : "Activate Priority")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>").addClass("grid-btn-del").attr("title", "Delete Priority").html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $scope.LoadPriorityList();
+    }]);
+</script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Priority Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}

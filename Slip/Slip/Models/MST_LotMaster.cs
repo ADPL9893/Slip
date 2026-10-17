@@ -45,6 +45,7 @@ namespace Slip.Models
         public decimal? OGCarat { get; set; }
 
         public Guid? DepartmentID { get; set; }
+        public int? HeadManagerID { get; set; }
 
         public string Remarks { get; set; }
         public bool IsActive { get; set; } = true;

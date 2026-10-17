@@ -108,6 +108,23 @@ namespace Slip.Controllers
             }
         }
 
+        [HttpGet]
+        public JsonResult Get_MST_HeadManagerList()
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_Employee_HeadList");
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         [HttpPost]
         public JsonResult Lot_Save(MST_LotMaster model, string Action = "INSERT")
         {
@@ -175,6 +192,7 @@ namespace Slip.Controllers
                         new SqlParameter("@OGPcs", (object)model.OGPcs ?? DBNull.Value),
                         new SqlParameter("@OGCarat", (object)model.OGCarat ?? DBNull.Value),
                         new SqlParameter("@DepartmentID", (object)model.DepartmentID ?? DBNull.Value),
+                        new SqlParameter("@HeadManagerID", (object)model.HeadManagerID ?? DBNull.Value),
                         new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
                         new SqlParameter("@IsActive", model.IsActive),
                         new SqlParameter("@CreatedBy", currentUserId));
@@ -209,6 +227,7 @@ namespace Slip.Controllers
                         new SqlParameter("@OGPcs", (object)model.OGPcs ?? DBNull.Value),
                         new SqlParameter("@OGCarat", (object)model.OGCarat ?? DBNull.Value),
                         new SqlParameter("@DepartmentID", (object)model.DepartmentID ?? DBNull.Value),
+                        new SqlParameter("@HeadManagerID", (object)model.HeadManagerID ?? DBNull.Value),
                         new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
                         new SqlParameter("@IsActive", model.IsActive),
                         new SqlParameter("@ModifiedBy", currentUserId));
@@ -2233,6 +2252,201 @@ namespace Slip.Controllers
             return View();
         }
 
+        #region Priority Master
+
+        public ActionResult PriorityMaster()
+        {
+            SetModulePermissions("Master", "PriorityMaster");
+            return View();
+        }
+
+        private MST_Priority MapPriority(Dictionary<string, object> rdr)
+        {
+            return new MST_Priority
+            {
+                PriorityID = rdr["PriorityID"] != null ? Convert.ToInt32(rdr["PriorityID"]) : 0,
+                PriorityName = rdr["PriorityName"] != null ? Convert.ToString(rdr["PriorityName"]) : "",
+                ColorHex = rdr["ColorHex"] != null ? Convert.ToString(rdr["ColorHex"]) : "",
+                IsDefault = rdr["IsDefault"] != null && Convert.ToBoolean(rdr["IsDefault"]),
+                IsActive = rdr["IsActive"] != null && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr["CreatedBy"] != null ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
+                CreatedOn = rdr["CreatedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                ModifiedBy = rdr["ModifiedBy"] != null ? (int?)Convert.ToInt32(rdr["ModifiedBy"]) : null,
+                ModifiedOn = rdr["ModifiedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["ModifiedOn"]) : null
+            };
+        }
+
+        public JsonResult Get_MST_PriorityList(string SearchText)
+        {
+            try
+            {
+                List<MST_Priority> list = new List<MST_Priority>();
+
+                List<Dictionary<string, object>> priorityRows = DbHelper.ExecuteReaderAsList("USP_MST_Priority_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+
+                foreach (var row in priorityRows)
+                {
+                    list.Add(MapPriority(row));
+                }
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Priority>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_MST_PriorityDropdownList()
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_Priority_DropdownList");
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_MST_PriorityById(int PriorityID)
+        {
+            try
+            {
+                MST_Priority item = null;
+
+                List<Dictionary<string, object>> priorityRows = DbHelper.ExecuteReaderAsList("USP_MST_Priority_GetById",
+                    new SqlParameter("@PriorityID", PriorityID));
+
+                if (priorityRows.Count > 0)
+                {
+                    item = MapPriority(priorityRows[0]);
+                }
+
+                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult PriorityMaster_Save(MST_Priority model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.PriorityID > 0;
+
+                string spName = isUpdate ? "USP_MST_Priority_Update" : "USP_MST_Priority_Insert";
+                List<SqlParameter> priorityParams = new List<SqlParameter>();
+                if (isUpdate)
+                {
+                    priorityParams.Add(new SqlParameter("@PriorityID", model.PriorityID));
+                }
+                priorityParams.Add(new SqlParameter("@PriorityName", (model.PriorityName ?? "").Trim().ToUpper()));
+                priorityParams.Add(new SqlParameter("@ColorHex", string.IsNullOrWhiteSpace(model.ColorHex) ? "#0284c7" : model.ColorHex));
+                priorityParams.Add(new SqlParameter("@IsDefault", model.IsDefault));
+                priorityParams.Add(new SqlParameter(isUpdate ? "@ModifiedBy" : "@CreatedBy", currentUserId));
+
+                List<Dictionary<string, object>> prioritySaveRows = DbHelper.ExecuteReaderAsList(spName, priorityParams.ToArray());
+                if (prioritySaveRows.Count > 0)
+                {
+                    var row = prioritySaveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+
+                if (isSuccess && string.IsNullOrEmpty(message))
+                {
+                    message = isUpdate ? "Priority updated successfully." : "Priority saved successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult PriorityMaster_Delete(int PriorityID)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                List<Dictionary<string, object>> priorityDeleteRows = DbHelper.ExecuteReaderAsList("USP_MST_Priority_Delete",
+                    new SqlParameter("@PriorityID", PriorityID),
+                    new SqlParameter("@ModifiedBy", currentUserId));
+
+                if (priorityDeleteRows.Count > 0)
+                {
+                    var row = priorityDeleteRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult PriorityMaster_ActiveInactive(int PriorityID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_Priority_ActiveInactive",
+                    new SqlParameter("@PriorityID", PriorityID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@ModifiedBy", currentUserId));
+
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        #endregion
+
         private MST_CompanyBranch MapBranch(Dictionary<string, object> rdr)
         {
             return new MST_CompanyBranch
@@ -2901,6 +3115,8 @@ namespace Slip.Controllers
                                         Remarks = rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
                                         MachineNo = SafeGetColumn(rdr, "MachineNo") != null ? Convert.ToString(SafeGetColumn(rdr, "MachineNo")) : "",
                                         Size = SafeGetColumn(rdr, "Size") != null ? Convert.ToString(SafeGetColumn(rdr, "Size")) : "",
+                                        DimensionID = SafeGetColumn(rdr, "DimensionID") != null ? (int?)Convert.ToInt32(SafeGetColumn(rdr, "DimensionID")) : null,
+                                        DimensionName = SafeGetColumn(rdr, "DimensionName") != null ? Convert.ToString(SafeGetColumn(rdr, "DimensionName")) : "",
                                         FromHeight = SafeGetColumn(rdr, "FromHeight") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "FromHeight")) : null,
                                         ToHeight = SafeGetColumn(rdr, "ToHeight") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "ToHeight")) : null,
                                         Hours = SafeGetColumn(rdr, "Hours") != null ? (decimal?)Convert.ToDecimal(SafeGetColumn(rdr, "Hours")) : null,
@@ -3391,7 +3607,7 @@ namespace Slip.Controllers
                 List<object> list = new List<object>();
 
                 DataSet ds = DbHelper.ExecuteDataSet("Get_MasterBook_Data",
-                    new SqlParameter("@FilterType", FilterType ?? "Rough Entry"),
+                    new SqlParameter("@FilterType", FilterType ?? "All Data"),
                     new SqlParameter("@FromDate", FromDate ?? ""),
                     new SqlParameter("@ToDate", ToDate ?? ""));
 

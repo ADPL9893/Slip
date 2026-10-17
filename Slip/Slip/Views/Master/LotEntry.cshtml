@@ -130,11 +130,20 @@
                     <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormDepartmentID">Department <span class="req">*</span></label>
+                    <label class="rd-label" for="FormDepartmentID">Department</label>
                     <div class="field-select-wrap">
                         <select id="FormDepartmentID" chosen="DepartmentList" ng-model="FormModel.DepartmentID" class="form-control rd-input">
                             <option value="">-- Select --</option>
                             <option ng-repeat="item in DepartmentList" value="{{item.ID}}">{{item.ShortName}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <label class="rd-label" for="FormHeadManagerID">Head Manager</label>
+                    <div class="field-select-wrap">
+                        <select id="FormHeadManagerID" chosen="HeadManagerList" ng-model="FormModel.HeadManagerID" class="form-control rd-input">
+                            <option value="">-- Select --</option>
+                            <option ng-repeat="item in HeadManagerList" value="{{item.EmployeeID}}">{{item.EmployeeName}}</option>
                         </select>
                     </div>
                 </div>
@@ -267,11 +276,12 @@
             <div class="row">
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label" for="FormLotPriority">Priority <span class="req">*</span></label>
-                    <select id="FormLotPriority" class="form-control rd-input" ng-model="FormModel.LotPriority">
-                        <option value="REGULAR">REGULAR</option>
-                        <option value="SAMPLE">SAMPLE</option>
-                        <option value="URGENT">URGENT</option>
-                    </select>
+                    <div class="field-select-wrap">
+                        <select id="FormLotPriority" chosen="PriorityList" class="form-control rd-input" ng-model="FormModel.LotPriority">
+                            <option value="">-- Select --</option>
+                            <option ng-repeat="item in PriorityList" value="{{item.PriorityName}}">{{item.PriorityName}}</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                     <label class="rd-label" for="FormGrowthRate">Growth Rate <span class="req">*</span></label>
@@ -344,6 +354,8 @@
         $scope.ReceipeList = [];
         $scope.GradeList = [];
         $scope.DepartmentList = [];
+        $scope.HeadManagerList = [];
+        $scope.PriorityList = [];
         $scope.SelectedBranchID = '';
         $scope.SelectedDistributionID = '';
         $scope.Selected = {};
@@ -381,11 +393,12 @@
             RejCarat: null, 
             OGPcs: null,
             OGCarat: null,
-            LotPriority: 'REGULAR',
+            LotPriority: '',
             GrowthRate: '',
             CompareNo: '',
             LotPurpose: '',
             DepartmentID: '',
+            HeadManagerID: '',
             Remarks: '',
             IsActive: true
         };
@@ -442,6 +455,28 @@
                 if (res.data && res.data.success) {
                     $scope.DepartmentList = res.data.list || [];
                     $timeout(function () { $('#FormDepartmentID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadHeadManagers = function () {
+            return $http.get('@Url.Action("Get_MST_HeadManagerList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.HeadManagerList = res.data.list || [];
+                    $timeout(function () { $('#FormHeadManagerID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadPriorities = function () {
+            return $http.get('@Url.Action("Get_MST_PriorityDropdownList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.PriorityList = res.data.list || [];
+                    if (!$scope.FormModel.LotPriority) {
+                        var defaultItem = $scope.PriorityList.find(function (x) { return x.IsDefault; });
+                        $scope.FormModel.LotPriority = defaultItem ? defaultItem.PriorityName : ($scope.PriorityList[0] ? $scope.PriorityList[0].PriorityName : '');
+                    }
+                    $timeout(function () { $('#FormLotPriority').trigger('chosen:updated'); }, 100);
                 }
             });
         };
@@ -565,11 +600,12 @@
                     RejCarat: m.RejCarat,
                     OGPcs: m.OGPcs,
                     OGCarat: m.OGCarat,
-                    LotPriority: m.LotPriority || 'REGULAR',
+                    LotPriority: m.LotPriority || '',
                     GrowthRate: m.GrowthRate,
                     CompareNo: m.CompareNo,
                     LotPurpose: m.LotPurpose,
                     DepartmentID: m.DepartmentID || '',
+                    HeadManagerID: m.HeadManagerID || '',
                     Remarks: m.Remarks,
                     IsActive: m.IsActive === true || m.IsActive === 1 || m.IsActive === '1' || m.IsActive === 'True'
                 };
@@ -603,6 +639,8 @@
                 }];
                 $scope.SelectedDistributionID = m.RoughDistributionID ? m.RoughDistributionID.toString() : '';
                 $scope.LoadDepartments(m.BranchID).then(function () { SyncChosenValue('#FormDepartmentID', m.DepartmentID); });
+                SyncChosenValue('#FormHeadManagerID', m.HeadManagerID);
+                SyncChosenValue('#FormLotPriority', m.LotPriority);
 
                 // Force the native <select> value directly rather than relying on
                 // Angular digest timing to have already applied the binding before
@@ -649,7 +687,6 @@
                 Noty("error", "Carat (" + carat.toFixed(3) + ") exceeds the bag's pending balance (" + availWt.toFixed(3) + ")!");
                 return false;
             }
-            if (!$scope.FormModel.DepartmentID) { Noty("error", "Please select Department!"); return false; }
             if (!$scope.FormModel.FactoryCodeID) { Noty("error", "Please select Factory Code!"); return false; }
             if (!($scope.FormModel.Receipe || '').trim()) { Noty("error", "Please select Receipe!"); return false; }
             if (!($scope.FormModel.LotPriority || '').trim()) { Noty("error", "Please select Priority!"); return false; }
@@ -711,7 +748,9 @@
         $q.all([
             $scope.LoadBranches(),
             $scope.LoadRecipes(),
-            $scope.LoadGrades()
+            $scope.LoadGrades(),
+            $scope.LoadHeadManagers(),
+            $scope.LoadPriorities()
         ]).then(function () {
             if ($scope.InitLotID > 0) {
                 $scope.LoadForEdit($scope.InitLotID);

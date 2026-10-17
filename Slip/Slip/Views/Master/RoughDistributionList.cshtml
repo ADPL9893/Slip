@@ -690,27 +690,6 @@ else
                         }
                     },
                     {
-                        caption: 'Priority',
-                        dataField: 'Priority',
-                        minWidth: 100,
-                        alignment: 'center',
-                        cellTemplate: function (container, options) {
-                            var priority = (options.data.Priority || 'REGULAR').toUpperCase();
-                            var badgeClass = "badge-status-pill badge-pill-info";
-
-                            if (priority === 'SAMPLE') {
-                                badgeClass = "badge-status-pill badge-pill-warning";
-                            } else if (priority === 'ARGENT' || priority === 'URGENT') {
-                                badgeClass = "badge-status-pill badge-pill-danger";
-                            }
-
-                            $("<span>")
-                                .addClass(badgeClass)
-                                .text(priority)
-                                .appendTo(container);
-                        }
-                    },
-                    {
                         caption: 'R. Name',
                         dataField: 'RName',
                         minWidth: 120
