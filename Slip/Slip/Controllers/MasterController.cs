@@ -2281,6 +2281,7 @@ namespace Slip.Controllers
             }
         }
 
+        //Branch Master
         public JsonResult Get_MST_BranchList(string SearchText)
         {
             try
@@ -3655,7 +3656,7 @@ namespace Slip.Controllers
                         Val("MachineNo") + "," +
                         Val("Hours") + "," +
                         Val("Height") + "," +
-                        Val("NewHeight") + "," +
+                        Val("NewHeight") + "," + 
                         Val("Size") + "," +
                         //Val("RejPcs") + "," +
                         //Val("RejCarat") + "," +
@@ -3833,5 +3834,151 @@ namespace Slip.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        //Department Master
+
+        #region Department Master (Mst_Department)
+
+        public ActionResult DepartmentMaster()
+        {
+            SetModulePermissions("Master", "DepartmentMaster");
+            return View();
+        }
+
+
+        //Convert DepartmentId 
+        private Mst_Department MapDepartment(Dictionary<string, object> rdr)
+        {
+            return new Mst_Department
+            {
+                ID = rdr["ID"] != null && Guid.TryParse(rdr["ID"].ToString(), out Guid gid) ? gid : Guid.Empty,
+                BranchId = rdr["BranchId"] != null ? Convert.ToInt32(rdr["BranchId"]) : 0,
+                BranchName = rdr.ContainsKey("BranchName") && rdr["BranchName"] != null ? Convert.ToString(rdr["BranchName"]) : "",
+                DepartmentName = rdr["DepartmentName"] != null ? Convert.ToString(rdr["DepartmentName"]) : "",
+                ShortName = rdr["ShortName"] != null ? Convert.ToString(rdr["ShortName"]) : "",
+                Floor = rdr.ContainsKey("Floor") && rdr["Floor"] != null ? Convert.ToString(rdr["Floor"]) : "",
+                Location = rdr.ContainsKey("Location") && rdr["Location"] != null ? Convert.ToString(rdr["Location"]) : "",
+                IsClv = rdr.ContainsKey("IsClv") && rdr["IsClv"] != null && Convert.ToBoolean(rdr["IsClv"]),
+                IsActive = rdr["IsActive"] != null && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr.ContainsKey("CreatedBy") && rdr["CreatedBy"] != null ? Convert.ToInt32(rdr["CreatedBy"]) : 0,
+                CreatedOn = rdr.ContainsKey("CreatedOn") && rdr["CreatedOn"] != null ? (DateTime?)Convert.ToDateTime(rdr["CreatedOn"]) : null,
+                UpdatedBy = rdr.ContainsKey("UpdatedBy") && rdr["UpdatedBy"] != null && rdr["UpdatedBy"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["UpdatedBy"]) : null,
+                UpdatedDate = rdr.ContainsKey("UpdatedDate") && rdr["UpdatedDate"] != null && rdr["UpdatedDate"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["UpdatedDate"]) : null
+            };
+        }
+
+
+        //Get DepartmentList For Browser For Searching
+        [HttpGet]
+        public JsonResult Get_MST_DepartmentGridList(string SearchText)
+        {
+            try
+            {
+                List<Mst_Department> list = new List<Mst_Department>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Department_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapDepartment(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<Mst_Department>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_MST_DepartmentById(Guid ID)
+        {
+            try
+            {
+                Mst_Department item = null;
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Department_GetById",
+                    new SqlParameter("@ID", ID));
+                if (rows.Count > 0)
+                {
+                    item = MapDepartment(rows[0]);
+                }
+                return Json(new { success = item != null, item = item }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Department_Insert_Update_Delete(Mst_Department model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new Mst_Department();
+
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                model.CreatedBy = currentUserId;
+                model.UpdatedBy = currentUserId;
+
+                XmlDocument xmlData = CommonMethods.ConvertToXml(model);
+                string xmlStr = "<DocumentElement><Mst_Department>" + xmlData.DocumentElement.InnerXml + "</Mst_Department></DocumentElement>";
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_Department_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ACTION", Action));
+
+                if (message != null && message.StartsWith("Department Is ", StringComparison.OrdinalIgnoreCase))
+                {
+                    isSuccess = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+
+        [HttpPost]
+        public JsonResult DepartmentMaster_ActiveInactive(Guid ID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_Department_ActiveInactive",
+                    new SqlParameter("@ID", ID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@UpdatedBy", currentUserId));
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+
     }
 }

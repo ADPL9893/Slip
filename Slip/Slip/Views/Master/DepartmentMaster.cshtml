@@ -1,0 +1,470 @@
+@{
+    ViewBag.Title = "Department Master";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+    <div ng-controller="DepartmentMasterCtrl" class="bm-page">
+        <!-- Header Card -->
+        <div class="bm-header-card">
+            <div class="bm-header-left">
+                <div class="bm-header-icon"><i class="fa fa-sitemap"></i></div>
+                <div>
+                    <div class="bm-breadcrumb">
+                        <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
+                        <span>Department Master</span>
+                    </div>
+                    <h4 class="bm-header-title">Department Master</h4>
+                </div>
+            </div>
+            <div>
+                <button class="btn-bm-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                    <i class="fa fa-plus"></i> ADD NEW DEPARTMENT
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid Card -->
+        <div class="bm-grid-card">
+            <div class="bm-card-header">
+                <div class="bm-card-title-left">
+                    <i class="fa fa-table"></i>
+                    <h3>Department Records</h3>
+                    <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
+                        <i class="fa fa-database"></i> {{DepartmentList.length || 0}} Records
+                    </span>
+                </div>
+            </div>
+            <div class="bm-grid-body">
+                <div id="departmentGridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Add / Edit Modal -->
+        <div class="modal fade" id="DepartmentModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-flex">
+                            <div class="modal-header-title-left">
+                                <i class="fa fa-sitemap modal-title-icon"></i>
+                                <h4 class="modal-title">{{FormModel.ID && FormModel.ID !== '00000000-0000-0000-0000-000000000000' ? 'Edit Department' : 'Add New Department'}}</h4>
+                            </div>
+                            <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="bm-modal-section">
+                            <div class="bm-modal-section-title"><i class="fa fa-info-circle text-primary"></i> DEPARTMENT DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 bm-form-group">
+                                    <label class="bm-label" for="ModalBranchId">BRANCH <span class="req">*</span></label>
+                                    <select id="ModalBranchId" chosen="BranchList" class="form-control bm-input" ng-model="FormModel.BranchId" ng-options="item.BranchID as item.BranchName for item in BranchList">
+                                        <option value="">Select Branch</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 col-sm-12 bm-form-group">
+                                    <label class="bm-label" for="ModalShortName">SHORT NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalShortName" ng-model="FormModel.ShortName" placeholder="e.g. 4P, SAW" maxlength="10" class="bm-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 bm-form-group">
+                                    <label class="bm-label" for="ModalDepartmentName">DEPARTMENT NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalDepartmentName" ng-model="FormModel.DepartmentName" placeholder="Enter Full Department Name" maxlength="150" class="bm-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
+                                    <label class="bm-label" for="ModalFloor">FLOOR</label>
+                                    <input type="text" id="ModalFloor" ng-model="FormModel.Floor" placeholder="e.g. 1st Floor / Ground" maxlength="50" class="bm-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
+                                    <label class="bm-label" for="ModalLocation">LOCATION</label>
+                                    <input type="text" id="ModalLocation" ng-model="FormModel.Location" placeholder="e.g. Unit-1, Wing A" maxlength="250" class="bm-input" />
+                                </div>
+                            </div>
+
+                            <div class="row" style="margin-top: 10px;">
+                                <div class="col-md-12">
+                                    <label style="display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 600; color: #334155;">
+                                        <input type="checkbox" ng-model="FormModel.IsClv" style="width: 16px; height: 16px; margin: 0 8px 0 0;" />
+                                        IS CLEAVING DEPARTMENT (IsClv)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-bm-reset" type="button" ng-click="ResetForm()">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn-bm-save" type="button" ng-click="SaveDepartment()" ng-disabled="IsSaving">
+                            <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                            {{FormModel.ID && FormModel.ID !== '00000000-0000-0000-0000-000000000000' ? 'UPDATE' : 'SAVE'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="DeptConfirmDeleteModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
+                            <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+                    <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
+                        <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
+                        <p style="font-size: 13px; color: #334155; margin: 0;">
+                            Are you sure you want to delete department <strong>{{SelectedDeleteItem.DepartmentName}}</strong> ({{SelectedDeleteItem.ShortName}})?
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
+                        <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
+                        <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    try {
+        module.directive('chosen', ['$timeout', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attrs) {
+                    var list = attrs['chosen'];
+                    if (list) {
+                        scope.$watchCollection(list, function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    if (attrs['ngModel']) {
+                        scope.$watch(attrs['ngModel'], function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                }
+            };
+        }]);
+    } catch (e) { /* chosen directive already registered on this module */ }
+
+    module.controller("DepartmentMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+
+        $scope.CanAdd = @(ViewBag.CanAdd != null && (bool)ViewBag.CanAdd ? "true" : "false");
+        $scope.CanEdit = @(ViewBag.CanEdit != null && (bool)ViewBag.CanEdit ? "true" : "false");
+        $scope.CanDelete = @(ViewBag.CanDelete != null && (bool)ViewBag.CanDelete ? "true" : "false");
+
+        $scope.DepartmentList = [];
+        $scope.BranchList = [];
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.SelectedDeleteItem = null;
+
+        $scope.DefaultForm = function () {
+            return {
+                ID: '00000000-0000-0000-0000-000000000000',
+                BranchId: '',
+                DepartmentName: '',
+                ShortName: '',
+                Floor: '',
+                Location: '',
+                IsClv: false,
+                IsActive: true
+            };
+        };
+
+        $scope.FormModel = $scope.DefaultForm();
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = $scope.DefaultForm();
+            $timeout(function () {
+                $('#ModalBranchId').trigger('chosen:updated');
+            }, 50);
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.LoadBranches();
+            $scope.ResetForm();
+            $("#DepartmentModal").modal("show");
+        };
+
+        $scope.GetGridInstance = function () {
+            var el = $("#departmentGridContainer");
+            return (el.length && el.hasClass("dx-widget")) ? el.dxDataGrid("instance") : null;
+        };
+
+        $scope.EditItem = function (item) {
+            $scope.LoadBranches();
+            $scope.FormModel = {
+                ID: item.ID,
+                BranchId: item.BranchId,
+                DepartmentName: item.DepartmentName,
+                ShortName: item.ShortName,
+                Floor: item.Floor || '',
+                Location: item.Location || '',
+                IsClv: !!item.IsClv,
+                IsActive: !!item.IsActive
+            };
+            $("#DepartmentModal").modal("show");
+            $timeout(function () {
+                $('#ModalBranchId').trigger('chosen:updated');
+            }, 80);
+        };
+
+        $scope.PromptDelete = function (item) {
+            $scope.SelectedDeleteItem = item;
+            $("#DeptConfirmDeleteModal").modal("show");
+        };
+
+        // DELETE -> same action: Department_Insert_Update_Delete (Action = 'DELETE')
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem || !$scope.SelectedDeleteItem.ID) return;
+
+            $http.post('@Url.Action("Department_Insert_Update_Delete", "Master")',
+                { model: { ID: $scope.SelectedDeleteItem.ID }, Action: 'DELETE' })
+                .then(function (res) {
+                    $("#DeptConfirmDeleteModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        Noty("success", res.data.message || "Department deleted successfully!");
+                        $scope.LoadDepartmentList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to delete department.");
+                    }
+                }, function () {
+                    $("#DeptConfirmDeleteModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.ToggleActive = function (item) {
+            var newStatus = !item.IsActive;
+            $http.post('@Url.Action("DepartmentMaster_ActiveInactive", "Master")', { ID: item.ID, IsActive: newStatus })
+                .then(function (res) {
+                    if (res.data && res.data.success) {
+                        item.IsActive = newStatus;
+                        var grid = $scope.GetGridInstance();
+                        if (grid) grid.refresh();
+                        Noty("success", res.data.message || "Status updated successfully!");
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
+                }, function () {
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadBranches = function () {
+            $http.get('@Url.Action("Get_MST_BranchList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.BranchList = res.data.list || [];
+                    $timeout(function () { $('#ModalBranchId').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadDepartmentList = function (searchText) {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_DepartmentGridList", "Master")', { params: { SearchText: searchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.DepartmentList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load departments.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        // INSERT / UPDATE -> same action: Department_Insert_Update_Delete
+        $scope.SaveDepartment = function () {
+            if (!$scope.FormModel.BranchId) {
+                Noty("error", "Please select Branch!");
+                $('#ModalBranchId').trigger('chosen:open');
+                return;
+            }
+            if (!$scope.FormModel.ShortName) {
+                Noty("error", "Please enter Short Name!");
+                $('#ModalShortName').focus();
+                return;
+            }
+            if (!$scope.FormModel.DepartmentName) {
+                Noty("error", "Please enter Department Name!");
+                $('#ModalDepartmentName').focus();
+                return;
+            }
+
+            var isEdit = $scope.FormModel.ID && $scope.FormModel.ID !== '00000000-0000-0000-0000-000000000000';
+            var action = isEdit ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("Department_Insert_Update_Delete", "Master")', { model: $scope.FormModel, Action: action })
+                .then(function (res) {
+                    $scope.IsSaving = false;
+                    if (res.data && res.data.success) {
+                        $("#DepartmentModal").modal("hide");
+                        Noty("success", res.data.message || (isEdit ? "Department updated successfully!" : "Department saved successfully!"));
+                        $scope.ResetForm();
+                        $scope.LoadDepartmentList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to save department.");
+                    }
+                }, function () {
+                    $scope.IsSaving = false;
+                    Noty("error", "Error saving department to server.");
+                });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.DepartmentList);
+                return;
+            }
+            $("#departmentGridContainer").dxDataGrid({
+                dataSource: $scope.DepartmentList,
+                keyExpr: 'ID',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                    }
+                },
+                height: 'calc(100vh - 210px)',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard', rowRenderingMode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: true, width: 250, placeholder: 'Search departments...' },
+                filterRow: { visible: true },
+                headerFilter: { visible: true },
+                columns: [
+                    {
+                        caption: '#', width: 45, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Branch', dataField: 'BranchName', minWidth: 140,
+                        cellTemplate: function (container, options) {
+                            $("<span>").addClass("badge-status-pill badge-pill-info").text(options.data.BranchName || '-').appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Short Name', dataField: 'ShortName', minWidth: 100, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.ShortName).css({ "color": "#1e293b", "font-size": "13px" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Department Name', dataField: 'DepartmentName', minWidth: 180 },
+                    { caption: 'Floor', dataField: 'Floor', minWidth: 110 },
+                    { caption: 'Location', dataField: 'Location', minWidth: 140 },
+                    {
+                        caption: 'Is Clv', dataField: 'IsClv', width: 90, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsClv) {
+                                $("<span>").addClass("badge-status-pill badge-pill-warning").text("Yes").appendTo(container);
+                            } else {
+                                $("<span>").text("No").css({ "color": "#94a3b8", "font-weight": "500" }).appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 120, alignment: 'center', fixed: true, fixedPosition: 'right',
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Department").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate" : "Activate")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>").addClass("grid-btn-del").attr("title", "Delete Department").html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $('#DepartmentModal').on('shown.bs.modal', function () {
+            $timeout(function () {
+                if (!$('#ModalBranchId').data('chosen')) {
+                    $('#ModalBranchId').chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                }
+                $('#ModalBranchId').trigger('chosen:updated');
+            }, 40);
+        });
+
+        $scope.LoadBranches();
+        $scope.LoadDepartmentList();
+    }]);
+    </script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Department Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}
