@@ -47,6 +47,52 @@ namespace Slip.Models
         [JsonProperty("roughType")] public string RoughType { get; set; }
     }
 
+    // Mirrors the external Branch API's LotInsertRequest/LotUpdateRequest
+    // (POST/PUT /api/Lot). One shared class for both - Insert only reads
+    // LotCode (required there) and ignores LotId; Update only reads LotId
+    // (required there) and ignores LotCode. Sent via BranchApiClient.
+    // SyncLotToAllBranches with EVERY field populated on every call (insert
+    // or update) - the underlying MST_Lot_Insert_Update_Delete proc's UPDATE
+    // branch overwrites columns unconditionally (no ISNULL-merge), so a
+    // partial payload would null out anything omitted.
+    public class BranchLotSyncRequest
+    {
+        [JsonProperty("lotId")] public int? LotId { get; set; }
+        [JsonProperty("lotCode")] public string LotCode { get; set; }
+        [JsonProperty("roughId")] public int? RoughId { get; set; }
+        [JsonProperty("lotPcs")] public int? LotPcs { get; set; }
+        [JsonProperty("lotCarat")] public double? LotCarat { get; set; }
+        [JsonProperty("remarks")] public string Remarks { get; set; }
+        [JsonProperty("ogname")] public string Ogname { get; set; }
+        [JsonProperty("lotType")] public string LotType { get; set; }
+        [JsonProperty("colorType")] public string ColorType { get; set; }
+        [JsonProperty("factoryCode")] public string FactoryCode { get; set; }
+        [JsonProperty("machineNo")] public string MachineNo { get; set; }
+        [JsonProperty("hours")] public double? Hours { get; set; }
+        [JsonProperty("height")] public double? Height { get; set; }
+        [JsonProperty("size")] public string Size { get; set; }
+        [JsonProperty("receipe")] public string Receipe { get; set; }
+        [JsonProperty("sizeCode")] public string SizeCode { get; set; }
+        [JsonProperty("roughRate")] public double? RoughRate { get; set; }
+        [JsonProperty("lotPriority")] public string LotPriority { get; set; }
+        [JsonProperty("growthRate")] public string GrowthRate { get; set; }
+        [JsonProperty("roughType")] public string RoughType { get; set; }
+        [JsonProperty("heightName")] public string HeightName { get; set; }
+        [JsonProperty("fromHeight")] public double? FromHeight { get; set; }
+        [JsonProperty("toHeight")] public double? ToHeight { get; set; }
+
+        // The 4 fields BranchApiClient re-syncs on every Branch Assignment /
+        // Department / Head Manager / IsReceived change.
+        [JsonProperty("branchId")] public int? BranchId { get; set; }
+        [JsonProperty("tableNo")] public string TableNo { get; set; }
+        [JsonProperty("headManagerId")] public int? HeadManagerId { get; set; }
+        [JsonProperty("isReceived")] public int? IsReceived { get; set; }
+
+        [JsonProperty("inwardDetailId")] public int? InwardDetailId { get; set; }
+        [JsonProperty("rCodeYear")] public int? RCodeYear { get; set; }
+        [JsonProperty("rCodeSerial")] public int? RCodeSerial { get; set; }
+    }
+
     public class BranchLoginRequest
     {
         [JsonProperty("userName")] public string UserName { get; set; }

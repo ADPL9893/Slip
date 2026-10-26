@@ -182,6 +182,17 @@ namespace Slip.Controllers
         // branch-less split has nowhere to sync to yet, so that's a no-op
         // until Lot_Save assigns one).
         [HttpPost]
+        // Blocks further edits to a Lot once a branch has reported it
+        // received (MST_Lot.IsReceived, flipped by the inbound
+        // api/API/Lot_MarkReceived callback from AnjaliLabTech.API - see
+        // APIController.cs). Used as a guard before Lot_Save/
+        // AssignLotBranch/Lot_Delete/Department-HeadManager updates.
+        private bool IsLotReceived(int lotID)
+        {
+            DataSet ds = DbHelper.ExecuteDataSet("USP_MST_Lot_GetIsReceived", new SqlParameter("@LotID", lotID));
+            return ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0 && Convert.ToBoolean(ds.Tables[0].Rows[0]["IsReceived"]);
+        }
+
         public JsonResult LotSplit_Save(List<MST_LotMaster> splits, int InwardDetailID, int SizeCodeID)
         {
             string message;
@@ -276,12 +287,13 @@ namespace Slip.Controllers
                     }
                 }
 
-                // Push every newly-created split to its OWN branch's standalone API
-                // only - BranchApiClient never throws, so a Branch API being
+                // Push every newly-created split to EVERY configured branch's
+                // own API (unconditionally, regardless of Branch assignment) -
+                // BranchApiClient never throws, so a Branch API being
                 // down/unreachable can't fail this save.
                 foreach (int newLotID in newLotIDs)
                 {
-                    BranchApiClient.SyncLot(newLotID);
+                    BranchApiClient.SyncLotToAllBranches(newLotID, currentUserId);
                 }
             }
             catch (Exception ex)
@@ -293,20 +305,27 @@ namespace Slip.Controllers
             return Json(new { success = isSuccess, message = message, newLotIDs = newLotIDs });
         }
 
-        // Updates a Lot. The first time a Branch is assigned to a Lot whose
-        // R.Code is still NULL (the "deferred" workflow - Lots are created
-        // branch-less and code-less, see LotSplit_Save), this generates its
-        // R.Code (now with the branch digit, since the Branch is finally
-        // known) and Lot Code before saving, in the same transaction.
-        // Re-saving a Lot that already has an R.Code (e.g. changing its
-        // Branch later) never regenerates it - it stays exactly as first
-        // printed/QR'd.
+        // Updates a Lot. Generates (or regenerates) the Lot's R.Code/Lot Code
+        // before saving, in the same transaction, whenever either is still
+        // NULL (first-ever Branch assignment - the "deferred" workflow, Lots
+        // are created branch-less and code-less, see LotSplit_Save) OR the
+        // Branch is actually changing from what it currently is - both
+        // R.Code and Lot Code bake in the Branch's own prefix digit (see
+        // usp_GenerateRoughCode_ForLot), so a Lot moved to a different
+        // Branch needs a new code, not its old Branch's code carried over.
+        // A re-save that keeps the SAME Branch never regenerates.
         [HttpPost]
         public JsonResult Lot_Save(MST_LotMaster model, string Action = "UPDATE")
         {
             try
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                if (IsLotReceived(model.LotID))
+                {
+                    return Json(new { success = false, message = "This Lot has already been received and can no longer be modified." });
+                }
+
                 Dictionary<string, object> r;
 
                 using (SqlConnection con = new SqlConnection(conn))
@@ -319,9 +338,10 @@ namespace Slip.Controllers
                             string existingRCode = null;
                             int? inwardDetailID = null;
                             int? sizeCodeID = null;
+                            int? existingBranchID = null;
 
                             using (SqlCommand getCmd = new SqlCommand(
-                                "SELECT RCode, InwardDetailID, SizeCodeID FROM dbo.MST_Lot WHERE LotID = @LotID", con, tran))
+                                "SELECT RCode, InwardDetailID, SizeCodeID, BranchID FROM dbo.MST_Lot WHERE LotID = @LotID", con, tran))
                             {
                                 getCmd.Parameters.AddWithValue("@LotID", model.LotID);
                                 using (SqlDataReader getRdr = getCmd.ExecuteReader())
@@ -331,6 +351,7 @@ namespace Slip.Controllers
                                         existingRCode = getRdr["RCode"] != DBNull.Value ? Convert.ToString(getRdr["RCode"]) : null;
                                         inwardDetailID = getRdr["InwardDetailID"] != DBNull.Value ? Convert.ToInt32(getRdr["InwardDetailID"]) : (int?)null;
                                         sizeCodeID = getRdr["SizeCodeID"] != DBNull.Value ? Convert.ToInt32(getRdr["SizeCodeID"]) : (int?)null;
+                                        existingBranchID = getRdr["BranchID"] != DBNull.Value ? Convert.ToInt32(getRdr["BranchID"]) : (int?)null;
                                     }
                                 }
                             }
@@ -338,7 +359,15 @@ namespace Slip.Controllers
                             object rCodeParam = DBNull.Value, rCodeYearParam = DBNull.Value, rCodeSerialParam = DBNull.Value,
                                    lotCodeParam = DBNull.Value, distributionPartNoParam = DBNull.Value;
 
-                            if (model.BranchID.HasValue && string.IsNullOrEmpty(existingRCode) && inwardDetailID.HasValue && sizeCodeID.HasValue)
+                            // Regenerate not just on first-ever assignment
+                            // (existingRCode empty) but also whenever the
+                            // Branch is actually CHANGING - RCode/LotCode
+                            // bake in the Branch's own prefix digit (see
+                            // usp_GenerateRoughCode_ForLot), so a Lot moved
+                            // to a different Branch needs a new code, not
+                            // its old Branch's code carried over.
+                            bool branchChanged = model.BranchID.HasValue && existingBranchID != model.BranchID;
+                            if (model.BranchID.HasValue && (string.IsNullOrEmpty(existingRCode) || branchChanged) && inwardDetailID.HasValue && sizeCodeID.HasValue)
                             {
                                 string rCode;
                                 int rCodeYear, rCodeSerial, distributionPartNo;
@@ -453,12 +482,12 @@ namespace Slip.Controllers
                 bool success = r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
                 string message = r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
 
-                // Covers "Branch assigned later": a split saved with no Branch
-                // only has somewhere to sync to once a Branch is actually set.
+                // Every Lot is already synced to every branch from creation,
+                // so any successful save just re-pushes the current state.
                 // BranchApiClient never throws, so this can't fail the save.
-                if (success && model.BranchID.HasValue)
+                if (success)
                 {
-                    BranchApiClient.SyncLot(model.LotID);
+                    BranchApiClient.SyncLotToAllBranches(model.LotID, currentUserId);
                 }
 
                 return Json(new
@@ -593,13 +622,21 @@ namespace Slip.Controllers
         // (and optionally @DepartmentID/@HeadManagerID, if the user also
         // edited those cells) to one Lot, nothing else. Generates the Lot's
         // R.Code/Lot Code first if this is its first-ever Branch assignment
-        // (RCode still NULL), exactly like Lot_Save does.
+        // OR if the Branch is actually changing from what it currently is
+        // (the code bakes in the Branch's own prefix digit), exactly like
+        // Lot_Save does.
         [HttpPost]
         public JsonResult AssignLotBranch(int LotID, int BranchID, Guid? DepartmentID = null, int? HeadManagerID = null)
         {
             try
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                if (IsLotReceived(LotID))
+                {
+                    return Json(new { success = false, message = "This Lot has already been received and can no longer be modified." });
+                }
+
                 Dictionary<string, object> r;
 
                 using (SqlConnection con = new SqlConnection(conn))
@@ -612,9 +649,10 @@ namespace Slip.Controllers
                             string existingRCode = null;
                             int? inwardDetailID = null;
                             int? sizeCodeID = null;
+                            int? existingBranchID = null;
 
                             using (SqlCommand getCmd = new SqlCommand(
-                                "SELECT RCode, InwardDetailID, SizeCodeID FROM dbo.MST_Lot WHERE LotID = @LotID", con, tran))
+                                "SELECT RCode, InwardDetailID, SizeCodeID, BranchID FROM dbo.MST_Lot WHERE LotID = @LotID", con, tran))
                             {
                                 getCmd.Parameters.AddWithValue("@LotID", LotID);
                                 using (SqlDataReader getRdr = getCmd.ExecuteReader())
@@ -624,6 +662,7 @@ namespace Slip.Controllers
                                         existingRCode = getRdr["RCode"] != DBNull.Value ? Convert.ToString(getRdr["RCode"]) : null;
                                         inwardDetailID = getRdr["InwardDetailID"] != DBNull.Value ? Convert.ToInt32(getRdr["InwardDetailID"]) : (int?)null;
                                         sizeCodeID = getRdr["SizeCodeID"] != DBNull.Value ? Convert.ToInt32(getRdr["SizeCodeID"]) : (int?)null;
+                                        existingBranchID = getRdr["BranchID"] != DBNull.Value ? Convert.ToInt32(getRdr["BranchID"]) : (int?)null;
                                     }
                                 }
                             }
@@ -631,7 +670,15 @@ namespace Slip.Controllers
                             object rCodeParam = DBNull.Value, rCodeYearParam = DBNull.Value, rCodeSerialParam = DBNull.Value,
                                    lotCodeParam = DBNull.Value, distributionPartNoParam = DBNull.Value;
 
-                            if (string.IsNullOrEmpty(existingRCode) && inwardDetailID.HasValue && sizeCodeID.HasValue)
+                            // Regenerate not just on first-ever assignment
+                            // (existingRCode empty) but also whenever the
+                            // Branch is actually CHANGING - RCode/LotCode
+                            // bake in the Branch's own prefix digit (see
+                            // usp_GenerateRoughCode_ForLot), so a Lot moved
+                            // to a different Branch needs a new code, not
+                            // its old Branch's code carried over.
+                            bool branchChanged = existingBranchID != BranchID;
+                            if ((string.IsNullOrEmpty(existingRCode) || branchChanged) && inwardDetailID.HasValue && sizeCodeID.HasValue)
                             {
                                 string rCode;
                                 int rCodeYear, rCodeSerial, distributionPartNo;
@@ -716,7 +763,7 @@ namespace Slip.Controllers
                     }
                 }
 
-                BranchApiClient.SyncLot(LotID);
+                BranchApiClient.SyncLotToAllBranches(LotID, currentUserId);
 
                 return Json(new
                 {
@@ -740,6 +787,12 @@ namespace Slip.Controllers
             try
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                if (IsLotReceived(LotID))
+                {
+                    return Json(new { success = false, message = "This Lot has already been received and can no longer be deleted." });
+                }
+
                 List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_Delete",
                     new SqlParameter("@LotID", LotID),
                     new SqlParameter("@ModifiedBy", currentUserId));
@@ -747,6 +800,11 @@ namespace Slip.Controllers
                 var r = rows.FirstOrDefault();
                 bool success = r != null && r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
                 string message = r != null && r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
+
+                if (success)
+                {
+                    BranchApiClient.DeleteLotFromAllBranches(LotID);
+                }
 
                 return Json(new { success = success, message = message });
             }
@@ -3856,6 +3914,7 @@ namespace Slip.Controllers
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
                 bool isUpdate = string.Equals(Action, "UPDATE", StringComparison.OrdinalIgnoreCase) && model.InwardID > 0;
+                List<int> savedDetailIDs = new List<int>();
 
                 if (string.Equals(model.SourceType, "BRANCH", StringComparison.OrdinalIgnoreCase)
                     && model.FromBranchID.HasValue && model.FromBranchID.Value == model.ToBranchID)
@@ -3935,7 +3994,8 @@ namespace Slip.Controllers
                                     using (SqlCommand lineCmd = new SqlCommand("USP_TRN_RoughInwardDetail_Save", con, tran))
                                     {
                                         lineCmd.CommandType = CommandType.StoredProcedure;
-                                        lineCmd.Parameters.AddWithValue("@InwardDetailID", line.InwardDetailID);
+                                        SqlParameter detailIdParam = lineCmd.Parameters.AddWithValue("@InwardDetailID", line.InwardDetailID);
+                                        detailIdParam.Direction = ParameterDirection.InputOutput;
                                         lineCmd.Parameters.AddWithValue("@InwardID", inwardId);
                                         lineCmd.Parameters.AddWithValue("@SrNo", srNo);
                                         lineCmd.Parameters.AddWithValue("@LotNo", line.LotNo ?? "");
@@ -3963,6 +4023,8 @@ namespace Slip.Controllers
                                         lineCmd.Parameters.AddWithValue("@ColorType", (object)lineColorType ?? DBNull.Value);
                                         lineCmd.Parameters.AddWithValue("@IsDelete", line.IsDelete);
                                         lineCmd.ExecuteNonQuery();
+
+                                        savedDetailIDs.Add(Convert.ToInt32(detailIdParam.Value));
                                     }
                                     srNo++;
                                 }
@@ -3988,6 +4050,22 @@ namespace Slip.Controllers
                 if (isSuccess && string.IsNullOrEmpty(message))
                 {
                     message = isUpdate ? "Rough Inward updated successfully." : "Rough Inward saved successfully.";
+                }
+
+                // Every Kapan line is pushed to every configured branch's API
+                // unconditionally (SyncRoughToAllBranches no-ops per-branch
+                // once already tracked), then re-pushed to whichever branches
+                // already have it (SyncRoughUpdateToAllBranches) so edits to
+                // an existing line reach them too - covers both new and
+                // edited lines without needing to tell them apart here.
+                // BranchApiClient never throws, so this can't fail the save.
+                if (isSuccess)
+                {
+                    foreach (int detailID in savedDetailIDs)
+                    {
+                        BranchApiClient.SyncRoughToAllBranches(detailID, currentUserId);
+                        BranchApiClient.SyncRoughUpdateToAllBranches(detailID);
+                    }
                 }
             }
             catch (Exception ex)

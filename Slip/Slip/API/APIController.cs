@@ -1,6 +1,7 @@
 ﻿using Microsoft.SqlServer.Server;
 using Slip.Models;
 using Slip.Models.Filter;
+using Slip.Utility;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -110,6 +111,41 @@ namespace Slip.API
                     Message = "An error occurred!",
                     Error = ex.Message
                 });
+            }
+        }
+
+        // Called BY AnjaliLabTech.API (not by Slip's own UI) whenever a Lot's
+        // IsReceived flag changes on a branch - see LotController.Update in
+        // AnjaliLabTech.API, and SlipCallback/SlipSyncClient.cs there, which
+        // posts here using the same AnjaliTech/Anj@9893 Basic Auth credentials
+        // this [BasicAuthentication] attribute already checks for. Resolves
+        // which Slip LotID the (apiLotId, branchId) pair belongs to via
+        // MST_Lot_BranchSync (ApiLotID alone isn't unique across branches -
+        // each branch has its own independent identity sequence), then flips
+        // MST_Lot.IsReceived - once set, MasterController's Lot_Save/
+        // AssignLotBranch/Lot_Delete all refuse further edits to that Lot.
+        [Route("api/API/Lot_MarkReceived")]
+        [BasicAuthentication]
+        [HttpPost]
+        public IHttpActionResult Lot_MarkReceived(int apiLotId, int branchId, bool isReceived)
+        {
+            try
+            {
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_MarkReceivedByApiLot",
+                    new SqlParameter("@ApiLotID", apiLotId),
+                    new SqlParameter("@BranchID", branchId),
+                    new SqlParameter("@IsReceived", isReceived));
+
+                var r = rows.FirstOrDefault();
+                bool success = r != null && r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
+                string message = r != null && r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
+
+                return Ok(new { Success = success, Message = message });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Ok(new { Success = false, Message = "ERROR: " + ex.Message });
             }
         }
 
