@@ -31,5 +31,6 @@
         public string ColorType { get; set; }
         public object IsDelete { get; internal set; }
         public bool NotAllow { get; internal set; } = false;
+        public int? OldRoughId { get; set; }
     }
 }

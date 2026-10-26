@@ -18,6 +18,9 @@
                 <button class="btn-ri-add-main" ng-click="OpenAddNew()" title="Open Lot Entry in new tab">
                     <i class="fa fa-plus"></i>
                 </button>
+                <button class="grid-action-btn-del" ng-hide="true" ng-click="PromptResetOldData()" title="Reset &amp; Reload Old Data (wipes Rough Inward/Lot and reloads from the old system - destructive)">
+                    <i class="fa fa-history"></i>
+                </button>
                 <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
                     <i class="fa fa-columns"></i>
                 </button>
@@ -71,6 +74,53 @@
                     </button>
                     <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button">
                         <i class="fa fa-trash"></i> Yes, Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset & Reload Old Data Confirmation Modal -->
+    <div class="modal fade" id="ConfirmResetOldDataModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-exclamation-triangle modal-icon-danger"></i>
+                        <h4 class="modal-header-title">Reset &amp; Reload Old Data</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-dialog-content">
+                        <div class="delete-warning-icon">
+                            <i class="fa fa-trash-o"></i>
+                        </div>
+                        <h4 class="delete-dialog-title">This permanently deletes ALL current data</h4>
+                        <p class="delete-dialog-text">
+                            This wipes every Rough Inward, Rough Inward Detail and Lot record currently
+                            in Slip, then reloads them from the old system. There is no undo.
+                            <br /><br />
+                            Type <strong>RESET</strong> below to confirm.
+                        </p>
+                        <input type="text"
+                               class="form-control rd-input"
+                               style="text-align:center; font-weight:700; letter-spacing:2px;"
+                               ng-model="ResetConfirmText"
+                               placeholder="Type RESET to confirm"
+                               autocomplete="off" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsResettingOldData">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete"
+                            ng-click="ExecuteResetOldData()"
+                            type="button"
+                            ng-disabled="IsResettingOldData || !ResetConfirmText || ResetConfirmText.toUpperCase() !== 'RESET'">
+                        <span ng-if="!IsResettingOldData"><i class="fa fa-history"></i> Yes, Reset &amp; Reload</span>
+                        <span ng-if="IsResettingOldData"><i class="fa fa-spinner fa-spin"></i> Resetting...</span>
                     </button>
                 </div>
             </div>
@@ -233,6 +283,10 @@
         $scope.IsLoading = false;
         $scope.SelectedDeleteItem = null;
 
+        // Reset & Reload Old Data
+        $scope.ResetConfirmText = '';
+        $scope.IsResettingOldData = false;
+
         // Image Upload & Viewer State
         $scope.UploadModel = { LotID: null, LotCode: '', Files: [] };
         $scope.IsUploading = false;
@@ -259,6 +313,20 @@
             }
             if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
                 window.top.ChromeTabs.openTab({ title: 'Lot Entry', url: url, forceReload: true });
+            } else {
+                window.open(url, '_blank');
+            }
+        };
+
+        $scope.OpenBranchSplit = function (row) {
+            var inwardDetailId = row ? (row.InwardDetailID || 0) : 0;
+            if (!inwardDetailId || parseInt(inwardDetailId) <= 0) {
+                Noty("error", "This Lot has no Inward source row to split by Branch.");
+                return;
+            }
+            var url = '@Url.Action("LotBranchSplit", "Master")' + '?InwardDetailID=' + parseInt(inwardDetailId);
+            if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
+                window.top.ChromeTabs.openTab({ title: 'Lot Branch Assignment', url: url, forceReload: true });
             } else {
                 window.open(url, '_blank');
             }
@@ -473,6 +541,36 @@
             });
         };
 
+        $scope.PromptResetOldData = function () {
+            $scope.ResetConfirmText = '';
+            $("#ConfirmResetOldDataModal").modal("show");
+        };
+
+        $scope.ExecuteResetOldData = function () {
+            
+            if (!$scope.ResetConfirmText || $scope.ResetConfirmText.toUpperCase() !== 'RESET') {
+                return;
+            }
+
+            $scope.IsResettingOldData = true;
+            // This pulls the old system's full history and re-imports it -
+            // give it a long client-side timeout too, not just the server's.
+            $http.post('@Url.Action("ResetAndImportOldInwardData", "Master")', {}, { timeout: 660000 }).then(function (res) {
+                $scope.IsResettingOldData = false;
+                $("#ConfirmResetOldDataModal").modal("hide");
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Reset & reload completed successfully.");
+                    $scope.FetchData();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Reset & reload failed.");
+                }
+            }, function () {
+                $scope.IsResettingOldData = false;
+                $("#ConfirmResetOldDataModal").modal("hide");
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
         function ApplyPriorityStyle($el, color) {
             if (!color) return;
             $el.css({ "color": color, "background": color + "22", "border": "1px solid " + color, "font-weight": 700, "padding": "2px 8px", "border-radius": "4px", "display": "inline-block" });
@@ -526,6 +624,12 @@
                             $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
                         }
                     },
+                    { caption: 'Jangad No', dataField: 'JangadNo', minWidth: 70 },
+                    { caption: 'Total Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 85, alignment: 'center' },
+                    { caption: 'Total Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center' },
+                    { caption: 'Inward Grade', dataField: 'InwardGrade', minWidth: 100 },
+                    { caption: 'Inward Pcs', dataField: 'InwardPcs', dataType: 'number', minWidth: 90, alignment: 'center' },
+                    { caption: 'Inward Carat', dataField: 'InwardCarat', dataType: 'number', format: '#0.000', minWidth: 100, alignment: 'center' },
                     {
                         caption: 'R.Code',
                         dataField: 'RCode',
@@ -564,7 +668,7 @@
                     {
                         caption: 'LotNo',
                         dataField: 'LotNo',
-                        minWidth: 140,
+                        minWidth: 70,
                         alignment: 'center',
                         calculateCellValue: function (data) {
                             if (data.DepartmentShortName == null)
@@ -583,8 +687,6 @@
                                 .appendTo(container);
                         }
                     },
-                    { caption: 'Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 80, alignment: 'center' },
-                    { caption: 'Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 90, alignment: 'center' },
                     {
                         caption: 'Priority', dataField: 'LotPriority', minWidth: 90, alignment: 'center',
                         cellTemplate: function (container, options) {
@@ -617,6 +719,16 @@
                                 .html('<i class="fa fa-external-link"></i>')
                                 .on("click", function () {
                                     $scope.$apply(function () { $scope.OpenEdit(options.data); });
+                                })
+                                .appendTo(group);
+
+                            $("<button>")
+                                .addClass("grid-action-btn-edit")
+                                .attr("title", "Lot Branch Assignment (assign/change the Branch for each Kapan from this Inward row)")
+                                .html('<i class="fa fa-code-fork"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () { $scope.OpenBranchSplit(options.data); });
                                 })
                                 .appendTo(group);
 

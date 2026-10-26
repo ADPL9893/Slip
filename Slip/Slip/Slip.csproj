@@ -353,6 +353,7 @@
     <Compile Include="Models\TRN_RoughInward.cs" />
     <Compile Include="Models\TRN_RoughInwardDetail.cs" />
     <Compile Include="Models\MST_RoughDistribution.cs" />
+    <Compile Include="Models\BranchApiModels.cs" />
     <Compile Include="Models\MST_SizeAndFnlShpGrpWisePriceDisc.cs" />
     <Compile Include="Models\MST_VoucherDetails.cs" />
     <Compile Include="Models\PriceXML.cs" />
@@ -380,6 +381,7 @@
     <Compile Include="Models\UserFileSizeModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\CommonMethods.cs" />
+    <Compile Include="Utility\BranchApiClient.cs" />
     <Compile Include="Utility\DbHelper.cs" />
     <Compile Include="Utility\ErrorLogger.cs" />
     <Compile Include="Utility\ExcelExport.cs" />
@@ -1336,6 +1338,8 @@
     <Content Include="Views\Master\QRGenerator.cshtml" />
     <Content Include="Views\Master\RoughDistributionQRPrint.cshtml" />
     <Content Include="Views\Master\LotQRPrint.cshtml" />
+    <Content Include="Views\Master\LotBranchSplit.cshtml" />
+    <Content Include="Views\Master\SlipExcelUpload.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

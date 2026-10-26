@@ -116,9 +116,9 @@ body {
    (their Chosen boxes are a different default height, so the same fixed
    gradient offsets didn't line up there). Do not unscope this again without
    visually verifying every existing page that uses Chosen. */
-.field-select-wrap {
-    width: 100%;
-}
+/*.field-select-wrap {
+    width: 450px !important;
+}*/
 
 .field-select-wrap select {
     width: 100% !important;
@@ -2100,7 +2100,7 @@ header.main-header {
             padding: 3px 5px !important;
             color: #1e293b !important;
             font-size: 12px !important;
-            line-height: 1.25 !important;
+            line-height: 2.25 !important;
             vertical-align: middle !important;
             white-space: nowrap !important;
         }
@@ -15819,17 +15819,14 @@ header.main-header {
     background: linear-gradient(135deg, #334155 0%, #64748b 100%) !important;
 }
 
-.btn-rough-entry {
+.btn-onhand {
     background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
 }
 
-.btn-branch-assign {
+.btn-distribution {
     background: linear-gradient(135deg, #c2410c 0%, #f97316 100%) !important;
 }
 
-.btn-planning {
-    background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%) !important;
-}
 /* CLV Running & CLV Complete: Shared Teal Cyan Gradient */
 .btn-clv-running {
     background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%) !important;
@@ -15847,7 +15844,7 @@ header.main-header {
     background: linear-gradient(135deg, #be123c 0%, #f43f5e 100%) !important;
 }
 
-.btn-mumbai-submit {
+.btn-transfer {
     background: linear-gradient(135deg, #334155 0%, #475569 100%) !important;
 }
 
@@ -15906,22 +15903,16 @@ header.main-header {
 }
 
 /* Dynamic Stage Matching Header Badges */
-.badge-stage-rough-entry {
+.badge-stage-onhand {
     background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
     color: #ffffff !important;
     border: 1px solid #1e3a8a;
 }
 
-.badge-stage-branch-assign {
+.badge-stage-distribution {
     background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%) !important;
     color: #ffffff !important;
     border: 1px solid #b45309;
-}
-
-.badge-stage-planning {
-    background: linear-gradient(135deg, #581c87 0%, #8b5cf6 100%) !important;
-    color: #ffffff !important;
-    border: 1px solid #581c87;
 }
 
 .badge-stage-clv {
@@ -15936,7 +15927,7 @@ header.main-header {
     border: 1px solid #9f1239;
 }
 
-.badge-stage-mumbai {
+.badge-stage-transfer {
     background: linear-gradient(135deg, #1e293b 0%, #475569 100%) !important;
     color: #ffffff !important;
     border: 1px solid #1e293b;
@@ -19574,6 +19565,109 @@ div.datepicker {
         background: #94a3b8 !important;
     }
 
+/* Lot Entry: inline save-row action button (sits beside a labeled field in
+   the same .row). Same trick as .rd-btn-action-row elsewhere on this page -
+   the markup pairs it with an empty "&nbsp;" .rd-label spacer so it lines up
+   top-to-top with the sibling column's real label + input, not the label. */
+.rd-save-row-action .btn-rd-save-main {
+    width: 100% !important;
+    justify-content: center !important;
+}
+
+/* Lot Entry: small inline stat summary line (Org/Pending Pcs & Carat) used
+   instead of full KPI cards - always its own full-width row so it can't be
+   clipped by a shorter sibling column. */
+.rd-mini-stats {
+    font-size: 12px !important;
+    color: #475569 !important;
+    padding: 2px 0 4px !important;
+}
+
+    .rd-mini-stats strong {
+        color: #0f172a !important;
+    }
+
+/* Lot Entry: per-branch split-percentage pills shown next to the Branch
+   picker in edit mode - highlights the currently-selected branch. !important
+   throughout so the pill stays legible regardless of the ancestor
+   .rd-card-specs card's own color overrides. */
+.rd-branch-split-pill {
+    display: inline-block !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #0f172a !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    padding: 4px 11px !important;
+    margin: 2px 4px 2px 0 !important;
+}
+
+.rd-branch-split-pill-sub {
+    font-weight: 400 !important;
+    color: #475569 !important;
+}
+
+.rd-branch-split-pill-active {
+    background-color: #d9f7be !important;
+    border-color: #95de64 !important;
+    color: #135200 !important;
+}
+
+    .rd-branch-split-pill-active .rd-branch-split-pill-sub {
+        color: #166534 !important;
+    }
+
+/* Manage Branch Split page: KPI boxes (reuses the .kpi-box/.kpi-icon-wrap/
+   .kpi-content/.kpi-label/.kpi-value/.kpi-sub building blocks already
+   defined further down for Rough Distribution's fixed 5-up row), but in a
+   wrapping flex row since the number of branches is dynamic, not fixed. */
+.kpi-container-branch {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    margin-top: 6px !important;
+}
+
+.kpi-box.kpi-branch {
+    flex: 1 1 220px !important;
+    max-width: 320px !important;
+}
+
+    .kpi-box.kpi-branch::before {
+        background: #0284c7;
+    }
+
+    .kpi-box.kpi-branch .kpi-icon-wrap {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+    }
+
+/* Avg Branch Split % row - amber accent to read as "reference/historical",
+   distinct from the live blue "current split" boxes above it. */
+.kpi-box.kpi-branch-avg::before {
+    background: #d97706;
+}
+
+    .kpi-box.kpi-branch-avg .kpi-icon-wrap {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: #ffffff;
+    }
+
+.kpi-value-unit {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+}
+
+/* Manage Branch Split page: vertical column separators in the Kapan grid -
+   scoped to this one grid's container ID so it doesn't affect the
+   borderless-vertical theme every other dxDataGrid in the app uses. */
+#kapanSplitGridContainer .dx-datagrid-headers .dx-datagrid-table .dx-row > td,
+#kapanSplitGridContainer .dx-datagrid-rowsview .dx-datagrid-table .dx-row > td {
+    border-right: 1px solid #cbd5e1 !important;
+}
+
 /* Base Section Card Container */
 .rd-card {
     border-radius: 12px !important;
@@ -19653,15 +19747,16 @@ div.datepicker {
 .rd-input {
     width: 100% !important;
     height: 38px !important;
-    padding: 6px 12px !important;
+    padding: 4px 12px !important;
     font-size: 12.5px !important;
     color: #0f172a !important;
     border-radius: 8px !important;
     transition: all 0.2s ease !important;
     outline: none !important;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
+    max-width: 448px !important;
+    /* margin-left: 27px; */
 }
-
 .rd-input-group {
     display: flex;
     align-items: center;
@@ -19721,6 +19816,10 @@ div.datepicker {
             cursor: not-allowed !important;
         }
 
+
+.rd-card-header .text-muted {
+    color: #ffff !important;
+}
     .rd-card-specs .chosen-container-single .chosen-single {
         background: #ffffff !important;
         border: 1.5px solid #7dd3fc !important;
@@ -20641,4 +20740,8 @@ i.text-primary {
         font-size: 10.5px !important;
     }
 }
+
+/* CLV Chart Modal CSS moved inline into MasterBook.cshtml (<style> block)
+   so it always loads fresh with the page, with zero dependency on this
+   file's cache/bundle state - see that file for the current rules. */
 

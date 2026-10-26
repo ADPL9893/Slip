@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using OfficeOpenXml;
 using Slip.Models;
 using Slip.Utility;
@@ -35,6 +36,15 @@ namespace Slip.Controllers
         public ActionResult LotEntry(int id = 0)
         {
             ViewBag.LotID = id;
+            return View();
+        }
+
+        // Separate page from LotEntry - manages Branch/Department/Head
+        // Manager assignment across every Kapan (Lot) split from one Inward
+        // Detail row, via an editable, checkbox-select grid.
+        public ActionResult LotBranchSplit(int InwardDetailID = 0)
+        {
+            ViewBag.InwardDetailID = InwardDetailID;
             return View();
         }
 
@@ -108,6 +118,27 @@ namespace Slip.Controllers
             }
         }
 
+        // Every active department across every Branch, for the Kapan split
+        // grid's per-row Department editor (filters client-side by each
+        // row's own Branch, since the grid can have many different branches
+        // on screen at once).
+        [HttpGet]
+        public JsonResult Get_MST_DepartmentList_All()
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_Department_GetAllList");
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
         [HttpGet]
         public JsonResult Get_MST_HeadManagerList()
         {
@@ -125,124 +156,575 @@ namespace Slip.Controllers
             }
         }
 
+        [HttpGet]
+        public JsonResult Get_TRN_RoughInwardDetailListForLotSplit()
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_TRN_RoughInwardDetail_GetListForLotSplit");
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Batch-saves every staged split line for one Inward Detail balance row
+        // in a single transaction and inserts each Lot. R.Code/Lot Code are
+        // deliberately NOT generated here anymore - a Lot is created with no
+        // Branch and no R.Code, and only gets its R.Code/Lot Code the first
+        // time a Branch is assigned to it (see Lot_Save below). Pushes each
+        // newly created Lot to its branch's standalone API afterwards (a
+        // branch-less split has nowhere to sync to yet, so that's a no-op
+        // until Lot_Save assigns one).
         [HttpPost]
-        public JsonResult Lot_Save(MST_LotMaster model, string Action = "INSERT")
+        public JsonResult LotSplit_Save(List<MST_LotMaster> splits, int InwardDetailID, int SizeCodeID)
+        {
+            string message;
+            bool isSuccess = false;
+            List<int> newLotIDs = new List<int>();
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                if (splits == null || splits.Count == 0)
+                {
+                    return Json(new { success = false, message = "No split lines to save." });
+                }
+
+                using (SqlConnection con = new SqlConnection(conn))
+                {
+                    con.Open();
+                    using (SqlTransaction tran = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            foreach (var split in splits)
+                            {
+                                using (SqlCommand insCmd = new SqlCommand("USP_MST_Lot_Insert", con, tran))
+                                {
+                                    insCmd.CommandType = CommandType.StoredProcedure;
+                                    insCmd.Parameters.AddWithValue("@InwardDetailID", InwardDetailID);
+                                    insCmd.Parameters.AddWithValue("@BranchID", (object)split.BranchID ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@RCode", DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@RCodeYear", DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@RCodeSerial", DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@LotCode", DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@DistributionPartNo", DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@Lot_Pcs", split.Lot_Pcs);
+                                    insCmd.Parameters.AddWithValue("@Lot_Carat", split.Lot_Carat);
+                                    insCmd.Parameters.AddWithValue("@ValuePerCT", (object)split.ValuePerCT ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@FactoryCodeID", (object)split.FactoryCodeID ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@FactoryCode", (object)split.FactoryCode ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@ColorType", (object)split.ColorType ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@SizeCodeID", (object)split.SizeCodeID ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@SizeCodeType", (object)split.SizeCodeType ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@GradeID", (object)split.GradeID ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@Grade", (object)split.Grade ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@LotType", (object)split.LotType ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@OGName", (object)split.OGName ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@MachineNo", (object)split.MachineNo ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@Hours", (object)split.Hours ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@Height", (object)split.Height ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@Size", (object)split.Size ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@Receipe", (object)split.Receipe ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@BoxNo", (object)split.BoxNo ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@RoughRate", (object)split.RoughRate ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@LotPurpose", (object)split.LotPurpose ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@LotPriority", (object)split.LotPriority ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@GrowthRate", (object)split.GrowthRate ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@CompareNo", (object)split.CompareNo ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@NewHeight", (object)split.NewHeight ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@CakePcs", (object)split.CakePcs ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@CakeWeight", (object)split.CakeWeight ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@RejPcs", (object)split.RejPcs ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@RejCarat", (object)split.RejCarat ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@OGPcs", (object)split.OGPcs ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@OGCarat", (object)split.OGCarat ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@DepartmentID", (object)split.DepartmentID ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@HeadManagerID", (object)split.HeadManagerID ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@Remarks", (object)split.Remarks ?? DBNull.Value);
+                                    insCmd.Parameters.AddWithValue("@IsActive", split.IsActive);
+                                    insCmd.Parameters.AddWithValue("@CreatedBy", currentUserId);
+
+                                    using (SqlDataReader insRdr = insCmd.ExecuteReader())
+                                    {
+                                        insRdr.Read();
+                                        bool rowSuccess = Convert.ToBoolean(insRdr["Success"]);
+                                        if (!rowSuccess)
+                                        {
+                                            throw new Exception(Convert.ToString(insRdr["Message"]));
+                                        }
+                                        newLotIDs.Add(Convert.ToInt32(insRdr["LotID"]));
+                                    }
+                                }
+                            }
+
+                            tran.Commit();
+                            isSuccess = true;
+                            message = "Lot splits saved successfully.";
+                        }
+                        catch (Exception ex)
+                        {
+                            tran.Rollback();
+                            throw new Exception(ex.Message, ex);
+                        }
+                    }
+                }
+
+                // Push every newly-created split to its OWN branch's standalone API
+                // only - BranchApiClient never throws, so a Branch API being
+                // down/unreachable can't fail this save.
+                foreach (int newLotID in newLotIDs)
+                {
+                    BranchApiClient.SyncLot(newLotID);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message, newLotIDs = newLotIDs });
+        }
+
+        // Updates a Lot. The first time a Branch is assigned to a Lot whose
+        // R.Code is still NULL (the "deferred" workflow - Lots are created
+        // branch-less and code-less, see LotSplit_Save), this generates its
+        // R.Code (now with the branch digit, since the Branch is finally
+        // known) and Lot Code before saving, in the same transaction.
+        // Re-saving a Lot that already has an R.Code (e.g. changing its
+        // Branch later) never regenerates it - it stays exactly as first
+        // printed/QR'd.
+        [HttpPost]
+        public JsonResult Lot_Save(MST_LotMaster model, string Action = "UPDATE")
         {
             try
             {
                 int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
-                bool isUpdate = Action == "UPDATE" && model.LotID > 0;
-                List<Dictionary<string, object>> rows;
+                Dictionary<string, object> r;
 
-                if (!isUpdate)
+                using (SqlConnection con = new SqlConnection(conn))
                 {
-                    // LotCode / DistributionPartNo are generated server-side (RCode + next
-                    // split letter), never taken from the client - mirrors how RCode itself
-                    // is generated server-side via usp_GenerateRoughCode in Rough Distribution.
-                    using (SqlConnection con = new SqlConnection(conn))
-                    using (SqlCommand genCmd = new SqlCommand("usp_GenerateLotCode", con))
+                    con.Open();
+                    using (SqlTransaction tran = con.BeginTransaction())
                     {
-                        genCmd.CommandType = CommandType.StoredProcedure;
-                        genCmd.Parameters.AddWithValue("@RoughDistributionID", model.RoughDistributionID);
-                        genCmd.Parameters.AddWithValue("@RCode", model.RCode ?? "");
-                        con.Open();
-                        using (SqlDataReader rdr = genCmd.ExecuteReader())
+                        try
                         {
-                            if (rdr.Read())
+                            string existingRCode = null;
+                            int? inwardDetailID = null;
+                            int? sizeCodeID = null;
+
+                            using (SqlCommand getCmd = new SqlCommand(
+                                "SELECT RCode, InwardDetailID, SizeCodeID FROM dbo.MST_Lot WHERE LotID = @LotID", con, tran))
                             {
-                                model.LotCode = Convert.ToString(rdr["LotCode"]);
-                                model.DistributionPartNo = Convert.ToInt32(rdr["DistributionPartNo"]);
+                                getCmd.Parameters.AddWithValue("@LotID", model.LotID);
+                                using (SqlDataReader getRdr = getCmd.ExecuteReader())
+                                {
+                                    if (getRdr.Read())
+                                    {
+                                        existingRCode = getRdr["RCode"] != DBNull.Value ? Convert.ToString(getRdr["RCode"]) : null;
+                                        inwardDetailID = getRdr["InwardDetailID"] != DBNull.Value ? Convert.ToInt32(getRdr["InwardDetailID"]) : (int?)null;
+                                        sizeCodeID = getRdr["SizeCodeID"] != DBNull.Value ? Convert.ToInt32(getRdr["SizeCodeID"]) : (int?)null;
+                                    }
+                                }
                             }
+
+                            object rCodeParam = DBNull.Value, rCodeYearParam = DBNull.Value, rCodeSerialParam = DBNull.Value,
+                                   lotCodeParam = DBNull.Value, distributionPartNoParam = DBNull.Value;
+
+                            if (model.BranchID.HasValue && string.IsNullOrEmpty(existingRCode) && inwardDetailID.HasValue && sizeCodeID.HasValue)
+                            {
+                                string rCode;
+                                int rCodeYear, rCodeSerial, distributionPartNo;
+                                string lotCode;
+
+                                using (SqlCommand genCmd = new SqlCommand("usp_GenerateRoughCode_ForLot", con, tran))
+                                {
+                                    genCmd.CommandType = CommandType.StoredProcedure;
+                                    genCmd.Parameters.AddWithValue("@SizeID", sizeCodeID.Value);
+                                    genCmd.Parameters.AddWithValue("@BranchID", model.BranchID.Value);
+                                    genCmd.Parameters.AddWithValue("@InwardDetailID", inwardDetailID.Value);
+                                    genCmd.Parameters.AddWithValue("@Year", DateTime.Now.Year);
+                                    using (SqlDataReader genRdr = genCmd.ExecuteReader())
+                                    {
+                                        genRdr.Read();
+                                        rCode = Convert.ToString(genRdr["RoughCode"]);
+                                        rCodeYear = Convert.ToInt32(genRdr["RCodeYear"]);
+                                        rCodeSerial = Convert.ToInt32(genRdr["RCodeSerial"]);
+                                    }
+                                }
+
+                                using (SqlCommand lotCodeCmd = new SqlCommand("usp_GenerateLotCode", con, tran))
+                                {
+                                    lotCodeCmd.CommandType = CommandType.StoredProcedure;
+                                    lotCodeCmd.Parameters.AddWithValue("@RoughDistributionID", 0);
+                                    lotCodeCmd.Parameters.AddWithValue("@RCode", rCode);
+                                    using (SqlDataReader lotRdr = lotCodeCmd.ExecuteReader())
+                                    {
+                                        lotRdr.Read();
+                                        lotCode = Convert.ToString(lotRdr["LotCode"]);
+                                        distributionPartNo = Convert.ToInt32(lotRdr["DistributionPartNo"]);
+                                    }
+                                }
+
+                                rCodeParam = rCode;
+                                rCodeYearParam = rCodeYear;
+                                rCodeSerialParam = rCodeSerial;
+                                lotCodeParam = lotCode;
+                                distributionPartNoParam = distributionPartNo;
+                            }
+
+                            using (SqlCommand updCmd = new SqlCommand("USP_MST_Lot_Update", con, tran))
+                            {
+                                updCmd.CommandType = CommandType.StoredProcedure;
+                                updCmd.Parameters.AddWithValue("@LotID", model.LotID);
+                                updCmd.Parameters.AddWithValue("@BranchID", (object)model.BranchID ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@RCode", rCodeParam);
+                                updCmd.Parameters.AddWithValue("@RCodeYear", rCodeYearParam);
+                                updCmd.Parameters.AddWithValue("@RCodeSerial", rCodeSerialParam);
+                                updCmd.Parameters.AddWithValue("@LotCode", lotCodeParam);
+                                updCmd.Parameters.AddWithValue("@DistributionPartNo", distributionPartNoParam);
+                                updCmd.Parameters.AddWithValue("@Lot_Pcs", model.Lot_Pcs);
+                                updCmd.Parameters.AddWithValue("@Lot_Carat", model.Lot_Carat);
+                                updCmd.Parameters.AddWithValue("@ValuePerCT", (object)model.ValuePerCT ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@GradeID", (object)model.GradeID ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@Grade", (object)model.Grade ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@LotType", (object)model.LotType ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@OGName", (object)model.OGName ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@MachineNo", (object)model.MachineNo ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@Hours", (object)model.Hours ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@Height", (object)model.Height ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@Size", (object)model.Size ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@Receipe", (object)model.Receipe ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@BoxNo", (object)model.BoxNo ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@RoughRate", (object)model.RoughRate ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@LotPurpose", (object)model.LotPurpose ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@LotPriority", (object)model.LotPriority ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@GrowthRate", (object)model.GrowthRate ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@CompareNo", (object)model.CompareNo ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@NewHeight", (object)model.NewHeight ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@CakePcs", (object)model.CakePcs ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@CakeWeight", (object)model.CakeWeight ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@RejPcs", (object)model.RejPcs ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@RejCarat", (object)model.RejCarat ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@OGPcs", (object)model.OGPcs ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@OGCarat", (object)model.OGCarat ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@DepartmentID", (object)model.DepartmentID ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@HeadManagerID", (object)model.HeadManagerID ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@Remarks", (object)model.Remarks ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@IsActive", model.IsActive);
+                                updCmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+
+                                using (SqlDataReader updRdr = updCmd.ExecuteReader())
+                                {
+                                    r = new Dictionary<string, object>();
+                                    if (updRdr.Read())
+                                    {
+                                        for (int i = 0; i < updRdr.FieldCount; i++)
+                                        {
+                                            r[updRdr.GetName(i)] = updRdr.GetValue(i);
+                                        }
+                                    }
+                                }
+                            }
+
+                            bool rowSuccess = r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
+                            if (!rowSuccess)
+                            {
+                                throw new Exception(r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR");
+                            }
+
+                            tran.Commit();
+                        }
+                        catch
+                        {
+                            tran.Rollback();
+                            throw;
                         }
                     }
-
-                    rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_Insert",
-                        new SqlParameter("@RoughDistributionID", model.RoughDistributionID),
-                        new SqlParameter("@RCode", (object)model.RCode ?? DBNull.Value),
-                        new SqlParameter("@LotCode", (object)model.LotCode ?? DBNull.Value),
-                        new SqlParameter("@DistributionPartNo", model.DistributionPartNo),
-                        new SqlParameter("@Lot_Pcs", model.Lot_Pcs),
-                        new SqlParameter("@Lot_Carat", model.Lot_Carat),
-                        new SqlParameter("@ValuePerCT", (object)model.ValuePerCT ?? DBNull.Value),
-                        new SqlParameter("@FactoryCodeID", (object)model.FactoryCodeID ?? DBNull.Value),
-                        new SqlParameter("@FactoryCode", (object)model.FactoryCode ?? DBNull.Value),
-                        new SqlParameter("@ColorType", (object)model.ColorType ?? DBNull.Value),
-                        new SqlParameter("@SizeCodeID", (object)model.SizeCodeID ?? DBNull.Value),
-                        new SqlParameter("@SizeCodeType", (object)model.SizeCodeType ?? DBNull.Value),
-                        new SqlParameter("@GradeID", (object)model.GradeID ?? DBNull.Value),
-                        new SqlParameter("@Grade", (object)model.Grade ?? DBNull.Value),
-                        new SqlParameter("@LotType", (object)model.LotType ?? DBNull.Value),
-                        new SqlParameter("@OGName", (object)model.OGName ?? DBNull.Value),
-                        new SqlParameter("@MachineNo", (object)model.MachineNo ?? DBNull.Value),
-                        new SqlParameter("@Hours", (object)model.Hours ?? DBNull.Value),
-                        new SqlParameter("@Height", (object)model.Height ?? DBNull.Value),
-                        new SqlParameter("@Size", (object)model.Size ?? DBNull.Value),
-                        new SqlParameter("@Receipe", (object)model.Receipe ?? DBNull.Value),
-                        new SqlParameter("@BoxNo", (object)model.BoxNo ?? DBNull.Value),
-                        new SqlParameter("@RoughRate", (object)model.RoughRate ?? DBNull.Value),
-                        new SqlParameter("@LotPurpose", (object)model.LotPurpose ?? DBNull.Value),
-                        new SqlParameter("@LotPriority", (object)model.LotPriority ?? DBNull.Value),
-                        new SqlParameter("@GrowthRate", (object)model.GrowthRate ?? DBNull.Value),
-                        new SqlParameter("@CompareNo", (object)model.CompareNo ?? DBNull.Value),
-                        new SqlParameter("@NewHeight", (object)model.NewHeight ?? DBNull.Value),
-                        new SqlParameter("@CakePcs", (object)model.CakePcs ?? DBNull.Value),
-                        new SqlParameter("@CakeWeight", (object)model.CakeWeight ?? DBNull.Value),
-                        new SqlParameter("@RejPcs", (object)model.RejPcs ?? DBNull.Value),
-                        new SqlParameter("@RejCarat", (object)model.RejCarat ?? DBNull.Value),
-                        new SqlParameter("@OGPcs", (object)model.OGPcs ?? DBNull.Value),
-                        new SqlParameter("@OGCarat", (object)model.OGCarat ?? DBNull.Value),
-                        new SqlParameter("@DepartmentID", (object)model.DepartmentID ?? DBNull.Value),
-                        new SqlParameter("@HeadManagerID", (object)model.HeadManagerID ?? DBNull.Value),
-                        new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
-                        new SqlParameter("@IsActive", model.IsActive),
-                        new SqlParameter("@CreatedBy", currentUserId));
                 }
-                else
+
+                bool success = r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
+                string message = r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
+
+                // Covers "Branch assigned later": a split saved with no Branch
+                // only has somewhere to sync to once a Branch is actually set.
+                // BranchApiClient never throws, so this can't fail the save.
+                if (success && model.BranchID.HasValue)
                 {
-                    rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_Update",
-                        new SqlParameter("@LotID", model.LotID),
-                        new SqlParameter("@Lot_Pcs", model.Lot_Pcs),
-                        new SqlParameter("@Lot_Carat", model.Lot_Carat),
-                        new SqlParameter("@ValuePerCT", (object)model.ValuePerCT ?? DBNull.Value),
-                        new SqlParameter("@GradeID", (object)model.GradeID ?? DBNull.Value),
-                        new SqlParameter("@Grade", (object)model.Grade ?? DBNull.Value),
-                        new SqlParameter("@LotType", (object)model.LotType ?? DBNull.Value),
-                        new SqlParameter("@OGName", (object)model.OGName ?? DBNull.Value),
-                        new SqlParameter("@MachineNo", (object)model.MachineNo ?? DBNull.Value),
-                        new SqlParameter("@Hours", (object)model.Hours ?? DBNull.Value),
-                        new SqlParameter("@Height", (object)model.Height ?? DBNull.Value),
-                        new SqlParameter("@Size", (object)model.Size ?? DBNull.Value),
-                        new SqlParameter("@Receipe", (object)model.Receipe ?? DBNull.Value),
-                        new SqlParameter("@BoxNo", (object)model.BoxNo ?? DBNull.Value),
-                        new SqlParameter("@RoughRate", (object)model.RoughRate ?? DBNull.Value),
-                        new SqlParameter("@LotPurpose", (object)model.LotPurpose ?? DBNull.Value),
-                        new SqlParameter("@LotPriority", (object)model.LotPriority ?? DBNull.Value),
-                        new SqlParameter("@GrowthRate", (object)model.GrowthRate ?? DBNull.Value),
-                        new SqlParameter("@CompareNo", (object)model.CompareNo ?? DBNull.Value),
-                        new SqlParameter("@NewHeight", (object)model.NewHeight ?? DBNull.Value),
-                        new SqlParameter("@CakePcs", (object)model.CakePcs ?? DBNull.Value),
-                        new SqlParameter("@CakeWeight", (object)model.CakeWeight ?? DBNull.Value),
-                        new SqlParameter("@RejPcs", (object)model.RejPcs ?? DBNull.Value),
-                        new SqlParameter("@RejCarat", (object)model.RejCarat ?? DBNull.Value),
-                        new SqlParameter("@OGPcs", (object)model.OGPcs ?? DBNull.Value),
-                        new SqlParameter("@OGCarat", (object)model.OGCarat ?? DBNull.Value),
-                        new SqlParameter("@DepartmentID", (object)model.DepartmentID ?? DBNull.Value),
-                        new SqlParameter("@HeadManagerID", (object)model.HeadManagerID ?? DBNull.Value),
-                        new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
-                        new SqlParameter("@IsActive", model.IsActive),
-                        new SqlParameter("@ModifiedBy", currentUserId));
+                    BranchApiClient.SyncLot(model.LotID);
                 }
-
-                var r = rows.FirstOrDefault();
-                bool success = r != null && r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
-                string message = r != null && r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
 
                 return Json(new
                 {
                     success = success,
                     message = message,
-                    LotID = r != null && r.ContainsKey("LotID") ? r["LotID"] : null,
-                    LotCode = model.LotCode
+                    LotID = r.ContainsKey("LotID") ? r["LotID"] : null,
+                    RCode = r.ContainsKey("RCode") ? r["RCode"] : null,
+                    LotCode = r.ContainsKey("LotCode") ? r["LotCode"] : model.LotCode
+                });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message) });
+            }
+        }
+
+        // Breakdown of one Inward Detail row's already-split total (all its
+        // non-deleted Lots, assigned or not) by Branch - used by the Lot
+        // Entry edit screen to show what % of the split-so-far total each
+        // Branch currently holds.
+        [HttpGet]
+        public JsonResult Get_LotBranchSplitSummary(int InwardDetailID, int? ExcludeLotID = null)
+        {
+            try
+            {
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_GetBranchSplitSummary",
+                    new SqlParameter("@InwardDetailID", InwardDetailID),
+                    new SqlParameter("@ExcludeLotID", (object)ExcludeLotID ?? DBNull.Value));
+
+                decimal totalPcs = 0, totalCarat = 0;
+                foreach (var row in rows)
+                {
+                    totalPcs += row.ContainsKey("Pcs") && row["Pcs"] != DBNull.Value ? Convert.ToDecimal(row["Pcs"]) : 0;
+                    totalCarat += row.ContainsKey("Carat") && row["Carat"] != DBNull.Value ? Convert.ToDecimal(row["Carat"]) : 0;
+                }
+
+                var list = rows.Select(row =>
+                {
+                    decimal pcs = row.ContainsKey("Pcs") && row["Pcs"] != DBNull.Value ? Convert.ToDecimal(row["Pcs"]) : 0;
+                    decimal carat = row.ContainsKey("Carat") && row["Carat"] != DBNull.Value ? Convert.ToDecimal(row["Carat"]) : 0;
+                    return new
+                    {
+                        BranchID = row.ContainsKey("BranchID") ? row["BranchID"] : null,
+                        BranchName = row.ContainsKey("BranchName") ? row["BranchName"] : null,
+                        Pcs = pcs,
+                        Carat = carat,
+                        PcsPercent = totalPcs > 0 ? Math.Round(pcs / totalPcs * 100, 1) : 0,
+                        CaratPercent = totalCarat > 0 ? Math.Round(carat / totalCarat * 100, 1) : 0
+                    };
+                }).ToList();
+
+                return Json(new { success = true, list = list, totalPcs = totalPcs, totalCarat = totalCarat }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Per-Branch average share of a source's total, over each Branch's
+        // last 5 assignments - reference data for the Lot Branch Assignment
+        // page (not scoped to any one Inward row).
+        //
+        // The proc's raw AvgPcsPercent/AvgCaratPercent are each Branch's own
+        // average computed independently (its last 5 assignments can come
+        // from entirely different source rows than another Branch's last 5),
+        // so they don't naturally sum to 100 the way one source row's live
+        // split always does. Normalizing here (each branch's raw average /
+        // sum of all branches' raw averages * 100) turns it into "if this
+        // source were split the way it typically has been, here's roughly
+        // the %age each Branch would get" - a distribution that always
+        // totals 100, directly comparable to the live split boxes above it.
+        [HttpGet]
+        public JsonResult Get_LotBranchAvgSplitPercent()
+        {
+            try
+            {
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_GetBranchAvgSplitPercent");
+
+                decimal rawPcsTotal = 0, rawCaratTotal = 0;
+                foreach (var row in rows)
+                {
+                    rawPcsTotal += row.ContainsKey("AvgPcsPercent") && row["AvgPcsPercent"] != DBNull.Value ? Convert.ToDecimal(row["AvgPcsPercent"]) : 0;
+                    rawCaratTotal += row.ContainsKey("AvgCaratPercent") && row["AvgCaratPercent"] != DBNull.Value ? Convert.ToDecimal(row["AvgCaratPercent"]) : 0;
+                }
+
+                var list = rows.Select(row =>
+                {
+                    decimal rawPcs = row.ContainsKey("AvgPcsPercent") && row["AvgPcsPercent"] != DBNull.Value ? Convert.ToDecimal(row["AvgPcsPercent"]) : 0;
+                    decimal rawCarat = row.ContainsKey("AvgCaratPercent") && row["AvgCaratPercent"] != DBNull.Value ? Convert.ToDecimal(row["AvgCaratPercent"]) : 0;
+                    return new
+                    {
+                        BranchID = row.ContainsKey("BranchID") ? row["BranchID"] : null,
+                        BranchName = row.ContainsKey("BranchName") ? row["BranchName"] : null,
+                        AvgPcsPercent = rawPcsTotal > 0 ? Math.Round(rawPcs / rawPcsTotal * 100, 1) : 0,
+                        AvgCaratPercent = rawCaratTotal > 0 ? Math.Round(rawCarat / rawCaratTotal * 100, 1) : 0,
+                        SampleCount = row.ContainsKey("SampleCount") ? row["SampleCount"] : 0
+                    };
+                }).ToList();
+
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Every Kapan (Lot) split from one Inward Detail row, for the
+        // Lot Branch Assignment grid.
+        [HttpGet]
+        public JsonResult Get_LotsByInwardDetailID(int InwardDetailID)
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_Lot_GetListByInwardDetailID",
+                    new SqlParameter("@InwardDetailID", InwardDetailID));
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // "Transfer" action for the Kapan split grid - assigns @BranchID
+        // (and optionally @DepartmentID/@HeadManagerID, if the user also
+        // edited those cells) to one Lot, nothing else. Generates the Lot's
+        // R.Code/Lot Code first if this is its first-ever Branch assignment
+        // (RCode still NULL), exactly like Lot_Save does.
+        [HttpPost]
+        public JsonResult AssignLotBranch(int LotID, int BranchID, Guid? DepartmentID = null, int? HeadManagerID = null)
+        {
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                Dictionary<string, object> r;
+
+                using (SqlConnection con = new SqlConnection(conn))
+                {
+                    con.Open();
+                    using (SqlTransaction tran = con.BeginTransaction())
+                    {
+                        try
+                        {
+                            string existingRCode = null;
+                            int? inwardDetailID = null;
+                            int? sizeCodeID = null;
+
+                            using (SqlCommand getCmd = new SqlCommand(
+                                "SELECT RCode, InwardDetailID, SizeCodeID FROM dbo.MST_Lot WHERE LotID = @LotID", con, tran))
+                            {
+                                getCmd.Parameters.AddWithValue("@LotID", LotID);
+                                using (SqlDataReader getRdr = getCmd.ExecuteReader())
+                                {
+                                    if (getRdr.Read())
+                                    {
+                                        existingRCode = getRdr["RCode"] != DBNull.Value ? Convert.ToString(getRdr["RCode"]) : null;
+                                        inwardDetailID = getRdr["InwardDetailID"] != DBNull.Value ? Convert.ToInt32(getRdr["InwardDetailID"]) : (int?)null;
+                                        sizeCodeID = getRdr["SizeCodeID"] != DBNull.Value ? Convert.ToInt32(getRdr["SizeCodeID"]) : (int?)null;
+                                    }
+                                }
+                            }
+
+                            object rCodeParam = DBNull.Value, rCodeYearParam = DBNull.Value, rCodeSerialParam = DBNull.Value,
+                                   lotCodeParam = DBNull.Value, distributionPartNoParam = DBNull.Value;
+
+                            if (string.IsNullOrEmpty(existingRCode) && inwardDetailID.HasValue && sizeCodeID.HasValue)
+                            {
+                                string rCode;
+                                int rCodeYear, rCodeSerial, distributionPartNo;
+                                string lotCode;
+
+                                using (SqlCommand genCmd = new SqlCommand("usp_GenerateRoughCode_ForLot", con, tran))
+                                {
+                                    genCmd.CommandType = CommandType.StoredProcedure;
+                                    genCmd.Parameters.AddWithValue("@SizeID", sizeCodeID.Value);
+                                    genCmd.Parameters.AddWithValue("@BranchID", BranchID);
+                                    genCmd.Parameters.AddWithValue("@InwardDetailID", inwardDetailID.Value);
+                                    genCmd.Parameters.AddWithValue("@Year", DateTime.Now.Year);
+                                    using (SqlDataReader genRdr = genCmd.ExecuteReader())
+                                    {
+                                        genRdr.Read();
+                                        rCode = Convert.ToString(genRdr["RoughCode"]);
+                                        rCodeYear = Convert.ToInt32(genRdr["RCodeYear"]);
+                                        rCodeSerial = Convert.ToInt32(genRdr["RCodeSerial"]);
+                                    }
+                                }
+
+                                using (SqlCommand lotCodeCmd = new SqlCommand("usp_GenerateLotCode", con, tran))
+                                {
+                                    lotCodeCmd.CommandType = CommandType.StoredProcedure;
+                                    lotCodeCmd.Parameters.AddWithValue("@RoughDistributionID", 0);
+                                    lotCodeCmd.Parameters.AddWithValue("@RCode", rCode);
+                                    using (SqlDataReader lotRdr = lotCodeCmd.ExecuteReader())
+                                    {
+                                        lotRdr.Read();
+                                        lotCode = Convert.ToString(lotRdr["LotCode"]);
+                                        distributionPartNo = Convert.ToInt32(lotRdr["DistributionPartNo"]);
+                                    }
+                                }
+
+                                rCodeParam = rCode;
+                                rCodeYearParam = rCodeYear;
+                                rCodeSerialParam = rCodeSerial;
+                                lotCodeParam = lotCode;
+                                distributionPartNoParam = distributionPartNo;
+                            }
+
+                            using (SqlCommand updCmd = new SqlCommand("USP_MST_Lot_UpdateBranch", con, tran))
+                            {
+                                updCmd.CommandType = CommandType.StoredProcedure;
+                                updCmd.Parameters.AddWithValue("@LotID", LotID);
+                                updCmd.Parameters.AddWithValue("@BranchID", BranchID);
+                                updCmd.Parameters.AddWithValue("@DepartmentID", (object)DepartmentID ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@HeadManagerID", (object)HeadManagerID ?? DBNull.Value);
+                                updCmd.Parameters.AddWithValue("@RCode", rCodeParam);
+                                updCmd.Parameters.AddWithValue("@RCodeYear", rCodeYearParam);
+                                updCmd.Parameters.AddWithValue("@RCodeSerial", rCodeSerialParam);
+                                updCmd.Parameters.AddWithValue("@LotCode", lotCodeParam);
+                                updCmd.Parameters.AddWithValue("@DistributionPartNo", distributionPartNoParam);
+                                updCmd.Parameters.AddWithValue("@ModifiedBy", currentUserId);
+
+                                using (SqlDataReader updRdr = updCmd.ExecuteReader())
+                                {
+                                    r = new Dictionary<string, object>();
+                                    if (updRdr.Read())
+                                    {
+                                        for (int i = 0; i < updRdr.FieldCount; i++)
+                                        {
+                                            r[updRdr.GetName(i)] = updRdr.GetValue(i);
+                                        }
+                                    }
+                                }
+                            }
+
+                            bool rowSuccess = r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
+                            if (!rowSuccess)
+                            {
+                                throw new Exception(r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR");
+                            }
+
+                            tran.Commit();
+                        }
+                        catch
+                        {
+                            tran.Rollback();
+                            throw;
+                        }
+                    }
+                }
+
+                BranchApiClient.SyncLot(LotID);
+
+                return Json(new
+                {
+                    success = true,
+                    message = r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "Branch assigned.",
+                    LotID = LotID,
+                    RCode = r.ContainsKey("RCode") ? r["RCode"] : null,
+                    LotCode = r.ContainsKey("LotCode") ? r["LotCode"] : null
                 });
             }
             catch (Exception ex)
@@ -274,6 +756,44 @@ namespace Slip.Controllers
                 return Json(new { success = false, message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message) });
             }
         }
+
+        // Lot Master's "Reset & Reload Old Data" button: pulls the old
+        // ADP_TEST system's Rough/Lot history from AnjaliLabTech.API (same
+        // service as BranchApiClient's Branch 1 sync) and wipes + reloads
+        // TRN_RoughInward/TRN_RoughInwardDetail/MST_Lot from it. Destructive
+        // and irreversible - the confirmation happens client-side before
+        // this is ever called.
+        [HttpPost]
+        public JsonResult ResetAndImportOldInwardData()
+        {
+            try
+            {
+                string rawJson = BranchApiClient.FetchOldInwardDataJson();
+                JObject parsed = JObject.Parse(rawJson);
+
+                string roughInwardJson = (parsed["roughInward"] ?? new JArray()).ToString();
+                string roughInwardDetailJson = (parsed["roughInwardDetails"] ?? new JArray()).ToString();
+                string lotJson = (parsed["lots"] ?? new JArray()).ToString();
+
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 1;
+
+                string message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_ResetAndImport_OldInwardData", 600,
+                    new SqlParameter("@RoughInwardJson", SqlDbType.NVarChar, -1) { Value = roughInwardJson },
+                    new SqlParameter("@RoughInwardDetailJson", SqlDbType.NVarChar, -1) { Value = roughInwardDetailJson },
+                    new SqlParameter("@LotJson", SqlDbType.NVarChar, -1) { Value = lotJson },
+                    new SqlParameter("@BranchID", 1),
+                    new SqlParameter("@CreatedBy", currentUserId));
+
+                bool success = !string.IsNullOrEmpty(message) && !message.StartsWith("ERROR", StringComparison.OrdinalIgnoreCase);
+                return Json(new { success = success, message = message });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message) });
+            }
+            }
+
         public JsonResult LotCode_Insert_Using_Excel(HttpPostedFileBase excelFile)
         {
             ExcelPackage.License.SetNonCommercialPersonal("ANJALI LABTECH");
@@ -1491,6 +2011,15 @@ namespace Slip.Controllers
                             }
                         }
                         Message = Convert.ToString(messageParam.Value);
+                    }
+
+                    // Push every newly-created split to its OWN branch's standalone API
+                    // only (BranchApiClient maps BranchID -> BranchApiBranch{N}Url) -
+                    // BranchApiClient never throws, so a Branch API being down/unreachable
+                    // can't fail this save.
+                    foreach (int newDistributionID in newDistributionIDs)
+                    {
+                        BranchApiClient.SyncDistribution(newDistributionID);
                     }
                 }
 
@@ -3607,7 +4136,7 @@ namespace Slip.Controllers
                 List<object> list = new List<object>();
 
                 DataSet ds = DbHelper.ExecuteDataSet("Get_MasterBook_Data",
-                    new SqlParameter("@FilterType", FilterType ?? "All Data"),
+                    new SqlParameter("@FilterType", FilterType ?? "All"),
                     new SqlParameter("@FromDate", FromDate ?? ""),
                     new SqlParameter("@ToDate", ToDate ?? ""));
 
@@ -3669,6 +4198,37 @@ namespace Slip.Controllers
             {
                 ErrorLogger.ErrorLog(ex);
                 return Json(new { success = false, message = ex.Message, List = new List<object>(), DataField = new List<object>(), DataFieldSummary = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        // Master Book row-menu "CLV Chart": LotCode is the Kapan key the
+        // external report is keyed on (not RCode - multiple Lot splits can
+        // share one RCode, but LotCode is unique per Kapan).
+        [HttpGet]
+        public ActionResult Get_ClvChartData(string LotCode)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(LotCode))
+                {
+                    return Json(new { success = false, message = "LotCode is required." }, JsonRequestBehavior.AllowGet);
+                }
+
+                string rawJson = BranchApiClient.GetAssortmentChartJson(LotCode, "CLV");
+                JObject data = JObject.Parse(rawJson);
+
+                // Content(...) + JsonConvert, not the built-in Json() helper -
+                // Json() serializes via JavaScriptSerializer, which doesn't
+                // understand Newtonsoft JToken/JObject internals and dumps
+                // their raw reflection shape instead of clean JSON. Newtonsoft
+                // has to be the one serializing this end-to-end.
+                string responseJson = JsonConvert.SerializeObject(new { success = true, data = data });
+                return Content(responseJson, "application/json");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message) }, JsonRequestBehavior.AllowGet);
             }
         }
         #endregion

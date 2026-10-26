@@ -78,7 +78,7 @@
                                     <div class="col-md-7 col-sm-7 col-xs-12 ri-form-group" ng-if="FormModel.SourceType === 'BRANCH'">
                                         <label class="ri-label" for="ModalFromBranchID">BRANCH <span class="req">*</span></label>
                                         <div class="field-select-wrap">
-                                            <select id="ModalFromBranchID" chosen="FromBranchList" class="form-control ri-input" ng-model="FormModel.FromBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in FromBranchList">
+                                            <select id="ModalFromBranchID" chosen="FromBranchList" class="form-control ri-input" ng-model="FormModel.FromBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as (item.BranchCode + ' - ' + item.BranchName) for item in FromBranchList">
                                                 <option value="">Select Branch</option>
                                             </select>
                                         </div>
@@ -101,7 +101,7 @@
                                     <div class="col-md-12 ri-form-group">
                                         <label class="ri-label" for="ModalToBranchID">COMPANY BRANCH <span class="req">*</span></label>
                                         <div class="field-select-wrap">
-                                            <select id="ModalToBranchID" chosen="ToBranchList" class="form-control ri-input" ng-model="FormModel.ToBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as item.BranchName for item in ToBranchList">
+                                            <select id="ModalToBranchID" chosen="ToBranchList" class="form-control ri-input" ng-model="FormModel.ToBranchID" ng-change="UpdateBranchFilters()" ng-options="item.BranchID as (item.BranchCode + ' - ' + item.BranchName) for item in ToBranchList">
                                                 <option value="">Select Branch</option>
                                             </select>
                                         </div>

@@ -3,7 +3,7 @@ var appModule;
 try {
     appModule = angular.module('app');
 } catch (e) {
-    appModule = angular.module('app', []);
+    appModule = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid', 'ui.grid.edit', 'ui.grid.rowEdit', 'ui.grid.cellNav', 'ui.grid.selection', 'ui.grid.pagination', 'ui.grid.moveColumns', 'ui.grid.exporter', 'ui.grid.pinning', 'ui.grid.resizeColumns', 'angularjs-dropdown-multiselect']);
 }
 var CallBack = 0;
 var CallBackParam = 0;
@@ -681,7 +681,7 @@ function ValidateRequired12() {
 }
 
 // Clipboard grid
-module.directive('uiGridCellSelection', function ($compile) {
+appModule.directive('uiGridCellSelection', function ($compile) {
     /*
     Proof of concept, in reality we need on/off events etc.
     */
@@ -762,7 +762,7 @@ module.directive('uiGridCellSelection', function ($compile) {
 //    return retVal;
 
 //}
-module.directive('valNum', function () {
+appModule.directive('valNum', function () {
     return {
         require: '?ngModel',
         link: function (scope, element, attrs, ngModelCtrl) {
@@ -820,7 +820,7 @@ module.directive('valNum', function () {
         }
     };
 });
-module.directive("decimals", function ($filter) {
+appModule.directive("decimals", function ($filter) {
     // Example : <input type="text" class="form-control input-sm" ng-model="PartyMaster.discountdifference" decimals="2" decimal-point=".">
     return {
         restrict: "A", // Only usable as an attribute of another HTML element
@@ -875,7 +875,7 @@ module.directive("decimals", function ($filter) {
     }
 });
 
-module.directive('onlyDigits', function () {
+appModule.directive('onlyDigits', function () {
     return {
         require: '?ngModel',
         restrict: 'A',
@@ -898,7 +898,7 @@ module.directive('onlyDigits', function () {
     };
 });
 
-module.directive('onlyTexts', function () {
+appModule.directive('onlyTexts', function () {
     return {
         require: '?ngModel',
         restrict: 'A',
@@ -920,7 +920,7 @@ module.directive('onlyTexts', function () {
         }
     };
 });
-module.directive('validNumber', function () {
+appModule.directive('validNumber', function () {
 
     //This module Support Property :  (1:valid-number) (2:allow-decimal="false/True") (3:allow-negative="false/True") (4:decimal-upto="1/2/3/ upto 100....")
     return {
@@ -1032,7 +1032,7 @@ module.directive('validNumber', function () {
     };
 });
 
-module.directive('validNumber1', function () {
+appModule.directive('validNumber1', function () {
 
     //This module Support Property :  (1:valid-number) (2:allow-decimal="false/True") (3:allow-negative="false/True") (4:decimal-upto="1/2/3/ upto 100....")
     return {
@@ -1149,7 +1149,7 @@ module.directive('validNumber1', function () {
     };
 });
 // For session expire handle
-module.factory('httpAuthInterceptor', function ($q, $window) {
+appModule.factory('httpAuthInterceptor', function ($q, $window) {
     return {
         'responseError': function (response) {
             // NOTE: detect error because of unauthenticated user
@@ -1165,15 +1165,15 @@ module.factory('httpAuthInterceptor', function ($q, $window) {
         }
     };
 });
-module.config(function ($httpProvider) {
+appModule.config(function ($httpProvider) {
     $httpProvider.interceptors.push('httpAuthInterceptor');
 });
 
-module.config(['$httpProvider', function ($httpProvider) {
+appModule.config(['$httpProvider', function ($httpProvider) {
     $httpProvider.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 }]);
 //END
-module.directive('validatealphanumeric', function () {
+appModule.directive('validatealphanumeric', function () {
     return {
         restrict: 'A',
         link: function (scope, elm, attrs, ctrl) {
@@ -1214,7 +1214,7 @@ module.directive('validatealphanumeric', function () {
     }
 });
 
-module.directive('setDefaultvalue', function () {
+appModule.directive('setDefaultvalue', function () {
     //Example <input type="text" class="form-control input-sm" ng-model="Test" set-Defaultvalue defalut-Value="123456">
     //Example <select class="form-control input-sm" ng-model="PartyMaster.BusinessTypeID" style="width: 100%;" ng-options="item.Business_Type_Id as item.BussinessName for item in BusinessTypes"  set-Defaultvalue defalut-Value="2">
     //Example <input type="checkbox" value="1" ng-model="PartyMaster.allowonlinebuy" set-Defaultvalue defalut-Value="0"> Allow&nbsp;onlineBuy
@@ -1236,33 +1236,48 @@ module.directive('setDefaultvalue', function () {
     };
 });
 
-module.filter('myDate', function ($filter) {
+appModule.filter('myDate', function ($filter) {
     return function (theDate) {
         return $filter('date')(DotnetTojson(theDate), "dd/MMM/yyyy");
     }
 });
-module.directive('chosen', function () {
+appModule.directive('chosen', ['$timeout', function ($timeout) {
     var linker = function (scope, element, attrs) {
         var list = attrs['chosen'];
 
         scope.$watch(list, function () {
-            element.trigger('chosen:updated');
+            // Deferred past the current digest - ng-repeat's {{item.value}}/
+            // {{item.id}} bindings only resolve to real text on digest, so
+            // refreshing Chosen synchronously here would re-read the <select>
+            // before that text is in place.
+            $timeout(function () {
+                element.trigger('chosen:updated');
+            });
         });
 
         scope.$watch(attrs['ngModel'], function () {
-            element.trigger('chosen:updated');
+            $timeout(function () {
+                element.trigger('chosen:updated');
+            });
         });
 
-        element.chosen();
+        // Same race on first init: ng-repeat has stamped out the <option>
+        // nodes by link time, but their {{ }} text interpolates on the next
+        // digest - calling .chosen() synchronously here would snapshot the
+        // still-unresolved "{{item.value}}" placeholder text into Chosen's
+        // own cloned dropdown markup instead of the real option text.
+        $timeout(function () {
+            element.chosen();
+        });
     };
 
     return {
         restrict: 'A',
         link: linker
     };
-});
+}]);
 
-module.directive('superColWidthUpdate', ['$timeout', function ($timeout) {
+appModule.directive('superColWidthUpdate', ['$timeout', function ($timeout) {
     return {
         'restrict': 'A',
         'link': function (scope, element) {
@@ -1294,7 +1309,7 @@ module.directive('superColWidthUpdate', ['$timeout', function ($timeout) {
         }
     };
 }]);
-module.filter('unique', function () {
+appModule.filter('unique', function () {
 
     return function (items, filterOn) {
 
@@ -1332,7 +1347,7 @@ module.filter('unique', function () {
         return items;
     };
 });
-module.filter('sumOfFloatValue', function () {
+appModule.filter('sumOfFloatValue', function () {
     return function (data, key) {
 
         if (angular.isUndefined(data) || angular.isUndefined(key))
@@ -1346,7 +1361,7 @@ module.filter('sumOfFloatValue', function () {
     }
 });
 
-module.filter('sumOfIntValue', function () {
+appModule.filter('sumOfIntValue', function () {
     return function (data, key) {
 
         if (angular.isUndefined(data) || angular.isUndefined(key))
@@ -1360,7 +1375,7 @@ module.filter('sumOfIntValue', function () {
 });
 
 //Created By Ashish
-module.filter('sumOfFValue', function () {
+appModule.filter('sumOfFValue', function () {
     return function (data, key) {
 
         if (angular.isUndefined(data) || angular.isUndefined(key))
@@ -1374,7 +1389,7 @@ module.filter('sumOfFValue', function () {
     }
 });
 
-module.directive('decimalNumber', function () {
+appModule.directive('decimalNumber', function () {
     return {
         require: '?ngModel',
         link: function (scope, element, attrs, ngModelCtrl) {
@@ -1423,7 +1438,7 @@ module.directive('decimalNumber', function () {
 });
 
 
-module.filter('groupBy', function () {
+appModule.filter('groupBy', function () {
     return function (data, key) {
         if (!(data && key)) return;
         var result = {};
@@ -1437,7 +1452,7 @@ module.filter('groupBy', function () {
 });
 
 
-//module.filter('groupBy', ['$parse', function ($parse) {
+//appModule.filter('groupBy', ['$parse', function ($parse) {
 //    return function (list, group_by) {
 
 //        var filtered = [];

@@ -1,0 +1,286 @@
+@{
+    ViewBag.Title = "Lot Branch Assignment";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+<div ng-controller="LotBranchSplitCtrl" class="rough-dist-page">
+    <div class="rd-card rd-card-specs">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title"><i class="fa fa-code-fork text-primary"></i> Lot Branch Assignment</h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="row">
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                    <label class="rd-label" for="BulkBranchID">Branch <span class="text-muted">(apply to checked Kapans)</span></label>
+                    <div class="field-select-wrap">
+                        <select id="BulkBranchID" chosen="BranchList" ng-model="BulkBranchID" class="form-control rd-input">
+                            <option value="">-- Select Branch --</option>
+                            <option ng-repeat="item in BranchList" value="{{item.id}}">{{item.value}}</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 rd-form-group rd-save-row-action">
+                    <label class="rd-label rd-action-label">&nbsp;</label>
+                    <button class="btn-rd-save-main" type="button" ng-disabled="!BulkBranchID" ng-click="ApplyBulkBranch()">
+                        <i class="fa fa-arrow-down"></i> Apply to Checked
+                    </button>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-4 col-xs-6 rd-form-group rd-save-row-action">
+                    <label class="rd-label rd-action-label">&nbsp;</label>
+                    <button class="btn-rd-save-main" type="button" ng-disabled="IsSaving" ng-click="TransferSelected()">
+                        <i class="fa fa-exchange" ng-class="{'fa-spin': IsSaving}"></i> Transfer Selected
+                    </button>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="row" ng-show="BranchSplitSummary.length > 0 || BranchAvgSplit.length > 0">
+                <div class="col-xs-12">
+                    <label class="rd-label">
+                        Branch Split (% of this source's already-split total)
+                        <span class="text-muted">&middot; Avg Branch Split % (last 5 assignments per Branch)</span>
+                    </label>
+                    <div class="kpi-container-branch">
+                        <div class="kpi-box kpi-branch" ng-repeat="b in BranchSplitSummary">
+                            <div class="kpi-icon-wrap"><i class="fa fa-industry"></i></div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">{{b.BranchName}}</div>
+                                <div class="kpi-value">{{b.CaratPercent}}% <span class="kpi-value-unit">Cts</span></div>
+                                <div class="kpi-sub">{{b.Pcs | number:0}} Pcs / {{b.Carat | number:3}} Cts</div>
+                            </div>
+                        </div>
+                        <div class="kpi-box kpi-branch kpi-branch-avg" ng-repeat="a in BranchAvgSplit">
+                            <div class="kpi-icon-wrap"><i class="fa fa-history"></i></div>
+                            <div class="kpi-content">
+                                <div class="kpi-label">{{a.BranchName}} <span class="kpi-value-unit">(avg)</span></div>
+                                <div class="kpi-value">{{a.AvgCaratPercent}}% <span class="kpi-value-unit">Cts avg</span></div>
+                                <div class="kpi-sub">Pcs avg {{a.AvgPcsPercent}}% &middot; {{a.SampleCount}} sample(s)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rd-card rd-card-entry">
+        <div class="rd-card-header">
+            <h5 class="rd-card-title"><i class="fa fa-table text-primary"></i> Kapans Split From This Source ({{SplitLots.length}})</h5>
+        </div>
+        <div class="rd-card-body">
+            <div class="uigrid3">
+                <div id="kapanSplitGridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'angularjs-dropdown-multiselect']);
+    }
+
+    module.controller("LotBranchSplitCtrl", ['$scope', '$http', '$timeout', '$q', function ($scope, $http, $timeout, $q) {
+        $scope.InwardDetailID = parseInt('@ViewBag.InwardDetailID') || 0;
+        $scope.BulkBranchID = '';
+
+        $scope.BranchList = [];
+        $scope.HeadManagerList = [];
+        $scope.AllDepartmentList = [];
+        $scope.BranchSplitSummary = [];
+        $scope.BranchAvgSplit = [];
+        $scope.SplitLots = [];
+        $scope.IsSaving = false;
+        $scope.IsLoading = false;
+
+        $scope.LoadBranches = function () {
+            return $http.post('@Url.Action("GetBranchdata_For_DropDown", "Master")').then(function (res) {
+                var bList = [];
+                if (res.data && res.data.BranchList && res.data.BranchList.length > 0) {
+                    for (var i = 0; i < res.data.BranchList.length; i++) {
+                        var bId = res.data.BranchList[i]["ID"];
+                        var bVal = res.data.BranchList[i]["Name"];
+                        if (bId !== undefined && bId !== null) {
+                            bList.push({ id: parseInt(bId), value: bVal });
+                        }
+                    }
+                }
+                $scope.BranchList = bList;
+            });
+        };
+
+        $scope.LoadHeadManagers = function () {
+            return $http.get('@Url.Action("Get_MST_HeadManagerList", "Master")').then(function (res) {
+                $scope.HeadManagerList = (res.data && res.data.success) ? (res.data.list || []) : [];
+            });
+        };
+
+        $scope.LoadAllDepartments = function () {
+            return $http.get('@Url.Action("Get_MST_DepartmentList_All", "Master")').then(function (res) {
+                $scope.AllDepartmentList = (res.data && res.data.success) ? (res.data.list || []) : [];
+            });
+        };
+
+        $scope.LoadBranchSplitSummary = function () {
+            if (!$scope.InwardDetailID) { $scope.BranchSplitSummary = []; return; }
+            $http.get('@Url.Action("Get_LotBranchSplitSummary", "Master")?InwardDetailID=' + $scope.InwardDetailID).then(function (res) {
+                $scope.BranchSplitSummary = (res.data && res.data.success) ? res.data.list : [];
+            }, function () {
+                $scope.BranchSplitSummary = [];
+            });
+        };
+
+        $scope.LoadBranchAvgSplit = function () {
+            $http.get('@Url.Action("Get_LotBranchAvgSplitPercent", "Master")').then(function (res) {
+                $scope.BranchAvgSplit = (res.data && res.data.success) ? res.data.list : [];
+            }, function () {
+                $scope.BranchAvgSplit = [];
+            });
+        };
+
+        $scope.LoadSplitLots = function () {
+            if (!$scope.InwardDetailID) return;
+            $http.get('@Url.Action("Get_LotsByInwardDetailID", "Master")?InwardDetailID=' + $scope.InwardDetailID).then(function (res) {
+                $scope.SplitLots = (res.data && res.data.success) ? res.data.list : [];
+                $scope.InitSplitGrid();
+            }, function () {
+                $scope.SplitLots = [];
+            });
+        };
+
+        // Re-creates the grid against the current array every load - same
+        // convention as LotEntry's Staged Splits grid, rather than trying to
+        // patch an existing dxDataGrid instance's dataSource.
+        $scope.InitSplitGrid = function () {
+            if (!$("#kapanSplitGridContainer").length) return;
+
+            $("#kapanSplitGridContainer").dxDataGrid({
+                dataSource: $scope.SplitLots,
+                keyExpr: 'LotID',
+                height: 'auto',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                hoverStateEnabled: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                paging: { enabled: false },
+                pager: { visible: false },
+                 columnChooser: { enabled: false },
+                selection: { mode: 'multiple', showCheckBoxesMode: 'always' },
+                editing: { mode: 'cell', allowUpdating: true, selectTextOnEditStart: true },
+                columns: [
+                    {
+                        caption: 'Kapan / Lot Code', dataField: 'LotCode', minWidth: 130, allowEditing: false,
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.value || '(not yet coded)').appendTo(container);
+                        }
+                    },
+                    { caption: 'R.Code', dataField: 'RCode', minWidth: 90, allowEditing: false },
+                    {
+                        caption: 'Branch', dataField: 'BranchID', minWidth: 130,
+                        lookup: { dataSource: $scope.BranchList, valueExpr: 'id', displayExpr: 'value' }
+                    },
+                    {
+                        caption: 'Department', dataField: 'DepartmentID', minWidth: 140,
+                        lookup: {
+                            dataSource: function (rowData) {
+                                return ($scope.AllDepartmentList || []).filter(function (d) {
+                                    return rowData && d.BranchId == rowData.BranchID;
+                                });
+                            },
+                            valueExpr: 'ID', displayExpr: 'DepartmentName'
+                        }
+                    },
+                    {
+                        caption: 'Head Manager', dataField: 'HeadManagerID', minWidth: 150,
+                        lookup: { dataSource: $scope.HeadManagerList, valueExpr: 'EmployeeID', displayExpr: 'EmployeeName' }
+                    },
+                    { caption: 'Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 80, alignment: 'right', format: '#,##0', allowEditing: false },
+                    { caption: 'Carat', dataField: 'Lot_Carat', dataType: 'number', minWidth: 100, alignment: 'right', format: '#,##0.000', allowEditing: false },
+                    { caption: 'Grade', dataField: 'Grade', minWidth: 80, allowEditing: false },
+                    { caption: 'Lot Type', dataField: 'LotType', minWidth: 100, allowEditing: false },
+                    { caption: 'Priority', dataField: 'LotPriority', minWidth: 100, allowEditing: false }
+                ]
+            });
+        };
+
+        // Bulk-sets the Branch column, in the grid only (not yet saved), for
+        // every currently checked Kapan - same effect as editing each row's
+        // Branch cell by hand, just applied to all checked rows at once.
+        // Department stays whatever it already was per row (a Branch change
+        // doesn't imply a Department change), so still editable per-row
+        // afterward if needed. Click Transfer Selected to actually persist.
+        $scope.ApplyBulkBranch = function () {
+            if (!$scope.BulkBranchID) { Noty("error", "Please select a Branch first."); return; }
+            var grid = $("#kapanSplitGridContainer").dxDataGrid("instance");
+            var selected = grid ? grid.getSelectedRowsData() : [];
+            if (!selected || selected.length === 0) { Noty("error", "Please check at least one Kapan."); return; }
+
+            var branchId = parseInt($scope.BulkBranchID);
+            selected.forEach(function (row) {
+                var rowIndex = grid.getRowIndexByKey(row.LotID);
+                if (rowIndex >= 0) {
+                    grid.cellValue(rowIndex, 'BranchID', branchId);
+                }
+            });
+        };
+
+        $scope.TransferSelected = function () {
+            var grid = $("#kapanSplitGridContainer").dxDataGrid("instance");
+            var selected = grid ? grid.getSelectedRowsData() : [];
+
+            if (!selected || selected.length === 0) {
+                Noty("error", "Please check at least one Kapan to transfer.");
+                return;
+            }
+
+            var invalid = selected.filter(function (row) { return !row.BranchID; });
+            if (invalid.length > 0) {
+                Noty("error", "Every selected Kapan must have a Branch set before transferring.");
+                return;
+            }
+
+            $scope.IsSaving = true;
+            var requests = selected.map(function (row) {
+                return $http.post('@Url.Action("AssignLotBranch", "Master")', {
+                    LotID: row.LotID,
+                    BranchID: row.BranchID,
+                    DepartmentID: row.DepartmentID || null,
+                    HeadManagerID: row.HeadManagerID || null
+                });
+            });
+
+            $q.all(requests).then(function (results) {
+                $scope.IsSaving = false;
+                var failed = results.filter(function (res) { return !(res.data && res.data.success); });
+                if (failed.length === 0) {
+                    Noty("success", selected.length + " Kapan(s) transferred successfully.");
+                } else {
+                    Noty("error", failed.length + " of " + selected.length + " transfer(s) failed.");
+                }
+                $scope.LoadBranchSplitSummary();
+                $scope.LoadBranchAvgSplit();
+                $scope.LoadSplitLots();
+            }, function () {
+                $scope.IsSaving = false;
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        $q.all([
+            $scope.LoadBranches(),
+            $scope.LoadHeadManagers(),
+            $scope.LoadAllDepartments()
+        ]).then(function () {
+            $scope.LoadBranchSplitSummary();
+            $scope.LoadBranchAvgSplit();
+            $scope.LoadSplitLots();
+        });
+    }]);
+</script>

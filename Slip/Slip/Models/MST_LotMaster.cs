@@ -6,7 +6,11 @@ namespace Slip.Models
     {
         public int LotID { get; set; }
         public int RoughDistributionID { get; set; }
+        public int InwardDetailID { get; set; }
+        public int? BranchID { get; set; }
         public string RCode { get; set; }
+        public int? RCodeYear { get; set; }
+        public int? RCodeSerial { get; set; }
         public string LotCode { get; set; }
         public int DistributionPartNo { get; set; }
 

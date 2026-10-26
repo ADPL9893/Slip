@@ -3,6 +3,313 @@
     Layout = "~/Views/Shared/_MainLayout.cshtml";
 }
 
+<!-- Inline, not in common.css: guarantees this always loads fresh with the
+     page (no stylesheet caching/bundling to go stale), and !important wins
+     against Bootstrap's .modal-dialog/table resets without relying on
+     common.css's own load order relative to Bootstrap. -->
+<style>
+    /* Plain white grid background - overrides the Material theme's default
+       shading on the header/rowsview panels and on alternating rows
+       (rowAlternationEnabled is on, which otherwise tints every other row
+       light gray). */
+    #masterBookGridContainer.dx-datagrid,
+    #masterBookGridContainer .dx-datagrid,
+    #masterBookGridContainer .dx-datagrid-headers,
+    #masterBookGridContainer .dx-datagrid-rowsview,
+    #masterBookGridContainer .dx-row,
+    #masterBookGridContainer .dx-row-alt {
+        background-color: #ffffff !important;
+    }
+
+    /* Compact grid: short row height, tight cell padding/font so the extra
+       Date/Label/Days columns fit without the grid feeling cramped. */
+    #masterBookGridContainer .dx-datagrid-headers .dx-row > td,
+    #masterBookGridContainer .dx-datagrid-rowsview .dx-row > td {
+        padding: 2px 6px !important;
+        font-size: 10.5px !important;
+        line-height: 16px !important;
+    }
+
+    #masterBookGridContainer .dx-datagrid-headers .dx-row > td {
+        font-weight: 700 !important;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+
+    #masterBookGridContainer .badge-status-pill {
+        padding: 1px 6px !important;
+        font-size: 10px !important;
+    }
+
+    /* LotCode/RoughWeight/KapanNo cells: value left, search icon pinned to
+       the cell's right edge regardless of text length. */
+    #masterBookGridContainer .mb-cell-search-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 6px;
+    }
+
+    #masterBookGridContainer .mb-cell-search-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #masterBookGridContainer .mb-cell-search-icon {
+        color: #94a3b8;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    #masterBookGridContainer .mb-cell-search-icon:hover {
+        color: #2563eb;
+    }
+
+    #ClvChartModal .modal-dialog {
+        width: 96vw !important;
+        max-width: 1500px !important;
+        margin: 20px auto !important;
+    }
+
+    #ClvChartModal .modal-body.clv-chart-body {
+        max-height: 80vh !important;
+        overflow-y: auto !important;
+        background: #f8fafc !important;
+        padding: 14px !important;
+    }
+
+    .clv-chart-report {
+        font-family: Consolas, "Courier New", monospace;
+        font-size: 11px !important;
+        color: #1e293b !important;
+    }
+
+    .clv-chart-report .clv-kv-grid .clv-report-title {
+        text-align: center !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        padding: 2px 6px !important;
+        color: #0f172a !important;
+        background: #ffffff !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .clv-chart-report .clv-kv-grid .clv-pct-highlight {
+        background: #bbf7d0 !important;
+        font-weight: 700 !important;
+    }
+
+    .clv-chart-report .clv-header-row,
+    .clv-chart-report .clv-section-row {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: flex-start !important;
+        gap: 8px !important;
+        margin: 0 0 8px 0 !important;
+        width: 100% !important;
+    }
+
+    /* Header row specifically: kv-grid (left) and grad-box (right) sit
+       flush against each other at matching height, grad-box kept at its
+       natural width instead of wrapping/shrinking. */
+    .clv-chart-report .clv-header-row {
+        align-items: stretch !important;
+    }
+
+    /* Tables keep their natural content width (nowrap cells mean they
+       can't meaningfully shrink without truncating data) - if a row's
+       tables together are wider than the modal, the ROW scrolls
+       horizontally instead of wrapping the trailing tables onto a new
+       line or letting a shrunk table visually overlap its siblings. */
+    .clv-chart-report .clv-section-row {
+        overflow-x: auto !important;
+    }
+
+    .clv-chart-report .clv-section-row > table {
+        flex-shrink: 0 !important;
+    }
+
+    /* Vertical stack of 2 tables acting as ONE column within a
+       .clv-section-row (e.g. "CLV P WT %" with the PRD/CLV value
+       comparison table directly underneath it). */
+    .clv-chart-report .clv-section-row > .clv-stack-col {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .clv-chart-report .clv-header-row > table.clv-grad-box {
+        flex: 0 0 auto !important;
+        align-self: stretch !important;
+    }
+
+    .clv-chart-report .clv-header-row > table.clv-grad-box tbody,
+    .clv-chart-report .clv-header-row > table.clv-grad-box {
+        height: 100% !important;
+    }
+
+    .clv-chart-report table.clv-plain-table {
+        border-collapse: collapse !important;
+        background: #ffffff !important;
+        table-layout: auto !important;
+        margin: 0 !important;
+    }
+
+    /* Table title - a real <th colspan> row inside the table (not a
+       <caption>, which rendered outside/disconnected from the bordered
+       grid) so it's part of the same bordered box as the header/data rows. */
+    .clv-chart-report table.clv-plain-table th.clv-table-title {
+        text-align: left !important;
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        padding: 3px 6px !important;
+        background: #334155 !important;
+        color: #ffffff !important;
+        border: 1px solid #334155 !important;
+    }
+
+    /* Only center the title when it's actually spanning/merged across a
+       wide multi-column header (PRD, FINAL, WEIGHT, LABOUR, etc.) - the
+       narrow 2-5 column mini tables keep a left-aligned title. */
+    .clv-chart-report table.clv-data-table th.clv-table-title,
+    .clv-chart-report table.clv-grow th.clv-table-title {
+        text-align: center !important;
+    }
+
+    /* Wrapper that shrink-wraps to the combined width of the sibling
+       tables it contains (instead of stretching full-width like a normal
+       .clv-section-row), so the shared title bar above them lines up
+       exactly with their actual width - not wider, not narrower. */
+    .clv-chart-report .clv-table-group {
+        display: inline-block !important;
+        margin: 0 0 8px 0 !important;
+    }
+
+    .clv-chart-report .clv-table-group > .clv-section-row {
+        width: auto !important;
+        margin: 0 !important;
+    }
+
+    /* The 2 tables inside a group sit flush against each other (shared
+       border, no visible gap) like one combined table - drop the right-hand
+       table's left border so the shared seam is a single line, not a
+       doubled-up 2px line from both tables' borders stacking. */
+    .clv-chart-report .clv-section-row.clv-no-gap {
+        gap: 0 !important;
+    }
+
+    .clv-chart-report .clv-section-row.clv-no-gap > table + table {
+        border-left: none !important;
+    }
+
+    .clv-chart-report .clv-section-row.clv-no-gap > table + table th:first-child,
+    .clv-chart-report .clv-section-row.clv-no-gap > table + table td:first-child {
+        border-left: none !important;
+    }
+
+    /* Plain heading above a group of sibling tables that share ONE title
+       between them (e.g. "ROUND" above the GR/NGR size tables) - a real
+       <th colspan> can't span across separate <table> elements. */
+    .clv-chart-report .clv-table-group-title {
+        text-align: center !important;
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        padding: 3px 6px !important;
+        background: #334155 !important;
+        color: #ffffff !important;
+        border: 1px solid #334155 !important;
+        margin: 0 0 -1px 0 !important;
+    }
+
+    .clv-chart-report table.clv-plain-table th,
+    .clv-chart-report table.clv-plain-table td {
+        border: 1px solid #94a3b8 !important;
+        padding: 2px 6px !important;
+        white-space: nowrap !important;
+        text-align: right !important;
+        line-height: 1.5 !important;
+    }
+
+    .clv-chart-report table.clv-plain-table th {
+        background: #e2e8f0 !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+    }
+
+    .clv-chart-report table.clv-plain-table td:first-child {
+        text-align: left !important;
+        font-weight: 600 !important;
+    }
+
+    .clv-chart-report table.clv-data-table {
+        min-width: 230px !important;
+    }
+
+    .clv-chart-report table.clv-grow {
+        flex: 1 1 auto !important;
+    }
+
+    .clv-chart-report table.clv-mini td {
+        text-align: right !important;
+    }
+
+    .clv-chart-report tr.clv-total-row td {
+        font-weight: 700 !important;
+        background: #f1f5f9 !important;
+    }
+
+    .clv-chart-report tr.clv-total-row td.clv-hl-orange {
+        background: #fb923c !important;
+        color: #ffffff !important;
+    }
+
+    .clv-chart-report tr.clv-total-row td.clv-hl-cyan {
+        background: #22d3ee !important;
+        color: #0f172a !important;
+    }
+
+    .clv-chart-report .clv-kv-grid {
+        flex: 1 1 auto !important;
+        display: grid !important;
+        grid-template-columns: repeat(14, auto) !important;
+        border: 1px solid #94a3b8 !important;
+        border-right: none !important;
+        border-bottom: none !important;
+        background: #ffffff !important;
+    }
+
+    .clv-chart-report .clv-kv-grid > div {
+        border-right: 1px solid #94a3b8 !important;
+        border-bottom: 1px solid #94a3b8 !important;
+        padding: 2px 6px !important;
+        white-space: nowrap !important;
+    }
+
+    .clv-chart-report .clv-kv-grid .clv-lbl {
+        font-weight: 700 !important;
+        background: #e2e8f0 !important;
+    }
+
+    .clv-chart-report .clv-kv-grid .clv-diff-cell {
+        color: #b91c1c !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+    }
+
+    .clv-chart-report table.clv-grad-box {
+        min-width: 230px !important;
+    }
+
+    .clv-chart-report table.clv-value-compare {
+        margin-bottom: 8px !important;
+    }
+</style>
 
 <div ng-controller="MasterBookCtrl" class="rough-dist-list-page">
     <div class="rdl-grid-card">
@@ -13,56 +320,43 @@
                 <span class="badge-status-pill badge-pill-info" ng-show="!IsLoading">{{List.length}} Records</span>
                 <span class="badge-status-pill" ng-class="GetStageBadgeClass(ActiveFilter)" ng-show="ActiveFilter">{{ActiveFilter}}</span>
 
-                <!-- Module Type Dropdown -->
-                <div class="mb-filter-field" style="width: 150px;">
-                    <select id="FilterModuleType" class="mb-filter-input" ng-model="SelectedModuleType" ng-change="OnModuleTypeChange()">
-                        <option value="All Data">All Data</option>
-                        <option value="Pre Rough">Pre Rough</option>
-                        <option value="Distribution">Distribution</option>
-                        <option value="CLV Chart">CLV Chart</option>
-                        <option value="MFG Chart">MFG Chart</option>
-                        <option value="Mumbai Submit">Mumbai Submit</option>
-                    </select>
+                <div class="field-select-wrap" style="width: 220px;">
+                    <input type="text"
+                           ng-model="SearchText"
+                           ng-change="OnSearchChange()"
+                           placeholder="Search Master Book..."
+                           class="form-control rd-input"
+                           style="height: 32px; padding: 4px 10px;" />
                 </div>
-
-                <!-- Date Range Filter -->
-                <div class="date-range-wrap">
-                    <input type="text" id="FromDate" class="mb-filter-input" style="width: 100px;" placeholder="From Date" readonly autocomplete="off" ng-model="FromDate" />
-                    <span class="date-range-sep">-</span>
-                    <input type="text" id="ToDate" class="mb-filter-input" style="width: 100px;" placeholder="To Date" readonly autocomplete="off" ng-model="ToDate" />
-                    <button class="btn-date-search" type="button" ng-click="SearchByDate()" title="Search with Date Filter">
-                        <i class="fa fa-search"></i>
-                    </button>
-                </div>
+                <button type="button" class="grid-action-btn-edit" title="Reset All Filters" ng-click="ResetAllFilters()">
+                    <i class="fa fa-eraser"></i>
+                </button>
             </div>
             <div class="rdl-card-actions">
                 <!-- 8 Stage Filter Buttons - icon-only, tooltip carries the label -->
                 <div class="mb-btn-group-row">
-                    <button type="button" class="mb-stage-square-btn btn-all-data" ng-class="{'active': ActiveFilter === 'All Data'}" ng-click="SelectFilter('All Data')" title="All Data (Reset Filter)">
+                    <button type="button" class="mb-stage-square-btn btn-all-data" ng-class="{'active': ActiveFilter === 'All'}" ng-click="SelectFilter('All')" title="All Lots">
                         <i class="fa fa-th-list"></i>
                     </button>
-                    <button type="button" class="mb-stage-square-btn btn-rough-entry" ng-class="{'active': ActiveFilter === 'Rough Entry'}" ng-click="SelectFilter('Rough Entry')" title="Rough Entry (All Data)">
-                        <i class="fa fa-diamond"></i>
+                    <button type="button" class="mb-stage-square-btn btn-onhand" ng-class="{'active': ActiveFilter === 'Onhand'}" ng-click="SelectFilter('Onhand')" title="Onhand (Not yet given to a Branch)">
+                        <i class="fa fa-archive"></i>
                     </button>
-                    <button type="button" class="mb-stage-square-btn btn-branch-assign" ng-class="{'active': ActiveFilter === 'Branch Assign'}" ng-click="SelectFilter('Branch Assign')" title="Branch Assign (All Data)">
-                        <i class="fa fa-code-fork"></i>
-                    </button>
-                    <button type="button" class="mb-stage-square-btn btn-planning" ng-class="{'active': ActiveFilter === 'Planning'}" ng-click="SelectFilter('Planning')" title="Planning (All Data)">
-                        <i class="fa fa-calculator"></i>
-                    </button>
-                    <button type="button" class="mb-stage-square-btn btn-clv-running" ng-class="{'active': ActiveFilter === 'CLV Running'}" ng-click="SelectFilter('CLV Running')" title="CLV Running (All Data)">
+                    <button type="button" class="mb-stage-square-btn btn-clv-running" ng-class="{'active': ActiveFilter === 'Cleaving Running'}" ng-click="SelectFilter('Cleaving Running')" title="Cleaving Running">
                         <i class="fa fa-cogs"></i>
                     </button>
-                    <button type="button" class="mb-stage-square-btn btn-clv-complete" ng-class="{'active': ActiveFilter === 'CLV Complte'}" ng-click="SelectFilter('CLV Complte')" title="CLV Complete (All Data)">
+                    <button type="button" class="mb-stage-square-btn btn-clv-complete" ng-class="{'active': ActiveFilter === 'Cleaving Completed'}" ng-click="SelectFilter('Cleaving Completed')" title="Cleaving Completed">
                         <i class="fa fa-check-square"></i>
                     </button>
-                    <button type="button" class="mb-stage-square-btn btn-mfg-running" ng-class="{'active': ActiveFilter === 'MFG Running'}" ng-click="SelectFilter('MFG Running')" title="MFG Running (All Data)">
+                    <button type="button" class="mb-stage-square-btn btn-distribution" ng-class="{'active': ActiveFilter === 'Distribution'}" ng-click="SelectFilter('Distribution')" title="Distribution">
+                        <i class="fa fa-code-fork"></i>
+                    </button>
+                    <button type="button" class="mb-stage-square-btn btn-mfg-running" ng-class="{'active': ActiveFilter === 'Mfg Running'}" ng-click="SelectFilter('Mfg Running')" title="Mfg Running">
                         <i class="fa fa-wrench"></i>
                     </button>
-                    <button type="button" class="mb-stage-square-btn btn-mfg-complete" ng-class="{'active': ActiveFilter === 'MFG Complte'}" ng-click="SelectFilter('MFG Complte')" title="MFG Complete (All Data)">
+                    <button type="button" class="mb-stage-square-btn btn-mfg-complete" ng-class="{'active': ActiveFilter === 'Mfg Complete'}" ng-click="SelectFilter('Mfg Complete')" title="Mfg Complete">
                         <i class="fa fa-flag-checkered"></i>
                     </button>
-                    <button type="button" class="mb-stage-square-btn btn-mumbai-submit" ng-class="{'active': ActiveFilter === 'Mumbai Submit'}" ng-click="SelectFilter('Mumbai Submit')" title="Mumbai Submit (All Data)">
+                    <button type="button" class="mb-stage-square-btn btn-transfer" ng-class="{'active': ActiveFilter === 'Transfer'}" ng-click="SelectFilter('Transfer')" title="Transfer (Mumbai Submitted)">
                         <i class="fa fa-send"></i>
                     </button>
                 </div>
@@ -73,14 +367,6 @@
                 <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
                     <i class="fa fa-file-excel-o"></i>
                 </button>
-                <div class="field-select-wrap" style="width: 220px;">
-                    <input type="text"
-                           ng-model="SearchText"
-                           ng-change="OnSearchChange()"
-                           placeholder="Search Master Book..."
-                           class="form-control rd-input"
-                           style="height: 32px; padding: 4px 10px;" />
-                </div>
             </div>
         </div>
 
@@ -110,6 +396,303 @@
             </li>
         </ul>
     </div>
+
+    <!-- CLV Chart Modal - replicates the "Cleaving Chart" print report.
+         Field-to-panel mapping below is a best-effort reconstruction from
+         ReportRepository.cs's shape (29 lists, List0..List28) cross-checked
+         against a sample PDF - a handful of lower-confidence spots are
+         flagged inline with "BEST GUESS". If a panel shows the wrong data
+         once tested against live data, the fix is just re-pointing that
+         panel's list/column config in the script below, not restructuring
+         the HTML. -->
+    <div class="modal fade" id="ClvChartModal" role="dialog">
+        <div class="modal-dialog clv-chart-modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-cogs modal-icon-info"></i>
+                        <h4 class="modal-header-title">Cleaving Chart - {{ClvLotCode}}</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body clv-chart-body">
+                    <div ng-if="IsLoadingClvChart" class="img-loading-state">
+                        <i class="fa fa-spinner fa-spin modal-loading-icon"></i>
+                        <div>Loading CLV Chart...</div>
+                    </div>
+
+                    <div ng-if="!IsLoadingClvChart && !ClvMain" class="img-empty-state">
+                        <div class="img-empty-icon"><i class="fa fa-cogs"></i></div>
+                        <h4 class="img-empty-title">No CLV Chart Data</h4>
+                        <p class="img-empty-text">No cleaving chart data was found for this Kapan.</p>
+                    </div>
+
+                    <div ng-if="!IsLoadingClvChart && ClvMain" class="clv-chart-report" id="clvChartPrintArea">
+                        <!-- Header strip: left info grid | PRD/CLV box | Grad box -->
+                        <div class="clv-header-row">
+                            <div class="clv-kv-grid">
+                                <div class="clv-lbl">Issue By</div><div>{{gv(ClvMain,'PrdUser')}}</div>
+                                <div class="clv-report-title" style="grid-column: span 10;">Cleaving Chart ({{gv(ClvMain,'PrdDate')}})</div>
+                                <div class="clv-lbl">Rough Rate</div><div>{{fmt(gv(ClvGradTotalRow,'Rate'),2)}}</div>
+
+                                <div class="clv-lbl">Issue Dt.</div><div>{{gv(ClvMain,'PrdDate')}}</div>
+                                <div class="clv-lbl">R Name</div><div>{{fmt(gv(ClvMain,'RWT'),2)}} / {{ClvLotCode}}</div>
+                                <div class="clv-lbl">Receipe</div><div>{{gv(ClvMain,'MainReceipe')}}</div>
+                                <div class="clv-lbl">PRD/CT $ (-L)</div><div>{{fmt(gv(ClvMain,'PrdPerCTValue'),2)}}</div>
+                                <div class="clv-lbl">PRD/CT</div><div>{{fmt(gv(ClvMain,'PrdPerCarat'),2)}}</div>
+                                <div class="clv-lbl">PRD %</div><div class="clv-pct-highlight">{{fmt(gv(ClvMain,'PrdPer'),2)}}</div>
+                                <div class="clv-lbl">Pcs</div><div>{{gv(ClvMain,'RoughPcs')}}</div>
+
+                                <div class="clv-lbl">Return Dt.</div><div>{{gv(ClvMain,'TrnDate')}}</div>
+                                <div class="clv-lbl">Challan</div><div>{{gv(ClvMain,'RCode')}}</div>
+                                <div class="clv-lbl">C Grad</div><div>{{gv(ClvMain,'GradNo')}}</div>
+                                <div class="clv-lbl">CLV/CT $ (-L)</div><div>{{fmt(gv(ClvMain,'ClvPerCTValue'),2)}}</div>
+                                <div class="clv-lbl">CLV/CT</div><div>{{fmt(gv(ClvMain,'ClvPerCarat'),2)}}</div>
+                                <div class="clv-lbl">CLV %</div><div class="clv-pct-highlight">{{fmt(gv(ClvMain,'ClvPer'),2)}}</div>
+                                <div class="clv-lbl">Size</div><div>{{fmt(gv(ClvMain,'Size'),2)}}</div>
+
+                                <div class="clv-lbl">Days</div><div>{{gv(ClvMain,'ClvDays')}}</div>
+                                <div class="clv-lbl">Carat</div><div>{{fmt(gv(ClvMain,'RWT'),2)}}</div>
+                                <div class="clv-lbl">K Grad</div><div>{{gv(ClvMain,'MainGradNo')}}</div>
+                                <div class="clv-diff-cell" style="grid-column: span 2;">{{fmt(gv(ClvMain,'PrdPerCTValue') - gv(ClvMain,'ClvPerCTValue'),2)}}</div>
+                                <div class="clv-diff-cell" style="grid-column: span 2;">{{fmt(gv(ClvMain,'PrdPerCarat') - gv(ClvMain,'ClvPerCarat'),2)}}</div>
+                                <div class="clv-diff-cell" style="grid-column: span 2;">{{fmt(gv(ClvMain,'PrdPer') - gv(ClvMain,'ClvPer'),2)}}</div>
+                                <div class="clv-lbl">Table No</div><div>{{gv(ClvMain,'TableNo')}}</div>
+                            </div>
+
+                            <table class="clv-plain-table clv-grad-box" ng-if="ClvGradTotalRow">
+                                <tr><th>Grad</th><th>Rate</th><th>Pcs</th><th>Carat</th><th>%</th></tr>
+                                <tr ng-repeat="r in ClvGradRows"><td>{{gv(r,'GradNo')}}</td><td>{{fmt(gv(r,'Rate'),2)}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'Carat'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                                <tr class="clv-total-row"><td>Total</td><td>{{fmt(gv(ClvGradTotalRow,'Rate'),2)}}</td><td>{{gv(ClvGradTotalRow,'Pcs')}}</td><td>{{fmt(gv(ClvGradTotalRow,'Carat'),2)}}</td><td>{{fmt(gv(ClvGradTotalRow,'Per'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- PRD shape table + its 2 side mini-panels.
+                             Data source is list20, NOT list1 - verified
+                             against live data: list1's actual values match
+                             the PDF's FINAL section, and list20's actual
+                             values match the PDF's PRD section (the API's
+                             real table order doesn't match
+                             ReportRepository.cs's naming intuition). There's
+                             no separate "total row" list either - TOTAL/
+                             GRAND TOTAL are computed client-side (ClvGroupTotal)
+                             from the GR+NGR rows. -->
+                        <div class="clv-section-row">
+                            <table class="clv-plain-table clv-data-table clv-grow">
+                                <tr><th class="clv-table-title" colspan="9">PRD</th></tr>
+                                <tr><th>Shape</th><th>Type</th><th>Pcs</th><th>R WT</th><th>P WT</th><th>Yeild %</th><th>$</th><th>Size</th><th>Result %</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list20">
+                                    <td>{{gv(r,'Shape')}}</td><td>{{gv(r,'Status')}}</td><td>{{gv(r,'Pcs')}}</td>
+                                    <td>{{fmt(gv(r,'RPartWeight'),2)}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td>
+                                    <td>{{fmt(gv(r,'Yeild'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td>
+                                    <td>{{fmt(gv(r,'Size'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td>
+                                </tr>
+                                <tr class="clv-total-row" ng-if="ClvChartData.list20.length">
+                                    <td colspan="2">GRAND TOTAL</td><td>{{ClvGroupTotal(ClvChartData.list20).Pcs}}</td>
+                                    <td>{{fmt(ClvGroupTotal(ClvChartData.list20).RPartWeight,2)}}</td><td class="clv-hl-orange">{{fmt(ClvGroupTotal(ClvChartData.list20).PolishWeight,2)}}</td>
+                                    <td>{{fmt(ClvGroupTotal(ClvChartData.list20).Yeild,2)}}</td><td>{{fmt(ClvGroupTotal(ClvChartData.list20).PrcAmt,2)}}</td>
+                                    <td></td><td class="clv-hl-cyan">{{fmt(ClvGroupTotal(ClvChartData.list20).Per,2)}}</td>
+                                </tr>
+                            </table>
+                            <table class="clv-plain-table clv-mini">
+                                <tr><th>PRD</th><th>P WT</th><th>%</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list20"><td>{{gv(r,'Status')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(ClvPct(gv(r,'PolishWeight'), ClvSum(ClvChartData.list20,'PolishWeight')),2)}}</td></tr>
+                                <tr class="clv-total-row"><td>TOTAL</td><td>{{fmt(ClvSum(ClvChartData.list20,'PolishWeight'),2)}}</td><td>100</td></tr>
+                            </table>
+                            <table class="clv-plain-table clv-mini">
+                                <tr><th>Grad</th><th>PRD/CT$(-L)</th><th>CLV/CT$(-L)</th></tr>
+                                <tr ng-repeat="r in ClvGradRows"><td>{{gv(r,'GradNo')}}</td><td>{{fmt(gv(r,'PrdPerCTValue'),2)}}</td><td>{{fmt(gv(r,'ClvPerCTValue'),2)}}</td></tr>
+                                <tr class="clv-total-row" ng-if="ClvGradTotalRow"><td>Total</td><td>{{fmt(gv(ClvGradTotalRow,'PrdPerCTValue'),2)}}</td><td>{{fmt(gv(ClvGradTotalRow,'ClvPerCTValue'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- FINAL (CLV) shape table + its 2 side mini-panels.
+                             Data source is list1 (see note above PRD). -->
+                        <div class="clv-section-row">
+                            <table class="clv-plain-table clv-data-table clv-grow">
+                                <tr><th class="clv-table-title" colspan="9">FINAL</th></tr>
+                                <tr><th>Shape</th><th>Type</th><th>Pcs</th><th>R WT</th><th>P WT</th><th>Yeild %</th><th>$</th><th>Size</th><th>Result %</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list1">
+                                    <td>{{gv(r,'Shape')}}</td><td>{{gv(r,'Status')}}</td><td>{{gv(r,'Pcs')}}</td>
+                                    <td>{{fmt(gv(r,'RPartWeight'),2)}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td>
+                                    <td>{{fmt(gv(r,'Yeild'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td>
+                                    <td>{{fmt(gv(r,'Size'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td>
+                                </tr>
+                                <tr class="clv-total-row" ng-if="ClvChartData.list1.length">
+                                    <td colspan="2">TOTAL</td><td>{{ClvGroupTotal(ClvChartData.list1).Pcs}}</td>
+                                    <td>{{fmt(ClvGroupTotal(ClvChartData.list1).RPartWeight,2)}}</td><td>{{fmt(ClvGroupTotal(ClvChartData.list1).PolishWeight,2)}}</td>
+                                    <td>{{fmt(ClvGroupTotal(ClvChartData.list1).Yeild,2)}}</td><td>{{fmt(ClvGroupTotal(ClvChartData.list1).PrcAmt,2)}}</td>
+                                    <td></td><td>{{fmt(ClvGroupTotal(ClvChartData.list1).Per,2)}}</td>
+                                </tr>
+                            </table>
+                            <!-- CLV P WT % stacked above the PRD vs CLV value
+                                 comparison table - one flex column within the
+                                 FINAL row, instead of the comparison table
+                                 sitting full-width below everything. -->
+                            <div class="clv-stack-col">
+                                <table class="clv-plain-table clv-mini">
+                                    <tr><th>CLV</th><th>P WT</th><th>%</th></tr>
+                                    <tr ng-repeat="r in ClvChartData.list1"><td>{{gv(r,'Status')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(ClvPct(gv(r,'PolishWeight'), ClvSum(ClvChartData.list1,'PolishWeight')),2)}}</td></tr>
+                                    <tr class="clv-total-row"><td>TOTAL</td><td>{{fmt(ClvSum(ClvChartData.list1,'PolishWeight'),2)}}</td><td>100</td></tr>
+                                </table>
+                                <table class="clv-plain-table clv-mini clv-value-compare">
+                                    <tr><th></th><th>PRD</th><th>CLV</th></tr>
+                                    <tr><td>VALUE $</td><td>{{fmt(gv(ClvMain,'PrdPrcAmt'),2)}}</td><td>{{fmt(gv(ClvMain,'ClvPrcAmt'),2)}}</td></tr>
+                                    <tr><td>LBR $</td><td>{{fmt(gv(ClvMain,'PrdLabour'),2)}}</td><td>{{fmt(gv(ClvMain,'ClvLabour'),2)}}</td></tr>
+                                    <tr><td>Val/CT $</td><td>{{fmt(gv(ClvMain,'PrdPerCTValue'),2)}}</td><td>{{fmt(gv(ClvMain,'ClvPerCTValue'),2)}}</td></tr>
+                                    <tr><td>Lab/CT $</td><td>{{fmt(gv(ClvMain,'PrdLabourPerCarat'),2)}}</td><td>{{fmt(gv(ClvMain,'ClvLabourPerCarat'),2)}}</td></tr>
+                                    <tr><td>F/CT $</td><td>{{fmt(gv(ClvMain,'PrdFinalPerCarat'),2)}}</td><td>{{fmt(gv(ClvMain,'ClvFinalPerCarat'),2)}}</td></tr>
+                                    <tr><td>VDiff $</td><td colspan="2">{{fmt(gv(ClvMain,'ClvDiff'),2)}}</td></tr>
+                                </table>
+                            </div>
+                            <table class="clv-plain-table clv-mini">
+                                <tr><th>Grad</th><th>PRD%</th><th>CLV%</th><th>Diff%</th></tr>
+                                <tr ng-repeat="r in ClvGradRows"><td>{{gv(r,'GradNo')}}</td><td>{{fmt(gv(r,'PrdPer'),2)}}</td><td>{{fmt(gv(r,'ClvPer'),2)}}</td><td>{{fmt(gv(r,'ClvPer') - gv(r,'PrdPer'),2)}}</td></tr>
+                                <tr class="clv-total-row" ng-if="ClvGradTotalRow"><td>Total</td><td>{{fmt(gv(ClvGradTotalRow,'PrdPer'),2)}}</td><td>{{fmt(gv(ClvGradTotalRow,'ClvPer'),2)}}</td><td>{{fmt(gv(ClvGradTotalRow,'ClvPer') - gv(ClvGradTotalRow,'PrdPer'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- WEIGHT/RATE/VALUE (scrap) + LABOUR -->
+                        <div class="clv-section-row">
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th></th><th>Weight</th><th>%</th><th>Rate</th><th>Value</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list3">
+                                    <td>{{gv(r,'ScrapType')}}</td><td>{{fmt(gv(r,'Weight'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td><td>{{fmt(gv(r,'Rate'),2)}}</td><td>{{fmt(gv(r,'Value'),2)}}</td>
+                                </tr>
+                            </table>
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="5">LABOUR</th></tr>
+                                <tr><th></th><th>Pcs</th><th>Weight</th><th>Rate</th><th>Labour$</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list4">
+                                    <td>{{gv(r,'Status')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'Weight'),2)}}</td><td>{{fmt(gv(r,'Rate'),2)}}</td><td>{{fmt(gv(r,'Amount'),2)}}</td>
+                                </tr>
+                                <tr class="clv-total-row"><td colspan="4">TOTAL</td><td>{{fmt(ClvSum(ClvChartData.list4,'Amount'),2)}}</td></tr>
+                            </table>
+                        </div>
+                        <!-- SIZE breakdown, Round shape (GR / NGR side by side) -
+                             "ROUND" is ONE shared title spanning both tables in
+                             the reference, not two separate "ROUND - GR"/
+                             "ROUND - NGR" titles, so it's a plain heading above
+                             the row instead of baked into either table. The
+                             whole group (title + GR + NGR) is wrapped so it
+                             shrink-wraps to the combined table width (not the
+                             full modal width) and the 2 tables sit flush
+                             against each other with no gap, like one table. -->
+                        <div class="clv-table-group">
+                            <div class="clv-table-group-title">ROUND</div>
+                            <div class="clv-section-row clv-no-gap">
+                                <table class="clv-plain-table clv-data-table">
+                                    <tr><th class="clv-table-title" colspan="4">GR</th></tr>
+                                <tr><th>Size</th><th>Pcs</th><th>Weight</th><th>$</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list6"><td>{{gv(r,'Category')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td></tr>
+                                <tr class="clv-total-row"><td>TOTAL</td><td>{{ClvSum(ClvChartData.list6,'Pcs')}}</td><td>{{fmt(ClvSum(ClvChartData.list6,'PolishWeight'),2)}}</td><td>{{fmt(ClvSum(ClvChartData.list6,'PrcAmt'),2)}}</td></tr>
+                            </table>
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="4">NGR</th></tr>
+                                <tr><th>Size</th><th>Pcs</th><th>Weight</th><th>$</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list7"><td>{{gv(r,'Category')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td></tr>
+                                <tr class="clv-total-row"><td>TOTAL</td><td>{{ClvSum(ClvChartData.list7,'Pcs')}}</td><td>{{fmt(ClvSum(ClvChartData.list7,'PolishWeight'),2)}}</td><td>{{fmt(ClvSum(ClvChartData.list7,'PrcAmt'),2)}}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- 2nd shape's SIZE breakdown (BEST GUESS - e.g. Fancy; shown only if present) -->
+                        <div class="clv-section-row" ng-if="ClvChartData.list8.length || ClvChartData.list9.length">
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="4">FANCY - GR</th></tr>
+                                <tr><th>Size</th><th>Pcs</th><th>Weight</th><th>$</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list8"><td>{{gv(r,'Category')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td></tr>
+                            </table>
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="4">FANCY - NGR</th></tr>
+                                <tr><th>Size</th><th>Pcs</th><th>Weight</th><th>$</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list9"><td>{{gv(r,'Category')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- PREDICTION + PROCESS WISE LOSS -->
+                        <div class="clv-section-row">
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="4">PREDICTION</th></tr>
+                                <tr><th>Status</th><th>P WT</th><th>Pcs</th><th>%</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list13"><td>{{gv(r,'Status')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                                <tr class="clv-total-row"><td>TOTAL</td><td>{{fmt(ClvSum(ClvChartData.list13,'PolishWeight'),2)}}</td><td>{{ClvSum(ClvChartData.list13,'Pcs')}}</td><td>100</td></tr>
+                            </table>
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="4">PROCESS WISE LOSS</th></tr>
+                                <tr><th>Process</th><th>P WT</th><th>Value</th><th>%</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list18"><td>{{gv(r,'Process')}}</td><td>{{fmt(gv(r,'DiffPWt'),2)}}</td><td>{{fmt(gv(r,'DiffPrcAmt'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                                <tr class="clv-total-row"><td>TOTAL</td><td>{{fmt(ClvSum(ClvChartData.list18,'DiffPWt'),2)}}</td><td>{{fmt(ClvSum(ClvChartData.list18,'DiffPrcAmt'),2)}}</td><td>{{fmt(ClvSum(ClvChartData.list18,'Per'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- CLV FINAL status table -->
+                        <table class="clv-plain-table clv-data-table">
+                            <tr><th class="clv-table-title" colspan="3">CLV FINAL</th></tr>
+                            <tr><th>Status</th><th>P WT</th><th>%</th></tr>
+                            <tr ng-repeat="r in ClvChartData.list14"><td>{{gv(r,'Status')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                            <tr class="clv-total-row"><td>TOTAL</td><td>{{fmt(ClvSum(ClvChartData.list14,'PolishWeight'),2)}}</td><td>100</td></tr>
+                        </table>
+
+                        <!-- CT UP ROUND / CT UP FANCY (GradType breakdown) -->
+                        <div class="clv-section-row">
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="5">CT UP ROUND</th></tr>
+                                <tr><th>GradType</th><th>Pcs</th><th>PrdPWT</th><th>PolishWeight</th><th>%</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list23"><td>{{gv(r,'GradType')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PrdPWT'),2)}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                            </table>
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="5">CT UP FANCY</th></tr>
+                                <tr><th>GradType</th><th>Pcs</th><th>PrdPWT</th><th>PolishWeight</th><th>%</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list25"><td>{{gv(r,'GradType')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PrdPWT'),2)}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- CT UP ROUND/FANCY (POINT BRK) status tables -->
+                        <div class="clv-section-row">
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="4">CT UP ROUND (POINT BRK)</th></tr>
+                                <tr><th>GradType</th><th>Pcs</th><th>100%</th><th>Total %</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list24"><td>{{gv(r,'GradType')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                            </table>
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="4">CT UP FANCY (POINT BRK)</th></tr>
+                                <tr><th>GradType</th><th>Pcs</th><th>100%</th><th>Total %</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list26"><td>{{gv(r,'GradType')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- Shape/Category breakdown (BEST GUESS placement - shown only if present) -->
+                        <div class="clv-section-row" ng-if="ClvChartData.list27.length || ClvChartData.list28.length">
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="5">Shape Category (27)</th></tr>
+                                <tr><th>Shape</th><th>Category</th><th>Pcs</th><th>Weight</th><th>$</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list27"><td>{{gv(r,'Shape')}}</td><td>{{gv(r,'Category')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td></tr>
+                            </table>
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="5">Shape Category (28)</th></tr>
+                                <tr><th>Shape</th><th>Category</th><th>Pcs</th><th>Weight</th><th>$</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list28"><td>{{gv(r,'Shape')}}</td><td>{{gv(r,'Category')}}</td><td>{{gv(r,'Pcs')}}</td><td>{{fmt(gv(r,'PolishWeight'),2)}}</td><td>{{fmt(gv(r,'PrcAmt'),2)}}</td></tr>
+                            </table>
+                        </div>
+
+                        <!-- List16 (Loss) - shown only if present, columns unconfirmed -->
+                        <div class="clv-section-row" ng-if="ClvChartData.list16.length">
+                            <table class="clv-plain-table clv-data-table">
+                                <tr><th class="clv-table-title" colspan="5">PROCESS WISE LOSS</th></tr>
+                                <tr><th>Status</th><th>Loss P WT</th><th>%</th><th>Loss $</th><th>$ %</th></tr>
+                                <tr ng-repeat="r in ClvChartData.list16"><td>{{gv(r,'Status')}}</td><td>{{fmt(gv(r,'LossPW'),2)}}</td><td>{{fmt(gv(r,'Per'),2)}}</td><td>{{fmt(gv(r,'LossPrc'),2)}}</td><td>{{fmt(gv(r,'PrcPer'),2)}}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button">
+                        <i class="fa fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -120,12 +703,9 @@
         module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
     }
 
-    module.controller("MasterBookCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
-        // Default page load pre-selection: 'All Data' (no stage/date narrowing)
-        $scope.SelectedModuleType = 'All Data';
-        $scope.ActiveFilter = 'All Data';
-        $scope.FromDate = '';
-        $scope.ToDate = '';
+    module.controller("MasterBookCtrl", ['$scope', '$http', function ($scope, $http) {
+        // Default page load pre-selection: 'All' (no stage/date narrowing)
+        $scope.ActiveFilter = 'All';
         $scope.List = [];
         $scope.DynamicColumns = [];
         $scope.DynamicSummary = [];
@@ -138,6 +718,19 @@
         $scope.OnSearchChange = function () {
             var gridInstance = $("#masterBookGridContainer").dxDataGrid("instance");
             if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        // Clears the search box AND every column filter (the per-cell
+        // search-icon clicks set column filterValue via columnOption, and
+        // headerFilter dropdowns can set their own) - clearFilter() with no
+        // argument wipes all of DevExtreme's filter types in one call.
+        $scope.ResetAllFilters = function () {
+            $scope.SearchText = '';
+            var gridInstance = $("#masterBookGridContainer").dxDataGrid("instance");
+            if (gridInstance) {
+                gridInstance.clearFilter();
+                gridInstance.searchByText('');
+            }
         };
 
         $scope.ShowColumnChooser = function () {
@@ -165,116 +758,30 @@
         // Dynamic Header Badge Class based on Active Stage
         $scope.GetStageBadgeClass = function (stage) {
             if (!stage) return 'badge-pill-info';
-            if (stage === 'All Data') return 'badge-pill-slate';
-            if (stage === 'Rough Entry') return 'badge-stage-rough-entry';
-            if (stage === 'Branch Assign') return 'badge-stage-branch-assign';
-            if (stage === 'Planning') return 'badge-stage-planning';
-            if (stage === 'CLV Running' || stage === 'CLV Complte') return 'badge-stage-clv';
-            if (stage === 'MFG Running' || stage === 'MFG Complte') return 'badge-stage-mfg';
-            if (stage === 'Mumbai Submit') return 'badge-stage-mumbai';
+            if (stage === 'All') return 'badge-pill-slate';
+            if (stage === 'Onhand') return 'badge-stage-onhand';
+            if (stage === 'Cleaving Running' || stage === 'Cleaving Completed') return 'badge-stage-clv';
+            if (stage === 'Distribution') return 'badge-stage-distribution';
+            if (stage === 'Mfg Running' || stage === 'Mfg Complete') return 'badge-stage-mfg';
+            if (stage === 'Transfer') return 'badge-stage-transfer';
             return 'badge-pill-info';
         };
 
-        // Clears the date-range inputs back to blank (used by the "All Data" reset)
-        $scope.ResetDateFilters = function () {
-            $('#FromDate').datepicker("clearDates");
-            $('#ToDate').datepicker("clearDates");
-            $scope.FromDate = '';
-            $scope.ToDate = '';
-        };
-
-        // Initialize DatePickers & Trigger Initial Default Load (All Data, no date restriction)
-        $timeout(function () {
-            $('#FromDate').datepicker({
-                format: "dd-M-yyyy",
-                autoclose: true,
-                todayHighlight: true,
-                orientation: "bottom auto"
-            }).on('changeDate', function (e) {
-                $scope.FromDate = $(this).val();
-            });
-
-            $('#ToDate').datepicker({
-                format: "dd-M-yyyy",
-                autoclose: true,
-                todayHighlight: true,
-                orientation: "bottom auto"
-            }).on('changeDate', function (e) {
-                $scope.ToDate = $(this).val();
-            });
-
-            // Default initial fetch: 'All Data', dates left blank (ALL data)
-            $scope.FetchData('All Data', true);
-        }, 100);
-
-        // Module Type dropdown change handler
-        $scope.OnModuleTypeChange = function () {
-            if ($scope.SelectedModuleType === 'All Data') {
-                $scope.ActiveFilter = 'All Data';
-                $scope.ResetDateFilters();
-            } else if ($scope.SelectedModuleType === 'Pre Rough') {
-                $scope.ActiveFilter = 'Rough Entry';
-            } else if ($scope.SelectedModuleType === 'Distribution') {
-                $scope.ActiveFilter = 'Branch Assign';
-            } else if ($scope.SelectedModuleType === 'CLV Chart') {
-                $scope.ActiveFilter = 'CLV Running';
-            } else if ($scope.SelectedModuleType === 'MFG Chart') {
-                $scope.ActiveFilter = 'MFG Running';
-            } else if ($scope.SelectedModuleType === 'Mumbai Submit') {
-                $scope.ActiveFilter = 'Mumbai Submit';
-            }
-
-            $scope.FetchData($scope.ActiveFilter, true);
-        };
-
-        // Scenario A: Search Button Click (Type Dropdown / Active Filter + Date Range)
-        $scope.SearchByDate = function () {
-            $scope.FetchData($scope.ActiveFilter, false);
-        };
-
-        // Scenario B: Stage Button Click (Fetch ALL historical data without date restriction)
+        // Stage Button Click
         $scope.SelectFilter = function (filterName) {
             $scope.ActiveFilter = filterName;
-
-            // Sync Module Type dropdown
-            if (filterName === 'All Data') {
-                $scope.SelectedModuleType = 'All Data';
-                $scope.ResetDateFilters();
-            } else if (filterName === 'Rough Entry') {
-                $scope.SelectedModuleType = 'Pre Rough';
-            } else if (filterName === 'Branch Assign' || filterName === 'Planning') {
-                $scope.SelectedModuleType = 'Distribution';
-            } else if (filterName === 'CLV Running' || filterName === 'CLV Complte') {
-                $scope.SelectedModuleType = 'CLV Chart';
-            } else if (filterName === 'MFG Running' || filterName === 'MFG Complte') {
-                $scope.SelectedModuleType = 'MFG Chart';
-            } else if (filterName === 'Mumbai Submit') {
-                $scope.SelectedModuleType = 'Mumbai Submit';
-            }
-
-            // Fetch ALL data without date restriction
-            $scope.FetchData(filterName, true);
+            $scope.FetchData(filterName);
         };
 
         // Fetch Grid Data from Server
-        // isAllData === true -> ignores FromDate and ToDate (sends '')
-        // isAllData === false -> sends selected FromDate and ToDate
-        $scope.FetchData = function (filterType, isAllData) {
+        $scope.FetchData = function (filterType) {
             $scope.IsLoading = true;
             if (typeof show_loader === 'function') show_loader();
 
-            var fromDateParam = '';
-            var toDateParam = '';
-
-            if (!isAllData) {
-                fromDateParam = $('#FromDate').val() || $scope.FromDate || '';
-                toDateParam = $('#ToDate').val() || $scope.ToDate || '';
-            }
-
             var postData = {
-                FilterType: filterType || $scope.ActiveFilter || 'Branch Assign',
-                FromDate: fromDateParam,
-                ToDate: toDateParam
+                FilterType: filterType || $scope.ActiveFilter || 'All',
+                FromDate: '',
+                ToDate: ''
             };
 
             $http.post('@Url.Action("Get_MasterBook_DataList", "Master")', postData)
@@ -301,9 +808,36 @@
             });
         };
 
+        // Trigger initial default load (All, no date restriction - the
+        // date-range filter UI was removed, so FetchData no longer takes
+        // date params at all).
+        $scope.FetchData('All');
+
         // Initialize Dynamic DevExtreme DataGrid
         $scope.InitGrid = function () {
             var gridCols = [];
+
+            // Shared cellTemplate: cell value on the left, a search icon
+            // pinned to the cell's right edge - clicking it sets that
+            // column's filter-row value to this cell's raw value, so the
+            // grid narrows to every row sharing it (column-wise filter,
+            // not the main search box).
+            function withSearchIcon(dataField) {
+                return function (container, options) {
+                    var displayVal = (options.text !== undefined && options.text !== null && options.text !== '') ? options.text : '-';
+                    var $wrap = $("<div>").addClass("mb-cell-search-wrap");
+                    $("<span>").addClass("mb-cell-search-text").text(displayVal).appendTo($wrap);
+                    $("<i>").addClass("fa fa-search mb-cell-search-icon")
+                        .attr("title", "Filter grid by this value")
+                        .on("click", function (e) {
+                            e.stopPropagation();
+                            var gridInstance = $("#masterBookGridContainer").dxDataGrid("instance");
+                            if (gridInstance) gridInstance.columnOption(dataField, "filterValue", options.value);
+                        })
+                        .appendTo($wrap);
+                    $wrap.appendTo(container);
+                };
+            }
 
             // Add index column (#)
             gridCols.push({
@@ -335,8 +869,26 @@
                 }
 
                 // Custom badge renderers based on dataField (independent of caption string)
-                if (dfLower === 'isactive') {
-                    c.width = 85;
+                if (dfLower === 'kapanno') {
+                    // TRN_RoughInwardDetail's own LotNo (the original Kapan
+                    // before any Lot split) - lets Lots split from the same
+                    // Kapan be compared against each other. Wider than the
+                    // compact default since values are long composite codes
+                    // (e.g. "D-S514-TRIAL03-2309-MIX-2809"). Plain text (no
+                    // badge) with the shared search icon.
+                    c.width = 230;
+                    c.alignment = 'left';
+                    c.cellTemplate = withSearchIcon('KapanNo');
+                } else if (dfLower === 'lotcode') {
+                    c.width = 110;
+                    c.alignment = 'left';
+                    c.cellTemplate = withSearchIcon('LotCode');
+                } else if (dfLower === 'mainlotcarat' || dfLower === 'roughcarat') {
+                    c.width = 110;
+                    c.alignment = 'left';
+                    c.cellTemplate = withSearchIcon(col.dataField);
+                } else if (dfLower === 'isactive') {
+                    c.width = 65;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         if (options.data.IsActive) {
@@ -346,22 +898,57 @@
                         }
                     };
                 } else if (dfLower === 'stagestatus') {
-                    c.width = 130;
+                    c.width = 100;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var stage = options.data.StageStatus || '';
                         var pillClass = "badge-pill-info";
-                        if (stage.indexOf('Complete') > -1 || stage.indexOf('Submitted') > -1) {
+                        if (stage.indexOf('Complete') > -1 || stage === 'Transfer') {
                             pillClass = "badge-pill-success";
                         } else if (stage.indexOf('Running') > -1) {
                             pillClass = "badge-pill-warning";
-                        } else if (stage.indexOf('Planning') > -1) {
+                        } else if (stage === 'Distribution') {
                             pillClass = "badge-pill-purple";
                         }
                         $("<span>").addClass("badge-status-pill " + pillClass).text(stage).appendTo(container);
                     };
+                } else if (dfLower === 'label') {
+                    c.width = 100;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var label = options.data.Label || '';
+                        var pillClass = "badge-pill-slate";
+                        if (label.indexOf('complete') > -1 || label === 'MumbaiSubmit') {
+                            pillClass = "badge-pill-success";
+                        } else if (label.indexOf('Running') > -1 || label === 'Clv Running' || label === 'MFG - Issue') {
+                            pillClass = "badge-pill-warning";
+                        } else if (label === 'Planning') {
+                            pillClass = "badge-pill-purple";
+                        }
+                        $("<span>").addClass("badge-status-pill " + pillClass).text(label).appendTo(container);
+                    };
+                } else if (dfLower === 'days') {
+                    c.width = 90;
+                    c.alignment = 'center';
+                    c.cellTemplate = function (container, options) {
+                        var days = options.data.Days;
+                        var color = options.data.DaysColor;
+                        var $wrap = $("<span>").css({ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "5px" });
+                        if (color) {
+                            $("<span>").css({
+                                display: "inline-block",
+                                width: "13px",
+                                height: "13px",
+                                borderRadius: "50%",
+                                backgroundColor: color,
+                                flexShrink: 0
+                            }).appendTo($wrap);
+                        }
+                        $("<span>").text(days === null || days === undefined ? '-' : days).appendTo($wrap);
+                        $wrap.appendTo(container);
+                    };
                 } else if (dfLower === 'priority') {
-                    c.minWidth = 100;
+                    c.width = 80;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var priority = (options.data[col.dataField] || options.data.Priority || options.data.priority || 'REGULAR').toUpperCase().trim();
@@ -380,7 +967,7 @@
                             .appendTo(container);
                     };
                 } else if (dfLower === 'rcode' || dfLower === 'r_code' || dfLower === 'r.code') {
-                    c.minWidth = 110;
+                    c.width = 85;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var val = options.data[col.dataField] || options.data.RCode || options.data.R_Code || '-';
@@ -400,23 +987,14 @@
                             .appendTo(container);
                     };
                 } else if (dfLower === 'jangadno' || dfLower === 'jangad' || dfLower === 'challanno') {
-                    c.minWidth = 105;
+                    c.width = 80;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var val = options.data[col.dataField] || options.data.ChallanNo || options.data.JangadNo || '-';
                         $("<span>").addClass("badge-status-pill badge-pill-slate").text(val).appendTo(container);
                     };
-                } else if (dfLower === 'recordtype') {
-                    c.width = 100;
-                    c.alignment = 'center';
-                    c.cellTemplate = function (container, options) {
-                        var val = options.data.RecordType || '-';
-                        var pillClass = 'badge-pill-info';
-                        if (val === 'Lot') pillClass = 'badge-pill-success';
-                        else if (val === 'Distribution') pillClass = 'badge-pill-warning';
-                        $("<span>").addClass("badge-status-pill " + pillClass).text(val).appendTo(container);
-                    };
                 } else if (dfLower === 'branchname' || dfLower === 'br' || dfLower === 'branchshortname') {
+                    c.width = 100;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var rawVal = options.data.BranchShortName || options.data.ShortName || options.data[col.dataField] || options.data.BranchName || '';
@@ -434,7 +1012,7 @@
                         }
                     };
                 } else if (dfLower === 'maingrad' || dfLower === 'grade') {
-                    c.width = 90;
+                    c.width = 70;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var val = options.data[col.dataField];
@@ -445,6 +1023,15 @@
                             $("<span>").text('-').appendTo(container);
                         }
                     };
+                } else if (dfLower === 'date' || dfLower === 'tableno' || dfLower === 'growthrate') {
+                    c.width = 110;
+                }
+
+                // Compact default for every column not given a specific
+                // width above (e.g. CLVRunningDate/MFGCompleteDate/Remarks)
+                // so the grid stays narrow instead of auto-sizing to content.
+                if (!c.width && !c.minWidth) {
+                    c.width = 85;
                 }
 
                 gridCols.push(c);
@@ -548,10 +1135,16 @@
                 },
                 paging: { enabled: false },
                 pager: { visible: false },
+                // Both the column-wise filter row and the filter-expression
+                // panel bar are hidden - filtering now happens via the
+                // per-cell search icons (columnOption filterValue), the
+                // headerFilter dropdowns, and the main search box, with the
+                // "Reset All Filters" button clearing all of it at once.
                 filterRow: {
-                    visible: true,
+                    visible: false,
                     applyFilter: 'auto'
                 },
+                filterPanel: { visible: false },
                 headerFilter: { visible: true },
                 searchPanel: { visible: false },
                 export: { enabled: false },
@@ -669,8 +1262,203 @@
         });
 
         // Action Click Handler for Reports & Charts
+        $scope.ClvChartData = null;
+        $scope.ClvMain = null;
+        $scope.ClvGradRows = [];
+        $scope.ClvGradTotalRow = null;
+        $scope.IsLoadingClvChart = false;
+
         $scope.OpenReport = function (reportType) {
+            var rowItem = $scope.SelectedRowItem;
             $scope.CloseReportMenu();
+
+            if (reportType === 'CLV Chart') {
+                $scope.OpenClvChart(rowItem);
+                return;
+            }
+            // Pre Rough / MFG Chart / IGI complet: not wired up yet.
+        };
+
+        // Fetches Report/GetAssortmentChart (Type=CLV) from the Branch 1 API,
+        // keyed by this row's LotCode (the Kapan key - RCode isn't unique per
+        // Kapan since multiple Lot splits can share one RCode).
+        $scope.ClvLotCode = '';
+
+        $scope.OpenClvChart = function (rowItem) {
+            var lotCode = rowItem ? rowItem.LotCode : null;
+            if (!lotCode) {
+                Noty("error", "This row has no Lot Code to look up a CLV Chart for.");
+                return;
+            }
+
+            // Captured into its own scope var, not read from SelectedRowItem
+            // in the modal template - OpenReport() already clears
+            // SelectedRowItem via CloseReportMenu() before this runs, so the
+            // modal would otherwise render with a blank Lot Code.
+            $scope.ClvLotCode = lotCode;
+
+            $scope.IsLoadingClvChart = true;
+            $scope.ClvChartData = null;
+            $scope.ClvMain = null;
+            $scope.ClvGradRows = [];
+            $scope.ClvGradTotalRow = null;
+            if (typeof show_loader === 'function') show_loader();
+
+            $http.get('@Url.Action("Get_ClvChartData", "Master")', { params: { LotCode: lotCode } }).then(function (res) {
+                $scope.IsLoadingClvChart = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                if (res.data && res.data.success) {
+                    $scope.ClvChartData = res.data.data || {};
+                     
+                     console.log(res.data.data)
+                    // List (singular, "list" in camelCase JSON) is the one
+                    // header row; List15 ("list15") is the Grad-wise
+                    // breakdown (B/C/...) with a trailing "Total" row - both
+                    // get pulled out into their own scope vars since the
+                    // header/grad-box markup above references them directly
+                    // instead of indexing into the arrays inline.
+                    var mainList = $scope.ClvChartData.list || [];
+                    $scope.ClvMain = mainList.length ? mainList[0] : null;
+
+                    var gradList = $scope.ClvChartData.list15 || [];
+                    $scope.ClvGradTotalRow = null;
+                    $scope.ClvGradRows = [];
+                    angular.forEach(gradList, function (r) {
+                        var gradNo = ($scope.gv(r, 'GradNo') || '').toString().toUpperCase();
+                        if (gradNo === 'TOTAL') {
+                            $scope.ClvGradTotalRow = r;
+                        } else {
+                            $scope.ClvGradRows.push(r);
+                        }
+                    });
+
+                    // API didn't send an explicit "Total" row for the Grad
+                    // breakdown - compute one so the Grad box/mini-panels
+                    // don't just show a blank Total row. Pcs/Carat are plain
+                    // sums; Rate/PRD/CLV-per-carat values are Carat-weighted
+                    // averages (verified against the PDF reference: e.g.
+                    // Rate 16.60 = sum(Rate*Carat)/sum(Carat) across B/C,
+                    // not a plain average).
+                    if (!$scope.ClvGradTotalRow && $scope.ClvGradRows.length) {
+                        $scope.ClvGradTotalRow = $scope.ClvComputeGradTotal($scope.ClvGradRows);
+                    }
+
+                    $('#ClvChartModal').modal('show');
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to load CLV Chart.");
+                }
+            }, function () {
+                $scope.IsLoadingClvChart = false;
+                if (typeof hide_loader === 'function') hide_loader();
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // Case-insensitive field lookup - the CLV Chart API response is
+        // camelCase JSON (ASP.NET Core default), but the report config
+        // above is written against the external project's PascalCase C#
+        // model names (ReportRepository.cs) for readability/traceability.
+        // Tries the exact name, then first-letter-lowered, then a full
+        // case-insensitive scan (covers short-acronym fields like "RWT"
+        // which camelCase to "rwt", not "rWT").
+        $scope.gv = function (row, pascalName) {
+            if (!row || !pascalName) return null;
+            if (row[pascalName] !== undefined) return row[pascalName];
+            var camel = pascalName.charAt(0).toLowerCase() + pascalName.slice(1);
+            if (row[camel] !== undefined) return row[camel];
+            var lower = pascalName.toLowerCase();
+            for (var k in row) {
+                if (row.hasOwnProperty(k) && k.toLowerCase() === lower) return row[k];
+            }
+            return null;
+        };
+
+        $scope.fmt = function (val, decimals) {
+            if (val === null || val === undefined || val === '' || isNaN(val)) return '';
+            return Number(val).toFixed(decimals || 0);
+        };
+
+        $scope.ClvSum = function (rows, pascalName) {
+            if (!rows || !rows.length) return 0;
+            var total = 0;
+            angular.forEach(rows, function (r) {
+                var v = parseFloat($scope.gv(r, pascalName));
+                if (!isNaN(v)) total += v;
+            });
+            return total;
+        };
+
+        $scope.ClvPct = function (part, whole) {
+            part = parseFloat(part) || 0;
+            whole = parseFloat(whole) || 0;
+            return whole ? (part / whole * 100) : 0;
+        };
+
+        // PRD/FINAL shape tables have no separate "total row" in the API
+        // response - just GR/NGR data rows - so TOTAL/GRAND TOTAL is summed
+        // here instead. Yeild %/Result % are both recomputed as
+        // PolishWeight/RPartWeight*100 (verified against the PDF reference:
+        // summed GR+NGR gives exactly the printed total). Size has no known
+        // summation formula (not a simple sum/average of the row values),
+        // so it's left blank on the computed total row rather than guessed.
+        $scope.ClvGroupTotal = function (rows) {
+            var t = { Pcs: 0, RPartWeight: 0, PolishWeight: 0, PrcAmt: 0, Yeild: 0, Per: 0 };
+            if (!rows || !rows.length) return t;
+            angular.forEach(rows, function (r) {
+                t.Pcs += parseFloat($scope.gv(r, 'Pcs')) || 0;
+                t.RPartWeight += parseFloat($scope.gv(r, 'RPartWeight')) || 0;
+                t.PolishWeight += parseFloat($scope.gv(r, 'PolishWeight')) || 0;
+                t.PrcAmt += parseFloat($scope.gv(r, 'PrcAmt')) || 0;
+            });
+            var pct = t.RPartWeight ? (t.PolishWeight / t.RPartWeight * 100) : 0;
+            t.Yeild = pct;
+            t.Per = pct;
+            return t;
+        };
+
+        // Fallback "Total" row for the Grad box (and its 2 sibling mini-
+        // panels, which reuse the same ClvGradTotalRow object) when the API
+        // doesn't send one. Pcs/Carat/Per are plain sums; Rate and the
+        // PRD/CLV per-carat & per-percent values are Carat-weighted
+        // averages, not plain averages - verified against the PDF
+        // reference (e.g. Rate 16.60 = sum(Rate*Carat)/sum(Carat) across
+        // Grad B/C, not (17.16+13.39)/2).
+        $scope.ClvComputeGradTotal = function (rows) {
+            var t = {
+                GradNo: 'TOTAL', Pcs: 0, Carat: 0, Per: 0,
+                Rate: 0, PrdPerCTValue: 0, ClvPerCTValue: 0, PrdPer: 0, ClvPer: 0
+            };
+            if (!rows || !rows.length) return t;
+
+            var totalCarat = 0;
+            var wRate = 0, wPrdCT = 0, wClvCT = 0, wPrdPer = 0, wClvPer = 0;
+
+            angular.forEach(rows, function (r) {
+                var pcs = parseFloat($scope.gv(r, 'Pcs')) || 0;
+                var carat = parseFloat($scope.gv(r, 'Carat')) || 0;
+                var per = parseFloat($scope.gv(r, 'Per')) || 0;
+
+                t.Pcs += pcs;
+                t.Carat += carat;
+                t.Per += per;
+                totalCarat += carat;
+
+                wRate += (parseFloat($scope.gv(r, 'Rate')) || 0) * carat;
+                wPrdCT += (parseFloat($scope.gv(r, 'PrdPerCTValue')) || 0) * carat;
+                wClvCT += (parseFloat($scope.gv(r, 'ClvPerCTValue')) || 0) * carat;
+                wPrdPer += (parseFloat($scope.gv(r, 'PrdPer')) || 0) * carat;
+                wClvPer += (parseFloat($scope.gv(r, 'ClvPer')) || 0) * carat;
+            });
+
+            if (totalCarat) {
+                t.Rate = wRate / totalCarat;
+                t.PrdPerCTValue = wPrdCT / totalCarat;
+                t.ClvPerCTValue = wClvCT / totalCarat;
+                t.PrdPer = wPrdPer / totalCarat;
+                t.ClvPer = wClvPer / totalCarat;
+            }
+
+            return t;
         };
     }]);
 </script>

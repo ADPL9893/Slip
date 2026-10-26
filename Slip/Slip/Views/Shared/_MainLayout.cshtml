@@ -4,6 +4,21 @@
     var StartMonthDateType = new DateTime(now.Year, now.Month, 1).ToString("dd-MMM-yyyy");
     var CurDates = System.DateTime.Now.Date.ToString("dd-MM-yyyy");
     var StartMonthDateTypes = new DateTime(now.Year, now.Month, 1).ToString("dd-MM-yyyy");
+
+    var userSession = SessionFacade.UserSession;
+    if (userSession == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+        return;
+    }
+
+    var permissionGroups = SessionFacade.FormPermissionsGroup;
+    var permissions = SessionFacade.FormPermissions;
+    if (permissionGroups == null || permissions == null)
+    {
+        Response.Redirect(Url.Action("Index", "Login"));
+        return;
+    }
 }
 @using Newtonsoft.Json;
 @using Slip.Utility;
@@ -399,9 +414,9 @@
 
                         @{
 
-                            foreach (var Group in Slip.Utility.SessionFacade.FormPermissionsGroup)
+                            foreach (var Group in permissionGroups)
                             {
-                                var groupItems = Slip.Utility.SessionFacade.FormPermissions.Where(x => x.GroupID == Group.GroupID).ToList();
+                                var groupItems = permissions.Where(x => x.GroupID == Group.GroupID).ToList();
                                 var isWide = groupItems.Count > 4;
                                 var half = (int)Math.Ceiling(groupItems.Count / 2.0);
 

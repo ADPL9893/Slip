@@ -4,315 +4,512 @@
 }
 
 <div ng-controller="LotEntryCtrl" class="rough-dist-page">
-    <!-- Header Banner -->
-    <div class="rd-header-card">
-        <div class="rd-header-left">
-            <div class="rd-header-icon">
-                <i class="fa fa-cubes"></i>
+    <!-- ============================== CREATE MODE ============================== -->
+    <div ng-show="!FormModel.LotID">
+        <!-- Select Inward Detail Balance -->
+        <div class="rd-card rd-card-specs">
+            <div class="rd-card-header">
+                <h5 class="rd-card-title">
+                    <i class="fa fa-cube text-primary"></i> 1. Select Inward Grade Balance
+                </h5>
             </div>
-            <div>
-                <div class="rd-breadcrumb">
-                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
-                    <a href="@Url.Action("Lot", "Master")">Lot Master</a> /
-                    <span>Lot Entry</span>
-                </div>
-                <h4 class="rd-header-title">{{FormModel.LotID > 0 ? 'Edit Lot' : 'New Lot'}}</h4>
-            </div>
-        </div>
-        <div class="rd-header-actions">
-            <button class="btn-rd-save-main" type="button" ng-disabled="IsSaving" ng-click="SaveLot()">
-                <i class="fa fa-save" ng-class="{'fa-spin': IsSaving}"></i> {{FormModel.LotID > 0 ? 'Update Lot' : 'Save Lot'}}
-            </button>
-        </div>
-    </div>
-
-    <!-- Select Branch & Distribution Bag -->
-    <div class="rd-card rd-card-specs">
-        <div class="rd-card-header">
-            <h5 class="rd-card-title">
-                <i class="fa fa-share-alt text-primary"></i> 1. Select Branch &amp; Distribution Bag
-            </h5>
-        </div>
-        <div class="rd-card-body">
-            <div class="row">
-                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="SelectedBranchID">
-                        Branch <span class="req">*</span>
-                    </label>
-                    <div class="field-select-wrap">
-                        <select id="SelectedBranchID"
-                                chosen="BranchList"
-                                ng-model="SelectedBranchID"
-                                ng-change="OnBranchChange()"
-                                ng-disabled="FormModel.LotID > 0"
-                                class="form-control rd-input">
-                            <option value="">-- Select Branch --</option>
-                            <option ng-repeat="item in BranchList" value="{{item.id}}">{{item.value}}</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="col-lg-5 col-md-6 col-sm-8 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="SelectedDistributionID">
-                        R.Code / Distribution Bag <span class="req">*</span>
-                    </label>
-                    <div class="field-select-wrap">
-                        <select id="SelectedDistributionID"
-                                chosen="DistributionList"
-                                ng-model="SelectedDistributionID"
-                                ng-change="OnDistributionChange()"
-                                ng-disabled="!SelectedBranchID || FormModel.LotID > 0"
-                                class="form-control rd-input">
-                            <option value="">-- Select Distribution Bag --</option>
-                            <option ng-repeat="item in DistributionList" value="{{item.DistributionID}}">
-                                {{GetDistributionLabel(item)}}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                <div class="clearfix"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Balance KPI Cards -->
-    <div class="kpi-container" ng-show="Selected.RoughDistributionID">
-        <div class="kpi-box kpi-org">
-            <div class="kpi-icon-wrap"><i class="fa fa-cube"></i></div>
-            <div class="kpi-content">
-                <div class="kpi-label">ORG Pcs</div>
-                <div class="kpi-value">{{(Selected.RoughPcs || 0) | number:0}} <span class="kpi-unit-label">Pcs</span></div>
-            </div>
-        </div>
-        <div class="kpi-box kpi-adj-wt">
-            <div class="kpi-icon-wrap"><i class="fa fa-diamond"></i></div>
-            <div class="kpi-content">
-                <div class="kpi-label">ORG Crts</div>
-                <div class="kpi-value">{{(Selected.RoughWeight || 0) | number:3}} <span class="kpi-unit-label">Cts</span></div>
-            </div>
-        </div>
-        <div class="kpi-box kpi-original">
-            <div class="kpi-icon-wrap"><i class="fa fa-cubes"></i></div>
-            <div class="kpi-content">
-                <div class="kpi-label">Pending Pcs</div>
-                <div class="kpi-value">{{(Selected.PendingPcs || 0) | number:0}} <span class="kpi-unit-label">Pcs</span></div>
-            </div>
-        </div>
-        <div class="kpi-box kpi-distributed">
-            <div class="kpi-icon-wrap"><i class="fa fa-balance-scale"></i></div>
-            <div class="kpi-content">
-                <div class="kpi-label">Pending Carat</div>
-                <div class="kpi-value">{{(Selected.PendingWeight || 0) | number:3}} <span class="kpi-unit-label">Cts</span></div>
-            </div>
-        </div>
-        <div class="kpi-box kpi-adj-pcs">
-            <div class="kpi-icon-wrap"><i class="fa fa-barcode"></i></div>
-            <div class="kpi-content">
-                <div class="kpi-label">Next Lot Code</div>
-                <div class="kpi-value" style="font-size: 20px;">{{PreviewLotCode || '-'}}</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Lot Details -->
-    <div class="rd-card rd-card-entry" ng-show="Selected.RoughDistributionID">
-        <div class="rd-card-header">
-            <h5 class="rd-card-title"><i class="fa fa-info-circle text-primary"></i> 2. Lot Details</h5>
-        </div>
-        <div class="rd-card-body">
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormLotPcs">Pcs <span class="req">*</span></label>
-                    <input type="text" id="FormLotPcs" ng-model="FormModel.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormLotCarat">Carat <span class="req">*</span></label>
-                    <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormDepartmentID">Department</label>
-                    <div class="field-select-wrap">
-                        <select id="FormDepartmentID" chosen="DepartmentList" ng-model="FormModel.DepartmentID" class="form-control rd-input">
-                            <option value="">-- Select --</option>
-                            <option ng-repeat="item in DepartmentList" value="{{item.ID}}">{{item.ShortName}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormHeadManagerID">Head Manager</label>
-                    <div class="field-select-wrap">
-                        <select id="FormHeadManagerID" chosen="HeadManagerList" ng-model="FormModel.HeadManagerID" class="form-control rd-input">
-                            <option value="">-- Select --</option>
-                            <option ng-repeat="item in HeadManagerList" value="{{item.EmployeeID}}">{{item.EmployeeName}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormGradeID">Grade</label>
-                    <div class="field-select-wrap">
-                        <select id="FormGradeID" chosen="GradeList" ng-model="FormModel.GradeID" ng-change="OnGradeChange()" class="form-control rd-input">
-                            <option value="">-- Select --</option>
-                            <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label">Factory Code <span class="req">*</span></label>
-                    <input type="text" ng-model="FormModel.FactoryCode" class="rd-input rd-master-input" readonly />
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label">Color Type <span class="req">*</span></label>
-                    <input type="text" ng-model="FormModel.ColorType" class="rd-input rd-master-input" readonly />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label">Size Code <span class="req">*</span></label>
-                    <input type="text" ng-model="FormModel.SizeCodeType" class="rd-input rd-master-input" readonly />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormLotType">Lot Type</label>
-                    <input type="text" id="FormLotType" ng-model="FormModel.LotType" placeholder="Lot Type" class="rd-input" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormOGName">OG Name</label>
-                    <input type="text" id="FormOGName" ng-model="FormModel.OGName" placeholder="OG Name" class="rd-input" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormValuePerCT">Value/CT</label>
-                    <input type="text" id="FormValuePerCT" ng-model="FormModel.ValuePerCT" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormRoughRate">Rough Rate</label>
-                    <input type="text" id="FormRoughRate" ng-model="FormModel.RoughRate" placeholder="0.00" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormReceipe">Receipe <span class="req">*</span></label>
-                    <div class="field-select-wrap">
-                        <select id="FormReceipe" chosen="ReceipeList" ng-model="FormModel.Receipe" class="form-control rd-input">
-                            <option value="">-- Select --</option>
-                            <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormBoxNo">Box No</label>
-                    <input type="text" id="FormBoxNo" ng-model="FormModel.BoxNo" placeholder="Box No" class="rd-input" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormMachineNo">Machine No</label>
-                    <input type="text" id="FormMachineNo" ng-model="FormModel.MachineNo" placeholder="Machine No" class="rd-input" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormHours">Hours</label>
-                    <input type="text" id="FormHours" ng-model="FormModel.Hours" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormHeight">Height</label>
-                    <input type="text" id="FormHeight" ng-model="FormModel.Height" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormNewHeight">New Height</label>
-                    <input type="text" id="FormNewHeight" ng-model="FormModel.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormSize">Size</label>
-                    <input type="text" id="FormSize" ng-model="FormModel.Size" placeholder="Size" class="rd-input" />
-                </div>
-                <div class="clearfix"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cake / Rejection / OG -->
-    <div class="rd-card rd-card-entry" ng-show="Selected.RoughDistributionID">
-        <div class="rd-card-header">
-            <h5 class="rd-card-title"><i class="fa fa-cube text-primary"></i> 3. Cake / Rejection / OG</h5>
-        </div>
-        <div class="rd-card-body">
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormCakePcs">Cake Pcs</label>
-                    <input type="text" id="FormCakePcs" ng-model="FormModel.CakePcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormCakeWeight">Cake Carat</label>
-                    <input type="text" id="FormCakeWeight" ng-model="FormModel.CakeWeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormRejPcs">Rej. Pcs</label>
-                    <input type="text" id="FormRejPcs" ng-model="FormModel.RejPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormRejCarat">Rej. Carat</label>
-                    <input type="text" id="FormRejCarat" ng-model="FormModel.RejCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormOGPcs">OG Pcs</label>
-                    <input type="text" id="FormOGPcs" ng-model="FormModel.OGPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormOGCarat">OG Carat</label>
-                    <input type="text" id="FormOGCarat" ng-model="FormModel.OGCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                </div>
-                <div class="clearfix"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Priority & Notes -->
-    <div class="rd-card rd-card-entry" ng-show="Selected.RoughDistributionID">
-        <div class="rd-card-header">
-            <h5 class="rd-card-title"><i class="fa fa-flag text-primary"></i> 4. Priority &amp; Notes</h5>
-        </div>
-        <div class="rd-card-body">
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormLotPriority">Priority <span class="req">*</span></label>
-                    <div class="field-select-wrap">
-                        <select id="FormLotPriority" chosen="PriorityList" class="form-control rd-input" ng-model="FormModel.LotPriority">
-                            <option value="">-- Select --</option>
-                            <option ng-repeat="item in PriorityList" value="{{item.PriorityName}}">{{item.PriorityName}}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormGrowthRate">Growth Rate <span class="req">*</span></label>
-                    <input type="text" id="FormGrowthRate" ng-model="FormModel.GrowthRate" placeholder="Growth Rate" class="rd-input" />
-                </div>
-                <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                    <label class="rd-label" for="FormCompareNo">Compare No</label>
-                    <input type="text" id="FormCompareNo" ng-model="FormModel.CompareNo" placeholder="Compare No" class="rd-input" />
-                </div>
-                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="FormLotPurpose">Lot Purpose <span class="req">*</span></label>
-                    <input type="text" id="FormLotPurpose" ng-model="FormModel.LotPurpose" placeholder="Lot Purpose" class="rd-input" />
-                </div>
-                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
-                    <label class="rd-label" for="FormRemarks">Remarks</label>
-                    <input type="text" id="FormRemarks" ng-model="FormModel.Remarks" placeholder="Remarks" class="rd-input" />
-                </div>
-                <div class="clearfix"></div>
-            </div>
-            <div class="row">
-                <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 rd-form-group">
-                    <label class="rd-label">Status</label>
-                    <div class="active-toggle-wrap">
-                        <input type="checkbox" id="FormIsActive" ng-model="FormModel.IsActive" />
-                        <label for="FormIsActive" class="status-toggle-label">
-                            <span ng-if="FormModel.IsActive" class="text-success"><i class="fa fa-check-circle"></i> Active</span>
-                            <span ng-if="!FormModel.IsActive" class="text-danger"><i class="fa fa-times-circle"></i> Inactive</span>
+            <div class="rd-card-body">
+                <div class="row">
+                    <div class="col-lg-6 col-md-7 col-sm-8 col-xs-12 rd-form-group">
+                        <label class="rd-label" for="SelectedInwardDetailID">
+                            Inward Lot<span class="req">*</span>
                         </label>
+                        <div class="field-select-wrap">
+                            <select id="SelectedInwardDetailID"
+                                    chosen="SourceList"
+                                    ng-model="SelectedInwardDetailID"
+                                    ng-change="OnSourceChange()"
+                                    ng-disabled="StagedSplits.length > 0"
+                                    class="form-control rd-input">
+                                <option value="">-- Select Inward Grade Balance --</option>
+                                <option ng-repeat="item in SourceList" value="{{item.InwardDetailID}}">
+                                    {{GetSourceLabel(item)}}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 rd-form-group rd-save-row-action">
+                        <label class="rd-label rd-action-label">&nbsp;</label>
+                        <button class="btn-rd-save-main" type="button" ng-disabled="IsSaving || StagedSplits.length === 0" ng-click="SaveAllSplits()">
+                            <i class="fa fa-save" ng-class="{'fa-spin': IsSaving}"></i> Save All Splits
+                            <span ng-if="StagedSplits.length > 0">({{StagedSplits.length}})</span>
+                        </button>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row" ng-show="Source.InwardDetailID">
+                    <div class="col-xs-12">
+                        <div class="rd-mini-stats">
+                            Org <strong>{{Source.Pcs || 0 | number:0}}</strong> Pcs / <strong>{{Source.Carat || 0 | number:3}}</strong> Cts
+                            &middot; Pending <strong>{{Source.PendingPcs || 0 | number:0}}</strong> Pcs / <strong>{{Source.PendingWeight || 0 | number:3}}</strong> Cts
+                        </div>
                     </div>
                 </div>
-                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <!-- Add Split Entry -->
+        <div class="rd-card rd-card-entry" ng-show="Source.InwardDetailID">
+            <div class="rd-card-header">
+                <h5 class="rd-card-title"><i class="fa fa-plus-circle text-primary"></i> 2. Add Split</h5>
+                <span class="text-muted" style="font-size: 11.5px;">
+                    Factory Code <strong>{{Source.FactoryCode || '-'}}</strong> &middot;
+                    Color <strong>{{Source.ColorType || '-'}}</strong> &middot;
+                    Size <strong>{{Source.SizeCodeType || '-'}}</strong>
+                    &middot; Remaining To Split <strong>{{AdjustPcs | number:0}} Pcs / {{AdjustWeight | number:3}} Cts</strong>
+                </span>
+            </div>
+            <div class="rd-card-body">
+                <div class="row">
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitPcs">
+                            Pcs <span class="req">*</span>
+                            <a href="javascript:void(0)" ng-if="AdjustPcs > 0" ng-click="NewSplit.Lot_Pcs = AdjustPcs" class="pull-right" style="font-weight:normal; font-size:11px; background-color:#d9f7be; padding:1px 5px; border-radius:3px;">All ({{AdjustPcs | number:0}})</a>
+                        </label>
+                        <input type="text" id="NewSplitPcs" ng-model="NewSplit.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitCarat">
+                            Carat <span class="req">*</span>
+                            <a href="javascript:void(0)" ng-if="AdjustWeight > 0" ng-click="NewSplit.Lot_Carat = AdjustWeight" class="pull-right" style="font-weight:normal; font-size:11px; background-color:#d9f7be; padding:1px 5px; border-radius:3px;">All ({{AdjustWeight | number:3}})</a>
+                        </label>
+                        <input type="text" id="NewSplitCarat" ng-model="NewSplit.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitBranchID">Branch</span></label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitBranchID" chosen="BranchList" ng-model="NewSplit.BranchID" ng-change="OnNewSplitBranchChange()" class="form-control rd-input">
+                                <option value="">Select</option>
+                                <option ng-repeat="item in BranchList" value="{{item.id}}">{{item.value}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitDepartmentID">Department</label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitDepartmentID" chosen="NewSplitDepartmentList" ng-model="NewSplit.DepartmentID" ng-disabled="!NewSplit.BranchID" class="form-control rd-input">
+                                <option value="">Select</option>
+                                <option ng-repeat="item in NewSplitDepartmentList" value="{{item.ID}}">{{item.ShortName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitHeadManagerID">Head Manager</label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitHeadManagerID" chosen="HeadManagerList" ng-model="NewSplit.HeadManagerID" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in HeadManagerList" value="{{item.EmployeeID}}">{{item.EmployeeName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitGradeID">Grade</label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitGradeID" chosen="GradeList" ng-model="NewSplit.GradeID" ng-change="OnNewSplitGradeChange()" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitLotPriority">Priority <span class="req">*</span></label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitLotPriority" chosen="PriorityList" class="form-control rd-input" ng-model="NewSplit.LotPriority">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in PriorityList" value="{{item.PriorityName}}">{{item.PriorityName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitCakePcs">Cake Pcs</label>
+                        <input type="text" id="NewSplitCakePcs" ng-model="NewSplit.CakePcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitCakeWeight">Cake Carat</label>
+                        <input type="text" id="NewSplitCakeWeight" ng-model="NewSplit.CakeWeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitOGPcs">OG Pcs</label>
+                        <input type="text" id="NewSplitOGPcs" ng-model="NewSplit.OGPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitOGCarat">OG Carat</label>
+                        <input type="text" id="NewSplitOGCarat" ng-model="NewSplit.OGCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitRejPcs">Rej. Pcs</label>
+                        <input type="text" id="NewSplitRejPcs" ng-model="NewSplit.RejPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitRejCarat">Rej. Carat</label>
+                        <input type="text" id="NewSplitRejCarat" ng-model="NewSplit.RejCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitMachineNo">Machine No</label>
+                        <input type="text" id="NewSplitMachineNo" ng-model="NewSplit.MachineNo" placeholder="Machine No" class="rd-input" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitHours">Hours</label>
+                        <input type="text" id="NewSplitHours" ng-model="NewSplit.Hours" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitHeight">Height</label>
+                        <input type="text" id="NewSplitHeight" ng-model="NewSplit.Height" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitNewHeight">New Height</label>
+                        <input type="text" id="NewSplitNewHeight" ng-model="NewSplit.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitSize">Size</label>
+                        <input type="text" id="NewSplitSize" ng-model="NewSplit.Size" placeholder="Size" class="rd-input" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitGrowthRate">Growth Rate <span class="req">*</span></label>
+                        <input type="text" id="NewSplitGrowthRate" ng-model="NewSplit.GrowthRate" placeholder="Growth Rate" class="rd-input" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitCompareNo">Compare No</label>
+                        <input type="text" id="NewSplitCompareNo" ng-model="NewSplit.CompareNo" placeholder="Compare No" class="rd-input" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitValuePerCT">Value/CT</label>
+                        <input type="text" id="NewSplitValuePerCT" ng-model="NewSplit.ValuePerCT" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitReceipe">Receipe <span class="req">*</span></label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitReceipe" chosen="ReceipeList" ng-model="NewSplit.Receipe" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitLotType">Lot Type</label>
+                        <input type="text" id="NewSplitLotType" ng-model="NewSplit.LotType" placeholder="Lot Type" class="rd-input" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitOGName">OG Name</label>
+                        <input type="text" id="NewSplitOGName" ng-model="NewSplit.OGName" placeholder="OG Name" class="rd-input" />
+                    </div>
+
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitRoughRate">Rough Rate</label>
+                        <input type="text" id="NewSplitRoughRate" ng-model="NewSplit.RoughRate" placeholder="0.00" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
+                        <label class="rd-label" for="NewSplitLotPurpose">Lot Purpose <span class="req">*</span></label>
+                        <input type="text" id="NewSplitLotPurpose" ng-model="NewSplit.LotPurpose" placeholder="Lot Purpose" class="rd-input" />
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                        <label class="rd-label" for="NewSplitRemarks">Remarks</label>
+                        <input type="text" id="NewSplitRemarks" ng-model="NewSplit.Remarks" placeholder="Remarks" class="rd-input" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 rd-form-group">
+                        <label class="rd-label">Status</label>
+                        <div class="active-toggle-wrap">
+                            <input type="checkbox" id="NewSplitIsActive" ng-model="NewSplit.IsActive" />
+                            <label for="NewSplitIsActive" class="status-toggle-label">
+                                <span ng-if="NewSplit.IsActive" class="text-success"><i class="fa fa-check-circle"></i> Active</span>
+                                <span ng-if="!NewSplit.IsActive" class="text-danger"><i class="fa fa-times-circle"></i> Inactive</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-8 col-xs-12 rd-form-group">
+                        <label class="rd-label rd-action-label">&nbsp;</label>
+                        <div class="rd-btn-action-row">
+                            <button class="btn-rd-add" type="button" ng-click="AddSplitRow()">
+                                <i class="fa fa-plus"></i> Add Split
+                            </button>
+                            <button class="btn-rd-clear" type="button" ng-click="ResetNewSplitForm()" title="Clear form fields">
+                                <i class="fa fa-eraser"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                
+            </div>
+        </div>
+
+        <!-- Staged Splits -->
+        <div class="rd-card rd-card-entry" ng-show="StagedSplits.length > 0">
+            <div class="rd-card-header">
+                <h5 class="rd-card-title"><i class="fa fa-table text-primary"></i> 3. Staged Splits ({{StagedSplits.length}})</h5>
+            </div>
+            <div class="rd-card-body">
+                <div class="uigrid3">
+                    <div id="stagedSplitsGridContainer" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================== EDIT MODE ============================== -->
+    <div ng-show="FormModel.LotID > 0">
+        <div class="rd-card rd-card-specs">
+            <div class="rd-card-header">
+                <h5 class="rd-card-title"><i class="fa fa-info-circle text-primary"></i> Source (read-only)</h5>
+            </div>
+            <div class="rd-card-body">
+                <div class="row">
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                        <label class="rd-label" for="FormBranchID">Branch <span class="text-muted">(assign/change anytime)</span></label>
+                        <div class="field-select-wrap">
+                            <select id="FormBranchID" chosen="BranchList" ng-model="FormModel.BranchID" ng-change="OnFormBranchChange()" class="form-control rd-input">
+                                <option value="">-- Not Assigned --</option>
+                                <option ng-repeat="item in BranchList" value="{{item.id}}">{{item.value}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label">R.Code / Lot Code</label>
+                        <input type="text" ng-model="FormModel.LotCode" class="rd-input rd-master-input" readonly />
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12 rd-form-group rd-save-row-action">
+                        <label class="rd-label rd-action-label">&nbsp;</label>
+                        <button class="btn-rd-save-main" type="button" ng-disabled="IsSaving" ng-click="SaveLot()">
+                            <i class="fa fa-save" ng-class="{'fa-spin': IsSaving}"></i> Update Lot
+                        </button>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="rd-mini-stats">
+                            Org <strong>{{Selected.RoughPcs || 0 | number:0}}</strong> Pcs / <strong>{{Selected.RoughWeight || 0 | number:3}}</strong> Cts
+                            &middot; Avail <strong>{{Selected.PendingPcs || 0 | number:0}}</strong> Pcs / <strong>{{Selected.PendingWeight || 0 | number:3}}</strong> Cts
+                        </div>
+                    </div>
+                </div>
+                <div class="row" ng-show="BranchSplitSummary.length > 0">
+                    <div class="col-xs-12">
+                        <label class="rd-label">Branch Split (% of this source's already-split total)</label>
+                        <div>
+                            <span ng-repeat="b in BranchSplitSummary" class="rd-branch-split-pill" ng-class="{'rd-branch-split-pill-active': b.BranchID == FormModel.BranchID}">
+                                {{b.BranchName}}: {{b.CaratPercent}}% Cts
+                                <span class="rd-branch-split-pill-sub">({{b.Pcs | number:0}} / {{b.Carat | number:3}})</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lot Details -->
+        <div class="rd-card rd-card-entry">
+            <div class="rd-card-header">
+                <h5 class="rd-card-title"><i class="fa fa-info-circle text-primary"></i> Lot Details</h5>
+            </div>
+            <div class="rd-card-body">
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormLotPcs">Pcs <span class="req">*</span></label>
+                        <input type="text" id="FormLotPcs" ng-model="FormModel.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormLotCarat">Carat <span class="req">*</span></label>
+                        <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormDepartmentID">Department</label>
+                        <div class="field-select-wrap">
+                            <select id="FormDepartmentID" chosen="DepartmentList" ng-model="FormModel.DepartmentID" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in DepartmentList" value="{{item.ID}}">{{item.ShortName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormHeadManagerID">Head Manager</label>
+                        <div class="field-select-wrap">
+                            <select id="FormHeadManagerID" chosen="HeadManagerList" ng-model="FormModel.HeadManagerID" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in HeadManagerList" value="{{item.EmployeeID}}">{{item.EmployeeName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormGradeID">Grade</label>
+                        <div class="field-select-wrap">
+                            <select id="FormGradeID" chosen="GradeList" ng-model="FormModel.GradeID" ng-change="OnGradeChange()" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label">Factory Code</label>
+                        <input type="text" ng-model="FormModel.FactoryCode" class="rd-input rd-master-input" readonly />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label">Color Type</label>
+                        <input type="text" ng-model="FormModel.ColorType" class="rd-input rd-master-input" readonly />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label">Size Code</label>
+                        <input type="text" ng-model="FormModel.SizeCodeType" class="rd-input rd-master-input" readonly />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormLotType">Lot Type</label>
+                        <input type="text" id="FormLotType" ng-model="FormModel.LotType" placeholder="Lot Type" class="rd-input" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormOGName">OG Name</label>
+                        <input type="text" id="FormOGName" ng-model="FormModel.OGName" placeholder="OG Name" class="rd-input" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormValuePerCT">Value/CT</label>
+                        <input type="text" id="FormValuePerCT" ng-model="FormModel.ValuePerCT" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormRoughRate">Rough Rate</label>
+                        <input type="text" id="FormRoughRate" ng-model="FormModel.RoughRate" placeholder="0.00" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormReceipe">Receipe <span class="req">*</span></label>
+                        <div class="field-select-wrap">
+                            <select id="FormReceipe" chosen="ReceipeList" ng-model="FormModel.Receipe" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormBoxNo">Box No</label>
+                        <input type="text" id="FormBoxNo" ng-model="FormModel.BoxNo" placeholder="Box No" class="rd-input" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormMachineNo">Machine No</label>
+                        <input type="text" id="FormMachineNo" ng-model="FormModel.MachineNo" placeholder="Machine No" class="rd-input" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormHours">Hours</label>
+                        <input type="text" id="FormHours" ng-model="FormModel.Hours" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormHeight">Height</label>
+                        <input type="text" id="FormHeight" ng-model="FormModel.Height" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormNewHeight">New Height</label>
+                        <input type="text" id="FormNewHeight" ng-model="FormModel.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormSize">Size</label>
+                        <input type="text" id="FormSize" ng-model="FormModel.Size" placeholder="Size" class="rd-input" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cake / Rejection / OG -->
+        <div class="rd-card rd-card-entry">
+            <div class="rd-card-header">
+                <h5 class="rd-card-title"><i class="fa fa-cube text-primary"></i> Cake / Rejection / OG</h5>
+            </div>
+            <div class="rd-card-body">
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormCakePcs">Cake Pcs</label>
+                        <input type="text" id="FormCakePcs" ng-model="FormModel.CakePcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormCakeWeight">Cake Carat</label>
+                        <input type="text" id="FormCakeWeight" ng-model="FormModel.CakeWeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormRejPcs">Rej. Pcs</label>
+                        <input type="text" id="FormRejPcs" ng-model="FormModel.RejPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormRejCarat">Rej. Carat</label>
+                        <input type="text" id="FormRejCarat" ng-model="FormModel.RejCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormOGPcs">OG Pcs</label>
+                        <input type="text" id="FormOGPcs" ng-model="FormModel.OGPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormOGCarat">OG Carat</label>
+                        <input type="text" id="FormOGCarat" ng-model="FormModel.OGCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Priority & Notes -->
+        <div class="rd-card rd-card-entry">
+            <div class="rd-card-header">
+                <h5 class="rd-card-title"><i class="fa fa-flag text-primary"></i> Priority &amp; Notes</h5>
+            </div>
+            <div class="rd-card-body">
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormLotPriority">Priority <span class="req">*</span></label>
+                        <div class="field-select-wrap">
+                            <select id="FormLotPriority" chosen="PriorityList" class="form-control rd-input" ng-model="FormModel.LotPriority">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in PriorityList" value="{{item.PriorityName}}">{{item.PriorityName}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormGrowthRate">Growth Rate <span class="req">*</span></label>
+                        <input type="text" id="FormGrowthRate" ng-model="FormModel.GrowthRate" placeholder="Growth Rate" class="rd-input" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormCompareNo">Compare No</label>
+                        <input type="text" id="FormCompareNo" ng-model="FormModel.CompareNo" placeholder="Compare No" class="rd-input" />
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                        <label class="rd-label" for="FormLotPurpose">Lot Purpose <span class="req">*</span></label>
+                        <input type="text" id="FormLotPurpose" ng-model="FormModel.LotPurpose" placeholder="Lot Purpose" class="rd-input" />
+                    </div>
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
+                        <label class="rd-label" for="FormRemarks">Remarks</label>
+                        <input type="text" id="FormRemarks" ng-model="FormModel.Remarks" placeholder="Remarks" class="rd-input" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 rd-form-group">
+                        <label class="rd-label">Status</label>
+                        <div class="active-toggle-wrap">
+                            <input type="checkbox" id="FormIsActive" ng-model="FormModel.IsActive" />
+                            <label for="FormIsActive" class="status-toggle-label">
+                                <span ng-if="FormModel.IsActive" class="text-success"><i class="fa fa-check-circle"></i> Active</span>
+                                <span ng-if="!FormModel.IsActive" class="text-danger"><i class="fa fa-times-circle"></i> Inactive</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -350,30 +547,32 @@
         $scope.InitLotID = parseInt('@ViewBag.LotID') || 0;
 
         $scope.BranchList = [];
-        $scope.DistributionList = [];
+        $scope.SourceList = [];
         $scope.ReceipeList = [];
         $scope.GradeList = [];
         $scope.DepartmentList = [];
+        $scope.NewSplitDepartmentList = [];
         $scope.HeadManagerList = [];
         $scope.PriorityList = [];
-        $scope.SelectedBranchID = '';
-        $scope.SelectedDistributionID = '';
-        $scope.Selected = {};
-        $scope.PreviewLotCode = '';
+        $scope.SelectedInwardDetailID = '';
+        $scope.Source = {};
+        $scope.StagedSplits = [];
+        $scope.AdjustPcs = 0;
+        $scope.AdjustWeight = 0;
         $scope.IsSaving = false;
         $scope.IsLoading = false;
+        $scope.Selected = {};
 
         $scope.FormModel = {
             LotID: 0,
-            RoughDistributionID: 0,
             RCode: '',
             LotCode: '',
-            DistributionPartNo: 0,
             FactoryCodeID: null,
             FactoryCode: '',
             ColorType: '',
             SizeCodeID: null,
             SizeCodeType: '',
+            BranchID: null,
             LotType: '',
             OGName: '',
             Lot_Pcs: null,
@@ -390,7 +589,7 @@
             CakePcs: null,
             CakeWeight: null,
             RejPcs: null,
-            RejCarat: null, 
+            RejCarat: null,
             OGPcs: null,
             OGCarat: null,
             LotPriority: '',
@@ -402,6 +601,42 @@
             Remarks: '',
             IsActive: true
         };
+
+        $scope.NewSplitDefaults = function () {
+            return {
+                BranchID: '',
+                DepartmentID: '',
+                HeadManagerID: '',
+                GradeID: null,
+                Grade: '',
+                LotType: '',
+                OGName: '',
+                Lot_Pcs: null,
+                Lot_Carat: null,
+                ValuePerCT: null,
+                RoughRate: null,
+                Receipe: '',
+                BoxNo: '',
+                MachineNo: '',
+                Hours: null,
+                Height: null,
+                NewHeight: null,
+                Size: '',
+                CakePcs: null,
+                CakeWeight: null,
+                RejPcs: null,
+                RejCarat: null,
+                OGPcs: null,
+                OGCarat: null,
+                LotPriority: '',
+                GrowthRate: '',
+                CompareNo: '',
+                LotPurpose: '',
+                Remarks: '',
+                IsActive: true
+            };
+        };
+        $scope.NewSplit = $scope.NewSplitDefaults();
 
         $('.allownumericwithoutdecimal').on('keypress', function (e) {
             if (e.which !== 8 && e.which !== 0 && (e.which < 48 || e.which > 57)) return false;
@@ -423,7 +658,16 @@
                     }
                 }
                 $scope.BranchList = bList;
-                $timeout(function () { $('#SelectedBranchID').trigger('chosen:updated'); }, 100);
+                $timeout(function () { $('#NewSplitBranchID').trigger('chosen:updated'); }, 100);
+            });
+        };
+
+        $scope.LoadSources = function () {
+            return $http.get('@Url.Action("Get_TRN_RoughInwardDetailListForLotSplit", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.SourceList = res.data.list || [];
+                    $timeout(function () { $('#SelectedInwardDetailID').trigger('chosen:updated'); }, 100);
+                }
             });
         };
 
@@ -431,7 +675,7 @@
             return $http.get('@Url.Action("Get_MST_ReceipeList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
                     $scope.ReceipeList = res.data.list || [];
-                    $timeout(function () { $('#FormReceipe').trigger('chosen:updated'); }, 100);
+                    $timeout(function () { $('#FormReceipe, #NewSplitReceipe').trigger('chosen:updated'); }, 100);
                 }
             });
         };
@@ -440,7 +684,7 @@
             return $http.get('@Url.Action("Get_MST_GradeList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
                     $scope.GradeList = res.data.list || [];
-                    $timeout(function () { $('#FormGradeID').trigger('chosen:updated'); }, 100);
+                    $timeout(function () { $('#FormGradeID, #NewSplitGradeID').trigger('chosen:updated'); }, 100);
                 }
             });
         };
@@ -463,7 +707,7 @@
             return $http.get('@Url.Action("Get_MST_HeadManagerList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
                     $scope.HeadManagerList = res.data.list || [];
-                    $timeout(function () { $('#FormHeadManagerID').trigger('chosen:updated'); }, 100);
+                    $timeout(function () { $('#FormHeadManagerID, #NewSplitHeadManagerID').trigger('chosen:updated'); }, 100);
                 }
             });
         };
@@ -472,89 +716,219 @@
             return $http.get('@Url.Action("Get_MST_PriorityDropdownList", "Master")').then(function (res) {
                 if (res.data && res.data.success) {
                     $scope.PriorityList = res.data.list || [];
-                    if (!$scope.FormModel.LotPriority) {
-                        var defaultItem = $scope.PriorityList.find(function (x) { return x.IsDefault; });
-                        $scope.FormModel.LotPriority = defaultItem ? defaultItem.PriorityName : ($scope.PriorityList[0] ? $scope.PriorityList[0].PriorityName : '');
-                    }
-                    $timeout(function () { $('#FormLotPriority').trigger('chosen:updated'); }, 100);
+                    var defaultItem = $scope.PriorityList.find(function (x) { return x.IsDefault; });
+                    var defaultName = defaultItem ? defaultItem.PriorityName : ($scope.PriorityList[0] ? $scope.PriorityList[0].PriorityName : '');
+                    if (!$scope.FormModel.LotPriority) { $scope.FormModel.LotPriority = defaultName; }
+                    if (!$scope.NewSplit.LotPriority) { $scope.NewSplit.LotPriority = defaultName; }
+                    $timeout(function () { $('#FormLotPriority, #NewSplitLotPriority').trigger('chosen:updated'); }, 100);
                 }
             });
         };
 
-        $scope.BuildPreviewCode = function () {
-            var partNo = (Selected_NextPartNoPreview()) || 1;
-            $scope.PreviewLotCode = $scope.Selected.RCode ? ($scope.Selected.RCode + String.fromCharCode(64 + partNo)) : '';
-        };
-        function Selected_NextPartNoPreview() {
-            return $scope.Selected ? $scope.Selected.NextPartNoPreview : null;
-        }
-
-        $scope.GetDistributionLabel = function (item) {
+        $scope.GetSourceLabel = function (item) {
             if (!item) return '';
-            var partNo = parseInt(item.RoughDistributionPartNo || 1);
-            var rCode = (item.RCode || '') + (partNo > 1 ? ('-' + partNo) : '');
-            return rCode + ' / ' + (item.Receipe || '-') + ' / ' + (item.ColorType || '-') + ' / ' + (item.FactoryCode || '-')
-                + ' \u2014 Pending ' + (item.PendingPcs || 0) + ' Pcs / ' + (item.PendingWeight || 0) + ' Cts';
+            return (item.LotNo || '-') + ' / Grade ' + (item.Grade || '-') + ' / ' + (item.Receipe || '-') + ' / ' + (item.ColorType || '-') + ' / ' + (item.FactoryCode || '-')
+                + ' - Pending ' + (item.PendingPcs || 0) + ' Pcs / ' + (item.PendingWeight || 0) + ' Cts';
         };
 
-        $scope.OnBranchChange = function () {
-            $scope.SelectedDistributionID = '';
-            $scope.Selected = {};
-            $scope.DistributionList = [];
-            $scope.PreviewLotCode = '';
-            $scope.FormModel.DepartmentID = '';
-            $scope.LoadDepartments($scope.SelectedBranchID);
-            if (!$scope.SelectedBranchID) return;
+        $scope.RecalculateAdjust = function () {
+            var usedPcs = 0, usedWt = 0;
+            for (var i = 0; i < $scope.StagedSplits.length; i++) {
+                usedPcs += parseFloat($scope.StagedSplits[i].Lot_Pcs || 0);
+                usedWt += parseFloat($scope.StagedSplits[i].Lot_Carat || 0);
+            }
+            $scope.AdjustPcs = parseFloat($scope.Source.PendingPcs || 0) - usedPcs;
+            $scope.AdjustWeight = parseFloat(($scope.Source.PendingWeight || 0) - usedWt).toFixed(3) * 1;
+        };
 
-            $http.get('@Url.Action("Get_MST_RoughDistributionListForLot", "Master")?BranchID=' + $scope.SelectedBranchID).then(function (res) {
-                $scope.DistributionList = (res.data && res.data.list) ? res.data.list : [];
-                $timeout(function () { $('#SelectedDistributionID').trigger('chosen:updated'); }, 100);
+        $scope.ApplySourceAutoFetch = function () {
+            var src = $scope.Source || {};
+            $scope.NewSplit.GradeID = src.GradeID || null;
+            $scope.NewSplit.Grade = src.Grade || '';
+            $scope.NewSplit.Receipe = src.Receipe || '';
+            $scope.NewSplit.MachineNo = src.MachineNo || '';
+            $scope.NewSplit.BoxNo = src.BoxNo || '';
+            $scope.NewSplit.Hours = src.Hours;
+            $scope.NewSplit.NewHeight = src.ToHeight;
+            $scope.NewSplit.GrowthRate = src.GrowthRate || '';
+            $scope.NewSplit.LotPurpose = src.LotPurpose || '';
+        };
+
+        $scope.OnSourceChange = function () {
+            var match = ($scope.SourceList || []).find(function (x) { return parseInt(x.InwardDetailID) === parseInt($scope.SelectedInwardDetailID); });
+            $scope.Source = match || {};
+            $scope.StagedSplits = [];
+            $scope.NewSplit = $scope.NewSplitDefaults();
+            if (match) {
+                $scope.ApplySourceAutoFetch();
+            }
+            $scope.RecalculateAdjust();
+            $scope.InitStagedGrid();
+            $timeout(function () {
+                $('#NewSplitGradeID, #NewSplitReceipe').trigger('chosen:updated');
+            }, 100);
+        };
+
+        $scope.OnNewSplitBranchChange = function () {
+            $scope.NewSplit.DepartmentID = '';
+            if (!$scope.NewSplit.BranchID) {
+                $scope.NewSplitDepartmentList = [];
+                return;
+            }
+            $http.get('@Url.Action("Get_MST_DepartmentList", "Master")?BranchID=' + $scope.NewSplit.BranchID).then(function (res) {
+                $scope.NewSplitDepartmentList = (res.data && res.data.success) ? (res.data.list || []) : [];
+                $timeout(function () { $('#NewSplitDepartmentID').trigger('chosen:updated'); }, 100);
             });
         };
 
-        $scope.OnDistributionChange = function () {
-            debugger
-            var match = ($scope.DistributionList || []).find(function (x) { return parseInt(x.DistributionID) === parseInt($scope.SelectedDistributionID); });
-            if (!match) {
-                $scope.Selected = {};
-                $scope.PreviewLotCode = '';
-                return;
-            }
-            $scope.Selected = match;
-            $scope.Selected.RoughDistributionID = match.DistributionID;
-            $scope.FormModel.RoughDistributionID = match.DistributionID;
-            $scope.FormModel.RCode = match.RCode;
-            // Factory Code / Color Type / Size Code always match the originating
-            // Rough Distribution - read-only, not independently editable.
-            $scope.FormModel.FactoryCodeID = match.FactoryCodeID;
-            $scope.FormModel.FactoryCode = match.FactoryCode;
-            $scope.FormModel.ColorType = match.ColorType;
-            $scope.FormModel.SizeCodeID = match.SizeCodeID;
-            $scope.FormModel.SizeCodeType = match.SizeCodeType;
-
-            // Carried over from the Rough Distribution / Rough Inward detail as a
-            // starting point - still user-editable afterward.
-            $scope.FormModel.GradeID = match.GradeID || null;
-            $scope.FormModel.Grade = match.Grade || '';
-            $scope.FormModel.MachineNo = match.MachineNo || '';
-            $scope.FormModel.BoxNo = match.BoxNo || '';
-            $scope.FormModel.Receipe = match.Receipe || '';
-            $scope.FormModel.Hours = match.Hours;
-            $scope.FormModel.NewHeight = match.NewHeight;
-            $scope.FormModel.GrowthRate = match.GrowthRate || '';
-            $scope.FormModel.LotPurpose = match.LotPurpose || '';
-
-            $timeout(function () {
-                $('#FormGradeID').trigger('chosen:updated');
-                $('#FormReceipe').trigger('chosen:updated');
-            }, 100);
-
-            $scope.BuildPreviewCode();
+        $scope.OnNewSplitGradeChange = function () {
+            var match = ($scope.GradeList || []).find(function (x) { return parseInt(x.GradeID) === parseInt($scope.NewSplit.GradeID); });
+            $scope.NewSplit.Grade = match ? match.Grade : '';
         };
 
         $scope.OnGradeChange = function () {
             var match = ($scope.GradeList || []).find(function (x) { return parseInt(x.GradeID) === parseInt($scope.FormModel.GradeID); });
             $scope.FormModel.Grade = match ? match.Grade : '';
+        };
+
+        $scope.OnFormBranchChange = function () {
+            $scope.FormModel.DepartmentID = '';
+            var branchMatch = ($scope.BranchList || []).find(function (x) { return parseInt(x.id) === parseInt($scope.FormModel.BranchID); });
+            $scope.Selected.BranchName = branchMatch ? branchMatch.value : '';
+            $scope.LoadDepartments($scope.FormModel.BranchID);
+        };
+
+        $scope.ResetNewSplitForm = function () {
+            var priorityKeep = $scope.NewSplit.LotPriority;
+            $scope.NewSplit = $scope.NewSplitDefaults();
+            $scope.NewSplit.LotPriority = priorityKeep;
+            $scope.NewSplitDepartmentList = [];
+            // Re-apply the source's auto-fetched values (Grade, Receipe, etc.) -
+            // clearing them to blank on every "Add Split" would force the user
+            // to re-pick/re-type them for every single split line.
+            $scope.ApplySourceAutoFetch();
+            $timeout(function () {
+                $('#NewSplitGradeID, #NewSplitReceipe').trigger('chosen:updated');
+            }, 100);
+        };
+
+        $scope.ValidateNewSplit = function () {
+            var pcs = parseInt($scope.NewSplit.Lot_Pcs);
+            var carat = parseFloat($scope.NewSplit.Lot_Carat);
+            if (isNaN(pcs) || pcs <= 0 || isNaN(carat) || carat <= 0) {
+                Noty("error", "Please enter valid Pcs and Carat (greater than zero)!");
+                return false;
+            }
+            if (pcs > $scope.AdjustPcs) {
+                Noty("error", "Pcs (" + pcs + ") exceeds the remaining balance (" + $scope.AdjustPcs + ")!");
+                return false;
+            }
+            if (carat > $scope.AdjustWeight + 0.0001) {
+                Noty("error", "Carat (" + carat.toFixed(3) + ") exceeds the remaining balance (" + $scope.AdjustWeight.toFixed(3) + ")!");
+                return false;
+            }
+            if (!($scope.NewSplit.Receipe || '').trim()) { Noty("error", "Please select Receipe!"); return false; }
+            if (!($scope.NewSplit.LotPriority || '').trim()) { Noty("error", "Please select Priority!"); return false; }
+            if (!($scope.NewSplit.GrowthRate || '').trim()) { Noty("error", "Please enter Growth Rate!"); return false; }
+            if (!($scope.NewSplit.LotPurpose || '').trim()) { Noty("error", "Please enter Lot Purpose!"); return false; }
+            return true;
+        };
+
+        $scope.AddSplitRow = function () {
+            if (!$scope.ValidateNewSplit()) return;
+
+            var branchMatch = ($scope.BranchList || []).find(function (x) { return parseInt(x.id) === parseInt($scope.NewSplit.BranchID); });
+            var deptMatch = ($scope.NewSplitDepartmentList || []).find(function (x) { return x.ID === $scope.NewSplit.DepartmentID; });
+
+            var row = angular.copy($scope.NewSplit);
+            row.BranchID = $scope.NewSplit.BranchID ? parseInt($scope.NewSplit.BranchID) : null;
+            row.BranchName = branchMatch ? branchMatch.value : '-';
+            row.DepartmentName = deptMatch ? deptMatch.ShortName : '-';
+            row.FactoryCodeID = $scope.Source.FactoryCodeID;
+            row.FactoryCode = $scope.Source.FactoryCode;
+            row.ColorType = $scope.Source.ColorType;
+            row.SizeCodeID = $scope.Source.SizeCodeID;
+            row.SizeCodeType = $scope.Source.SizeCodeType;
+
+            $scope.StagedSplits.push(row);
+            $scope.RecalculateAdjust();
+            $scope.ResetNewSplitForm();
+            $scope.InitStagedGrid();
+        };
+
+        $scope.RemoveSplitRow = function (index) {
+            $scope.StagedSplits.splice(index, 1);
+            $scope.RecalculateAdjust();
+            $scope.InitStagedGrid();
+        };
+
+        // DevExtreme DataGrid for the staged (not-yet-saved) split lines -
+        // mirrors RoughDistributionCtrl's InitGrid pattern: re-create the
+        // widget against the current array on every add/remove rather than
+        // trying to patch an existing dxDataGrid instance's dataSource.
+        $scope.InitStagedGrid = function () {
+            if (!$("#stagedSplitsGridContainer").length) return;
+
+            $("#stagedSplitsGridContainer").dxDataGrid({
+                dataSource: $scope.StagedSplits,
+                height: 'auto',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                hoverStateEnabled: true,
+                rowAlternationEnabled: true,
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                paging: { enabled: false },
+                pager: { visible: false },
+                columnChooser: { enabled: false },
+                columns: [
+                    {
+                        caption: '#',
+                        width: 50,
+                        alignment: 'center',
+                        allowResizing: false,
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).appendTo(container);
+                        }
+                    },
+                    { caption: 'Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 90, alignment: 'right', format: '#,##0' },
+                    { caption: 'Carat', dataField: 'Lot_Carat', dataType: 'number', minWidth: 110, alignment: 'right', format: '#,##0.000' },
+                    { caption: 'Branch', dataField: 'BranchName', minWidth: 110 },
+                    { caption: 'Department', dataField: 'DepartmentName', minWidth: 110 },
+                    { caption: 'Priority', dataField: 'LotPriority', minWidth: 100 },
+                    { caption: 'Grade', dataField: 'Grade', minWidth: 90 },
+                    { caption: 'Lot Type', dataField: 'LotType', minWidth: 100 },
+                    {
+                        caption: 'ACTION',
+                        width: 70,
+                        alignment: 'center',
+                        allowResizing: false,
+                        fixed: true,
+                        fixedPosition: 'right',
+                        cellTemplate: function (container, options) {
+                            $("<button>")
+                                .addClass("grid-action-btn-del")
+                                .attr("type", "button")
+                                .attr("title", "Remove Staged Split")
+                                .html('<i class="fa fa-trash-o"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () {
+                                        $scope.RemoveSplitRow(options.rowIndex);
+                                    });
+                                })
+                                .appendTo(container);
+                        }
+                    }
+                ],
+                summary: {
+                    totalItems: [
+                        { column: 'Lot_Pcs', summaryType: 'sum', valueFormat: '#,##0', displayFormat: '{0}', alignByColumn: true },
+                        { column: 'Lot_Carat', summaryType: 'sum', valueFormat: '#,##0.000', displayFormat: '{0}', alignByColumn: true }
+                    ]
+                }
+            });
         };
 
         $scope.LoadForEdit = function (lotId) {
@@ -570,15 +944,15 @@
                 var m = res.data.item;
                 $scope.FormModel = {
                     LotID: parseInt(m.LotID),
-                    RoughDistributionID: parseInt(m.RoughDistributionID),
+                    InwardDetailID: m.InwardDetailID,
                     RCode: m.RCode,
                     LotCode: m.LotCode,
-                    DistributionPartNo: m.DistributionPartNo,
                     FactoryCodeID: m.FactoryCodeID,
                     FactoryCode: m.FactoryCode,
                     ColorType: m.ColorType,
                     SizeCodeID: m.SizeCodeID,
                     SizeCodeType: m.SizeCodeType,
+                    BranchID: m.BranchID || null,
                     GradeID: m.GradeID,
                     Grade: m.Grade,
                     LotType: m.LotType,
@@ -609,52 +983,28 @@
                     Remarks: m.Remarks,
                     IsActive: m.IsActive === true || m.IsActive === 1 || m.IsActive === '1' || m.IsActive === 'True'
                 };
+                var branchMatch = ($scope.BranchList || []).find(function (x) { return parseInt(x.id) === parseInt(m.BranchID); });
                 $scope.Selected = {
-                    RoughDistributionID: m.RoughDistributionID,
-                    RCode: m.RCode,
+                    BranchName: branchMatch ? branchMatch.value : '',
                     RoughPcs: m.RoughPcs,
                     RoughWeight: m.RoughWeight,
                     PendingPcs: m.AvailablePcs,
                     PendingWeight: m.AvailableWeight
                 };
-                $scope.PreviewLotCode = m.LotCode;
-
-                // Branch/Distribution selects are disabled in edit mode (the bag
-                // can't be changed after creation), but still need to *display*
-                // the lot's actual bag - the branch-filtered dropdown list won't
-                // necessarily contain it anymore (e.g. its pending balance may now
-                // be 0), so inject a synthetic single-item list for it here.
-                $scope.SelectedBranchID = m.BranchID ? m.BranchID.toString() : '';
-                $scope.DistributionList = [{
-                    DistributionID: m.RoughDistributionID,
-                    RCode: m.RCode,
-                    RoughDistributionPartNo: m.RoughDistributionPartNo,
-                    Receipe: m.Receipe,
-                    ColorType: m.ColorType,
-                    FactoryCode: m.FactoryCode,
-                    RoughPcs: m.RoughPcs,
-                    RoughWeight: m.RoughWeight,
-                    PendingPcs: m.AvailablePcs,
-                    PendingWeight: m.AvailableWeight
-                }];
-                $scope.SelectedDistributionID = m.RoughDistributionID ? m.RoughDistributionID.toString() : '';
                 $scope.LoadDepartments(m.BranchID).then(function () { SyncChosenValue('#FormDepartmentID', m.DepartmentID); });
                 SyncChosenValue('#FormHeadManagerID', m.HeadManagerID);
                 SyncChosenValue('#FormLotPriority', m.LotPriority);
 
-                // Force the native <select> value directly rather than relying on
-                // Angular digest timing to have already applied the binding before
-                // chosen:updated fires - otherwise Chosen can render blank even
-                // though the underlying model value is correct.
                 function SyncChosenValue(selector, value) {
                     $timeout(function () {
                         $(selector).val(value != null ? value.toString() : '').trigger('chosen:updated');
                     }, 200);
                 }
-                SyncChosenValue('#SelectedBranchID', $scope.SelectedBranchID);
-                SyncChosenValue('#SelectedDistributionID', $scope.SelectedDistributionID);
                 SyncChosenValue('#FormGradeID', m.GradeID);
                 SyncChosenValue('#FormReceipe', m.Receipe);
+                SyncChosenValue('#FormBranchID', m.BranchID);
+
+                $scope.LoadBranchSplitSummary();
             }, function () {
                 $scope.IsLoading = false;
                 if (typeof hide_loader === 'function') hide_loader();
@@ -662,11 +1012,22 @@
             });
         };
 
+        // Breakdown of one Inward row's already-split total (every non-deleted
+        // Lot split from it, assigned or not) by Branch. Used by both the
+        // normal Edit form (defaults to the current Lot's own InwardDetailID)
+        // and Branch Split mode (passes it explicitly).
+        $scope.BranchSplitSummary = [];
+        $scope.LoadBranchSplitSummary = function (inwardDetailID) {
+            inwardDetailID = inwardDetailID || $scope.FormModel.InwardDetailID;
+            if (!inwardDetailID) { $scope.BranchSplitSummary = []; return; }
+            $http.get('@Url.Action("Get_LotBranchSplitSummary", "Master")?InwardDetailID=' + inwardDetailID).then(function (res) {
+                $scope.BranchSplitSummary = (res.data && res.data.success) ? res.data.list : [];
+            }, function () {
+                $scope.BranchSplitSummary = [];
+            });
+        };
+
         $scope.ValidateForm = function () {
-            if (!$scope.FormModel.RoughDistributionID) {
-                Noty("error", "Please select Branch and R.Code / Distribution Bag!");
-                return false;
-            }
             var pcs = parseInt($scope.FormModel.Lot_Pcs);
             var carat = parseFloat($scope.FormModel.Lot_Carat);
             if (isNaN(pcs) || pcs < 0 || isNaN(carat) || carat < 0) {
@@ -680,14 +1041,13 @@
             var availPcs = parseFloat($scope.Selected.PendingPcs || 0);
             var availWt = parseFloat($scope.Selected.PendingWeight || 0);
             if (pcs > availPcs) {
-                Noty("error", "Pcs (" + pcs + ") exceeds the bag's pending balance (" + availPcs + ")!");
+                Noty("error", "Pcs (" + pcs + ") exceeds the available balance (" + availPcs + ")!");
                 return false;
             }
             if (carat > availWt + 0.0001) {
-                Noty("error", "Carat (" + carat.toFixed(3) + ") exceeds the bag's pending balance (" + availWt.toFixed(3) + ")!");
+                Noty("error", "Carat (" + carat.toFixed(3) + ") exceeds the available balance (" + availWt.toFixed(3) + ")!");
                 return false;
             }
-            if (!$scope.FormModel.FactoryCodeID) { Noty("error", "Please select Factory Code!"); return false; }
             if (!($scope.FormModel.Receipe || '').trim()) { Noty("error", "Please select Receipe!"); return false; }
             if (!($scope.FormModel.LotPriority || '').trim()) { Noty("error", "Please select Priority!"); return false; }
             if (!($scope.FormModel.GrowthRate || '').trim()) { Noty("error", "Please enter Growth Rate!"); return false; }
@@ -695,9 +1055,9 @@
             return true;
         };
 
-        $scope.GenerateAndShowQR = function (lotId) {
-            if (!lotId) return $q.when();
-            return $http.post('@Url.Action("GenerateLotQRs", "Master")', { lotIDs: [lotId] }).then(function (res) {
+        $scope.GenerateAndShowQR = function (lotIds) {
+            if (!lotIds || lotIds.length === 0) return $q.when();
+            return $http.post('@Url.Action("GenerateLotQRs", "Master")', { lotIDs: lotIds }).then(function (res) {
                 if (res.data && res.data.success) {
                     window.open('@Url.Action("LotQRPrint", "Master")', '_blank');
                 } else {
@@ -708,36 +1068,59 @@
             });
         };
 
+        $scope.GoBackToList = function () {
+            var lotListUrl = '@Url.Action("Lot", "Master")';
+            if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
+                window.top.ChromeTabs.openTab({ title: 'Lot Master', url: lotListUrl, forceReload: true });
+            }
+            if (typeof window.closeCurrentTab === 'function') {
+                window.closeCurrentTab();
+            } else {
+                window.location.href = lotListUrl;
+            }
+        };
+
         $scope.SaveLot = function () {
             if (!$scope.ValidateForm()) return;
 
             $scope.IsSaving = true;
-            var action = $scope.FormModel.LotID > 0 ? 'UPDATE' : 'INSERT';
-            $http.post('@Url.Action("Lot_Save", "Master")', { model: $scope.FormModel, Action: action }).then(function (res) {
+            $http.post('@Url.Action("Lot_Save", "Master")', { model: $scope.FormModel, Action: 'UPDATE' }).then(function (res) {
                 $scope.IsSaving = false;
                 if (res.data && res.data.success) {
                     Noty("success", res.data.message || "Lot saved successfully.");
+                    $scope.FormModel.RCode = res.data.RCode || $scope.FormModel.RCode;
+                    $scope.FormModel.LotCode = res.data.LotCode || $scope.FormModel.LotCode;
+                    $scope.LoadBranchSplitSummary();
                     var savedLotId = res.data.LotID || $scope.FormModel.LotID;
-
-                    // Wait for the QR tab to actually open before switching/closing,
-                    // otherwise leaving this tab cancels the in-flight QR request.
-                    $scope.GenerateAndShowQR(savedLotId).then(function () {
-                        var lotListUrl = '@Url.Action("Lot", "Master")';
-                        if (window.top && window.top.ChromeTabs && window.top.ChromeTabs.openTab) {
-                            window.top.ChromeTabs.openTab({ title: 'Lot Master', url: lotListUrl, forceReload: true });
-                        }
-                        if (typeof window.closeCurrentTab === 'function') {
-                            window.closeCurrentTab();
-                        } else {
-                            window.location.href = lotListUrl;
-                        }
-                    });
+                    $scope.GenerateAndShowQR([savedLotId]).then(function () { $scope.GoBackToList(); });
                 } else {
                     Noty("error", (res.data && res.data.message) || "Failed to save lot.");
                 }
             }, function () {
                 $scope.IsSaving = false;
                 Noty("error", "Error saving lot to server.");
+            });
+        };
+
+        $scope.SaveAllSplits = function () {
+            if ($scope.StagedSplits.length === 0) return;
+
+            $scope.IsSaving = true;
+            $http.post('@Url.Action("LotSplit_Save", "Master")', {
+                splits: $scope.StagedSplits,
+                InwardDetailID: $scope.Source.InwardDetailID,
+                SizeCodeID: $scope.Source.SizeCodeID
+            }).then(function (res) {
+                $scope.IsSaving = false;
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Lot splits saved successfully.");
+                    $scope.GenerateAndShowQR(res.data.newLotIDs).then(function () { $scope.GoBackToList(); });
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to save lot splits.");
+                }
+            }, function () {
+                $scope.IsSaving = false;
+                Noty("error", "Error saving lot splits to server.");
             });
         };
 
@@ -750,10 +1133,13 @@
             $scope.LoadRecipes(),
             $scope.LoadGrades(),
             $scope.LoadHeadManagers(),
-            $scope.LoadPriorities()
+            $scope.LoadPriorities(),
+            $scope.InitLotID > 0 ? $q.when() : $scope.LoadSources()
         ]).then(function () {
             if ($scope.InitLotID > 0) {
                 $scope.LoadForEdit($scope.InitLotID);
+            } else {
+                $scope.InitStagedGrid();
             }
         });
     }]);

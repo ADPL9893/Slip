@@ -245,7 +245,7 @@
                         <div class="report-file-input-wrapper">
                             <input id="filename7" type="file" accept=".xlsx" file-model="Planning.filename7" ng-model="Diamond.filename7" class="report-file-input" />
                         </div>
-                        <button class="btn-report-upload" type="button" ng-click="Upload7()">
+                        <button class="btn-report-upload" type="button" ng-click="UploadIdealLabour()">
                             <i class="fa fa-cloud-upload"></i> Upload
                         </button>
                     </div>
@@ -267,6 +267,7 @@
     }
 
     module.directive('chosen', function () {
+        debugger
         var linker = function (scope, element, attrs) {
             var list = attrs['chosen'];
 
@@ -496,6 +497,7 @@
         };
 
         $scope.Upload6 = function () {
+            debugger
             var formData = new FormData();
             var file = document.getElementById('filename6').files;
 
@@ -529,16 +531,14 @@
             }
         };
 
-        $scope.Upload7 = function () {
+        $scope.UploadIdealLabour = function () {
             var formData = new FormData();
             var file = document.getElementById('filename7').files;
-
             if (file.length > 0) {
                 for (var i = 0; i < file.length; i++) {
                     formData.append("excelFile", file[i]);
                 }
                 show_loader();
-
                 $http({
                     method: 'POST',
                     url: '@Url.Action("TRN_Ideal_Labour_Upload", "Slip")',

@@ -57,11 +57,17 @@ namespace Slip.Utility
         {
             get
             {
+                if (HttpContext.Current?.Session == null)
+                    return null;
+
                 return (List<CheckPermission_User>)HttpContext.Current.Session[_FormPermissionsList];
             }
             set
             {
-                HttpContext.Current.Session[_FormPermissionsList] = value;
+                if (HttpContext.Current?.Session != null)
+                {
+                    HttpContext.Current.Session[_FormPermissionsList] = value;
+                }
             }
         }
         //public static List<BarcodeGenerateListOne> BarcodeGenerateList
@@ -79,11 +85,17 @@ namespace Slip.Utility
         {
             get
             {
+                if (HttpContext.Current?.Session == null)
+                    return null;
+
                 return (List<CheckPermission_User>)HttpContext.Current.Session[_FormPermissionsGroup];
             }
             set
             {
-                HttpContext.Current.Session[_FormPermissionsGroup] = value;
+                if (HttpContext.Current?.Session != null)
+                {
+                    HttpContext.Current.Session[_FormPermissionsGroup] = value;
+                }
             }
         }
         //public static List<HPHT_Barcode> HPHTBarcodeList
