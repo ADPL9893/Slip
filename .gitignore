@@ -36,3 +36,4 @@ secrets.json
 *.pubxml
 /SQL
 /Slip/.vs/Slip/config/applicationhost.config
+/Slip/SQL BackUP
