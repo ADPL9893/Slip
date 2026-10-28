@@ -340,6 +340,7 @@
     <Compile Include="Models\FourP_Pridiction.cs" />
     <Compile Include="Models\MainRoughSummary.cs" />
     <Compile Include="Models\Mst_Department.cs" />
+    <Compile Include="Models\SYS_Module.cs" />
     <Compile Include="Models\MST_Lot.cs" />
     <Compile Include="Models\MST_LotMaster.cs" />
     <Compile Include="Models\MST_Role.cs" />
@@ -1336,6 +1337,7 @@
     <Content Include="Views\Master\RoughDistributionQRPrint.cshtml" />
     <Content Include="Views\Master\LotQRPrint.cshtml" />
     <Content Include="Views\Master\DepartmentMaster.cshtml" />
+    <Content Include="Views\Master\ModuleMaster.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

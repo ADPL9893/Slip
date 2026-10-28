@@ -5,45 +5,44 @@
 
 @if (ViewBag.CanView != null && (bool)ViewBag.CanView)
 {
-    <div ng-controller="DepartmentMasterCtrl" class="bm-page">
-        <!-- Header Card -->
-        <div class="bm-header-card">
-            <div class="bm-header-left">
-                <div class="bm-header-icon"><i class="fa fa-sitemap"></i></div>
-                <div>
-                    <div class="bm-breadcrumb">
-                        <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> /
-                        <span>Department Master</span>
-                    </div>
-                    <h4 class="bm-header-title">Department Master</h4>
-                </div>
-            </div>
-            <div>
-                <button class="btn-bm-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
-                    <i class="fa fa-plus"></i> ADD NEW DEPARTMENT
-                </button>
-            </div>
-        </div>
-
-        <!-- Grid Card -->
-        <div class="bm-grid-card">
-            <div class="bm-card-header">
-                <div class="bm-card-title-left">
-                    <i class="fa fa-table"></i>
-                    <h3>Department Records</h3>
-                    <span class="badge-status-pill badge-pill-info" style="margin-left: 6px;">
-                        <i class="fa fa-database"></i> {{DepartmentList.length || 0}} Records
+    <div ng-controller="DepartmentMasterCtrl" class="rough-dist-list-page">
+        <div class="rdl-grid-card">
+            <div class="rdl-card-header">
+                <div class="rdl-card-title-left">
+                    <i class="fa fa-sitemap"></i>
+                    <h3>Department Master</h3>
+                    <span class="badge-status-pill badge-pill-info">
+                        <i class="fa fa-database"></i> {{DepartmentList.length || 0}} Total Records
                     </span>
                 </div>
+                <div class="rdl-card-actions">
+                    <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()" title="Add Department">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                        <i class="fa fa-columns"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                        <i class="fa fa-file-excel-o"></i>
+                    </button>
+                    <div class="field-select-wrap field-select-wrap--search">
+                        <input type="text"
+                               ng-model="SearchText"
+                               ng-change="OnSearchChange()"
+                               placeholder="Search department records..."
+                               class="form-control ri-input" />
+                    </div>
+                </div>
             </div>
-            <div class="bm-grid-body">
-                <div id="departmentGridContainer" style="width: 100%;"></div>
+
+            <div class="rdl-grid-body">
+                <div id="inwardGridContainer" style="width: 100%;"></div>
             </div>
         </div>
 
         <!-- Add / Edit Modal -->
-        <div class="modal fade" id="DepartmentModal" role="dialog" data-backdrop="static">
-            <div class="modal-dialog">
+        <div class="modal fade" id="InwardModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" style="max-width: 650px; width: 95%; margin: 30px auto;">
                 <div class="modal-content">
                     <div class="modal-header">
                         <div class="modal-header-flex">
@@ -56,37 +55,39 @@
                     </div>
 
                     <div class="modal-body">
-                        <div class="bm-modal-section">
-                            <div class="bm-modal-section-title"><i class="fa fa-info-circle text-primary"></i> DEPARTMENT DETAILS</div>
+                        <div class="ri-modal-section">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> DEPARTMENT DETAILS</div>
 
                             <div class="row">
-                                <div class="col-md-6 col-sm-12 bm-form-group">
-                                    <label class="bm-label" for="ModalBranchId">BRANCH <span class="req">*</span></label>
-                                    <select id="ModalBranchId" chosen="BranchList" class="form-control bm-input" ng-model="FormModel.BranchId" ng-options="item.BranchID as item.BranchName for item in BranchList">
-                                        <option value="">Select Branch</option>
-                                    </select>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalBranchId">BRANCH <span class="req">*</span></label>
+                                    <div class="field-select-wrap">
+                                        <select id="ModalBranchId" chosen="BranchList" class="form-control ri-input" ng-model="FormModel.BranchId" ng-options="item.BranchID as item.BranchName for item in BranchList">
+                                            <option value="">Select Branch</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-md-6 col-sm-12 bm-form-group">
-                                    <label class="bm-label" for="ModalShortName">SHORT NAME <span class="req">*</span></label>
-                                    <input type="text" id="ModalShortName" ng-model="FormModel.ShortName" placeholder="e.g. 4P, SAW" maxlength="10" class="bm-input" />
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShortName">SHORT NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalShortName" ng-model="FormModel.ShortName" placeholder="e.g. 4P, SAW" maxlength="10" class="ri-input" />
                                 </div>
                             </div>
 
                             <div class="row">
-                                <div class="col-md-12 bm-form-group">
-                                    <label class="bm-label" for="ModalDepartmentName">DEPARTMENT NAME <span class="req">*</span></label>
-                                    <input type="text" id="ModalDepartmentName" ng-model="FormModel.DepartmentName" placeholder="Enter Full Department Name" maxlength="150" class="bm-input" />
+                                <div class="col-md-12 ri-form-group">
+                                    <label class="ri-label" for="ModalDepartmentName">DEPARTMENT NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalDepartmentName" ng-model="FormModel.DepartmentName" placeholder="Enter Full Department Name" maxlength="150" class="ri-input" />
                                 </div>
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
-                                    <label class="bm-label" for="ModalFloor">FLOOR</label>
-                                    <input type="text" id="ModalFloor" ng-model="FormModel.Floor" placeholder="e.g. 1st Floor / Ground" maxlength="50" class="bm-input" />
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalFloor">FLOOR</label>
+                                    <input type="text" id="ModalFloor" ng-model="FormModel.Floor" placeholder="e.g. 1st Floor / Ground" maxlength="50" class="ri-input" />
                                 </div>
-                                <div class="col-md-6 col-sm-6 col-xs-12 bm-form-group">
-                                    <label class="bm-label" for="ModalLocation">LOCATION</label>
-                                    <input type="text" id="ModalLocation" ng-model="FormModel.Location" placeholder="e.g. Unit-1, Wing A" maxlength="250" class="bm-input" />
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalLocation">LOCATION</label>
+                                    <input type="text" id="ModalLocation" ng-model="FormModel.Location" placeholder="e.g. Unit-1, Wing A" maxlength="250" class="ri-input" />
                                 </div>
                             </div>
 
@@ -102,10 +103,10 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button class="btn-bm-reset" type="button" ng-click="ResetForm()">
+                        <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
                             <i class="fa fa-refresh"></i> Reset
                         </button>
-                        <button class="btn-bm-save" type="button" ng-click="SaveDepartment()" ng-disabled="IsSaving">
+                        <button class="btn-ri-save" type="button" ng-click="SaveDepartment()" ng-disabled="IsSaving">
                             <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
                             {{FormModel.ID && FormModel.ID !== '00000000-0000-0000-0000-000000000000' ? 'UPDATE' : 'SAVE'}}
                         </button>
@@ -117,20 +118,23 @@
         <!-- Delete Confirmation Modal -->
         <div class="modal fade" id="DeptConfirmDeleteModal" role="dialog" data-backdrop="static">
             <div class="modal-dialog modal-sm">
-                <div class="modal-content">
-                    <div class="modal-header" style="background: #111827 !important; padding: 12px 18px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <h4 class="modal-title" style="font-size: 14px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
-                            <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                <div class="modal-content" style="border-radius: 12px; border: none; overflow: hidden; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);">
+                    <div class="modal-header" style="background: var(--topbar-bg-solid, #1C2B6B) !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #15215a; position: relative;">
+                        <div class="modal-header-flex">
+                            <div class="modal-header-title-left">
+                                <i class="fa fa-trash-o" style="color: #f87171; font-size: 17px;"></i>
+                                <h4 class="modal-title" style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0;">Confirm Delete</h4>
+                            </div>
+                            <button type="button" class="btn-close-header" data-dismiss="modal" style="color: #c7d2fe; opacity: 1; font-size: 24px; font-weight: 300; line-height: 1; background: transparent; border: none; outline: none; cursor: pointer;">&times;</button>
                         </div>
                     </div>
-                    <div class="modal-body text-center" style="padding: 20px; background: #ffffff;">
+                    <div class="modal-body text-center" style="padding: 24px 20px; background: #ffffff;">
                         <i class="fa fa-trash-o text-danger" style="font-size: 38px; margin-bottom: 12px; display: block;"></i>
                         <p style="font-size: 13px; color: #334155; margin: 0;">
                             Are you sure you want to delete department <strong>{{SelectedDeleteItem.DepartmentName}}</strong> ({{SelectedDeleteItem.ShortName}})?
                         </p>
                     </div>
-                    <div class="modal-footer" style="padding: 10px 18px; background: #f8fafc;">
+                    <div class="modal-footer" style="padding: 12px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0;">
                         <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600;">Cancel</button>
                         <button class="btn btn-danger btn-sm" ng-click="ExecuteDelete()" type="button" style="font-weight: 600;">Delete</button>
                     </div>
@@ -206,12 +210,39 @@
         $scope.OpenAddModal = function () {
             $scope.LoadBranches();
             $scope.ResetForm();
-            $("#DepartmentModal").modal("show");
+            $("#InwardModal").modal("show");
         };
 
         $scope.GetGridInstance = function () {
-            var el = $("#departmentGridContainer");
+            var el = $("#inwardGridContainer");
             return (el.length && el.hasClass("dx-widget")) ? el.dxDataGrid("instance") : null;
+        };
+
+        $scope.SearchText = '';
+        $scope.OnSearchChange = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('DepartmentMaster');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'DepartmentMaster.xlsx');
+                });
+            });
         };
 
         $scope.EditItem = function (item) {
@@ -226,7 +257,7 @@
                 IsClv: !!item.IsClv,
                 IsActive: !!item.IsActive
             };
-            $("#DepartmentModal").modal("show");
+            $("#InwardModal").modal("show");
             $timeout(function () {
                 $('#ModalBranchId').trigger('chosen:updated');
             }, 80);
@@ -326,7 +357,7 @@
                 .then(function (res) {
                     $scope.IsSaving = false;
                     if (res.data && res.data.success) {
-                        $("#DepartmentModal").modal("hide");
+                        $("#InwardModal").modal("hide");
                         Noty("success", res.data.message || (isEdit ? "Department updated successfully!" : "Department saved successfully!"));
                         $scope.ResetForm();
                         $scope.LoadDepartmentList();
@@ -343,34 +374,102 @@
             var gridInstance = $scope.GetGridInstance();
             if (gridInstance) {
                 gridInstance.option("dataSource", $scope.DepartmentList);
+                gridInstance.refresh();
                 return;
             }
-            $("#departmentGridContainer").dxDataGrid({
+            $("#inwardGridContainer").dxDataGrid({
                 dataSource: $scope.DepartmentList,
                 keyExpr: 'ID',
+                height: '100%',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: false,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: false },
+                filterRow: { visible: false, applyFilter: 'auto' },
+                headerFilter: { visible: true },
+                onToolbarPreparing: function (e) {
+                    e.toolbarOptions.items = [];
+                },
                 onRowPrepared: function (e) {
                     if (e.rowType === "data") {
                         e.rowElement.addClass("ri-row-animate");
                         e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
                     }
                 },
-                height: 'calc(100vh - 210px)',
-                columnAutoWidth: true,
-                allowColumnResizing: true,
-                columnResizingMode: 'widget',
-                showColumnLines: true,
-                showRowLines: true,
-                showBorders: true,
-                sorting: { mode: "multiple" },
-                scrolling: { mode: 'standard', rowRenderingMode: 'standard' },
-                paging: { enabled: false },
-                pager: { visible: false },
-                searchPanel: { visible: true, width: 250, placeholder: 'Search departments...' },
-                filterRow: { visible: true },
-                headerFilter: { visible: true },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "header") {
+                        e.cellElement.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $indicators = e.cellElement.find(".dx-column-indicators");
+                        if ($indicators.length > 1) {
+                            $indicators.slice(1).remove();
+                        }
+                        var $first = e.cellElement.find(".dx-column-indicators").first();
+                        if ($first.length) {
+                            e.cellElement.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    }
+                },
+                onContentReady: function (e) {
+                    e.element.find(".dx-datagrid-headers .dx-header-row > td").each(function () {
+                        var $td = $(this);
+                        $td.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $ind = $td.find(".dx-column-indicators");
+                        if ($ind.length > 1) {
+                            $ind.slice(1).remove();
+                        }
+                        var $first = $ind.first();
+                        if ($first.length) {
+                            $td.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    });
+                },
+                selection: { mode: 'single' },
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'DepartmentName',
+                            summaryType: 'count',
+                            displayFormat: 'Total: {0}',
+                            alignByColumn: true
+                        }
+                    ]
+                },
+                export: { enabled: false },
                 columns: [
                     {
-                        caption: '#', width: 45, alignment: 'center',
+                        caption: '#', width: 45, alignment: 'center', allowReordering: false, allowFiltering: false, allowSorting: false,
                         cellTemplate: function (container, options) {
                             $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
                         }
@@ -382,9 +481,9 @@
                         }
                     },
                     {
-                        caption: 'Short Name', dataField: 'ShortName', minWidth: 100, alignment: 'center',
+                        caption: 'Short Name', dataField: 'ShortName', minWidth: 110, alignment: 'center',
                         cellTemplate: function (container, options) {
-                            $("<strong>").text(options.data.ShortName).css({ "color": "#1e293b", "font-size": "13px" }).appendTo(container);
+                            $("<strong>").text(options.data.ShortName || '').css({ "color": "#1C5F8F" }).appendTo(container);
                         }
                     },
                     { caption: 'Department Name', dataField: 'DepartmentName', minWidth: 180 },
@@ -411,7 +510,7 @@
                         }
                     },
                     {
-                        caption: 'Action', width: 120, alignment: 'center', fixed: true, fixedPosition: 'right',
+                        caption: 'Action', width: 120, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
                         visible: ($scope.CanEdit || $scope.CanDelete),
                         cellTemplate: function (container, options) {
                             var div = $("<div>").addClass("grid-btn-group");
@@ -445,7 +544,7 @@
             });
         };
 
-        $('#DepartmentModal').on('shown.bs.modal', function () {
+        $('#InwardModal').on('shown.bs.modal', function () {
             $timeout(function () {
                 if (!$('#ModalBranchId').data('chosen')) {
                     $('#ModalBranchId').chosen({ width: '100%', search_contains: true, allow_single_deselect: true });

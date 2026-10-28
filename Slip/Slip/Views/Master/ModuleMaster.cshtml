@@ -1,0 +1,648 @@
+@{
+    ViewBag.Title = "Module Master";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+    <div ng-controller="ModuleMasterCtrl" class="rough-dist-list-page">
+        <div class="rdl-grid-card">
+            <div class="rdl-card-header">
+                <div class="rdl-card-title-left">
+                    <i class="fa fa-cubes"></i>
+                    <h3>Module Master</h3>
+                    <span class="badge-status-pill badge-pill-info">
+                        <i class="fa fa-database"></i> {{ModuleList.length || 0}} Total Records
+                    </span>
+                </div>
+                <div class="rdl-card-actions">
+                    <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()" title="Add Module">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                        <i class="fa fa-columns"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                        <i class="fa fa-file-excel-o"></i>
+                    </button>
+                    <div class="field-select-wrap field-select-wrap--search">
+                        <input type="text"
+                               ng-model="SearchText"
+                               ng-change="OnSearchChange()"
+                               placeholder="Search module records..."
+                               class="form-control ri-input" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rdl-grid-body">
+                <div id="inwardGridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Add / Edit Modal -->
+        <div class="modal fade" id="InwardModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" style="max-width: 720px; width: 95%; margin: 30px auto;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-flex">
+                            <div class="modal-header-title-left">
+                                <i class="fa fa-cubes modal-title-icon"></i>
+                                <h4 class="modal-title">{{FormModel.ModuleID && FormModel.ModuleID > 0 ? 'Edit Module' : 'Add New Module'}}</h4>
+                            </div>
+                            <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="ri-modal-section">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> MODULE DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalGroupId">MODULE GROUP</label>
+                                    <div class="field-select-wrap">
+                                        <select id="ModalGroupId" chosen="GroupList" class="form-control ri-input" ng-model="FormModel.GroupID" ng-options="item.GroupID as item.GroupName for item in GroupList">
+                                            <option value="">Select Group</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalModuleName">MODULE NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalModuleName" ng-model="FormModel.ModuleName" placeholder="e.g. Module Master" maxlength="100" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalController">CONTROLLER <span class="req">*</span></label>
+                                    <input type="text" id="ModalController" ng-model="FormModel.Controller" ng-change="AutoUpdateUrl()" placeholder="e.g. Master" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalAction">ACTION <span class="req">*</span></label>
+                                    <input type="text" id="ModalAction" ng-model="FormModel.Action" ng-change="AutoUpdateUrl()" placeholder="e.g. ModuleMaster" maxlength="100" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalURL">URL / ROUTE</label>
+                                    <input type="text" id="ModalURL" ng-model="FormModel.URL" placeholder="Auto-generated e.g. Master\ModuleMaster" maxlength="100" class="ri-input" readonly disabled style="background-color: #f1f5f9; cursor: not-allowed; color: #475569;" />
+                                </div>
+                                <div class="col-md-3 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalIconName">ICON NAME</label>
+                                    <div style="position: relative;">
+                                        <input type="text" id="ModalIconName" ng-model="FormModel.IconName" placeholder="e.g. icon-diamond, fa fa-cube" maxlength="100" class="ri-input" style="padding-right: 36px;" />
+                                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #64748b;">
+                                            <i ng-class="FormModel.IconName || 'icon-diamond'"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" style="white-space: nowrap;" for="ModalSequence">SEQUENCE <span class="req">*</span></label>
+                                    <input type="number" id="ModalSequence" ng-model="FormModel.Sequence" placeholder="e.g. 1" min="1" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 ri-form-group">
+                                    <label class="ri-label" for="ModalDescription">DESCRIPTION</label>
+                                    <input type="text" id="ModalDescription" ng-model="FormModel.Description" placeholder="Enter Module Description" maxlength="500" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 ri-form-group">
+                                    <label class="ri-label" for="ModalRemarks">REMARKS</label>
+                                    <input type="text" id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Internal remarks / notes" maxlength="500" class="ri-input" />
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn-ri-save" type="button" ng-click="SaveModule()" ng-disabled="IsSaving">
+                            <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                            {{FormModel.ModuleID && FormModel.ModuleID > 0 ? 'UPDATE' : 'SAVE'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Confirmation Modal -->
+        <div class="modal fade" id="ModuleStatusConfirmModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" style="max-width: 440px; margin: 60px auto;">
+                <div class="modal-content" style="border-radius: 12px; border: none; overflow: hidden; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);">
+                    <div class="modal-header" style="background: var(--topbar-bg-solid, #1C2B6B) !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #15215a; position: relative;">
+                        <div class="modal-header-flex" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="modal-header-title-left" style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fa" ng-class="ToggleNewStatus ? 'fa-check-circle text-success' : 'fa-exclamation-triangle text-warning'" style="font-size: 18px;"></i>
+                                <h4 class="modal-title" style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0;">
+                                    {{ToggleNewStatus ? 'Confirm Activate Module' : 'Confirm Deactivate Module'}}
+                                </h4>
+                            </div>
+                            <button type="button" class="btn-close-header" data-dismiss="modal" style="color: #c7d2fe; opacity: 1; font-size: 24px; font-weight: 300; line-height: 1; background: transparent; border: none; outline: none; cursor: pointer;">&times;</button>
+                        </div>
+                    </div>
+                    <div class="modal-body text-center" style="padding: 24px 22px; background: #ffffff;">
+                        <i class="fa" ng-class="ToggleNewStatus ? 'fa-toggle-on text-success' : 'fa-toggle-off text-warning'" style="font-size: 42px; margin-bottom: 12px; display: inline-block;"></i>
+                        <h5 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                            {{ToggleNewStatus ? 'Activate this module?' : 'Deactivate this module?'}}
+                        </h5>
+                        <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">
+                            Are you sure you want to {{ToggleNewStatus ? 'activate' : 'deactivate'}} <strong>{{ToggleItem.ModuleName}}</strong>?
+                            <span ng-if="!ToggleNewStatus" style="display: block; margin-top: 8px; color: #dc2626; font-size: 12px; font-weight: 600;">
+                                <i class="fa fa-info-circle"></i> Once deactivated, this module will not appear in the Navbar or Menu for any users.
+                            </span>
+                            <span ng-if="ToggleNewStatus" style="display: block; margin-top: 8px; color: #16a34a; font-size: 12px; font-weight: 600;">
+                                <i class="fa fa-info-circle"></i> Once activated, this module will become visible in the Navbar and Menu.
+                            </span>
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="padding: 12px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
+                        <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600; min-width: 75px;">
+                            No
+                        </button>
+                        <button class="btn btn-sm" ng-class="ToggleNewStatus ? 'btn-success' : 'btn-danger'" ng-click="ConfirmToggleStatus()" ng-disabled="IsUpdatingStatus" type="button" style="font-weight: 600; min-width: 90px;">
+                            <i class="fa" ng-class="IsUpdatingStatus ? 'fa-spinner fa-spin' : (ToggleNewStatus ? 'fa-check' : 'fa-power-off')"></i>
+                            {{ToggleNewStatus ? 'Yes, Activate' : 'Yes, Deactivate'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    try {
+        module.directive('chosen', ['$timeout', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attrs) {
+                    var list = attrs['chosen'];
+                    if (list) {
+                        scope.$watchCollection(list, function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    if (attrs['ngModel']) {
+                        scope.$watch(attrs['ngModel'], function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    element.chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                }
+            };
+        }]);
+    } catch (e) { /* chosen directive already registered on this module */ }
+
+    module.controller("ModuleMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+
+        $scope.CanAdd = @(ViewBag.CanAdd != null && (bool)ViewBag.CanAdd ? "true" : "false");
+        $scope.CanEdit = @(ViewBag.CanEdit != null && (bool)ViewBag.CanEdit ? "true" : "false");
+
+        $scope.ModuleList = [];
+        $scope.GroupList = [];
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+
+        $scope.DefaultForm = function () {
+            var nextSeq = 1;
+            if ($scope.ModuleList && $scope.ModuleList.length > 0) {
+                var maxSeq = 0;
+                angular.forEach($scope.ModuleList, function (m) {
+                    if (m.Sequence && m.Sequence > maxSeq) maxSeq = m.Sequence;
+                });
+                nextSeq = maxSeq + 1;
+            }
+            return {
+                ModuleID: 0,
+                GroupID: null,
+                ModuleName: '',
+                Description: '',
+                Controller: '',
+                Action: '',
+                URL: '',
+                IconName: 'icon-diamond',
+                Sequence: nextSeq,
+                SubMenu: '',
+                Remarks: '',
+                IsActive: true,
+                IsVoucher: false
+            };
+        };
+
+        $scope.ControllerList = [
+            { Name: 'Dashboard' },
+            { Name: 'Master' },
+            { Name: 'Pricing' },
+            { Name: 'Slip' },
+            { Name: 'Report' },
+            { Name: 'DiamxData' },
+            { Name: 'User' },
+            { Name: 'Employees' }
+        ];
+
+        $timeout(function () {
+            $('#ModalController').trigger('chosen:updated');
+        }, 50);
+
+        $scope.FormModel = $scope.DefaultForm();
+
+        $scope.AutoUpdateUrl = function () {
+            if ($scope.FormModel.Controller && $scope.FormModel.Action) {
+                $scope.FormModel.URL = $scope.FormModel.Controller + '\\' + $scope.FormModel.Action;
+            } else if ($scope.FormModel.Controller) {
+                $scope.FormModel.URL = $scope.FormModel.Controller + '\\';
+            } else {
+                $scope.FormModel.URL = '';
+            }
+        };
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = $scope.DefaultForm();
+            $timeout(function () {
+                $('#ModalGroupId').trigger('chosen:updated');
+            }, 50);
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.LoadGroups();
+            $scope.ResetForm();
+            $("#InwardModal").modal("show");
+        };
+
+        $scope.GetGridInstance = function () {
+            var el = $("#inwardGridContainer");
+            return (el.length && el.hasClass("dx-widget")) ? el.dxDataGrid("instance") : null;
+        };
+
+        $scope.SearchText = '';
+        $scope.OnSearchChange = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('ModuleMaster');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'ModuleMaster.xlsx');
+                });
+            });
+        };
+
+        $scope.EditItem = function (item) {
+            $scope.LoadGroups();
+            $scope.FormModel = {
+                ModuleID: item.ModuleID,
+                GroupID: item.GroupID || null,
+                ModuleName: item.ModuleName || '',
+                Description: item.Description || '',
+                Controller: item.Controller || '',
+                Action: item.Action || '',
+                URL: item.URL || '',
+                IconName: item.IconName || 'icon-diamond',
+                Sequence: item.Sequence || 1,
+                SubMenu: item.SubMenu || '',
+                Remarks: item.Remarks || '',
+                IsActive: !!item.IsActive,
+                IsVoucher: !!item.IsVoucher
+            };
+            $("#InwardModal").modal("show");
+            $timeout(function () {
+                $('#ModalGroupId').trigger('chosen:updated');
+            }, 80);
+        };
+
+
+
+        $scope.ToggleItem = null;
+        $scope.ToggleNewStatus = false;
+        $scope.IsUpdatingStatus = false;
+
+        $scope.ToggleActive = function (item) {
+            $scope.ToggleItem = item;
+            $scope.ToggleNewStatus = !item.IsActive;
+            $("#ModuleStatusConfirmModal").modal("show");
+        };
+
+        $scope.ConfirmToggleStatus = function () {
+            if (!$scope.ToggleItem) return;
+            var item = $scope.ToggleItem;
+            var newStatus = $scope.ToggleNewStatus;
+            $scope.IsUpdatingStatus = true;
+
+            $http.post('@Url.Action("ModuleMaster_ActiveInactive", "Master")', { ModuleID: item.ModuleID, IsActive: newStatus })
+                .then(function (res) {
+                    $scope.IsUpdatingStatus = false;
+                    $("#ModuleStatusConfirmModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        item.IsActive = newStatus;
+                        item.StrictlyStop = !newStatus;
+                        var grid = $scope.GetGridInstance();
+                        if (grid) grid.refresh();
+                        Noty("success", res.data.message || (newStatus ? "Module activated successfully!" : "Module deactivated successfully!"));
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
+                }, function () {
+                    $scope.IsUpdatingStatus = false;
+                    $("#ModuleStatusConfirmModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadGroups = function () {
+            $http.get('@Url.Action("Get_SYS_ModuleGroupList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.GroupList = res.data.list || [];
+                    $timeout(function () { $('#ModalGroupId').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadModuleList = function (searchText) {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_SYS_ModuleGridList", "Master")', { params: { SearchText: searchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.ModuleList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load modules.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.SaveModule = function () {
+            if (!$scope.FormModel.ModuleName) {
+                Noty("error", "Please enter Module Name!");
+                $('#ModalModuleName').focus();
+                return;
+            }
+            if (!$scope.FormModel.Controller) {
+                Noty("error", "Please enter Controller!");
+                $('#ModalController').focus();
+                return;
+            }
+            if (!$scope.FormModel.Action) {
+                Noty("error", "Please enter Action!");
+                $('#ModalAction').focus();
+                return;
+            }
+
+            var isEdit = $scope.FormModel.ModuleID && $scope.FormModel.ModuleID > 0;
+            var action = isEdit ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            // StrictlyStop = !IsActive
+            $scope.FormModel.StrictlyStop = !$scope.FormModel.IsActive;
+
+            $http.post('@Url.Action("Module_Insert_Update_Delete", "Master")', { model: $scope.FormModel, Action: action })
+                .then(function (res) {
+                    $scope.IsSaving = false;
+                    if (res.data && res.data.success) {
+                        $("#InwardModal").modal("hide");
+                        Noty("success", res.data.message || (isEdit ? "Module updated successfully!" : "Module saved successfully!"));
+                        $scope.ResetForm();
+                        $scope.LoadModuleList();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to save module.");
+                    }
+                }, function () {
+                    $scope.IsSaving = false;
+                    Noty("error", "Error saving module to server.");
+                });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.ModuleList);
+                gridInstance.refresh();
+                return;
+            }
+            $("#inwardGridContainer").dxDataGrid({
+                dataSource: $scope.ModuleList,
+                keyExpr: 'ModuleID',
+                height: '100%',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: false,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: false },
+                filterRow: { visible: false, applyFilter: 'auto' },
+                headerFilter: { visible: true },
+                onToolbarPreparing: function (e) {
+                    e.toolbarOptions.items = [];
+                },
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
+                    }
+                },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "header") {
+                        e.cellElement.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $indicators = e.cellElement.find(".dx-column-indicators");
+                        if ($indicators.length > 1) {
+                            $indicators.slice(1).remove();
+                        }
+                        var $first = e.cellElement.find(".dx-column-indicators").first();
+                        if ($first.length) {
+                            e.cellElement.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    }
+                },
+                onContentReady: function (e) {
+                    e.element.find(".dx-datagrid-headers .dx-header-row > td").each(function () {
+                        var $td = $(this);
+                        $td.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $ind = $td.find(".dx-column-indicators");
+                        if ($ind.length > 1) {
+                            $ind.slice(1).remove();
+                        }
+                        var $first = $ind.first();
+                        if ($first.length) {
+                            $td.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    });
+                },
+                selection: { mode: 'single' },
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'ModuleName',
+                            summaryType: 'count',
+                            displayFormat: 'Total: {0}',
+                            alignByColumn: true
+                        }
+                    ]
+                },
+                export: { enabled: false },
+                columns: [
+                    {
+                        caption: '#', width: 45, alignment: 'center', allowReordering: false, allowFiltering: false, allowSorting: false,
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Group', dataField: 'GroupName', minWidth: 120,
+                        cellTemplate: function (container, options) {
+                            if (options.data.GroupName) {
+                                $("<strong>").text(options.data.GroupName).css({ "color": "#1C5F8F" }).appendTo(container);
+                            } else {
+                                $("<span>").text('-').css({ "color": "#94a3b8" }).appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Module Name', dataField: 'ModuleName', minWidth: 160,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.ModuleName || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Controller', dataField: 'Controller', minWidth: 110 },
+                    { caption: 'Action', dataField: 'Action', minWidth: 110 },
+                    { caption: 'URL', dataField: 'URL', minWidth: 140 },
+                    {
+                        caption: 'Icon', dataField: 'IconName', width: 120, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var icon = options.data.IconName || 'icon-diamond';
+                            var $wrap = $("<span>").css({ "display": "inline-flex", "align-items": "center", "gap": "6px" });
+                            $("<i>").addClass(icon).css({ "color": "#2563eb", "font-size": "13px" }).appendTo($wrap);
+                            $("<span>").text(icon).css({ "font-size": "12px", "color": "#475569" }).appendTo($wrap);
+                            $wrap.appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Seq', dataField: 'Sequence', width: 70, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.data.Sequence || 0).css({ "font-weight": "700", "color": "#0f172a" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 85, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Module").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate" : "Activate")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $('#InwardModal').on('shown.bs.modal', function () {
+            $timeout(function () {
+                if (!$('#ModalGroupId').data('chosen')) {
+                    $('#ModalGroupId').chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                }
+                $('#ModalGroupId').trigger('chosen:updated');
+            }, 40);
+        });
+
+        $scope.LoadGroups();
+        $scope.LoadModuleList();
+    }]);
+    </script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Module Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}

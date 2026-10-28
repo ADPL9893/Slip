@@ -3979,6 +3979,184 @@ namespace Slip.Controllers
         }
         #endregion
 
+        #region Module Master (SYS_Module)
+
+        public ActionResult ModuleMaster()
+        {
+            // પ્રોજેક્ટના સ્ટાન્ડર્ડ મુજબ નોર્મલ પરમિશન સેટ થશે
+            SetModulePermissions("Master", "ModuleMaster");
+            return View();
+        }
+
+        private SYS_Module MapModule(Dictionary<string, object> rdr)
+        {
+            return new SYS_Module
+            {
+                ModuleID = rdr["ModuleID"] != null ? Convert.ToInt32(rdr["ModuleID"]) : 0,
+                ModuleName = rdr["ModuleName"] != null ? Convert.ToString(rdr["ModuleName"]) : "",
+                Description = rdr.ContainsKey("Description") && rdr["Description"] != null ? Convert.ToString(rdr["Description"]) : "",
+                Controller = rdr.ContainsKey("Controller") && rdr["Controller"] != null ? Convert.ToString(rdr["Controller"]) : "",
+                Action = rdr.ContainsKey("Action") && rdr["Action"] != null ? Convert.ToString(rdr["Action"]) : "",
+                URL = rdr.ContainsKey("URL") && rdr["URL"] != null ? Convert.ToString(rdr["URL"]) : "",
+                IconName = rdr.ContainsKey("IconName") && rdr["IconName"] != null ? Convert.ToString(rdr["IconName"]) : "icon-diamond",
+                StrictlyStop = rdr.ContainsKey("StrictlyStop") && rdr["StrictlyStop"] != null && Convert.ToBoolean(rdr["StrictlyStop"]),
+                IsActive = rdr.ContainsKey("IsActive") && rdr["IsActive"] != null
+                    ? Convert.ToBoolean(rdr["IsActive"])
+                    : (rdr.ContainsKey("StrictlyStop") && rdr["StrictlyStop"] != null ? !Convert.ToBoolean(rdr["StrictlyStop"]) : true),
+                Created = rdr.ContainsKey("Created") && rdr["Created"] != null && rdr["Created"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["Created"]) : null,
+                Modified = rdr.ContainsKey("Modified") && rdr["Modified"] != null && rdr["Modified"] != DBNull.Value ? (DateTime?)Convert.ToDateTime(rdr["Modified"]) : null,
+                Remarks = rdr.ContainsKey("Remarks") && rdr["Remarks"] != null ? Convert.ToString(rdr["Remarks"]) : "",
+                Sequence = rdr.ContainsKey("Sequence") && rdr["Sequence"] != null ? Convert.ToInt32(rdr["Sequence"]) : 0,
+                UserID = rdr.ContainsKey("UserID") && rdr["UserID"] != null ? Convert.ToInt32(rdr["UserID"]) : 0,
+                GroupID = rdr.ContainsKey("GroupID") && rdr["GroupID"] != null && rdr["GroupID"] != DBNull.Value ? (int?)Convert.ToInt32(rdr["GroupID"]) : null,
+                GroupName = rdr.ContainsKey("GroupName") && rdr["GroupName"] != null ? Convert.ToString(rdr["GroupName"]) : "",
+                SubMenu = rdr.ContainsKey("SubMenu") && rdr["SubMenu"] != null ? Convert.ToString(rdr["SubMenu"]) : "",
+                IsVoucher = rdr.ContainsKey("IsVoucher") && rdr["IsVoucher"] != null && rdr["IsVoucher"] != DBNull.Value ? (bool?)Convert.ToBoolean(rdr["IsVoucher"]) : null
+            };
+        }
+
+        [HttpGet]
+        public JsonResult Get_SYS_ModuleGroupList()
+        {
+            try
+            {
+                List<SYS_ModuleGroupModel> list = new List<SYS_ModuleGroupModel>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_SYS_ModuleGroup_GetList");
+                foreach (var r in rows)
+                {
+                    list.Add(new SYS_ModuleGroupModel
+                    {
+                        GroupID = r["GroupID"] != null ? Convert.ToInt32(r["GroupID"]) : 0,
+                        GroupName = r["GroupName"] != null ? Convert.ToString(r["GroupName"]) : "",
+                        Sequence = r.ContainsKey("Sequence") && r["Sequence"] != null ? Convert.ToInt32(r["Sequence"]) : 0
+                    });
+                }
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<SYS_ModuleGroupModel>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_SYS_ModuleGridList(string SearchText)
+        {
+            try
+            {
+                List<SYS_Module> list = new List<SYS_Module>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_SYS_Module_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapModule(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<SYS_Module>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Module_Insert_Update_Delete(SYS_Module model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                string act = (Action ?? "INSERT").ToUpper().Trim();
+                if (act == "DELETE")
+                {
+                    return Json(new { success = false, message = "Delete operation is disabled from UI. Please delete inactive modules directly from database." });
+                }
+
+                if (model == null) model = new SYS_Module();
+
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 1;
+                model.UserID = currentUserId;
+
+                if (string.IsNullOrWhiteSpace(model.URL))
+                {
+                    model.URL = (!string.IsNullOrWhiteSpace(model.Controller) && !string.IsNullOrWhiteSpace(model.Action))
+                        ? (model.Controller + "\\" + model.Action) : "";
+                }
+                if (string.IsNullOrWhiteSpace(model.IconName))
+                {
+                    model.IconName = "icon-diamond";
+                }
+
+                bool strictlyStop = !model.IsActive;
+
+                // Parameters Based Call
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_SYS_Module_Insert_Update_Delete",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@ModuleID", model.ModuleID),
+                    new SqlParameter("@ModuleName", (object)model.ModuleName ?? DBNull.Value),
+                    new SqlParameter("@Description", (object)model.Description ?? DBNull.Value),
+                    new SqlParameter("@Controller", (object)model.Controller ?? DBNull.Value),
+                    new SqlParameter("@ActionName", (object)model.Action ?? DBNull.Value),
+                    new SqlParameter("@URL", (object)model.URL ?? DBNull.Value),
+                    new SqlParameter("@IconName", (object)model.IconName ?? "icon-diamond"),
+                    new SqlParameter("@StrictlyStop", strictlyStop),
+                    new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
+                    new SqlParameter("@Sequence", model.Sequence),
+                    new SqlParameter("@UserID", currentUserId),
+                    new SqlParameter("@GroupID", (object)model.GroupID ?? DBNull.Value),
+                    new SqlParameter("@SubMenu", (object)model.SubMenu ?? DBNull.Value),
+                    new SqlParameter("@IsVoucher", (object)model.IsVoucher ?? false));
+
+                if (message != null && message.StartsWith("Module Is ", StringComparison.OrdinalIgnoreCase))
+                {
+                    isSuccess = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult ModuleMaster_ActiveInactive(int ModuleID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_SYS_Module_ActiveInactive",
+                    new SqlParameter("@ModuleID", ModuleID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@UpdatedBy", currentUserId));
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        #endregion
+
 
     }
 }
