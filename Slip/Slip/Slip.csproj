@@ -340,6 +340,12 @@
     <Compile Include="Models\FourP_Pridiction.cs" />
     <Compile Include="Models\MainRoughSummary.cs" />
     <Compile Include="Models\Mst_Department.cs" />
+    <Compile Include="Models\MST_Shape.cs" />
+    <Compile Include="Models\MST_Color.cs" />
+    <Compile Include="Models\MST_Clarity.cs" />
+    <Compile Include="Models\MST_Cut.cs" />
+    <Compile Include="Models\MST_Dimension.cs" />
+    <Compile Include="Models\MST_SizeCode.cs" />
     <Compile Include="Models\SYS_Module.cs" />
     <Compile Include="Models\MST_Lot.cs" />
     <Compile Include="Models\MST_LotMaster.cs" />
@@ -1338,6 +1344,7 @@
     <Content Include="Views\Master\LotQRPrint.cshtml" />
     <Content Include="Views\Master\DepartmentMaster.cshtml" />
     <Content Include="Views\Master\ModuleMaster.cshtml" />
+    <Content Include="Views\Master\ParameterMaster.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,1478 @@
+@{
+    ViewBag.Title = "Parameter Master";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+    <div ng-controller="ParameterMasterCtrl" class="rough-dist-list-page">
+        <div class="rdl-grid-card">
+            <div class="rdl-card-header" style="position: relative; z-index: 1000; min-height: 46px; overflow: visible !important;">
+                <div class="rdl-card-title-left" style="overflow: visible;">
+                    <i class="fa fa-cubes"></i>
+                    <h3>Parameter Master</h3>
+
+                    <span class="badge-status-pill badge-pill-info">
+                        <i class="fa fa-database"></i> {{GetCurrentList().length || 0}} Total Records
+                    </span>
+
+                    <!-- Parameter Dropdown: Shape (default), Color, Clarity, Cut -->
+                    <div class="field-select-wrap" style="width: 185px; position: relative; z-index: 1001; top: -6px;">
+                        <select id="ParameterTypeSelect"
+                                chosen="ParameterTypeList"
+                                class="form-control ri-input"
+                                ng-model="SelectedParameter"
+                                ng-change="OnParameterChange()"
+                                ng-options="item.id as item.name for item in ParameterTypeList">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="rdl-card-actions">
+                    <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()" title="Add {{GetParameterDisplayName()}}">
+                        <i class="fa fa-plus"></i> 
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                        <i class="fa fa-columns"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                        <i class="fa fa-file-excel-o"></i>
+                    </button>
+                    <div class="field-select-wrap field-select-wrap--search">
+                        <input type="text"
+                               ng-model="SearchText"
+                               ng-change="OnSearchChange()"
+                               placeholder="Search {{GetParameterDisplayName()}} records..."
+                               class="form-control ri-input" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rdl-grid-body">
+                <div id="inwardGridContainer" style="width: 100%; height: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Add / Edit Modal (InwardModal ID for shared css styling) -->
+        <div class="modal fade" id="InwardModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" style="max-width: 650px; width: 95%; margin: 30px auto;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-flex">
+                            <div class="modal-header-title-left">
+                                <i class="fa fa-cubes modal-title-icon"></i>
+                                <h4 class="modal-title">{{(IsEditMode() ? 'Edit ' : 'Add New ') + GetParameterDisplayName()}}</h4>
+                            </div>
+                            <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- ========================= SHAPE FORM ========================= -->
+                        <div class="ri-modal-section" ng-if="SelectedParameter === 'Shape'">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> SHAPE DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeTypeID">SHAPE TYPE</label>
+                                    <div class="field-select-wrap">
+                                        <select id="ModalShapeTypeID"
+                                                chosen="ShapeTypeList"
+                                                class="form-control ri-input"
+                                                ng-model="ShapeModel.ShapeTypeID"
+                                                ng-change="OnModalShapeTypeChange()"
+                                                ng-options="item.ShapeTypeID as item.ShapeType for item in ShapeTypeList">
+                                            <option value="">Select Shape Type</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeGroup">SHAPE GROUP</label>
+                                    <div class="field-select-wrap">
+                                        <select id="ModalShapeGroup"
+                                                chosen="ShapeGroupList"
+                                                class="form-control ri-input"
+                                                ng-model="ShapeModel.ShapeGroup"
+                                                ng-options="item.ShapeGroup as item.ShapeGroup for item in ShapeGroupList">
+                                            <option value="">Select Shape Group</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeName">SHAPE NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalShapeName" ng-model="ShapeModel.ShapeName" placeholder="e.g. ROUND, PEAR" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeShortName">SHORT NAME</label>
+                                    <input type="text" id="ModalShapeShortName" ng-model="ShapeModel.ShortName" placeholder="e.g. RB, PE" maxlength="50" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeCategory">SHAPE CATEGORY</label>
+                                    <input type="text" id="ModalShapeCategory" ng-model="ShapeModel.ShapeCategory" placeholder="e.g. ROUND, LEO_PEAR" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeSequence">SEQUENCE</label>
+                                    <input type="number" id="ModalShapeSequence" ng-model="ShapeModel.Sequence" placeholder="e.g. 1, 2, 3" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeFinalGroup">FINAL GROUP</label>
+                                    <input type="text" id="ModalShapeFinalGroup" ng-model="ShapeModel.ShapeFinalGroup" placeholder="e.g. ROUND, FANCY" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapePrdGroup">PRD GROUP</label>
+                                    <input type="text" id="ModalShapePrdGroup" ng-model="ShapeModel.ShapePrdGroup" placeholder="Product Group" maxlength="100" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeType">TYPE</label>
+                                    <input type="text" id="ModalShapeType" ng-model="ShapeModel.Type" placeholder="Type" maxlength="50" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeDisplayType">DISPLAY TYPE</label>
+                                    <input type="text" id="ModalShapeDisplayType" ng-model="ShapeModel.DisplayType" placeholder="Display Type" maxlength="50" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 ri-form-group">
+                                    <label class="ri-label" for="ModalShapeRemarks">REMARKS</label>
+                                    <input type="text" id="ModalShapeRemarks" ng-model="ShapeModel.Remarks" placeholder="Enter Remarks" maxlength="250" class="ri-input" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================= COLOR FORM ========================= -->
+                        <div class="ri-modal-section" ng-if="SelectedParameter === 'Color'">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> COLOR DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalColorName">COLOR NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalColorName" ng-model="ColorModel.ColorName" placeholder="e.g. D, E, F, GREY, BROWN" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalColorType">COLOR TYPE</label>
+                                    <div class="field-select-wrap">
+                                        <select id="ModalColorType"
+                                                chosen="ColorTypeOptions"
+                                                class="form-control ri-input"
+                                                ng-model="ColorModel.ColorType"
+                                                ng-change="OnColorTypeChange()"
+                                                ng-options="item.value as item.text for item in ColorTypeOptions">
+                                            <option value="">Select Color Type</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalColorSequence">SEQUENCE</label>
+                                    <input type="number" id="ModalColorSequence" ng-model="ColorModel.Sequence" placeholder="e.g. 1, 2, 3" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalColorIDUserFile">USER FILE ID</label>
+                                    <input type="number" id="ModalColorIDUserFile" ng-model="ColorModel.ColorIDUserFile" placeholder="User File ID" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 ri-form-group">
+                                    <label class="ri-label" for="ModalColorRemarks">REMARKS</label>
+                                    <input type="text" id="ModalColorRemarks" ng-model="ColorModel.Remarks" placeholder="Enter Remarks" maxlength="250" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <!-- IsActive Checkbox: ONLY in Color table -->
+                            @*<div class="row" style="margin-top: 10px;">
+                                <div class="col-md-12">
+                                    <label style="display: flex; align-items: center; cursor: pointer; font-size: 13px; font-weight: 600; color: #334155;">
+                                        <input type="checkbox" ng-model="ColorModel.IsActive" style="width: 16px; height: 16px; margin: 0 8px 0 0;" />
+                                        IS ACTIVE (IsActive)
+                                    </label>
+                                </div>
+                            </div>*@
+                        </div>
+
+                        <!-- ========================= CLARITY FORM ========================= -->
+                        <div class="ri-modal-section" ng-if="SelectedParameter === 'Clarity'">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> CLARITY DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalClarityName">CLARITY NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalClarityName" ng-model="ClarityModel.ClarityName" placeholder="e.g. IF, VVS1, VS1, SI1" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalSubClarity">SUB CLARITY</label>
+                                    <input type="text" id="ModalSubClarity" ng-model="ClarityModel.SubClarity" placeholder="e.g. _1, _2" maxlength="50" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalClaritySequence">SEQUENCE</label>
+                                    <input type="number" id="ModalClaritySequence" ng-model="ClarityModel.Sequence" placeholder="e.g. 1, 2, 3" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalClarityIDUserFile">USER FILE ID</label>
+                                    <input type="number" id="ModalClarityIDUserFile" ng-model="ClarityModel.ClarityIDUserFile" placeholder="User File ID" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 ri-form-group">
+                                    <label class="ri-label" for="ModalClarityRemarks">REMARKS</label>
+                                    <input type="text" id="ModalClarityRemarks" ng-model="ClarityModel.Remarks" placeholder="Enter Remarks" maxlength="250" class="ri-input" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================= CUT FORM ========================= -->
+                        <div class="ri-modal-section" ng-if="SelectedParameter === 'Cut'">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> CUT DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalCutName">CUT NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalCutName" ng-model="CutModel.CutName" placeholder="e.g. IDEAL, EX, VG, GD" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalCutGroup">CUT GROUP</label>
+                                    <input type="text" id="ModalCutGroup" ng-model="CutModel.CutGroup" placeholder="e.g. EX, VG" maxlength="100" class="ri-input" />
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalCutSequence">SEQUENCE</label>
+                                    <input type="number" id="ModalCutSequence" ng-model="CutModel.Sequence" placeholder="e.g. 1, 2, 3" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                    <label class="ri-label" for="ModalCutRemarks">REMARKS</label>
+                                    <input type="text" id="ModalCutRemarks" ng-model="CutModel.Remarks" placeholder="Enter Remarks" maxlength="250" class="ri-input" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================= DIMENSION FORM ========================= -->
+                        <div class="ri-modal-section" ng-if="SelectedParameter === 'Dimension'">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> DIMENSION DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalDimensionName">DIMENSION NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalDimensionName" ng-model="DimensionModel.DimensionName" placeholder="e.g. 20*20, 7.25*7.25" maxlength="100" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalDimensionOrderBy">ORDER BY</label>
+                                    <input type="number" id="ModalDimensionOrderBy" ng-model="DimensionModel.OrderBy" placeholder="e.g. 1, 2, 3" class="ri-input" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================= FACTORY CODE FORM ========================= -->
+                        <div class="ri-modal-section" ng-if="SelectedParameter === 'FactoryCode'">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> FACTORY CODE DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalFactoryCode">FACTORY CODE <span class="req">*</span></label>
+                                    <input type="text" id="ModalFactoryCode" ng-model="FactoryCodeModel.FactoryCode" placeholder="e.g. A, B, CUBIC" maxlength="10" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalFactoryCodeOrderBy">ORDER BY</label>
+                                    <input type="number" id="ModalFactoryCodeOrderBy" ng-model="FactoryCodeModel.OrderBy" placeholder="e.g. 1, 2, 3" class="ri-input" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================= SIZE CODE FORM ========================= -->
+                        <div class="ri-modal-section" ng-if="SelectedParameter === 'SizeCode'">
+                            <div class="ri-modal-section-title"><i class="fa fa-info-circle text-primary"></i> SIZE CODE DETAILS</div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalSizeName">SIZE NAME <span class="req">*</span></label>
+                                    <input type="text" id="ModalSizeName" ng-model="SizeCodeModel.SizeName" placeholder="e.g. 0.01, 1.00" maxlength="50" class="ri-input" />
+                                </div>
+                                <div class="col-md-6 col-sm-12 ri-form-group">
+                                    <label class="ri-label" for="ModalSizeShortName">SHORT NAME</label>
+                                    <input type="text" id="ModalSizeShortName" ng-model="SizeCodeModel.ShortName" placeholder="e.g. S1" maxlength="5" class="ri-input" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-ri-reset" type="button" ng-click="ResetCurrentForm()">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn-ri-save" type="button" ng-click="SaveCurrentParameter()" ng-disabled="IsSaving">
+                            <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                            {{IsEditMode() ? 'UPDATE' : 'SAVE'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Confirmation Modal -->
+        <div class="modal fade" id="ParameterStatusConfirmModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" style="max-width: 440px; margin: 60px auto;">
+                <div class="modal-content" style="border-radius: 12px; border: none; overflow: hidden; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.28);">
+                    <div class="modal-header" style="background: var(--topbar-bg-solid, #1C2B6B) !important; color: #ffffff; padding: 14px 20px !important; border-bottom: 1px solid #15215a; position: relative;">
+                        <div class="modal-header-flex" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="modal-header-title-left" style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fa" ng-class="ToggleNewStatus ? 'fa-check-circle text-success' : 'fa-exclamation-triangle text-warning'" style="font-size: 18px;"></i>
+                                <h4 class="modal-title" style="font-size: 15px; font-weight: 700; color: #ffffff; margin: 0;">
+                                    {{ToggleNewStatus ? 'Confirm Activate ' + GetParameterDisplayName() : 'Confirm Deactivate ' + GetParameterDisplayName()}}
+                                </h4>
+                            </div>
+                            <button type="button" class="btn-close-header" data-dismiss="modal" style="color: #c7d2fe; opacity: 1; font-size: 24px; font-weight: 300; line-height: 1; background: transparent; border: none; outline: none; cursor: pointer;">&times;</button>
+                        </div>
+                    </div>
+                    <div class="modal-body text-center" style="padding: 24px 22px; background: #ffffff;">
+                        <i class="fa" ng-class="ToggleNewStatus ? 'fa-toggle-on text-success' : 'fa-toggle-off text-warning'" style="font-size: 42px; margin-bottom: 12px; display: inline-block;"></i>
+                        <h5 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">
+                            {{ToggleNewStatus ? 'Activate this ' + (GetParameterDisplayName() | lowercase) + '?' : 'Deactivate this ' + (GetParameterDisplayName() | lowercase) + '?'}}
+                        </h5>
+                        <p style="font-size: 13px; color: #475569; margin: 0; line-height: 1.5;">
+                            Are you sure you want to {{ToggleNewStatus ? 'activate' : 'deactivate'}} <strong>{{GetToggleItemName()}}</strong>?
+                            <span ng-if="!ToggleNewStatus" style="display: block; margin-top: 8px; color: #dc2626; font-size: 12px; font-weight: 600;">
+                                <i class="fa fa-info-circle"></i> Once deactivated, this {{GetParameterDisplayName() | lowercase}} will be marked as Inactive.
+                            </span>
+                            <span ng-if="ToggleNewStatus" style="display: block; margin-top: 8px; color: #16a34a; font-size: 12px; font-weight: 600;">
+                                <i class="fa fa-info-circle"></i> Once activated, this {{GetParameterDisplayName() | lowercase}} will become Active.
+                            </span>
+                        </p>
+                    </div>
+                    <div class="modal-footer" style="padding: 12px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 8px;">
+                        <button class="btn btn-default btn-sm" data-dismiss="modal" type="button" style="font-weight: 600; min-width: 75px;">
+                            No
+                        </button>
+                        <button class="btn btn-sm" ng-class="ToggleNewStatus ? 'btn-success' : 'btn-danger'" ng-click="ConfirmToggleStatus()" ng-disabled="IsUpdatingStatus" type="button" style="font-weight: 600; min-width: 90px;">
+                            <i class="fa" ng-class="IsUpdatingStatus ? 'fa-spinner fa-spin' : (ToggleNewStatus ? 'fa-check' : 'fa-power-off')"></i>
+                            {{ToggleNewStatus ? 'Yes, Activate' : 'Yes, Deactivate'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    try {
+        module.directive('chosen', ['$timeout', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attrs) {
+                    var list = attrs['chosen'];
+                    if (list) {
+                        scope.$watchCollection(list, function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    if (attrs['ngModel']) {
+                        scope.$watch(attrs['ngModel'], function () {
+                            $timeout(function () { element.trigger('chosen:updated'); }, 50);
+                        });
+                    }
+                    element.chosen({ width: '100%', search_contains: true, allow_single_deselect: false });
+                }
+            };
+        }]);
+    } catch (e) { /* chosen directive already registered on this module */ }
+
+    module.controller("ParameterMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+
+        $scope.CanAdd = @(ViewBag.CanAdd != null && (bool)ViewBag.CanAdd ? "true" : "false");
+        $scope.CanEdit = @(ViewBag.CanEdit != null && (bool)ViewBag.CanEdit ? "true" : "false");
+
+        $scope.GetParameterDisplayName = function () {
+            if ($scope.SelectedParameter === 'FactoryCode') return 'Factory Code';
+            if ($scope.SelectedParameter === 'SizeCode') return 'Size Code';
+            return $scope.SelectedParameter;
+        };
+
+        // Parameter Types
+        $scope.ParameterTypeList = [
+            { id: 'Shape', name: 'Shape' },
+            { id: 'Color', name: 'Color' },
+            { id: 'Clarity', name: 'Clarity' },
+            { id: 'Cut', name: 'Cut' },
+            { id: 'Dimension', name: 'Dimension' },
+            { id: 'FactoryCode', name: 'Factory Code' },
+            { id: 'SizeCode', name: 'Size Code' }
+        ];
+
+        // Selected Parameter: Default is 'Shape'
+        $scope.SelectedParameter = 'Shape';
+
+        // Lists for each parameter
+        $scope.ShapeList = [];
+        $scope.ColorList = [];
+        $scope.ClarityList = [];
+        $scope.CutList = [];
+        $scope.DimensionList = [];
+        $scope.FactoryCodeList = [];
+        $scope.SizeCodeList = [];
+
+        // Lookups for Shape modal dropdowns
+        $scope.ShapeTypeList = [];
+        $scope.ShapeGroupList = [];
+
+        $scope.LoadShapeLookups = function () {
+            $http.get('@Url.Action("Get_MST_ShapeTypeList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.ShapeTypeList = res.data.list || [];
+                    $timeout(function () { $('#ModalShapeTypeID').trigger('chosen:updated'); }, 50);
+                }
+            });
+
+            $http.get('@Url.Action("Get_MST_ShapeGroupList", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.ShapeGroupList = res.data.list || [];
+                    $timeout(function () { $('#ModalShapeGroup').trigger('chosen:updated'); }, 50);
+                }
+            });
+        };
+
+        $scope.OnModalShapeTypeChange = function () {
+            var selectedType = '';
+            if ($scope.ShapeModel.ShapeTypeID) {
+                for (var i = 0; i < $scope.ShapeTypeList.length; i++) {
+                    if ($scope.ShapeTypeList[i].ShapeTypeID == $scope.ShapeModel.ShapeTypeID) {
+                        selectedType = $scope.ShapeTypeList[i].ShapeType;
+                        break;
+                    }
+                }
+            }
+
+            $http.get('@Url.Action("Get_MST_ShapeGroupList", "Master")', { params: { shapeType: selectedType } }).then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.ShapeGroupList = res.data.list || [];
+                    $timeout(function () { $('#ModalShapeGroup').trigger('chosen:updated'); }, 50);
+                }
+            });
+        };
+
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.SearchText = '';
+
+        // Default models
+        $scope.DefaultShapeForm = function () {
+            return {
+                ShapeID: 0,
+                ShapeName: '',
+                ShortName: '',
+                ShapeGroup: '',
+                ShapeCategory: '',
+                ShapeTypeID: null,
+                Sequence: null,
+                ShapeFinalGroup: '',
+                ShapePrdGroup: '',
+                Type: '',
+                DisplayType: '',
+                Remarks: ''
+            };
+        };
+
+        $scope.DefaultColorForm = function () {
+            return {
+                ColorID: 0,
+                ColorName: '',
+                ColorType: '',
+                ColorTypeID: null,
+                Sequence: null,
+                ColorIDUserFile: null,
+                IsActive: true,
+                Remarks: ''
+            };
+        };
+
+        $scope.ColorTypeOptions = [
+            { value: 'Round', text: 'Round', id: 1 },
+            { value: 'Fancy', text: 'Fancy', id: 2 }
+        ];
+
+        $scope.OnColorTypeChange = function () {
+            if ($scope.ColorModel.ColorType === 'Round') {
+                $scope.ColorModel.ColorTypeID = 1;
+            } else if ($scope.ColorModel.ColorType === 'Fancy') {
+                $scope.ColorModel.ColorTypeID = 2;
+            } else {
+                $scope.ColorModel.ColorTypeID = null;
+            }
+        };
+
+        $scope.DefaultClarityForm = function () {
+            return {
+                ClarityID: 0,
+                ClarityName: '',
+                SubClarity: '',
+                Sequence: null,
+                ClarityIDUserFile: null,
+                Remarks: ''
+            };
+        };
+
+        $scope.DefaultCutForm = function () {
+            return {
+                CutID: 0,
+                CutName: '',
+                CutGroup: '',
+                Sequence: null,
+                Remarks: ''
+            };
+        };
+
+        $scope.DefaultDimensionForm = function () {
+            return {
+                ID: 0,
+                DimensionName: '',
+                OrderBy: null,
+                IsActive: true
+            };
+        };
+
+        $scope.DefaultFactoryCodeForm = function () {
+            return {
+                ID: 0,
+                FactoryCode: '',
+                OrderBy: null
+            };
+        };
+
+        $scope.DefaultSizeCodeForm = function () {
+            return {
+                ID: 0,
+                SizeName: '',
+                ShortName: '',
+                IsActive: true
+            };
+        };
+
+        $scope.ShapeModel = $scope.DefaultShapeForm();
+        $scope.ColorModel = $scope.DefaultColorForm();
+        $scope.ClarityModel = $scope.DefaultClarityForm();
+        $scope.CutModel = $scope.DefaultCutForm();
+        $scope.DimensionModel = $scope.DefaultDimensionForm();
+        $scope.FactoryCodeModel = $scope.DefaultFactoryCodeForm();
+        $scope.SizeCodeModel = $scope.DefaultSizeCodeForm();
+
+        $scope.GetCurrentList = function () {
+            if ($scope.SelectedParameter === 'Shape') return $scope.ShapeList;
+            if ($scope.SelectedParameter === 'Color') return $scope.ColorList;
+            if ($scope.SelectedParameter === 'Clarity') return $scope.ClarityList;
+            if ($scope.SelectedParameter === 'Cut') return $scope.CutList;
+            if ($scope.SelectedParameter === 'Dimension') return $scope.DimensionList;
+            if ($scope.SelectedParameter === 'FactoryCode') return $scope.FactoryCodeList;
+            if ($scope.SelectedParameter === 'SizeCode') return $scope.SizeCodeList;
+            return [];
+        };
+
+        $scope.IsEditMode = function () {
+            if ($scope.SelectedParameter === 'Shape') return ($scope.ShapeModel.ShapeID && $scope.ShapeModel.ShapeID > 0);
+            if ($scope.SelectedParameter === 'Color') return ($scope.ColorModel.ColorID && $scope.ColorModel.ColorID > 0);
+            if ($scope.SelectedParameter === 'Clarity') return ($scope.ClarityModel.ClarityID && $scope.ClarityModel.ClarityID > 0);
+            if ($scope.SelectedParameter === 'Cut') return ($scope.CutModel.CutID && $scope.CutModel.CutID > 0);
+            if ($scope.SelectedParameter === 'Dimension') return ($scope.DimensionModel.ID && $scope.DimensionModel.ID > 0);
+            if ($scope.SelectedParameter === 'FactoryCode') return ($scope.FactoryCodeModel.ID && $scope.FactoryCodeModel.ID > 0);
+            if ($scope.SelectedParameter === 'SizeCode') return ($scope.SizeCodeModel.ID && $scope.SizeCodeModel.ID > 0);
+            return false;
+        };
+
+        $scope.ResetCurrentForm = function () {
+            if ($scope.SelectedParameter === 'Shape') {
+                $scope.ShapeModel = $scope.DefaultShapeForm();
+                $timeout(function () {
+                    $('#ModalShapeTypeID').trigger('chosen:updated');
+                    $('#ModalShapeGroup').trigger('chosen:updated');
+                }, 50);
+            }
+            else if ($scope.SelectedParameter === 'Color') {
+                $scope.ColorModel = $scope.DefaultColorForm();
+                $timeout(function () {
+                    $('#ModalColorType').trigger('chosen:updated');
+                }, 50);
+            }
+            else if ($scope.SelectedParameter === 'Clarity') $scope.ClarityModel = $scope.DefaultClarityForm();
+            else if ($scope.SelectedParameter === 'Cut') $scope.CutModel = $scope.DefaultCutForm();
+            else if ($scope.SelectedParameter === 'Dimension') $scope.DimensionModel = $scope.DefaultDimensionForm();
+            else if ($scope.SelectedParameter === 'FactoryCode') $scope.FactoryCodeModel = $scope.DefaultFactoryCodeForm();
+            else if ($scope.SelectedParameter === 'SizeCode') $scope.SizeCodeModel = $scope.DefaultSizeCodeForm();
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.ResetCurrentForm();
+            if ($scope.SelectedParameter === 'Shape') {
+                $scope.LoadShapeLookups();
+            }
+            $http.get('@Url.Action("Get_NextSequence", "Master")', { params: { parameterType: $scope.SelectedParameter } })
+                .then(function (res) {
+                    if (res.data && res.data.success) {
+                        var next = res.data.nextSequence;
+                        if ($scope.SelectedParameter === 'Shape') $scope.ShapeModel.Sequence = next;
+                        else if ($scope.SelectedParameter === 'Color') $scope.ColorModel.Sequence = next;
+                        else if ($scope.SelectedParameter === 'Clarity') $scope.ClarityModel.Sequence = next;
+                        else if ($scope.SelectedParameter === 'Cut') $scope.CutModel.Sequence = next;
+                        else if ($scope.SelectedParameter === 'Dimension') $scope.DimensionModel.OrderBy = next;
+                        else if ($scope.SelectedParameter === 'FactoryCode') $scope.FactoryCodeModel.OrderBy = next;
+                    }
+                });
+            $("#InwardModal").modal("show");
+            $timeout(function () {
+                if ($scope.SelectedParameter === 'Shape') {
+                    $('#ModalShapeName').focus();
+                    $('#ModalShapeTypeID').trigger('chosen:updated');
+                    $('#ModalShapeGroup').trigger('chosen:updated');
+                }
+                else if ($scope.SelectedParameter === 'Color') {
+                    $('#ModalColorName').focus();
+                    $('#ModalColorType').trigger('chosen:updated');
+                }
+                else if ($scope.SelectedParameter === 'Clarity') $('#ModalClarityName').focus();
+                else if ($scope.SelectedParameter === 'Cut') $('#ModalCutName').focus();
+                else if ($scope.SelectedParameter === 'Dimension') $('#ModalDimensionName').focus();
+                else if ($scope.SelectedParameter === 'FactoryCode') $('#ModalFactoryCode').focus();
+                else if ($scope.SelectedParameter === 'SizeCode') $('#ModalSizeName').focus();
+            }, 300);
+        };
+
+        $scope.GetGridInstance = function () {
+            var el = $("#inwardGridContainer");
+            return (el.length && el.hasClass("dx-widget")) ? el.dxDataGrid("instance") : null;
+        };
+
+        $scope.OnSearchChange = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet($scope.GetParameterDisplayName() + 'Master');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), $scope.GetParameterDisplayName() + 'Master.xlsx');
+                });
+            });
+        };
+
+        $scope.OnParameterChange = function () {
+            $scope.SearchText = '';
+            $scope.ResetCurrentForm();
+            $scope.LoadCurrentData();
+            $timeout(function () {
+                $('#ParameterTypeSelect').trigger('chosen:updated');
+            }, 50);
+        };
+
+        $scope.EditItem = function (item) {
+            if ($scope.SelectedParameter === 'Shape') {
+                $scope.LoadShapeLookups();
+                $scope.ShapeModel = angular.copy(item);
+                $timeout(function () {
+                    $('#ModalShapeTypeID').trigger('chosen:updated');
+                    $('#ModalShapeGroup').trigger('chosen:updated');
+                }, 80);
+            } else if ($scope.SelectedParameter === 'Color') {
+                $scope.ColorModel = angular.copy(item);
+                $scope.ColorModel.IsActive = !!item.IsActive;
+                if (!$scope.ColorModel.ColorType) {
+                    if ($scope.ColorModel.ColorTypeID == 1) $scope.ColorModel.ColorType = 'Round';
+                    else if ($scope.ColorModel.ColorTypeID == 2) $scope.ColorModel.ColorType = 'Fancy';
+                } else if (!$scope.ColorModel.ColorTypeID) {
+                    if ($scope.ColorModel.ColorType === 'Round') $scope.ColorModel.ColorTypeID = 1;
+                    else if ($scope.ColorModel.ColorType === 'Fancy') $scope.ColorModel.ColorTypeID = 2;
+                }
+                $timeout(function () {
+                    $('#ModalColorType').trigger('chosen:updated');
+                }, 80);
+            } else if ($scope.SelectedParameter === 'Clarity') {
+                $scope.ClarityModel = angular.copy(item);
+            } else if ($scope.SelectedParameter === 'Cut') {
+                $scope.CutModel = angular.copy(item);
+            } else if ($scope.SelectedParameter === 'Dimension') {
+                $scope.DimensionModel = angular.copy(item);
+                $scope.DimensionModel.IsActive = !!item.IsActive;
+            } else if ($scope.SelectedParameter === 'FactoryCode') {
+                $scope.FactoryCodeModel = angular.copy(item);
+            } else if ($scope.SelectedParameter === 'SizeCode') {
+                $scope.SizeCodeModel = angular.copy(item);
+                $scope.SizeCodeModel.IsActive = !!item.IsActive;
+            }
+            $("#InwardModal").modal("show");
+        };
+
+        // TOGGLE ACTIVE STATE & CONFIRMATION
+        $scope.ToggleItem = null;
+        $scope.ToggleNewStatus = false;
+        $scope.IsUpdatingStatus = false;
+
+        $scope.GetToggleItemName = function () {
+            if (!$scope.ToggleItem) return '';
+            if ($scope.SelectedParameter === 'Color') return $scope.ToggleItem.ColorName || '';
+            if ($scope.SelectedParameter === 'Dimension') return $scope.ToggleItem.DimensionName || '';
+            if ($scope.SelectedParameter === 'SizeCode') return $scope.ToggleItem.SizeName || '';
+            return '';
+        };
+
+        $scope.ToggleActive = function (item) {
+            $scope.ToggleItem = item;
+            $scope.ToggleNewStatus = !item.IsActive;
+            $("#ParameterStatusConfirmModal").modal("show");
+        };
+
+        $scope.ToggleColorActive = function (item) {
+            $scope.ToggleActive(item);
+        };
+
+        $scope.ToggleDimensionActive = function (item) {
+            $scope.ToggleActive(item);
+        };
+
+        $scope.ToggleSizeCodeActive = function (item) {
+            $scope.ToggleActive(item);
+        };
+
+        $scope.ConfirmToggleStatus = function () {
+            if (!$scope.ToggleItem) return;
+            var item = $scope.ToggleItem;
+            var newStatus = $scope.ToggleNewStatus;
+            $scope.IsUpdatingStatus = true;
+
+            var url = '';
+            var payload = {};
+            var paramName = $scope.GetParameterDisplayName();
+
+            if ($scope.SelectedParameter === 'Color') {
+                url = '@Url.Action("ColorMaster_ActiveInactive", "Master")';
+                payload = { ColorID: item.ColorID, IsActive: newStatus };
+            } else if ($scope.SelectedParameter === 'Dimension') {
+                url = '@Url.Action("DimensionMaster_ActiveInactive", "Master")';
+                payload = { ID: item.ID, IsActive: newStatus };
+            } else if ($scope.SelectedParameter === 'SizeCode') {
+                url = '@Url.Action("SizeCodeMaster_ActiveInactive", "Master")';
+                payload = { ID: item.ID, IsActive: newStatus };
+            }
+
+            $http.post(url, payload)
+                .then(function (res) {
+                    $scope.IsUpdatingStatus = false;
+                    $("#ParameterStatusConfirmModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        item.IsActive = newStatus;
+                        var grid = $scope.GetGridInstance();
+                        if (grid) grid.refresh();
+                        Noty("success", res.data.message || (newStatus ? (paramName + " activated successfully!") : (paramName + " deactivated successfully!")));
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
+                }, function () {
+                    $scope.IsUpdatingStatus = false;
+                    $("#ParameterStatusConfirmModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        // SAVE (INSERT / UPDATE)
+        $scope.SaveCurrentParameter = function () {
+            var url = '';
+            var modelPayload = null;
+            var isEdit = $scope.IsEditMode();
+            var action = isEdit ? 'UPDATE' : 'INSERT';
+
+            if ($scope.SelectedParameter === 'Shape') {
+                if (!$scope.ShapeModel.ShapeName || !$scope.ShapeModel.ShapeName.trim()) {
+                    Noty("error", "Please enter Shape Name!");
+                    $('#ModalShapeName').focus();
+                    return;
+                }
+                url = '@Url.Action("Shape_Insert_Update", "Master")';
+                modelPayload = $scope.ShapeModel;
+            } else if ($scope.SelectedParameter === 'Color') {
+                if (!$scope.ColorModel.ColorName || !$scope.ColorModel.ColorName.trim()) {
+                    Noty("error", "Please enter Color Name!");
+                    $('#ModalColorName').focus();
+                    return;
+                }
+                url = '@Url.Action("Color_Insert_Update", "Master")';
+                modelPayload = $scope.ColorModel;
+            } else if ($scope.SelectedParameter === 'Clarity') {
+                if (!$scope.ClarityModel.ClarityName || !$scope.ClarityModel.ClarityName.trim()) {
+                    Noty("error", "Please enter Clarity Name!");
+                    $('#ModalClarityName').focus();
+                    return;
+                }
+                url = '@Url.Action("Clarity_Insert_Update", "Master")';
+                modelPayload = $scope.ClarityModel;
+            } else if ($scope.SelectedParameter === 'Cut') {
+                if (!$scope.CutModel.CutName || !$scope.CutModel.CutName.trim()) {
+                    Noty("error", "Please enter Cut Name!");
+                    $('#ModalCutName').focus();
+                    return;
+                }
+                url = '@Url.Action("Cut_Insert_Update", "Master")';
+                modelPayload = $scope.CutModel;
+            } else if ($scope.SelectedParameter === 'Dimension') {
+                if (!$scope.DimensionModel.DimensionName || !$scope.DimensionModel.DimensionName.trim()) {
+                    Noty("error", "Please enter Dimension Name!");
+                    $('#ModalDimensionName').focus();
+                    return;
+                }
+                url = '@Url.Action("Dimension_Insert_Update", "Master")';
+                modelPayload = $scope.DimensionModel;
+            } else if ($scope.SelectedParameter === 'FactoryCode') {
+                if (!$scope.FactoryCodeModel.FactoryCode || !$scope.FactoryCodeModel.FactoryCode.trim()) {
+                    Noty("error", "Please enter Factory Code!");
+                    $('#ModalFactoryCode').focus();
+                    return;
+                }
+                url = '@Url.Action("FactoryCode_Insert_Update", "Master")';
+                modelPayload = $scope.FactoryCodeModel;
+            } else if ($scope.SelectedParameter === 'SizeCode') {
+                if (!$scope.SizeCodeModel.SizeName || !$scope.SizeCodeModel.SizeName.trim()) {
+                    Noty("error", "Please enter Size Name!");
+                    $('#ModalSizeName').focus();
+                    return;
+                }
+                url = '@Url.Action("SizeCode_Insert_Update", "Master")';
+                modelPayload = $scope.SizeCodeModel;
+            }
+
+            $scope.IsSaving = true;
+            $http.post(url, { model: modelPayload, Action: action })
+                .then(function (res) {
+                    $scope.IsSaving = false;
+                    var msg = (res.data && res.data.message) || '';
+                    var isSuccess = !!(res.data && res.data.success);
+                    if (msg.toLowerCase().indexOf('already exists') >= 0 ||
+                        msg.toLowerCase().indexOf('is required') >= 0 ||
+                        msg.toLowerCase().indexOf('invalid') >= 0 ||
+                        msg.toLowerCase().indexOf('error') >= 0) {
+                        isSuccess = false;
+                    }
+
+                    if (isSuccess) {
+                        $("#InwardModal").modal("hide");
+                        Noty("success", msg || (isEdit ? ($scope.GetParameterDisplayName() + " updated successfully!") : ($scope.GetParameterDisplayName() + " saved successfully!")));
+                        $scope.ResetCurrentForm();
+                        $scope.LoadCurrentData();
+                    } else {
+                        Noty("error", msg || ("Failed to save " + $scope.GetParameterDisplayName() + "."));
+                    }
+                }, function () {
+                    $scope.IsSaving = false;
+                    Noty("error", "Error saving " + $scope.GetParameterDisplayName() + " to server.");
+                });
+        };
+
+        // DATA LOADERS
+        $scope.LoadCurrentData = function () {
+            if ($scope.SelectedParameter === 'Shape') $scope.LoadShapeList();
+            else if ($scope.SelectedParameter === 'Color') $scope.LoadColorList();
+            else if ($scope.SelectedParameter === 'Clarity') $scope.LoadClarityList();
+            else if ($scope.SelectedParameter === 'Cut') $scope.LoadCutList();
+            else if ($scope.SelectedParameter === 'Dimension') $scope.LoadDimensionList();
+            else if ($scope.SelectedParameter === 'FactoryCode') $scope.LoadFactoryCodeList();
+            else if ($scope.SelectedParameter === 'SizeCode') $scope.LoadSizeCodeList();
+        };
+
+        $scope.LoadShapeList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_ShapeGridList", "Master")', { params: { SearchText: $scope.SearchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.ShapeList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load shapes.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadColorList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_ColorGridList", "Master")', { params: { SearchText: $scope.SearchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.ColorList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load colors.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadClarityList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_ClarityGridList", "Master")', { params: { SearchText: $scope.SearchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.ClarityList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load clarities.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadCutList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_CutGridList", "Master")', { params: { SearchText: $scope.SearchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.CutList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load cuts.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadDimensionList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_DimensionGridList", "Master")', { params: { SearchText: $scope.SearchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.DimensionList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load dimensions.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadFactoryCodeList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_FactoryCodeGridList", "Master")', { params: { SearchText: $scope.SearchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.FactoryCodeList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load factory codes.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.LoadSizeCodeList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_SizeCodeGridList", "Master")', { params: { SearchText: $scope.SearchText || '' } })
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.SizeCodeList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load size codes.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        // COLUMNS GENERATOR
+        $scope.GetColumnsForCurrentParameter = function () {
+            var indexCol = {
+                caption: '#', width: 45, alignment: 'center', allowReordering: false, allowFiltering: false, allowSorting: false,
+                cellTemplate: function (container, options) {
+                    $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                }
+            };
+
+            if ($scope.SelectedParameter === 'Shape') {
+                return [
+                    indexCol,
+                    {
+                        caption: 'Shape Name', dataField: 'ShapeName', minWidth: 150,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.ShapeName || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Short Name', dataField: 'ShortName', width: 100, alignment: 'center' },
+                    { caption: 'Shape Group', dataField: 'ShapeGroup', minWidth: 120 },
+                    { caption: 'Shape Category', dataField: 'ShapeCategory', minWidth: 130 },
+                    {
+                        caption: 'Shape Type',
+                        dataField: 'ShapeTypeName',
+                        width: 120,
+                        alignment: 'center',
+                        calculateCellValue: function (data) {
+                            return data.ShapeTypeName || (data.ShapeTypeID ? 'Type ' + data.ShapeTypeID : '');
+                        }
+                    },
+                    { caption: 'Sequence', dataField: 'Sequence', width: 90, alignment: 'center' },
+                    { caption: 'Final Group', dataField: 'ShapeFinalGroup', minWidth: 120 },
+                    { caption: 'Prd Group', dataField: 'ShapePrdGroup', minWidth: 120 },
+                    { caption: 'Type', dataField: 'Type', minWidth: 90 },
+                    { caption: 'Display Type', dataField: 'DisplayType', minWidth: 100 },
+                    { caption: 'Remarks', dataField: 'Remarks', minWidth: 140 },
+                    {
+                        caption: 'Action', width: 65, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Shape").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+                            }
+                            div.appendTo(container);
+                        }
+                    }
+                ];
+            } else if ($scope.SelectedParameter === 'Color') {
+                return [
+                    indexCol,
+                    {
+                        caption: 'Color Name', dataField: 'ColorName', minWidth: 130,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.ColorName || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Color Type',
+                        dataField: 'ColorType',
+                        width: 120,
+                        alignment: 'center',
+                        calculateCellValue: function (data) {
+                            return data.ColorType || (data.ColorTypeID == 1 ? 'Round' : (data.ColorTypeID == 2 ? 'Fancy' : ''));
+                        }
+                    },
+                    { caption: 'Sequence', dataField: 'Sequence', width: 90, alignment: 'center' },
+                    { caption: 'User File ID', dataField: 'ColorIDUserFile', width: 110, alignment: 'center' },
+                    { caption: 'Remarks', dataField: 'Remarks', minWidth: 150 },
+                    {
+                        // ONLY Color has Status column
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 105, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Color").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate" : "Activate")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleColorActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+                            div.appendTo(container);
+                        }
+                    }
+                ];
+            } else if ($scope.SelectedParameter === 'Clarity') {
+                return [
+                    indexCol,
+                    {
+                        caption: 'Clarity Name', dataField: 'ClarityName', minWidth: 140,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.ClarityName || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Sub Clarity', dataField: 'SubClarity', minWidth: 110, alignment: 'center' },
+                    { caption: 'Sequence', dataField: 'Sequence', width: 90, alignment: 'center' },
+                    { caption: 'User File ID', dataField: 'ClarityIDUserFile', width: 110, alignment: 'center' },
+                    { caption: 'Remarks', dataField: 'Remarks', minWidth: 150 },
+                    {
+                        caption: 'Action', width: 65, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Clarity").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+                            }
+                            div.appendTo(container);
+                        }
+                    }
+                ];
+            } else if ($scope.SelectedParameter === 'Cut') {
+                return [
+                    indexCol,
+                    {
+                        caption: 'Cut Name', dataField: 'CutName', minWidth: 140,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.CutName || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Cut Group', dataField: 'CutGroup', minWidth: 120, alignment: 'center' },
+                    { caption: 'Sequence', dataField: 'Sequence', width: 90, alignment: 'center' },
+                    { caption: 'Remarks', dataField: 'Remarks', minWidth: 150 },
+                    {
+                        caption: 'Action', width: 65, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Cut").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+                            }
+                            div.appendTo(container);
+                        }
+                    }
+                ];
+            } else if ($scope.SelectedParameter === 'Dimension') {
+                return [
+                    indexCol,
+                    {
+                        caption: 'Dimension Name', dataField: 'DimensionName', minWidth: 150,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.DimensionName || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Order By', dataField: 'OrderBy', width: 100, alignment: 'center' },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 105, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Dimension").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate" : "Activate")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleDimensionActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+                            div.appendTo(container);
+                        }
+                    }
+                ];
+            } else if ($scope.SelectedParameter === 'FactoryCode') {
+                return [
+                    indexCol,
+                    {
+                        caption: 'Factory Code', dataField: 'FactoryCode', minWidth: 150,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.FactoryCode || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Order By', dataField: 'OrderBy', width: 100, alignment: 'center' },
+                    {
+                        caption: 'Action', width: 65, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Factory Code").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+                            }
+                            div.appendTo(container);
+                        }
+                    }
+                ];
+            } else if ($scope.SelectedParameter === 'SizeCode') {
+                return [
+                    indexCol,
+                    {
+                        caption: 'Size Name', dataField: 'SizeName', minWidth: 150,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.SizeName || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Short Name', dataField: 'ShortName', width: 110, alignment: 'center' },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 105, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: $scope.CanEdit,
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Size Code").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate" : "Activate")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleSizeCodeActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+                            div.appendTo(container);
+                        }
+                    }
+                ];
+            }
+            return [];
+        };
+
+        $scope.GetKeyExpr = function () {
+            if ($scope.SelectedParameter === 'Shape') return 'ShapeID';
+            if ($scope.SelectedParameter === 'Color') return 'ColorID';
+            if ($scope.SelectedParameter === 'Clarity') return 'ClarityID';
+            if ($scope.SelectedParameter === 'Cut') return 'CutID';
+            if ($scope.SelectedParameter === 'Dimension') return 'ID';
+            if ($scope.SelectedParameter === 'FactoryCode') return 'ID';
+            if ($scope.SelectedParameter === 'SizeCode') return 'ID';
+            return 'ID';
+        };
+
+        $scope.GetSummaryField = function () {
+            if ($scope.SelectedParameter === 'Shape') return 'ShapeName';
+            if ($scope.SelectedParameter === 'Color') return 'ColorName';
+            if ($scope.SelectedParameter === 'Clarity') return 'ClarityName';
+            if ($scope.SelectedParameter === 'Cut') return 'CutName';
+            if ($scope.SelectedParameter === 'Dimension') return 'DimensionName';
+            if ($scope.SelectedParameter === 'FactoryCode') return 'FactoryCode';
+            if ($scope.SelectedParameter === 'SizeCode') return 'SizeName';
+            return 'Name';
+        };
+
+        $scope.InitGrid = function () {
+            var el = $("#inwardGridContainer");
+            if (el.data("dxDataGrid")) {
+                el.dxDataGrid("instance").dispose();
+            }
+
+            var currentList = $scope.GetCurrentList();
+            var columns = $scope.GetColumnsForCurrentParameter();
+            var keyExpr = $scope.GetKeyExpr();
+            var summaryCol = $scope.GetSummaryField();
+
+            el.dxDataGrid({
+                dataSource: currentList,
+                keyExpr: keyExpr,
+                height: '100%',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: false,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: false },
+                filterRow: { visible: false, applyFilter: 'auto' },
+                headerFilter: { visible: true },
+                onToolbarPreparing: function (e) {
+                    e.toolbarOptions.items = [];
+                },
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
+                    }
+                },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "header") {
+                        e.cellElement.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $indicators = e.cellElement.find(".dx-column-indicators");
+                        if ($indicators.length > 1) {
+                            $indicators.slice(1).remove();
+                        }
+                        var $first = e.cellElement.find(".dx-column-indicators").first();
+                        if ($first.length) {
+                            e.cellElement.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    }
+                },
+                onContentReady: function (e) {
+                    e.element.find(".dx-datagrid-headers .dx-header-row > td").each(function () {
+                        var $td = $(this);
+                        $td.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $ind = $td.find(".dx-column-indicators");
+                        if ($ind.length > 1) {
+                            $ind.slice(1).remove();
+                        }
+                        var $first = $ind.first();
+                        if ($first.length) {
+                            $td.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    });
+                },
+                selection: { mode: 'single' },
+                summary: {
+                    totalItems: [
+                        {
+                            column: summaryCol,
+                            summaryType: 'count',
+                            displayFormat: 'Total: {0}',
+                            alignByColumn: true
+                        }
+                    ]
+                },
+                export: { enabled: false },
+                columns: columns
+            });
+        };
+
+        // Modal Shown listener for chosen initialization
+        $('#InwardModal').on('shown.bs.modal', function () {
+            $timeout(function () {
+                if ($scope.SelectedParameter === 'Shape') {
+                    if (!$('#ModalShapeTypeID').data('chosen')) {
+                        $('#ModalShapeTypeID').chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                    }
+                    if (!$('#ModalShapeGroup').data('chosen')) {
+                        $('#ModalShapeGroup').chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                    }
+                    $('#ModalShapeTypeID').trigger('chosen:updated');
+                    $('#ModalShapeGroup').trigger('chosen:updated');
+                }
+                else if ($scope.SelectedParameter === 'Color') {
+                    if (!$('#ModalColorType').data('chosen')) {
+                        $('#ModalColorType').chosen({ width: '100%', search_contains: true, allow_single_deselect: true });
+                    }
+                    $('#ModalColorType').trigger('chosen:updated');
+                }
+            }, 50);
+        });
+
+        // Initial Load (Default: Shape)
+        $scope.LoadShapeLookups();
+        $scope.LoadCurrentData();
+
+        $timeout(function () {
+            if (!$('#ParameterTypeSelect').data('chosen')) {
+                $('#ParameterTypeSelect').chosen({ width: '100%', search_contains: true, allow_single_deselect: false });
+            }
+            $('#ParameterTypeSelect').trigger('chosen:updated');
+        }, 60);
+
+    }]);
+    </script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Parameter Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}

@@ -4158,5 +4158,750 @@ namespace Slip.Controllers
         #endregion
 
 
+
+        #region Parameter Master (Shape, Color, Clarity, Cut)
+
+        public ActionResult ParameterMaster()
+        {
+            SetModulePermissions("Master", "ParameterMaster");
+            return View();
+        }
+
+        #region Mappers
+        private MST_Shape MapShape(Dictionary<string, object> rdr)
+        {
+            return new MST_Shape
+            {
+                ShapeID = rdr.ContainsKey("ShapeID") && rdr["ShapeID"] != null && rdr["ShapeID"] != DBNull.Value ? Convert.ToInt32(rdr["ShapeID"]) : 0,
+                ShapeName = rdr.ContainsKey("ShapeName") && rdr["ShapeName"] != null && rdr["ShapeName"] != DBNull.Value ? Convert.ToString(rdr["ShapeName"]) : "",
+                ShapeTypeID = rdr.ContainsKey("ShapeTypeID") && rdr["ShapeTypeID"] != null && rdr["ShapeTypeID"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["ShapeTypeID"]), out int stid) ? (int?)stid : null,
+                ShapeTypeName = rdr.ContainsKey("ShapeTypeName") && rdr["ShapeTypeName"] != null && rdr["ShapeTypeName"] != DBNull.Value ? Convert.ToString(rdr["ShapeTypeName"]) : (rdr.ContainsKey("ShapeType") && rdr["ShapeType"] != null && rdr["ShapeType"] != DBNull.Value ? Convert.ToString(rdr["ShapeType"]) : ""),
+                Remarks = rdr.ContainsKey("Remarks") && rdr["Remarks"] != null && rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                Created = rdr.ContainsKey("Created") && rdr["Created"] != null && rdr["Created"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Created"]), out DateTime cr) ? (DateTime?)cr : null,
+                Modified = rdr.ContainsKey("Modified") && rdr["Modified"] != null && rdr["Modified"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Modified"]), out DateTime md) ? (DateTime?)md : null,
+                Sequence = rdr.ContainsKey("Sequence") && rdr["Sequence"] != null && rdr["Sequence"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["Sequence"]), out int seq) ? (int?)seq : null,
+                ShapeCategory = rdr.ContainsKey("ShapeCategory") && rdr["ShapeCategory"] != null && rdr["ShapeCategory"] != DBNull.Value ? Convert.ToString(rdr["ShapeCategory"]) : "",
+                UserID = rdr.ContainsKey("UserID") && rdr["UserID"] != null && rdr["UserID"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["UserID"]), out int uid) ? (int?)uid : null,
+                UpdateBy = rdr.ContainsKey("UpdateBy") && rdr["UpdateBy"] != null && rdr["UpdateBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["UpdateBy"]), out int ub) ? (int?)ub : null,
+                ShapeGroup = rdr.ContainsKey("ShapeGroup") && rdr["ShapeGroup"] != null && rdr["ShapeGroup"] != DBNull.Value ? Convert.ToString(rdr["ShapeGroup"]) : "",
+                ShortName = rdr.ContainsKey("ShortName") && rdr["ShortName"] != null && rdr["ShortName"] != DBNull.Value ? Convert.ToString(rdr["ShortName"]) : "",
+                MaxNo = rdr.ContainsKey("MaxNo") && rdr["MaxNo"] != null && rdr["MaxNo"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["MaxNo"]), out int mn) ? (int?)mn : null,
+                MaxNoDate = rdr.ContainsKey("MaxNoDate") && rdr["MaxNoDate"] != null && rdr["MaxNoDate"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["MaxNoDate"]), out DateTime mnd) ? (DateTime?)mnd : null,
+                Type = rdr.ContainsKey("Type") && rdr["Type"] != null && rdr["Type"] != DBNull.Value ? Convert.ToString(rdr["Type"]) : "",
+                DisplayType = rdr.ContainsKey("DisplayType") && rdr["DisplayType"] != null && rdr["DisplayType"] != DBNull.Value ? Convert.ToString(rdr["DisplayType"]) : "",
+                ShapePrdGroup = rdr.ContainsKey("ShapePrdGroup") && rdr["ShapePrdGroup"] != null && rdr["ShapePrdGroup"] != DBNull.Value ? Convert.ToString(rdr["ShapePrdGroup"]) : "",
+                ShapeFinalGroup = rdr.ContainsKey("ShapeFinalGroup") && rdr["ShapeFinalGroup"] != null && rdr["ShapeFinalGroup"] != DBNull.Value ? Convert.ToString(rdr["ShapeFinalGroup"]) : "",
+                ShapeIDUserFile = rdr.ContainsKey("ShapeIDUserFile") && rdr["ShapeIDUserFile"] != null && rdr["ShapeIDUserFile"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["ShapeIDUserFile"]), out int suf) ? (int?)suf : null
+            };
+        }
+
+        private MST_Color MapColor(Dictionary<string, object> rdr)
+        {
+            return new MST_Color
+            {
+                ColorID = rdr.ContainsKey("ColorID") && rdr["ColorID"] != null && rdr["ColorID"] != DBNull.Value ? Convert.ToInt32(rdr["ColorID"]) : 0,
+                ColorName = rdr.ContainsKey("ColorName") && rdr["ColorName"] != null && rdr["ColorName"] != DBNull.Value ? Convert.ToString(rdr["ColorName"]) : "",
+                ColorTypeID = rdr.ContainsKey("ColorTypeID") && rdr["ColorTypeID"] != null && rdr["ColorTypeID"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["ColorTypeID"]), out int ctid) ? (int?)ctid : null,
+                ColorType = rdr.ContainsKey("ColorType") && rdr["ColorType"] != null && rdr["ColorType"] != DBNull.Value ? Convert.ToString(rdr["ColorType"]) : (rdr.ContainsKey("ColorTypeID") && rdr["ColorTypeID"] != null && Convert.ToString(rdr["ColorTypeID"]) == "2" ? "Fancy" : (rdr.ContainsKey("ColorTypeID") && rdr["ColorTypeID"] != null && Convert.ToString(rdr["ColorTypeID"]) == "1" ? "Round" : "")),
+                Remarks = rdr.ContainsKey("Remarks") && rdr["Remarks"] != null && rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                Created = rdr.ContainsKey("Created") && rdr["Created"] != null && rdr["Created"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Created"]), out DateTime cr) ? (DateTime?)cr : null,
+                Modified = rdr.ContainsKey("Modified") && rdr["Modified"] != null && rdr["Modified"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Modified"]), out DateTime md) ? (DateTime?)md : null,
+                Sequence = rdr.ContainsKey("Sequence") && rdr["Sequence"] != null && rdr["Sequence"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["Sequence"]), out int seq) ? (int?)seq : null,
+                UserID = rdr.ContainsKey("UserID") && rdr["UserID"] != null && rdr["UserID"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["UserID"]), out int uid) ? (int?)uid : null,
+                IsActive = rdr.ContainsKey("IsActive") && rdr["IsActive"] != null && rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
+                ColorIDUserFile = rdr.ContainsKey("ColorIDUserFile") && rdr["ColorIDUserFile"] != null && rdr["ColorIDUserFile"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["ColorIDUserFile"]), out int cuf) ? (int?)cuf : null
+            };
+        }
+
+        private MST_Clarity MapClarity(Dictionary<string, object> rdr)
+        {
+            return new MST_Clarity
+            {
+                ClarityID = rdr.ContainsKey("ClarityID") && rdr["ClarityID"] != null && rdr["ClarityID"] != DBNull.Value ? Convert.ToInt32(rdr["ClarityID"]) : 0,
+                ClarityName = rdr.ContainsKey("ClarityName") && rdr["ClarityName"] != null && rdr["ClarityName"] != DBNull.Value ? Convert.ToString(rdr["ClarityName"]) : "",
+                SubClarity = rdr.ContainsKey("SubClarity") && rdr["SubClarity"] != null && rdr["SubClarity"] != DBNull.Value ? Convert.ToString(rdr["SubClarity"]) : "",
+                Sequence = rdr.ContainsKey("Sequence") && rdr["Sequence"] != null && rdr["Sequence"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["Sequence"]), out int seq) ? (int?)seq : null,
+                ClarityIDUserFile = rdr.ContainsKey("ClarityIDUserFile") && rdr["ClarityIDUserFile"] != null && rdr["ClarityIDUserFile"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["ClarityIDUserFile"]), out int cluf) ? (int?)cluf : null,
+                Remarks = rdr.ContainsKey("Remarks") && rdr["Remarks"] != null && rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                Created = rdr.ContainsKey("Created") && rdr["Created"] != null && rdr["Created"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Created"]), out DateTime cr) ? (DateTime?)cr : null,
+                Modified = rdr.ContainsKey("Modified") && rdr["Modified"] != null && rdr["Modified"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Modified"]), out DateTime md) ? (DateTime?)md : null
+            };
+        }
+
+        private MST_Cut MapCut(Dictionary<string, object> rdr)
+        {
+            return new MST_Cut
+            {
+                CutID = rdr.ContainsKey("CutID") && rdr["CutID"] != null && rdr["CutID"] != DBNull.Value ? Convert.ToInt32(rdr["CutID"]) : 0,
+                CutName = rdr.ContainsKey("CutName") && rdr["CutName"] != null && rdr["CutName"] != DBNull.Value ? Convert.ToString(rdr["CutName"]) : "",
+                CutGroup = rdr.ContainsKey("CutGroup") && rdr["CutGroup"] != null && rdr["CutGroup"] != DBNull.Value ? Convert.ToString(rdr["CutGroup"]) : "",
+                Sequence = rdr.ContainsKey("Sequence") && rdr["Sequence"] != null && rdr["Sequence"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["Sequence"]), out int seq) ? (int?)seq : null,
+                Remarks = rdr.ContainsKey("Remarks") && rdr["Remarks"] != null && rdr["Remarks"] != DBNull.Value ? Convert.ToString(rdr["Remarks"]) : "",
+                Created = rdr.ContainsKey("Created") && rdr["Created"] != null && rdr["Created"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Created"]), out DateTime cr) ? (DateTime?)cr : null,
+                Modified = rdr.ContainsKey("Modified") && rdr["Modified"] != null && rdr["Modified"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["Modified"]), out DateTime md) ? (DateTime?)md : null
+            };
+        }
+
+        private MST_Dimension MapDimension(Dictionary<string, object> rdr)
+        {
+            return new MST_Dimension
+            {
+                ID = rdr.ContainsKey("ID") && rdr["ID"] != null && rdr["ID"] != DBNull.Value ? Convert.ToInt32(rdr["ID"]) : 0,
+                DimensionName = rdr.ContainsKey("DimensionName") && rdr["DimensionName"] != null && rdr["DimensionName"] != DBNull.Value ? Convert.ToString(rdr["DimensionName"]) : "",
+                OrderBy = rdr.ContainsKey("OrderBy") && rdr["OrderBy"] != null && rdr["OrderBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["OrderBy"]), out int ob) ? (int?)ob : null,
+                CreatedBy = rdr.ContainsKey("CreatedBy") && rdr["CreatedBy"] != null && rdr["CreatedBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["CreatedBy"]), out int cb) ? (int?)cb : null,
+                CreatedDate = rdr.ContainsKey("CreatedDate") && rdr["CreatedDate"] != null && rdr["CreatedDate"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["CreatedDate"]), out DateTime cd) ? (DateTime?)cd : null,
+                UpdatedBy = rdr.ContainsKey("UpdatedBy") && rdr["UpdatedBy"] != null && rdr["UpdatedBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["UpdatedBy"]), out int ub) ? (int?)ub : null,
+                UpdatedDate = rdr.ContainsKey("UpdatedDate") && rdr["UpdatedDate"] != null && rdr["UpdatedDate"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["UpdatedDate"]), out DateTime ud) ? (DateTime?)ud : null,
+                IsActive = rdr.ContainsKey("IsActive") && rdr["IsActive"] != null && rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"])
+            };
+        }
+
+        private MST_FactoryCode MapFactoryCode(Dictionary<string, object> rdr)
+        {
+            return new MST_FactoryCode
+            {
+                ID = rdr.ContainsKey("ID") && rdr["ID"] != null && rdr["ID"] != DBNull.Value ? Convert.ToInt32(rdr["ID"]) : 0,
+                FactoryCode = rdr.ContainsKey("FactoryCode") && rdr["FactoryCode"] != null && rdr["FactoryCode"] != DBNull.Value ? Convert.ToString(rdr["FactoryCode"]).Trim() : "",
+                OrderBy = rdr.ContainsKey("OrderBy") && rdr["OrderBy"] != null && rdr["OrderBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["OrderBy"]), out int ob) ? (int?)ob : null,
+                CreatedOn = rdr.ContainsKey("CreatedOn") && rdr["CreatedOn"] != null && rdr["CreatedOn"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["CreatedOn"]), out DateTime co) ? (DateTime?)co : null,
+                CreatedBy = rdr.ContainsKey("CreatedBy") && rdr["CreatedBy"] != null && rdr["CreatedBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["CreatedBy"]), out int cb) ? (int?)cb : null,
+                UpdatedOn = rdr.ContainsKey("UpdatedOn") && rdr["UpdatedOn"] != null && rdr["UpdatedOn"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["UpdatedOn"]), out DateTime uo) ? (DateTime?)uo : null,
+                UpdatedBy = rdr.ContainsKey("UpdatedBy") && rdr["UpdatedBy"] != null && rdr["UpdatedBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["UpdatedBy"]), out int ub) ? (int?)ub : null
+            };
+        }
+
+        private MST_SizeCode MapSizeCode(Dictionary<string, object> rdr)
+        {
+            return new MST_SizeCode
+            {
+                ID = rdr.ContainsKey("ID") && rdr["ID"] != null && rdr["ID"] != DBNull.Value ? Convert.ToInt32(rdr["ID"]) : 0,
+                SizeName = rdr.ContainsKey("SizeName") && rdr["SizeName"] != null && rdr["SizeName"] != DBNull.Value ? Convert.ToString(rdr["SizeName"]) : "",
+                ShortName = rdr.ContainsKey("ShortName") && rdr["ShortName"] != null && rdr["ShortName"] != DBNull.Value ? Convert.ToString(rdr["ShortName"]) : "",
+                IsActive = rdr.ContainsKey("IsActive") && rdr["IsActive"] != null && rdr["IsActive"] != DBNull.Value && Convert.ToBoolean(rdr["IsActive"]),
+                CreatedBy = rdr.ContainsKey("CreatedBy") && rdr["CreatedBy"] != null && rdr["CreatedBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["CreatedBy"]), out int cb) ? (int?)cb : null,
+                CreatedDate = rdr.ContainsKey("CreatedDate") && rdr["CreatedDate"] != null && rdr["CreatedDate"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["CreatedDate"]), out DateTime cd) ? (DateTime?)cd : null,
+                UpdatedBy = rdr.ContainsKey("UpdatedBy") && rdr["UpdatedBy"] != null && rdr["UpdatedBy"] != DBNull.Value && int.TryParse(Convert.ToString(rdr["UpdatedBy"]), out int ub) ? (int?)ub : null,
+                UpdatedDate = rdr.ContainsKey("UpdatedDate") && rdr["UpdatedDate"] != null && rdr["UpdatedDate"] != DBNull.Value && DateTime.TryParse(Convert.ToString(rdr["UpdatedDate"]), out DateTime ud) ? (DateTime?)ud : null
+            };
+        }
+        #endregion
+
+        #region Shape Actions
+        [HttpGet]
+        public JsonResult Get_MST_ShapeGridList(string SearchText)
+        {
+            try
+            {
+                List<MST_Shape> list = new List<MST_Shape>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Shape_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapShape(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Shape>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_MST_ShapeTypeList()
+        {
+            try
+            {
+                var list = new List<object>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_ShapeType_GetList");
+                foreach (var row in rows)
+                {
+                    list.Add(new
+                    {
+                        ShapeTypeID = row.ContainsKey("ShapeTypeID") && row["ShapeTypeID"] != null && row["ShapeTypeID"] != DBNull.Value ? Convert.ToInt32(row["ShapeTypeID"]) : 0,
+                        ShapeType = row.ContainsKey("ShapeType") && row["ShapeType"] != null && row["ShapeType"] != DBNull.Value ? Convert.ToString(row["ShapeType"]) : ""
+                    });
+                }
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_MST_ShapeGroupList(string shapeType = "")
+        {
+            try
+            {
+                var list = new List<object>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_ShapeGroup_GetList",
+                    new SqlParameter("@ShapeType", string.IsNullOrWhiteSpace(shapeType) ? (object)DBNull.Value : shapeType));
+                foreach (var row in rows)
+                {
+                    list.Add(new
+                    {
+                        ID = row.ContainsKey("ID") && row["ID"] != null && row["ID"] != DBNull.Value ? Convert.ToInt32(row["ID"]) : 0,
+                        ShapeGroup = row.ContainsKey("ShapeGroup") && row["ShapeGroup"] != null && row["ShapeGroup"] != DBNull.Value ? Convert.ToString(row["ShapeGroup"]) : "",
+                        ShapeType = row.ContainsKey("ShapeType") && row["ShapeType"] != null && row["ShapeType"] != DBNull.Value ? Convert.ToString(row["ShapeType"]) : ""
+                    });
+                }
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpGet]
+        public JsonResult Get_NextSequence(string parameterType)
+        {
+            try
+            {
+                string tableName = "MST_Shape";
+                string colName = "Sequence";
+
+                if (string.Equals(parameterType, "Color", StringComparison.OrdinalIgnoreCase)) { tableName = "MST_Color"; colName = "Sequence"; }
+                else if (string.Equals(parameterType, "Clarity", StringComparison.OrdinalIgnoreCase)) { tableName = "MST_Clarity"; colName = "Sequence"; }
+                else if (string.Equals(parameterType, "Cut", StringComparison.OrdinalIgnoreCase)) { tableName = "MST_Cut"; colName = "Sequence"; }
+                else if (string.Equals(parameterType, "Dimension", StringComparison.OrdinalIgnoreCase)) { tableName = "MST_Dimension"; colName = "OrderBy"; }
+                else if (string.Equals(parameterType, "FactoryCode", StringComparison.OrdinalIgnoreCase)) { tableName = "MST_FactoryCode"; colName = "OrderBy"; }
+                else if (string.Equals(parameterType, "SizeCode", StringComparison.OrdinalIgnoreCase)) { tableName = "MST_SizeCode"; colName = "ID"; }
+
+                int nextSeq = 1;
+                string connStr = ConfigurationManager.ConnectionStrings["StockDetailConnectionString"].ConnectionString;
+                using (SqlConnection con = new SqlConnection(connStr))
+                using (SqlCommand cmd = new SqlCommand("SELECT ISNULL(MAX(" + colName + "), 0) + 1 FROM dbo." + tableName, con))
+                {
+                    cmd.CommandType = CommandType.Text;
+                    con.Open();
+                    object result = cmd.ExecuteScalar();
+                    if (result != null && result != DBNull.Value)
+                    {
+                        nextSeq = Convert.ToInt32(result);
+                    }
+                }
+                return Json(new { success = true, nextSequence = nextSeq }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, nextSequence = 1 }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        private bool IsParameterSaveSuccess(string message, string paramName)
+        {
+            if (string.IsNullOrWhiteSpace(message)) return false;
+            if (message.StartsWith("ERROR", StringComparison.OrdinalIgnoreCase)) return false;
+            if (message.IndexOf("already exists", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+            if (message.IndexOf("is required", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+            if (message.IndexOf("invalid", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+            if (message.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0) return false;
+
+            return message.IndexOf("saved", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   message.IndexOf("updated", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   message.IndexOf("success", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                   message.StartsWith(paramName + " Is ", StringComparison.OrdinalIgnoreCase);
+        }
+
+        [HttpPost]
+        public JsonResult Shape_Insert_Update(MST_Shape model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new MST_Shape();
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                model.UserID = currentUserId;
+                model.UpdateBy = currentUserId;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_Shape_Insert_Update",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@ShapeID", model.ShapeID),
+                    new SqlParameter("@ShapeName", (object)model.ShapeName ?? DBNull.Value),
+                    new SqlParameter("@ShortName", (object)model.ShortName ?? DBNull.Value),
+                    new SqlParameter("@ShapeGroup", (object)model.ShapeGroup ?? DBNull.Value),
+                    new SqlParameter("@ShapeCategory", (object)model.ShapeCategory ?? DBNull.Value),
+                    new SqlParameter("@ShapeTypeID", (object)model.ShapeTypeID ?? DBNull.Value),
+                    new SqlParameter("@Sequence", (object)model.Sequence ?? DBNull.Value),
+                    new SqlParameter("@ShapeFinalGroup", (object)model.ShapeFinalGroup ?? DBNull.Value),
+                    new SqlParameter("@ShapePrdGroup", (object)model.ShapePrdGroup ?? DBNull.Value),
+                    new SqlParameter("@Type", (object)model.Type ?? DBNull.Value),
+                    new SqlParameter("@DisplayType", (object)model.DisplayType ?? DBNull.Value),
+                    new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
+                    new SqlParameter("@UserID", currentUserId),
+                    new SqlParameter("@UpdateBy", currentUserId),
+                    new SqlParameter("@ShapeIDUserFile", (object)model.ShapeIDUserFile ?? DBNull.Value));
+
+                isSuccess = IsParameterSaveSuccess(message, "Shape");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+        #region Color Actions
+        [HttpGet]
+        public JsonResult Get_MST_ColorGridList(string SearchText)
+        {
+            try
+            {
+                List<MST_Color> list = new List<MST_Color>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Color_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapColor(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Color>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Color_Insert_Update(MST_Color model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new MST_Color();
+                if (!string.IsNullOrWhiteSpace(model.ColorType))
+                {
+                    if (model.ColorType.Equals("Round", StringComparison.OrdinalIgnoreCase)) model.ColorTypeID = 1;
+                    else if (model.ColorType.Equals("Fancy", StringComparison.OrdinalIgnoreCase)) model.ColorTypeID = 2;
+                }
+                else if (model.ColorTypeID.HasValue)
+                {
+                    if (model.ColorTypeID == 1) model.ColorType = "Round";
+                    else if (model.ColorTypeID == 2) model.ColorType = "Fancy";
+                }
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                model.UserID = currentUserId;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_Color_Insert_Update",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@ColorID", model.ColorID),
+                    new SqlParameter("@ColorName", (object)model.ColorName ?? DBNull.Value),
+                    new SqlParameter("@ColorTypeID", (object)model.ColorTypeID ?? DBNull.Value),
+                    new SqlParameter("@ColorType", (object)model.ColorType ?? DBNull.Value),
+                    new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
+                    new SqlParameter("@Sequence", (object)model.Sequence ?? DBNull.Value),
+                    new SqlParameter("@UserID", currentUserId),
+                    new SqlParameter("@IsActive", model.IsActive),
+                    new SqlParameter("@ColorIDUserFile", (object)model.ColorIDUserFile ?? DBNull.Value));
+
+                isSuccess = IsParameterSaveSuccess(message, "Color");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult ColorMaster_ActiveInactive(int ColorID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_Color_ActiveInactive",
+                    new SqlParameter("@ColorID", ColorID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@UpdatedBy", currentUserId));
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+                else
+                {
+                    isSuccess = true;
+                    message = "Status updated successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+        #region Clarity Actions
+        [HttpGet]
+        public JsonResult Get_MST_ClarityGridList(string SearchText)
+        {
+            try
+            {
+                List<MST_Clarity> list = new List<MST_Clarity>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Clarity_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapClarity(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Clarity>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Clarity_Insert_Update(MST_Clarity model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new MST_Clarity();
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_Clarity_Insert_Update",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@ClarityID", model.ClarityID),
+                    new SqlParameter("@ClarityName", (object)model.ClarityName ?? DBNull.Value),
+                    new SqlParameter("@SubClarity", (object)model.SubClarity ?? DBNull.Value),
+                    new SqlParameter("@Sequence", (object)model.Sequence ?? DBNull.Value),
+                    new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
+                    new SqlParameter("@UserID", currentUserId),
+                    new SqlParameter("@ClarityIDUserFile", (object)model.ClarityIDUserFile ?? DBNull.Value));
+
+                isSuccess = IsParameterSaveSuccess(message, "Clarity");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+        #region Cut Actions
+        [HttpGet]
+        public JsonResult Get_MST_CutGridList(string SearchText)
+        {
+            try
+            {
+                List<MST_Cut> list = new List<MST_Cut>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Cut_GetList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapCut(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Cut>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Cut_Insert_Update(MST_Cut model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new MST_Cut();
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_Cut_Insert_Update",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@CutID", model.CutID),
+                    new SqlParameter("@CutName", (object)model.CutName ?? DBNull.Value),
+                    new SqlParameter("@CutGroup", (object)model.CutGroup ?? DBNull.Value),
+                    new SqlParameter("@Sequence", (object)model.Sequence ?? DBNull.Value),
+                    new SqlParameter("@Remarks", (object)model.Remarks ?? DBNull.Value),
+                    new SqlParameter("@UserID", currentUserId));
+
+                isSuccess = IsParameterSaveSuccess(message, "Cut");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+        #region Dimension Actions
+        [HttpGet]
+        public JsonResult Get_MST_DimensionGridList(string SearchText)
+        {
+            try
+            {
+                List<MST_Dimension> list = new List<MST_Dimension>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Dimension_GetGridList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapDimension(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Dimension>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Dimension_Insert_Update(MST_Dimension model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new MST_Dimension();
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_Dimension_Insert_Update",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@ID", model.ID),
+                    new SqlParameter("@DimensionName", (object)model.DimensionName ?? DBNull.Value),
+                    new SqlParameter("@OrderBy", (object)model.OrderBy ?? DBNull.Value),
+                    new SqlParameter("@IsActive", model.IsActive),
+                    new SqlParameter("@UserID", currentUserId));
+
+                isSuccess = IsParameterSaveSuccess(message, "Dimension");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult DimensionMaster_ActiveInactive(int ID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_Dimension_ActiveInactive",
+                    new SqlParameter("@ID", ID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@UpdatedBy", currentUserId));
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+                else
+                {
+                    isSuccess = true;
+                    message = "Status updated successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+        #region Factory Code Actions
+        [HttpGet]
+        public JsonResult Get_MST_FactoryCodeGridList(string SearchText)
+        {
+            try
+            {
+                List<MST_FactoryCode> list = new List<MST_FactoryCode>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_FactoryCode_GetGridList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapFactoryCode(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_FactoryCode>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult FactoryCode_Insert_Update(MST_FactoryCode model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new MST_FactoryCode();
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_FactoryCode_Insert_Update",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@ID", model.ID),
+                    new SqlParameter("@FactoryCode", (object)model.FactoryCode ?? DBNull.Value),
+                    new SqlParameter("@OrderBy", (object)model.OrderBy ?? DBNull.Value),
+                    new SqlParameter("@UserID", currentUserId));
+
+                isSuccess = IsParameterSaveSuccess(message, "Factory Code");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+        #region Size Code Actions
+        [HttpGet]
+        public JsonResult Get_MST_SizeCodeGridList(string SearchText)
+        {
+            try
+            {
+                List<MST_SizeCode> list = new List<MST_SizeCode>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_SizeCode_GetGridList",
+                    new SqlParameter("@SearchText", string.IsNullOrWhiteSpace(SearchText) ? (object)DBNull.Value : SearchText));
+                foreach (var row in rows)
+                {
+                    list.Add(MapSizeCode(row));
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_SizeCode>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult SizeCode_Insert_Update(MST_SizeCode model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                if (model == null) model = new MST_SizeCode();
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_SizeCode_Insert_Update",
+                    new SqlParameter("@ACTION", Action ?? "INSERT"),
+                    new SqlParameter("@ID", model.ID),
+                    new SqlParameter("@SizeName", (object)model.SizeName ?? DBNull.Value),
+                    new SqlParameter("@ShortName", (object)model.ShortName ?? DBNull.Value),
+                    new SqlParameter("@IsActive", model.IsActive),
+                    new SqlParameter("@UserID", currentUserId));
+
+                isSuccess = IsParameterSaveSuccess(message, "Size Code");
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        [HttpPost]
+        public JsonResult SizeCodeMaster_ActiveInactive(int ID, bool IsActive)
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+                List<Dictionary<string, object>> activeInactiveRows = DbHelper.ExecuteReaderAsList("USP_MST_SizeCode_ActiveInactive",
+                    new SqlParameter("@ID", ID),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@UpdatedBy", currentUserId));
+                if (activeInactiveRows.Count > 0)
+                {
+                    var row = activeInactiveRows[0];
+                    object successVal = row.ContainsKey("Success") ? row["Success"] : null;
+                    isSuccess = successVal != null && Convert.ToInt32(successVal) == 1;
+                    object msgVal = row.ContainsKey("Message") ? row["Message"] : null;
+                    message = msgVal != null ? Convert.ToString(msgVal) : "";
+                }
+                else
+                {
+                    isSuccess = true;
+                    message = "Status updated successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+                isSuccess = false;
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+        #endregion
+
+        #endregion
+
     }
 }
