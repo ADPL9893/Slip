@@ -4609,5 +4609,230 @@ namespace Slip.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        // MST RECIPE CRUD AND GET 
+
+        public ActionResult RecipeMaster()
+        {
+            SetModulePermissions("Master", "RecipeMaster");
+            return View();
+        }
+
+        public JsonResult Get_MST_ReceipeGridList()
+        {
+            try
+            {
+                List<MST_Receipe> list = new List<MST_Receipe>();
+                List<Dictionary<string, object>> receipeRows = DbHelper.ExecuteReaderAsList("USP_MST_Receipe_GetList");
+                foreach (var row in receipeRows)
+                {
+                    list.Add(new MST_Receipe
+                    {
+                        ReceipeID = Convert.ToInt32(row["ReceipeID"]),
+                        Receipe = row["Receipe"] != null ? Convert.ToString(row["Receipe"]) : "",
+                        Remarks = row.ContainsKey("Remarks") && row["Remarks"] != null ? Convert.ToString(row["Remarks"]) : "",
+                        IsActive = row.ContainsKey("IsActive") && row["IsActive"] != null ? Convert.ToBoolean(row["IsActive"]) : true
+                    });
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_Receipe>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult Receipe_Insert_Update_Delete(MST_Receipe model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                model.UserID = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : (int?)null;
+
+                XmlDocument xmlData = CommonMethods.ConvertToXml(model);
+                string xmlStr = "<DocumentElement><MST_Receipe>" + xmlData.DocumentElement.InnerXml + "</MST_Receipe></DocumentElement>";
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_Receipe_Insert_Update_Delete",
+                    new SqlParameter("@XML", xmlStr),
+                    new SqlParameter("@ACTION", Action));
+
+                if (message != null && (message.ToLower().Contains("inserted") || message.ToLower().Contains("updated") || message.ToLower().Contains("deleted") || message.ToLower().Contains("success")))
+                {
+                    isSuccess = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        // MST COLOR DAYS (MASTERBOOK DAYS) CRUD AND GET 
+
+        public ActionResult ColorDaysMaster()
+        {
+            SetModulePermissions("Master", "ColorDaysMaster");
+            return View();
+        }
+
+        public JsonResult Get_MST_MasterbookDaysList()
+        {
+            try
+            {
+                List<MST_MasterbookDays> list = new List<MST_MasterbookDays>();
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_MasterbookDays_GetList");
+                foreach (var row in rows)
+                {
+                    list.Add(new MST_MasterbookDays
+                    {
+                        MasterbookDaysID = Convert.ToInt32(row["MasterbookDaysID"]),
+                        StartDay = row.ContainsKey("StartDay") && row["StartDay"] != null ? Convert.ToInt32(row["StartDay"]) : 0,
+                        EndDay = row.ContainsKey("EndDay") && row["EndDay"] != null ? Convert.ToInt32(row["EndDay"]) : 0,
+                        ColorHex = row.ContainsKey("ColorHex") && row["ColorHex"] != null ? Convert.ToString(row["ColorHex"]) : "",
+                        IsActive = row.ContainsKey("IsActive") && row["IsActive"] != null ? Convert.ToBoolean(row["IsActive"]) : true
+                    });
+                }
+                var jsonResult = Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, list = new List<MST_MasterbookDays>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult MasterbookDays_Insert_Update_Delete(MST_MasterbookDays model, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_MasterbookDays_Insert_Update_Delete",
+                    new SqlParameter("@MasterbookDaysID", model.MasterbookDaysID),
+                    new SqlParameter("@StartDay", model.StartDay),
+                    new SqlParameter("@EndDay", model.EndDay),
+                    new SqlParameter("@ColorHex", (object)model.ColorHex ?? DBNull.Value),
+                    new SqlParameter("@IsActive", model.IsActive),
+                    new SqlParameter("@UserID", currentUserId),
+                    new SqlParameter("@ACTION", Action));
+
+                if (message != null && (message.ToLower().Contains("inserted") || message.ToLower().Contains("updated") || message.ToLower().Contains("deleted") || message.ToLower().Contains("success")))
+                {
+                    isSuccess = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        // USER MASTER GET AND CRUD 
+
+        public ActionResult UserMaster()
+        {
+            SetModulePermissions("Master", "UserMaster");
+            return View();
+        }
+
+        public JsonResult Get_UserMaster_Data()
+        {
+            try
+            {
+                DataSet ds = DbHelper.ExecuteDataSet("USP_MST_UserMaster_Getdata");
+
+                List<Dictionary<string, object>> userList = new List<Dictionary<string, object>>();
+                List<Dictionary<string, object>> employeeList = new List<Dictionary<string, object>>();
+
+                if (ds != null && ds.Tables.Count > 0 && ds.Tables[0].Rows.Count > 0)
+                {
+                    for (int i = 0; i < ds.Tables[0].Rows.Count; i++)
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int j = 0; j < ds.Tables[0].Columns.Count; j++)
+                        {
+                            row.Add(ds.Tables[0].Columns[j].ColumnName, ds.Tables[0].Rows[i][j]);
+                        }
+                        userList.Add(row);
+                    }
+                }
+
+                if (ds != null && ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
+                {
+                    for (int i = 0; i < ds.Tables[1].Rows.Count; i++)
+                    {
+                        Dictionary<string, object> row = new Dictionary<string, object>();
+                        for (int j = 0; j < ds.Tables[1].Columns.Count; j++)
+                        {
+                            row.Add(ds.Tables[1].Columns[j].ColumnName, ds.Tables[1].Rows[i][j]);
+                        }
+                        employeeList.Add(row);
+                    }
+                }
+
+                var jsonResult = Json(new
+                {
+                    success = true,
+                    UserList = userList,
+                    EmployeeList = employeeList
+                }, JsonRequestBehavior.AllowGet);
+                jsonResult.MaxJsonLength = Int32.MaxValue;
+                return jsonResult;
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message, UserList = new List<object>(), EmployeeList = new List<object>() }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        [HttpPost]
+        public JsonResult UserMaster_Insert_Update_Delete(int UserID = 0, int? EmployeeID = null, string UserName = "", string Password = "", bool IsAdmin = false, bool IsActive = true, string Action = "INSERT")
+        {
+            string message = "";
+            bool isSuccess = false;
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                message = DbHelper.ExecuteNonQueryWithMessage("USP_MST_UserMaster_Insert_Update_Delete",
+                    new SqlParameter("@ACTION", Action),
+                    new SqlParameter("@UserID", UserID),
+                    new SqlParameter("@EmployeeID", (object)EmployeeID ?? DBNull.Value),
+                    new SqlParameter("@UserName", (object)UserName ?? DBNull.Value),
+                    new SqlParameter("@Password", (object)Password ?? DBNull.Value),
+                    new SqlParameter("@IsAdmin", IsAdmin),
+                    new SqlParameter("@IsActive", IsActive),
+                    new SqlParameter("@CreatedByUserID", currentUserId));
+
+                if (message != null && (message.ToLower().Contains("saved") || message.ToLower().Contains("updated") || message.ToLower().Contains("deleted") || message.ToLower().Contains("success")))
+                {
+                    isSuccess = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
+            }
+            return Json(new { success = isSuccess, message = message });
+        }
+
+        
+
     }
 }

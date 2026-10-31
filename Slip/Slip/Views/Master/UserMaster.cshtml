@@ -1,0 +1,845 @@
+@{
+    ViewBag.Title = "User Master";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+    <div ng-controller="UserMasterCtrl" class="rough-dist-list-page">
+        <!-- Grid Card -->
+        <div class="rdl-grid-card">
+            <div class="rdl-card-header">
+                <div class="rdl-card-title-left">
+                    <i class="fa fa-users"></i>
+                    <h3>User Master</h3>
+                    <span class="badge-status-pill badge-pill-info">
+                        <i class="fa fa-database"></i> {{UserList.length || 0}} Total Records
+                    </span>
+                </div>
+                <div class="rdl-card-actions">
+                    <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()" title="Add New User">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                        <i class="fa fa-columns"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                        <i class="fa fa-file-excel-o"></i>
+                    </button>
+                    <div class="field-select-wrap field-select-wrap--search">
+                        <input type="text"
+                               ng-model="SearchText"
+                               ng-change="OnSearchChange()"
+                               placeholder="Search user records..."
+                               class="form-control ri-input" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rdl-grid-body">
+                <div id="userGridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Add / Edit User Modal -->
+        <div class="modal fade" id="UserModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" style="max-width: 560px; width: 92%; margin: 30px auto;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-brand">
+                            <i class="fa fa-users" style="color: #38bdf8; font-size: 18px;"></i>
+                            <h4 class="modal-header-title">{{FormModel.UserID > 0 ? 'Edit User' : 'New User'}}</h4>
+                        </div>
+                        <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <!-- Employee Dropdown -->
+                        <div class="ri-form-group" style="margin-bottom: 16px;">
+                            <label class="ri-label" for="ModalEmployeeID">
+                                EMPLOYEE <span class="req">*</span>
+                            </label>
+                            <select id="ModalEmployeeID" 
+                                    ng-model="FormModel.EmployeeID" 
+                                    class="form-control ri-input"
+                                    ng-disabled="FormModel.UserID > 0"
+                                    style="width: 100%; height: 38px;">
+                                <option value="">-- Select Employee --</option>
+                                <option ng-repeat="emp in EmployeeList" ng-value="emp.EmployeeID">
+                                    {{emp.EmployeeName}} (Code: {{emp.EmpCode || '-'}} / Desig: {{emp.Designation || '-'}})
+                                </option>
+                            </select>
+                            <small ng-if="FormModel.UserID > 0" style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">
+                                <i class="fa fa-info-circle"></i> Employee cannot be changed in edit mode.
+                            </small>
+                        </div>
+
+                        <!-- User Name -->
+                        <div class="ri-form-group" style="margin-bottom: 16px;">
+                            <label class="ri-label" for="ModalUserName">
+                                USER NAME <span class="req">*</span>
+                            </label>
+                            <input type="text" 
+                                   id="ModalUserName" 
+                                   ng-model="FormModel.UserName" 
+                                   placeholder="Enter login username" 
+                                   class="form-control ri-input" 
+                                   autocomplete="off" />
+                        </div>
+
+                        <!-- Password -->
+                        <div class="ri-form-group" style="margin-bottom: 16px;">
+                            <label class="ri-label" for="ModalPassword">
+                                PASSWORD <span class="req">*</span>
+                            </label>
+                            <div style="position: relative; width: 100%;">
+                                <input type="{{ShowPassword ? 'text' : 'password'}}" 
+                                       id="ModalPassword" 
+                                       ng-model="FormModel.Password" 
+                                       placeholder="Enter password" 
+                                       class="form-control ri-input" 
+                                       style="padding-right: 38px; margin: 0;"
+                                       autocomplete="new-password" />
+                                <button type="button" 
+                                        class="btn-toggle-eye" 
+                                        ng-click="ShowPassword = !ShowPassword" 
+                                        tabindex="-1" 
+                                        title="{{ShowPassword ? 'Hide password' : 'Show password'}}">
+                                    <i class="fa" ng-class="ShowPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="ri-form-group" style="margin-bottom: 16px;">
+                            <label class="ri-label" for="ModalConfirmPassword">
+                                CONFIRM PASSWORD <span class="req">*</span>
+                            </label>
+                            <div style="position: relative; width: 100%;">
+                                <input type="{{ShowConfirmPassword ? 'text' : 'password'}}" 
+                                       id="ModalConfirmPassword" 
+                                       ng-model="FormModel.ConfirmPassword" 
+                                       placeholder="Re-enter password to confirm" 
+                                       class="form-control ri-input" 
+                                       style="padding-right: 38px; margin: 0;"
+                                       autocomplete="new-password" />
+                                <button type="button" 
+                                        class="btn-toggle-eye" 
+                                        ng-click="ShowConfirmPassword = !ShowConfirmPassword" 
+                                        tabindex="-1" 
+                                        title="{{ShowConfirmPassword ? 'Hide password' : 'Show password'}}">
+                                    <i class="fa" ng-class="ShowConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Is Admin Checkbox -->
+                        <div class="ri-form-group" style="margin-bottom: 8px;">
+                            <label class="ri-label">ROLE / PERMISSION</label>
+                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+                                <input type="checkbox" 
+                                       id="ModalIsAdmin" 
+                                       ng-model="FormModel.IsAdmin" 
+                                       style="width: 17px; height: 17px; cursor: pointer; accent-color: #6366f1;" />
+                                <label for="ModalIsAdmin" style="margin: 0; font-size: 13px; font-weight: 600; cursor: pointer; color: #1e293b;">
+                                    <i class="fa fa-shield" style="color: #0284c7;"></i> Admin User (Full Access)
+                                </label>
+                            </div>
+                            <small style="color: #64748b; font-size: 11px; margin-top: 4px; display: block;">
+                                If unchecked, the user will be created as a <strong>Standard</strong> user.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn-ri-save" type="button" ng-click="SaveUser()" ng-disabled="IsSaving">
+                            <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                            {{FormModel.UserID > 0 ? 'UPDATE' : 'SAVE'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active / Inactive Status Confirmation Modal -->
+        <div class="modal fade" id="ConfirmStatusModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-brand">
+                            <i class="fa" ng-class="IsStatusItemActive() ? 'fa-toggle-off' : 'fa-toggle-on'" style="color: #38bdf8; font-size: 18px;"></i>
+                            <h4 class="modal-header-title">Confirm Status</h4>
+                        </div>
+                        <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="delete-dialog-content">
+                            <div class="delete-warning-icon" ng-style="{'background': IsStatusItemActive() ? '#fee2e2' : '#dcfce7', 'color': IsStatusItemActive() ? '#ef4444' : '#15803d'}">
+                                <i class="fa" ng-class="IsStatusItemActive() ? 'fa-toggle-off' : 'fa-toggle-on'"></i>
+                            </div>
+                            <h4 class="delete-dialog-title">{{IsStatusItemActive() ? 'Deactivate User?' : 'Activate User?'}}</h4>
+                            <p class="delete-dialog-text">
+                                Are you sure you want to <strong>{{IsStatusItemActive() ? 'deactivate' : 'activate'}}</strong> user account <strong>{{SelectedStatusItem.UserName}}</strong>?
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsTogglingStatus">
+                            <i class="fa fa-times"></i> Cancel
+                        </button>
+                        <button class="btn-modal-action" 
+                                ng-style="{'background': IsStatusItemActive() ? '#ef4444' : '#16a34a', 'color': '#ffffff'}"
+                                ng-click="ExecuteToggleStatus()" 
+                                type="button" 
+                                ng-disabled="IsTogglingStatus">
+                            <i class="fa fa-spinner fa-spin" ng-show="IsTogglingStatus"></i>
+                            <i class="fa" ng-class="IsStatusItemActive() ? 'fa-toggle-off' : 'fa-toggle-on'" ng-hide="IsTogglingStatus"></i>
+                            {{IsStatusItemActive() ? 'Deactivate' : 'Activate'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Soft Delete Confirmation Modal -->
+        <div class="modal fade" id="ConfirmDeleteModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-brand">
+                            <i class="fa fa-exclamation-triangle modal-icon-danger"></i>
+                            <h4 class="modal-header-title">Confirm Delete</h4>
+                        </div>
+                        <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="delete-dialog-content">
+                            <div class="delete-warning-icon">
+                                <i class="fa fa-trash-o"></i>
+                            </div>
+                            <h4 class="delete-dialog-title">Delete User?</h4>
+                            <p class="delete-dialog-text">
+                                Are you sure you want to delete user account <strong>{{SelectedDeleteItem.UserName}}</strong> 
+                                <span ng-if="SelectedDeleteItem.EmployeeName && SelectedDeleteItem.EmployeeName !== '-'">({{SelectedDeleteItem.EmployeeName}})</span>?
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsDeleting">
+                            <i class="fa fa-times"></i> Cancel
+                        </button>
+                        <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button" ng-disabled="IsDeleting">
+                            <i class="fa fa-spinner fa-spin" ng-show="IsDeleting"></i>
+                            <i class="fa fa-trash" ng-hide="IsDeleting"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch', 'ui.grid']);
+    }
+
+    module.controller("UserMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.UserList = [];
+        $scope.EmployeeList = [];
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.IsDeleting = false;
+        $scope.SelectedDeleteItem = null;
+
+        $scope.SelectedStatusItem = null;
+        $scope.IsTogglingStatus = false;
+        $scope.ShowPassword = false;
+        $scope.ShowConfirmPassword = false;
+
+        $scope.SearchText = '';
+
+        $scope.IsStatusItemActive = function () {
+            if (!$scope.SelectedStatusItem) return false;
+            var val = $scope.SelectedStatusItem.IsActive;
+            return (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+        };
+
+        $scope.GetGridInstance = function () {
+            var $el = $("#userGridContainer");
+            if (!$el.data("dxDataGrid")) {
+                return null;
+            }
+            return $el.dxDataGrid("instance");
+        };
+
+        $scope.RefreshGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.refresh();
+            } else {
+                $scope.InitGrid();
+            }
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.showColumnChooser();
+            }
+        };
+
+        $scope.OnSearchChange = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.searchByText($scope.SearchText || '');
+            }
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (!gridInstance) {
+                if (typeof Noty === 'function') Noty("warning", "Grid is not ready for export.");
+                return;
+            }
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('UserMaster');
+
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true,
+                customizeCell: function (options) {
+                    var gridCell = options.gridCell;
+                    var excelCell = options.excelCell;
+                    if (gridCell && gridCell.rowType === 'header') {
+                        excelCell.fill = {
+                            type: 'pattern',
+                            pattern: 'solid',
+                            fgColor: { argb: 'FF1C2B6B' }
+                        };
+                        excelCell.font = { color: { argb: 'FFFFFFFF' }, bold: true };
+                        excelCell.alignment = { horizontal: 'center', vertical: 'middle' };
+                    }
+                }
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'UserMaster.xlsx');
+                });
+            });
+        };
+
+        $scope.FormModel = {
+            UserID: 0,
+            EmployeeID: '',
+            UserName: '',
+            Password: '',
+            ConfirmPassword: '',
+            IsAdmin: false
+        };
+
+        // Open Add Modal
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#UserModal").modal("show");
+            $timeout(function () {
+                $('#ModalEmployeeID').focus();
+            }, 200);
+        };
+
+        // Reset Form
+        $scope.ResetForm = function () {
+            $scope.FormModel = {
+                UserID: 0,
+                EmployeeID: '',
+                UserName: '',
+                Password: '',
+                ConfirmPassword: '',
+                IsAdmin: false
+            };
+            $scope.ShowPassword = false;
+            $scope.ShowConfirmPassword = false;
+        };
+
+        // Edit User
+        $scope.EditItem = function (item) {
+            if (!item) return;
+
+            // Ensure employee exists in EmployeeList so select box binds correctly
+            var empExists = false;
+            if ($scope.EmployeeList && $scope.EmployeeList.length > 0) {
+                for (var i = 0; i < $scope.EmployeeList.length; i++) {
+                    if ($scope.EmployeeList[i].EmployeeID == item.EmployeeID) {
+                        empExists = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!empExists && item.EmployeeID) {
+                $scope.EmployeeList.push({
+                    EmployeeID: item.EmployeeID,
+                    EmployeeName: item.EmployeeName || 'Employee #' + item.EmployeeID,
+                    EmpCode: item.EmpCode || '',
+                    Designation: item.Designation || ''
+                });
+            }
+
+            $scope.FormModel = {
+                UserID: item.UserID,
+                EmployeeID: item.EmployeeID,
+                UserName: item.UserName,
+                Password: item.Password,
+                ConfirmPassword: item.Password,
+                IsAdmin: (item.IsAdmin === true || item.IsAdmin === 'True' || item.IsAdmin === 'true' || item.IsAdmin === 1 || item.IsAdmin === '1')
+            };
+            $scope.ShowPassword = false;
+            $scope.ShowConfirmPassword = false;
+
+            $("#UserModal").modal("show");
+            $timeout(function () {
+                $('#ModalUserName').focus();
+            }, 200);
+        };
+
+        // Prompt Status Toggle (Open Confirmation Modal)
+        $scope.PromptToggleStatus = function (item) {
+            if (!item || !item.UserID) return;
+            $scope.SelectedStatusItem = item;
+            $("#ConfirmStatusModal").modal("show");
+        };
+
+        // Execute Status Toggle after Confirmation
+        $scope.ExecuteToggleStatus = function () {
+            if (!$scope.SelectedStatusItem || $scope.IsTogglingStatus) return;
+            $scope.IsTogglingStatus = true;
+            var item = $scope.SelectedStatusItem;
+            var isCurrentActive = $scope.IsStatusItemActive();
+            var newStatus = !isCurrentActive;
+
+            $http.post('@Url.Action("UserMaster_Insert_Update_Delete", "Master")', {
+                UserID: item.UserID,
+                EmployeeID: item.EmployeeID,
+                UserName: item.UserName,
+                Password: item.Password,
+                IsAdmin: item.IsAdmin,
+                IsActive: newStatus,
+                Action: 'UPDATE'
+            }).then(function (res) {
+                $scope.IsTogglingStatus = false;
+                $("#ConfirmStatusModal").modal("hide");
+                if (res.data && res.data.success) {
+                    item.IsActive = newStatus;
+                    $scope.RefreshGrid();
+                    if (typeof Noty === 'function') {
+                        Noty("success", res.data.message || (newStatus ? "User activated successfully!" : "User deactivated successfully!"));
+                    }
+                    $scope.SelectedStatusItem = null;
+                } else {
+                    if (typeof Noty === 'function') {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
+                }
+            }, function () {
+                $scope.IsTogglingStatus = false;
+                $("#ConfirmStatusModal").modal("hide");
+                if (typeof Noty === 'function') Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // Prompt Delete
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.UserID) return;
+            $scope.SelectedDeleteItem = item;
+            $("#ConfirmDeleteModal").modal("show");
+        };
+
+        // Execute Soft Delete
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem || $scope.IsDeleting) return;
+            $scope.IsDeleting = true;
+
+            $http.post('@Url.Action("UserMaster_Insert_Update_Delete", "Master")', {
+                UserID: $scope.SelectedDeleteItem.UserID,
+                Action: 'DELETE'
+            }).then(function (res) {
+                $scope.IsDeleting = false;
+                $("#ConfirmDeleteModal").modal("hide");
+
+                if (res.data && res.data.success) {
+                    if (typeof Noty === 'function') Noty("success", res.data.message || "User deleted successfully!");
+                    $scope.SelectedDeleteItem = null;
+                    $scope.FetchData();
+                } else {
+                    if (typeof Noty === 'function') Noty("error", (res.data && res.data.message) || "Failed to delete user.");
+                }
+            }, function () {
+                $scope.IsDeleting = false;
+                $("#ConfirmDeleteModal").modal("hide");
+                if (typeof Noty === 'function') Noty("error", "Error connecting to server.");
+            });
+        };
+
+        // Save / Update User
+        $scope.SaveUser = function () {
+            // Validation: Employee
+            if (!$scope.FormModel.EmployeeID) {
+                if (typeof Noty === 'function') Noty("error", "Please select an Employee!");
+                $('#ModalEmployeeID').focus();
+                return;
+            }
+
+            // Validation: Username
+            if (!$scope.FormModel.UserName || !$scope.FormModel.UserName.trim()) {
+                if (typeof Noty === 'function') Noty("error", "Please enter a User Name!");
+                $('#ModalUserName').focus();
+                return;
+            }
+
+            // Validation: Password
+            if (!$scope.FormModel.Password || !$scope.FormModel.Password.trim()) {
+                if (typeof Noty === 'function') Noty("error", "Please enter a Password!");
+                $('#ModalPassword').focus();
+                return;
+            }
+
+            // Validation: Confirm Password
+            if ($scope.FormModel.Password !== $scope.FormModel.ConfirmPassword) {
+                if (typeof Noty === 'function') Noty("error", "Password and Confirm Password do not match!");
+                $('#ModalConfirmPassword').focus();
+                return;
+            }
+
+            var action = ($scope.FormModel.UserID > 0) ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("UserMaster_Insert_Update_Delete", "Master")', {
+                UserID: $scope.FormModel.UserID || 0,
+                EmployeeID: parseInt($scope.FormModel.EmployeeID),
+                UserName: $scope.FormModel.UserName.trim(),
+                Password: $scope.FormModel.Password.trim(),
+                IsAdmin: $scope.FormModel.IsAdmin || false,
+                IsActive: true,
+                Action: action
+            }).then(function (res) {
+                $scope.IsSaving = false;
+                if (res.data && res.data.success) {
+                    $("#UserModal").modal("hide");
+                    if (typeof Noty === 'function') {
+                        Noty("success", res.data.message || (action === 'UPDATE' ? "User updated successfully!" : "User created successfully!"));
+                    }
+                    $scope.ResetForm();
+                    $scope.FetchData();
+                } else {
+                    if (typeof Noty === 'function') Noty("error", (res.data && res.data.message) || "Failed to save user.");
+                }
+            }, function () {
+                $scope.IsSaving = false;
+                if (typeof Noty === 'function') Noty("error", "Error saving user to server.");
+            });
+        };
+
+        // Fetch Data from Server
+        $scope.FetchData = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_UserMaster_Data", "Master")')
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.UserList = res.data.UserList || [];
+                        $scope.EmployeeList = res.data.EmployeeList || [];
+                        $scope.InitGrid();
+                    } else {
+                        if (typeof Noty === 'function') Noty("error", (res.data && res.data.message) || "Failed to load user master data.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    if (typeof Noty === 'function') Noty("error", "Error loading user data from server.");
+                });
+        };
+
+        // Initialize DevExtreme DataGrid
+        $scope.InitGrid = function () {
+            var $grid = $("#userGridContainer");
+
+            if ($grid.data("dxDataGrid")) {
+                $grid.dxDataGrid("dispose");
+                $grid.empty();
+            }
+
+            $grid.dxDataGrid({
+                dataSource: $scope.UserList,
+                keyExpr: 'UserID',
+                height: 600,
+                loadPanel: {
+                    enabled: true
+                },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'virtual' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: false },
+                filterRow: {
+                    visible: true,
+                    applyFilter: 'auto'
+                },
+                headerFilter: { visible: true },
+                selection: { mode: 'single' },
+                export: { enabled: false },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "header") {
+                        var $td = $(e.cellElement);
+                        $td.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $ind = $td.find(".dx-column-indicators");
+                        if ($ind.length > 1) {
+                            $ind.slice(1).remove();
+                        }
+                        var $first = $ind.first();
+                        if ($first.length) {
+                            $td.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    }
+                },
+                onContentReady: function (e) {
+                    e.element.find(".dx-datagrid-headers .dx-header-row > td").each(function () {
+                        var $td = $(this);
+                        $td.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $ind = $td.find(".dx-column-indicators");
+                        if ($ind.length > 1) {
+                            $ind.slice(1).remove();
+                        }
+                        var $first = $ind.first();
+                        if ($first.length) {
+                            $td.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    });
+                },
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'UserName',
+                            summaryType: 'count',
+                            displayFormat: 'Total: {0}'
+                        }
+                    ]
+                },
+                columns: [
+                    // 1. Index Column
+                    {
+                        caption: '#',
+                        width: 45,
+                        alignment: 'center',
+                        allowReordering: false,
+                        allowFiltering: false,
+                        allowSorting: false,
+                        fixed: true,
+                        fixedPosition: 'left',
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .text(options.rowIndex + 1)
+                                .css({ "font-weight": "600", "color": "#64748b" })
+                                .appendTo(container);
+                        }
+                    },
+                    // 2. Employee Name
+                    {
+                        dataField: 'EmployeeName',
+                        caption: 'Employee Name',
+                        minWidth: 160,
+                        cellTemplate: function (container, options) {
+                            $("<strong>")
+                                .text(options.value || '-')
+                                .css({ "color": "#1e293b", "font-weight": "600" })
+                                .appendTo(container);
+                        }
+                    },
+                    // 3. Employee Code
+                    {
+                        dataField: 'EmpCode',
+                        caption: 'Code',
+                        minWidth: 80,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .text(options.value || '-')
+                                .css({ "font-weight": "600", "color": "#2563eb" })
+                                .appendTo(container);
+                        }
+                    },
+                    // 4. Designation
+                    {
+                        dataField: 'Designation',
+                        caption: 'Designation',
+                        minWidth: 110
+                    },
+                    // 5. User Name
+                    {
+                        dataField: 'UserName',
+                        caption: 'User Name',
+                        minWidth: 140,
+                        cellTemplate: function (container, options) {
+                            $("<div>")
+                                .css({ "display": "flex", "align-items": "center", "gap": "6px" })
+                                .html('<i class="fa fa-user-circle" style="color: #0284c7; font-size: 14px;"></i> <strong style="color: #0f172a; font-weight: 700;">' + (options.value || '-') + '</strong>')
+                                .appendTo(container);
+                        }
+                    },
+                    // 6. Password
+                    {
+                        dataField: 'Password',
+                        caption: 'Password',
+                        minWidth: 100,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .text(options.value || '-')
+                                .css({ "font-weight": "600", "color": "#1e293b" })
+                                .appendTo(container);
+                        }
+                    },
+                    // 7. Is Admin
+                    {
+                        dataField: 'IsAdmin',
+                        caption: 'Role / Is Admin',
+                        minWidth: 110,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var val = options.value;
+                            var isAdmin = (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+                            if (isAdmin) {
+                                $("<span>")
+                                    .addClass("badge-status-pill badge-pill-info")
+                                    .html('<i class="fa fa-shield"></i> Admin')
+                                    .appendTo(container);
+                            } else {
+                                $("<span>")
+                                    .addClass("badge-status-pill badge-pill-muted")
+                                    .text("Standard")
+                                    .appendTo(container);
+                            }
+                        }
+                    },
+                    // 8. Status (IsActive)
+                    {
+                        dataField: 'IsActive',
+                        caption: 'Status',
+                        minWidth: 85,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var val = options.value;
+                            var isActive = (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+                            if (isActive) {
+                                $("<span>")
+                                    .addClass("badge-status-pill badge-pill-success")
+                                    .text("Active")
+                                    .appendTo(container);
+                            } else {
+                                $("<span>")
+                                    .addClass("badge-status-pill badge-pill-danger")
+                                    .text("Inactive")
+                                    .appendTo(container);
+                            }
+                        }
+                    },
+                    // 9. Created Date
+                    {
+                        dataField: 'CreatedDate',
+                        caption: 'Created Date',
+                        minWidth: 110,
+                        alignment: 'center'
+                    },
+                    // 10. Action Column (Edit, Toggle & Delete)
+                    {
+                        caption: 'Action',
+                        width: 120,
+                        alignment: 'center',
+                        fixed: true,
+                        fixedPosition: 'right',
+                        allowReordering: false,
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit User").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () {
+                                        $scope.$apply(function () {
+                                            $scope.EditItem(options.data);
+                                        });
+                                    })
+                                    .appendTo(div);
+
+                                var isActive = (options.data.IsActive === true || options.data.IsActive === 'True' || options.data.IsActive === 'true' || options.data.IsActive === 1 || options.data.IsActive === '1');
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate User" : "Activate User")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () {
+                                    $scope.$apply(function () {
+                                        $scope.PromptToggleStatus(options.data);
+                                    });
+                                }).appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>").addClass("grid-btn-del").attr("title", "Delete User").html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () {
+                                        $scope.$apply(function () {
+                                            $scope.PromptDelete(options.data);
+                                        });
+                                    })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        // Initial Load
+        $scope.FetchData();
+    }]);
+    </script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>User Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}

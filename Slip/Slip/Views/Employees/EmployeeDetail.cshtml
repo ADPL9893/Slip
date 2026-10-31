@@ -117,6 +117,10 @@
                 if (typeof hide_loader === 'function') hide_loader();
 
                 var rawList = (response.data && response.data.EMPEmployeeList) ? response.data.EMPEmployeeList : [];
+                // Ensure unique ID for DevExtreme keyExpr
+                angular.forEach(rawList, function (item) {
+                    item.ID = item.EmployeeID || item.ID;
+                });
                 $scope.List = rawList;
 
                 var rawFields = (response.data && response.data.DataField) ? response.data.DataField : [];
@@ -174,8 +178,9 @@
                             col.caption = 'Designation';
                         } else if (fieldKey === 'employeetype' || fieldKey === 'emptype') {
                             col.caption = 'Employee Type';
-                        } else if (fieldKey === 'username' || fieldKey === 'user_name') {
-                            col.caption = 'User Name';
+                        //} else if (fieldKey === 'username' || fieldKey === 'user_name') {
+                        //    col.caption = 'User Name';
+
                         } else if (fieldKey === 'company' || fieldKey === 'companyname') {
                             col.caption = 'Company';
                         } else if (fieldKey === 'isactive' || fieldKey === 'status') {
@@ -211,6 +216,22 @@
                                 .appendTo(container);
                         };
                     }
+                    //// Special styling for User Name (Decoupled SEC_User)
+                    //else if (fieldKey === 'username' || fieldKey === 'user_name') {
+                    //    col.minWidth = 120;
+                    //    col.cellTemplate = function (container, options) {
+                    //        var uVal = options.value || (options.data ? options.data.UserName : '');
+                    //        if (uVal) {
+                    //            $("<div>")
+                    //                .css({ "display": "flex", "align-items": "center", "gap": "6px" })
+                    //                .html('<i class="fa fa-user-circle" style="color: #0284c7; font-size: 13px;"></i> <strong style="color: #0f172a; font-weight: 600;">' + uVal + '</strong>')
+                    //                .appendTo(container);
+                    //        } else {
+                    //            $("<span>").text("-").appendTo(container);
+                    //        }
+                    //    };
+                    //}
+
                     // Special styling for Status
                     else if (fieldKey === 'isactive' || fieldKey === 'status') {
                         col.minWidth = 65;
@@ -247,8 +268,8 @@
                         col.minWidth = 80;
                     }
                     // Special formatting for Dates
-                    else if (fieldKey.indexOf('date') !== -1 || fieldKey === 'dob') {
-                        col.minWidth = 85;
+                    else if (fieldKey.indexOf('date') !== -1 || fieldKey === 'dob' || fieldKey === 'created' || fieldKey === 'modified') {
+                        col.minWidth = 90;
                         col.dataType = 'date';
                         col.format = 'dd-MMM-yyyy';
                         col.alignment = 'center';
@@ -261,7 +282,7 @@
             // 3. Action Column (Edit & Delete)
             gridColumns.push({
                 caption: 'Action',
-                width: 75,
+                width: 95,
                 alignment: 'center',
                 fixed: true,
                 fixedPosition: 'right',
@@ -274,7 +295,8 @@
                         .addClass("grid-action-btn-edit")
                         .attr("title", "Edit Employee")
                         .html('<i class="fa fa-pencil"></i>')
-                        .on("click", function () {
+                        .on("click", function (e) {
+                            e.preventDefault();
                             $scope.$apply(function () {
                                 $scope.EditRow(options.data.ID || options.data.EmployeeID);
                             });
@@ -286,7 +308,8 @@
                         .addClass("grid-action-btn-del")
                         .attr("title", "Delete Employee")
                         .html('<i class="fa fa-trash-o"></i>')
-                        .on("click", function () {
+                        .on("click", function (e) {
+                            e.preventDefault();
                             $scope.$apply(function () {
                                 $scope.PromptDelete(options.data);
                             });
@@ -296,6 +319,7 @@
                     group.appendTo(container);
                 }
             });
+
 
             $scope.InitGrid(gridColumns);
         };
@@ -396,11 +420,11 @@
                 },
                 export: {
                     enabled: true,
-                    formats: ['xlxs'],
+                    formats: ['xlsx', 'xlxs'],
                     allowExportSelectedData: false
                 },
                 onExporting: function (e) {
-                    if (e.format === 'xlxs') {
+                    if (e.format === 'xlsx' || e.format === 'xlxs') {
                         if (typeof ExcelJS !== 'undefined') {
                             var workbook = new ExcelJS.Workbook();
                             var worksheet = workbook.addWorksheet('Employees');

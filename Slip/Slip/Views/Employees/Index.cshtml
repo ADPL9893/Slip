@@ -179,6 +179,7 @@
         </div>
     </div>
 
+    @*
     <!-- Section 3: Account Credentials Card (Soft Ice Blue - Same as Personal Information) -->
     <div class="emp-card emp-card-account">
         <div class="emp-card-header">
@@ -188,14 +189,14 @@
         </div>
         <div class="emp-card-body">
             <div class="emp-form-row">
-                <!-- Username -->
+                 Username 
                 <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12">
                     <div class="emp-form-group">
                         <label class="emp-label">Username <span class="req">*</span></label>
                         <input type="text" ng-model="EmployeeMaster.UserName" class="emp-form-control" placeholder="Enter Login Username" autocomplete="off" />
                     </div>
                 </div>
-                <!-- Password -->
+                 Password 
                 <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12">
                     <div class="emp-form-group">
                         <label class="emp-label">Password <span class="req">*</span></label>
@@ -205,6 +206,7 @@
             </div>
         </div>
     </div>
+    *@
 
     <!-- Section 4: Identity & Address Information Card (Soft Periwinkle / Royal Indigo - Same as Employment Details) -->
     <div class="emp-card emp-card-identity">
@@ -597,15 +599,15 @@
                 return;
             }
 
-            if ($scope.EmployeeMaster.UserName == undefined || $scope.EmployeeMaster.UserName == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Enter Username !");
-                return;
-            }
+            //if ($scope.EmployeeMaster.UserName == undefined || $scope.EmployeeMaster.UserName == "") {
+            //    if (typeof Noty === 'function') Noty("error", "Please Enter Username !");
+            //    return;
+            //}
 
-            if ($scope.EmployeeMaster.Password == undefined || $scope.EmployeeMaster.Password == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Enter Password !");
-                return;
-            }
+            //if ($scope.EmployeeMaster.Password == undefined || $scope.EmployeeMaster.Password == "") {
+            //    if (typeof Noty === 'function') Noty("error", "Please Enter Password !");
+            //    return;
+            //}
 
             if ($scope.EmployeeMaster.TableNo == undefined || $scope.EmployeeMaster.TableNo == "") {
                 $scope.EmployeeMaster.TableNo = "0";

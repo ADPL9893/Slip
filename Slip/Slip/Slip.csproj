@@ -350,6 +350,7 @@
     <Compile Include="Models\MST_PartyMaster.cs" />
     <Compile Include="Models\MST_Purpose.cs" />
     <Compile Include="Models\MST_Receipe.cs" />
+    <Compile Include="Models\MST_MasterbookDays.cs" />
     <Compile Include="Models\TRN_RoughInward.cs" />
     <Compile Include="Models\TRN_RoughInwardDetail.cs" />
     <Compile Include="Models\MST_RoughDistribution.cs" />
@@ -1340,6 +1341,9 @@
     <Content Include="Views\Master\LotQRPrint.cshtml" />
     <Content Include="Views\Master\LotBranchSplit.cshtml" />
     <Content Include="Views\Master\SlipExcelUpload.cshtml" />
+    <Content Include="Views\Master\RecipeMaster.cshtml" />
+    <Content Include="Views\Master\ColorDaysMaster.cshtml" />
+    <Content Include="Views\Master\UserMaster.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

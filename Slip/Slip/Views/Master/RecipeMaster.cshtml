@@ -1,0 +1,504 @@
+@{
+    ViewBag.Title = "Recipe Master";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+    <div ng-controller="RecipeMasterCtrl" class="rough-dist-list-page">
+        <!-- Grid Card -->
+        <div class="rdl-grid-card">
+            <div class="rdl-card-header">
+                <div class="rdl-card-title-left">
+                    <i class="fa fa-flask"></i>
+                    <h3>Recipe Master</h3>
+                    <span class="badge-status-pill badge-pill-info">
+                        <i class="fa fa-database"></i> {{RecipeList.length || 0}} Total Records
+                    </span>
+                </div>
+                <div class="rdl-card-actions">
+                    <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()" title="Add New Recipe">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                        <i class="fa fa-columns"></i>
+                    </button>
+                    <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                        <i class="fa fa-file-excel-o"></i>
+                    </button>
+                    <div class="field-select-wrap field-select-wrap--search">
+                        <input type="text"
+                               ng-model="SearchText"
+                               ng-change="OnSearchChange()"
+                               placeholder="Search recipe records..."
+                               class="form-control ri-input" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="rdl-grid-body">
+                <div id="recipeGridContainer" style="width: 100%;"></div>
+            </div>
+        </div>
+
+        <!-- Add / Edit Modal -->
+        <div class="modal fade" id="InwardModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog" style="max-width: 560px; width: 92%; margin: 30px auto;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-flex">
+                            <div class="modal-header-title-left">
+                                <i class="fa fa-flask modal-title-icon"></i>
+                                <h4 class="modal-title">{{FormModel.ReceipeID > 0 ? 'Edit Recipe' : 'New Recipe'}}</h4>
+                            </div>
+                            <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12 ri-form-group">
+                                <label class="ri-label" for="ModalReceipe">RECIPE <span class="req">*</span></label>
+                                <input type="text" id="ModalReceipe" ng-model="FormModel.Receipe" placeholder="Enter Recipe Name" class="form-control ri-input" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 ri-form-group">
+                                <label class="ri-label" for="ModalRemarks">REMARKS</label>
+                                <textarea id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Enter Remarks" class="form-control ri-input" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 ri-form-group" style="margin-bottom: 5px;">
+                                <label class="ri-label">STATUS</label>
+                                <div class="active-toggle-wrap" style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+                                    <input type="checkbox" id="ModalIsActive" ng-model="FormModel.IsActive" style="width: 16px; height: 16px; cursor: pointer;" />
+                                    <label for="ModalIsActive" style="margin: 0; font-size: 13px; font-weight: 600; cursor: pointer; color: #1e293b;">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                        <button class="btn-ri-save" type="button" ng-click="SaveRecipe()" ng-disabled="IsSaving">
+                            <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                            {{FormModel.ReceipeID > 0 ? 'UPDATE' : 'SAVE'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="RecipeConfirmDeleteModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-brand">
+                            <i class="fa fa-exclamation-triangle modal-icon-danger"></i>
+                            <h4 class="modal-header-title">Confirm Delete</h4>
+                        </div>
+                        <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="delete-dialog-content">
+                            <div class="delete-warning-icon">
+                                <i class="fa fa-trash-o"></i>
+                            </div>
+                            <h4 class="delete-dialog-title">Delete Recipe?</h4>
+                            <p class="delete-dialog-text">
+                                Are you sure you want to delete recipe <strong>{{SelectedDeleteItem.Receipe}}</strong>?
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsDeleting">
+                            <i class="fa fa-times"></i> Cancel
+                        </button>
+                        <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button" ng-disabled="IsDeleting">
+                            <i class="fa fa-spinner fa-spin" ng-show="IsDeleting"></i>
+                            <i class="fa fa-trash" ng-hide="IsDeleting"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    module.controller("RecipeMasterCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanEdit = ('@ViewBag.CanEdit' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.RecipeList = [];
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.IsDeleting = false;
+        $scope.SelectedDeleteItem = null;
+
+        $scope.FormModel = {
+            ReceipeID: 0,
+            Receipe: '',
+            Remarks: '',
+            IsActive: true
+        };
+
+        $scope.SearchText = '';
+        $scope.OnSearchChange = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('RecipeMaster');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RecipeMaster.xlsx');
+                });
+            });
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#InwardModal").modal("show");
+            $timeout(function () { $('#ModalReceipe').focus(); }, 150);
+        };
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = {
+                ReceipeID: 0,
+                Receipe: '',
+                Remarks: '',
+                IsActive: true
+            };
+        };
+
+        $scope.EditItem = function (item) {
+            if (!item) return;
+            $scope.FormModel = {
+                ReceipeID: item.ReceipeID,
+                Receipe: item.Receipe || '',
+                Remarks: item.Remarks || '',
+                IsActive: item.IsActive !== false
+            };
+            $("#InwardModal").modal("show");
+            $timeout(function () { $('#ModalReceipe').focus(); }, 150);
+        };
+
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.ReceipeID) return;
+            $scope.SelectedDeleteItem = item;
+            $("#RecipeConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem || $scope.IsDeleting) return;
+            $scope.IsDeleting = true;
+            $http.post('@Url.Action("Receipe_Insert_Update_Delete", "Master")', {
+                model: { ReceipeID: $scope.SelectedDeleteItem.ReceipeID },
+                Action: 'DELETE'
+            }).then(function (res) {
+                $scope.IsDeleting = false;
+                $("#RecipeConfirmDeleteModal").modal("hide");
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Recipe deleted successfully!");
+                    $scope.SelectedDeleteItem = null;
+                    $scope.LoadRecipeList();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to delete recipe.");
+                }
+            }, function () {
+                $scope.IsDeleting = false;
+                $("#RecipeConfirmDeleteModal").modal("hide");
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        $scope.GetGridInstance = function () {
+            var $el = $("#recipeGridContainer");
+            if (!$el.data("dxDataGrid")) {
+                return null;
+            }
+            return $el.dxDataGrid("instance");
+        };
+
+        $scope.RefreshGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.refresh();
+            } else {
+                $scope.InitGrid();
+            }
+        };
+
+        $scope.ToggleActive = function (item) {
+            if (!item || !item.ReceipeID) return;
+            var newStatus = !item.IsActive;
+            var updateModel = {
+                ReceipeID: item.ReceipeID,
+                Receipe: item.Receipe,
+                Remarks: item.Remarks,
+                IsActive: newStatus
+            };
+            $http.post('@Url.Action("Receipe_Insert_Update_Delete", "Master")', {
+                model: updateModel,
+                Action: 'UPDATE'
+            }).then(function (res) {
+                if (res.data && res.data.success) {
+                    item.IsActive = newStatus;
+                    $scope.RefreshGrid();
+                    Noty("success", res.data.message || "Status updated successfully!");
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                }
+            }, function () {
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        $scope.LoadRecipeList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_MST_ReceipeGridList", "Master")')
+                .then(function (res) {
+                    $scope.IsLoading = false;
+                    if (res.data && res.data.success) {
+                        $scope.RecipeList = res.data.list || [];
+                        $scope.InitGrid();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to load recipes.");
+                    }
+                }, function () {
+                    $scope.IsLoading = false;
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.SaveRecipe = function () {
+            if (!$scope.FormModel.Receipe || !$scope.FormModel.Receipe.trim()) {
+                Noty("error", "Please enter Recipe Name!");
+                $('#ModalReceipe').focus();
+                return;
+            }
+
+            var action = ($scope.FormModel.ReceipeID > 0) ? 'UPDATE' : 'INSERT';
+            $scope.IsSaving = true;
+
+            $http.post('@Url.Action("Receipe_Insert_Update_Delete", "Master")', {
+                model: $scope.FormModel,
+                Action: action
+            }).then(function (res) {
+                $scope.IsSaving = false;
+                if (res.data && res.data.success) {
+                    $("#InwardModal").modal("hide");
+                    Noty("success", res.data.message || (action === 'UPDATE' ? "Recipe updated successfully!" : "Recipe saved successfully!"));
+                    $scope.ResetForm();
+                    $scope.LoadRecipeList();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to save recipe.");
+                }
+            }, function () {
+                $scope.IsSaving = false;
+                Noty("error", "Error saving recipe to server.");
+            });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.RecipeList);
+                gridInstance.refresh();
+                return;
+            }
+            $("#recipeGridContainer").dxDataGrid({
+                dataSource: $scope.RecipeList,
+                keyExpr: 'ReceipeID',
+                height: '100%',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: {
+                    enabled: true,
+                    mode: 'select'
+                },
+                columnFixing: {
+                    enabled: true
+                },
+                showColumnLines: false,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "multiple" },
+                scrolling: { mode: 'standard' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: false },
+                filterRow: { visible: false, applyFilter: 'auto' },
+                headerFilter: { visible: true },
+                onToolbarPreparing: function (e) {
+                    e.toolbarOptions.items = [];
+                },
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
+                    }
+                },
+                onCellPrepared: function (e) {
+                    if (e.rowType === "header") {
+                        e.cellElement.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $indicators = e.cellElement.find(".dx-column-indicators");
+                        if ($indicators.length > 1) {
+                            $indicators.slice(1).remove();
+                        }
+                        var $first = e.cellElement.find(".dx-column-indicators").first();
+                        if ($first.length) {
+                            e.cellElement.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    }
+                },
+                onContentReady: function (e) {
+                    e.element.find(".dx-datagrid-headers .dx-header-row > td").each(function () {
+                        var $td = $(this);
+                        $td.find(".dx-column-indicators.dx-visibility-hidden").remove();
+                        var $ind = $td.find(".dx-column-indicators");
+                        if ($ind.length > 1) {
+                            $ind.slice(1).remove();
+                        }
+                        var $first = $ind.first();
+                        if ($first.length) {
+                            $td.prepend($first);
+                            $first.css({
+                                "float": "right",
+                                "margin-left": "6px",
+                                "margin-right": "0",
+                                "display": "inline-flex",
+                                "visibility": "visible"
+                            });
+                        }
+                    });
+                },
+                selection: { mode: 'single' },
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'Receipe',
+                            summaryType: 'count',
+                            displayFormat: 'Total: {0}',
+                            alignByColumn: true
+                        }
+                    ]
+                },
+                export: { enabled: false },
+                columns: [
+                    {
+                        caption: '#', width: 45, alignment: 'center', allowReordering: false, allowFiltering: false, allowSorting: false,
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Recipe', dataField: 'Receipe', minWidth: 200,
+                        cellTemplate: function (container, options) {
+                            $("<strong>").text(options.data.Receipe || '').css({ "color": "#1C5F8F" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Remarks', dataField: 'Remarks', minWidth: 260,
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.data.Remarks || '-').css({ "color": "#475569" }).appendTo(container);
+                        }
+                    },
+                    {
+                        caption: 'Status', dataField: 'IsActive', width: 110, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            if (options.data.IsActive) {
+                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                            } else {
+                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Action', width: 120, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        visible: ($scope.CanEdit || $scope.CanDelete),
+                        cellTemplate: function (container, options) {
+                            var div = $("<div>").addClass("grid-btn-group");
+
+                            if ($scope.CanEdit) {
+                                $("<button>").addClass("grid-btn-edit").attr("title", "Edit Recipe").html('<i class="fa fa-pencil"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
+                                    .appendTo(div);
+
+                                var isActive = !!options.data.IsActive;
+                                var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
+                                    .attr("title", isActive ? "Deactivate Recipe" : "Activate Recipe")
+                                    .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
+                                if (!isActive) {
+                                    $toggleBtn.addClass("is-inactive-state");
+                                }
+                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleActive(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            if ($scope.CanDelete) {
+                                $("<button>").addClass("grid-btn-del").attr("title", "Delete Recipe").html('<i class="fa fa-trash-o"></i>')
+                                    .on("click", function () { $scope.$apply(function () { $scope.PromptDelete(options.data); }); })
+                                    .appendTo(div);
+                            }
+
+                            div.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $scope.LoadRecipeList();
+    }]);
+    </script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Recipe Master</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}
