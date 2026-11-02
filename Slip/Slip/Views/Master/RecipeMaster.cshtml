@@ -94,6 +94,46 @@
             </div>
         </div>
 
+        <!-- Active / Inactive Status Confirmation Modal -->
+        <div class="modal fade" id="RecipeConfirmStatusModal" role="dialog" data-backdrop="static">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <div class="modal-header-brand">
+                            <i class="fa" ng-class="IsStatusItemActive() ? 'fa-toggle-off' : 'fa-toggle-on'" style="color: #38bdf8; font-size: 18px;"></i>
+                            <h4 class="modal-header-title">Confirm Status</h4>
+                        </div>
+                        <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="delete-dialog-content">
+                            <div class="delete-warning-icon" ng-style="{'background': IsStatusItemActive() ? '#fee2e2' : '#dcfce7', 'color': IsStatusItemActive() ? '#ef4444' : '#15803d'}">
+                                <i class="fa" ng-class="IsStatusItemActive() ? 'fa-toggle-off' : 'fa-toggle-on'"></i>
+                            </div>
+                            <h4 class="delete-dialog-title">{{IsStatusItemActive() ? 'Deactivate Recipe?' : 'Activate Recipe?'}}</h4>
+                            <p class="delete-dialog-text">
+                                Are you sure you want to <strong>{{IsStatusItemActive() ? 'deactivate' : 'activate'}}</strong> recipe <strong>{{SelectedStatusItem.Receipe}}</strong>?
+                            </p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsTogglingStatus">
+                            <i class="fa fa-times"></i> Cancel
+                        </button>
+                        <button class="btn-modal-action" 
+                                ng-style="{'background': IsStatusItemActive() ? '#ef4444' : '#16a34a', 'color': '#ffffff'}"
+                                ng-click="ExecuteToggleStatus()" 
+                                type="button" 
+                                ng-disabled="IsTogglingStatus">
+                            <i class="fa fa-spinner fa-spin" ng-show="IsTogglingStatus"></i>
+                            <i class="fa" ng-class="IsStatusItemActive() ? 'fa-toggle-off' : 'fa-toggle-on'" ng-hide="IsTogglingStatus"></i>
+                            {{IsStatusItemActive() ? 'Deactivate' : 'Activate'}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Delete Confirmation Modal -->
         <div class="modal fade" id="RecipeConfirmDeleteModal" role="dialog" data-backdrop="static">
             <div class="modal-dialog modal-sm">
@@ -149,6 +189,14 @@
         $scope.IsSaving = false;
         $scope.IsDeleting = false;
         $scope.SelectedDeleteItem = null;
+        $scope.SelectedStatusItem = null;
+        $scope.IsTogglingStatus = false;
+
+        $scope.IsStatusItemActive = function () {
+            if (!$scope.SelectedStatusItem) return false;
+            var val = $scope.SelectedStatusItem.IsActive;
+            return (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+        };
 
         $scope.FormModel = {
             ReceipeID: 0,
@@ -257,9 +305,20 @@
             }
         };
 
-        $scope.ToggleActive = function (item) {
+        // Prompt Status Toggle (Open Confirmation Modal)
+        $scope.PromptToggleStatus = function (item) {
             if (!item || !item.ReceipeID) return;
-            var newStatus = !item.IsActive;
+            $scope.SelectedStatusItem = item;
+            $("#RecipeConfirmStatusModal").modal("show");
+        };
+
+        // Execute Status Toggle after Confirmation
+        $scope.ExecuteToggleStatus = function () {
+            if (!$scope.SelectedStatusItem || $scope.IsTogglingStatus) return;
+            $scope.IsTogglingStatus = true;
+            var item = $scope.SelectedStatusItem;
+            var isCurrentActive = $scope.IsStatusItemActive();
+            var newStatus = !isCurrentActive;
             var updateModel = {
                 ReceipeID: item.ReceipeID,
                 Receipe: item.Receipe,
@@ -270,15 +329,26 @@
                 model: updateModel,
                 Action: 'UPDATE'
             }).then(function (res) {
+                $scope.IsTogglingStatus = false;
+                $("#RecipeConfirmStatusModal").modal("hide");
                 if (res.data && res.data.success) {
                     item.IsActive = newStatus;
                     $scope.RefreshGrid();
-                    Noty("success", res.data.message || "Status updated successfully!");
+                    if (typeof Noty === 'function') {
+                        Noty("success", res.data.message || (newStatus ? "Recipe activated successfully!" : "Recipe deactivated successfully!"));
+                    }
+                    $scope.SelectedStatusItem = null;
                 } else {
-                    Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    if (typeof Noty === 'function') {
+                        Noty("error", (res.data && res.data.message) || "Failed to update status.");
+                    }
                 }
             }, function () {
-                Noty("error", "Error connecting to server.");
+                $scope.IsTogglingStatus = false;
+                $("#RecipeConfirmStatusModal").modal("hide");
+                if (typeof Noty === 'function') {
+                    Noty("error", "Error connecting to server.");
+                }
             });
         };
 
@@ -465,15 +535,18 @@
                                     .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
                                     .appendTo(div);
 
-                                var isActive = !!options.data.IsActive;
+                                var isActive = (options.data.IsActive === true || options.data.IsActive === 'True' || options.data.IsActive === 'true' || options.data.IsActive === 1 || options.data.IsActive === '1');
                                 var $toggleBtn = $("<button>").addClass("grid-btn-toggle")
                                     .attr("title", isActive ? "Deactivate Recipe" : "Activate Recipe")
                                     .html('<i class="fa ' + (isActive ? "fa-toggle-on" : "fa-toggle-off") + '"></i>');
                                 if (!isActive) {
                                     $toggleBtn.addClass("is-inactive-state");
                                 }
-                                $toggleBtn.on("click", function () { $scope.$apply(function () { $scope.ToggleActive(options.data); }); })
-                                    .appendTo(div);
+                                $toggleBtn.on("click", function () {
+                                    $scope.$apply(function () {
+                                        $scope.PromptToggleStatus(options.data);
+                                    });
+                                }).appendTo(div);
                             }
 
                             if ($scope.CanDelete) {

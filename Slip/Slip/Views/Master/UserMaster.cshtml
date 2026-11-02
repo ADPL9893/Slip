@@ -670,41 +670,72 @@
                                 .appendTo(container);
                         }
                     },
-                    // 2. Employee Name
+                    // 2. Branch
+                    {
+                        dataField: 'BranchName',
+                        caption: 'Branch',
+                        minWidth: 120,
+                        calculateCellValue: function (data) {
+                            return data.BranchName || '-';
+                        },
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .css({ "font-weight": "600", "color": "#0f172a" })
+                                .text(options.value || '-')
+                                .appendTo(container);
+                        }
+                    },
+                    // 3. Department
+                    {
+                        dataField: 'DepartmentName',
+                        caption: 'Department',
+                        minWidth: 120,
+                        calculateCellValue: function (data) {
+                            return data.DepartmentName || '-';
+                        },
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .css({ "color": "#334155", "font-weight": "500" })
+                                .text(options.value || '-')
+                                .appendTo(container);
+                        }
+                    },
+                    // 4. Code (Employee Code)
+                    {
+                        dataField: 'EmpCode',
+                        caption: 'Code',
+                        minWidth: 85,
+                        width: 85,
+                        alignment: 'center',
+                        calculateCellValue: function (data) {
+                            return data.EmpCode || '-';
+                        },
+                        cellTemplate: function (container, options) {
+                            $("<span>")
+                                .text(options.value || '-')
+                                .css({ "font-weight": "700", "color": "#0284c7" })
+                                .appendTo(container);
+                        }
+                    },
+                    // 5. Employee Name
                     {
                         dataField: 'EmployeeName',
                         caption: 'Employee Name',
                         minWidth: 160,
+                        calculateCellValue: function (data) {
+                            return data.EmployeeName || '-';
+                        },
                         cellTemplate: function (container, options) {
                             $("<strong>")
                                 .text(options.value || '-')
-                                .css({ "color": "#1e293b", "font-weight": "600" })
+                                .css({ "color": "#0f172a", "font-weight": "600" })
                                 .appendTo(container);
                         }
                     },
-                    // 3. Employee Code
-                    {
-                        dataField: 'EmpCode',
-                        caption: 'Code',
-                        minWidth: 80,
-                        alignment: 'center',
-                        cellTemplate: function (container, options) {
-                            $("<span>")
-                                .text(options.value || '-')
-                                .css({ "font-weight": "600", "color": "#2563eb" })
-                                .appendTo(container);
-                        }
-                    },
-                    // 4. Designation
-                    {
-                        dataField: 'Designation',
-                        caption: 'Designation',
-                        minWidth: 110
-                    },
-                    // 5. User Name
+                    // 6. Username
                     {
                         dataField: 'UserName',
-                        caption: 'User Name',
+                        caption: 'Username',
                         minWidth: 140,
                         cellTemplate: function (container, options) {
                             $("<div>")
@@ -713,29 +744,19 @@
                                 .appendTo(container);
                         }
                     },
-                    // 6. Password
-                    {
-                        dataField: 'Password',
-                        caption: 'Password',
-                        minWidth: 100,
-                        alignment: 'center',
-                        cellTemplate: function (container, options) {
-                            $("<span>")
-                                .text(options.value || '-')
-                                .css({ "font-weight": "600", "color": "#1e293b" })
-                                .appendTo(container);
-                        }
-                    },
                     // 7. Is Admin
                     {
                         dataField: 'IsAdmin',
-                        caption: 'Role / Is Admin',
-                        minWidth: 110,
+                        caption: 'Is Admin',
+                        minWidth: 100,
+                        width: 100,
                         alignment: 'center',
+                        calculateCellValue: function (data) {
+                            var val = data.IsAdmin;
+                            return (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+                        },
                         cellTemplate: function (container, options) {
-                            var val = options.value;
-                            var isAdmin = (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
-                            if (isAdmin) {
+                            if (options.value) {
                                 $("<span>")
                                     .addClass("badge-status-pill badge-pill-info")
                                     .html('<i class="fa fa-shield"></i> Admin')
@@ -752,12 +773,15 @@
                     {
                         dataField: 'IsActive',
                         caption: 'Status',
-                        minWidth: 85,
+                        minWidth: 95,
+                        width: 95,
                         alignment: 'center',
+                        calculateCellValue: function (data) {
+                            var val = data.IsActive;
+                            return (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+                        },
                         cellTemplate: function (container, options) {
-                            var val = options.value;
-                            var isActive = (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
-                            if (isActive) {
+                            if (options.value) {
                                 $("<span>")
                                     .addClass("badge-status-pill badge-pill-success")
                                     .text("Active")
@@ -770,12 +794,47 @@
                             }
                         }
                     },
-                    // 9. Created Date
+                    // 9. Last Login
                     {
-                        dataField: 'CreatedDate',
-                        caption: 'Created Date',
-                        minWidth: 110,
-                        alignment: 'center'
+                        dataField: 'LastLogin',
+                        caption: 'Last Login',
+                        minWidth: 160,
+                        alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var val = options.value;
+                            if (!val || val === '-' || val === 'null') {
+                                $("<span>").css({ "color": "#94a3b8" }).text("-").appendTo(container);
+                                return;
+                            }
+                            var d = null;
+                            if (typeof val === 'string' && val.indexOf('/Date(') !== -1) {
+                                var match = /\/Date\((\d+)(?:[+-]\d+)?\)\//.exec(val);
+                                if (match) {
+                                    d = new Date(parseInt(match[1], 10));
+                                }
+                            } else if (val instanceof Date) {
+                                d = val;
+                            } else {
+                                d = new Date(val);
+                            }
+
+                            if (!d || isNaN(d.getTime())) {
+                                $("<span>").css({ "color": "#94a3b8" }).text("-").appendTo(container);
+                                return;
+                            }
+
+                            var day = ('0' + d.getDate()).slice(-2);
+                            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                            var month = months[d.getMonth()];
+                            var year = d.getFullYear();
+                            var hours = d.getHours();
+                            var minutes = ('0' + d.getMinutes()).slice(-2);
+                            var ampm = hours >= 12 ? 'PM' : 'AM';
+                            hours = hours % 12;
+                            hours = hours ? hours : 12;
+                            var formattedTime = day + '-' + month + '-' + year + ' ' + ('0' + hours).slice(-2) + ':' + minutes + ' ' + ampm;
+                            $("<span>").css({ "color": "#334155", "font-weight": "500" }).text(formattedTime).appendTo(container);
+                        }
                     },
                     // 10. Action Column (Edit, Toggle & Delete)
                     {

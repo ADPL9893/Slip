@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -31,6 +31,7 @@ namespace Slip.Models
         public string GSTNo { get; set; }
         public string PanNo { get; set; }
         public int DepartID { get; set; }
+        public Nullable<Guid> DepartmentID { get; set; }
         public int ManagerID { get; set; }
         public string TableNo { get; set; }
         public string EmpCode { get; set; }

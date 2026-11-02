@@ -4,42 +4,38 @@
 }
 
 
-<div ng-controller="EmployeeDetailCtrl" class="emp-list-page">
-    <!-- Header Banner Card -->
-    <div class="emp-header-card">
-        <div class="emp-header-left">
-            <div class="emp-header-icon">
-                <i class="fa fa-users"></i>
-            </div>
-            <div>
-                <div class="emp-breadcrumb">
-                    <a href="@Url.Action("Index", "Home")"><i class="fa fa-home"></i> Home</a> / 
-                    <span>Employee List</span>
-                </div>
-                <h4 class="emp-header-title">Employee List</h4>
-            </div>
-        </div>
-        <div class="emp-header-actions">
-            <button class="btn-emp-add" ng-click="OpenAddNew()" title="Open Employee Registration in new tab">
-                <i class="fa fa-plus-circle"></i> Add New
-            </button>
-        </div>
-    </div>
+<div ng-controller="EmployeeDetailCtrl" class="rough-dist-list-page">
 
-    <!-- DataGrid Container Card -->
-    <div class="emp-grid-card">
-        <div class="emp-card-header">
-            <div class="emp-card-title-left">
-                <i class="fa fa-table"></i>
-                <h3>Employee Records ({{List.length || 0}} Records)</h3>
-            </div>
-            <div class="emp-card-actions">
+    <!-- DataGrid Container Card (UserMaster Style) -->
+    <div class="rdl-grid-card">
+        <div class="rdl-card-header">
+            <div class="rdl-card-title-left">
+                <i class="fa fa-users"></i>
+                <h3>Employee List</h3>
                 <span class="badge-status-pill badge-pill-info">
                     <i class="fa fa-database"></i> {{List.length || 0}} Total Records
                 </span>
             </div>
+            <div class="rdl-card-actions">
+                <button class="btn-ri-add-main" type="button" ng-click="OpenAddNew()" title="Add New Employee">
+                    <i class="fa fa-plus"></i>
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                    <i class="fa fa-columns"></i>
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                    <i class="fa fa-file-excel-o"></i>
+                </button>
+                <div class="field-select-wrap field-select-wrap--search">
+                    <input type="text"
+                           ng-model="SearchText"
+                           ng-change="OnSearchChange()"
+                           placeholder="Search all employees..."
+                           class="form-control ri-input" />
+                </div>
+            </div>
         </div>
-        <div class="emp-grid-body">
+        <div class="rdl-grid-body">
             <div class="uigrid">
                 <div id="gridContainer" style="width: 100%;"></div>
             </div>
@@ -123,8 +119,7 @@
                 });
                 $scope.List = rawList;
 
-                var rawFields = (response.data && response.data.DataField) ? response.data.DataField : [];
-                $scope.BuildGridColumns(rawFields);
+                $scope.BuildGridColumns();
             }, function () {
                 $scope.IsLoading = false;
                 if (typeof hide_loader === 'function') hide_loader();
@@ -134,14 +129,14 @@
             });
         };
 
-        // Format Grid Columns (Compact High-Density Display)
-        $scope.BuildGridColumns = function (dataFields) {
+        // Format Grid Columns (Only requested columns: Branch, Department, Code, Employee Name, Designation, Gender, Status, Is Head)
+        $scope.BuildGridColumns = function () {
             var gridColumns = [];
 
             // 1. Index / Serial # Column
             gridColumns.push({
                 caption: '#',
-                width: 40,
+                width: 45,
                 alignment: 'center',
                 allowReordering: false,
                 fixed: true,
@@ -154,132 +149,147 @@
                 }
             });
 
-            // 2. Process backend dynamic DataFields
-            if (dataFields && dataFields.length > 0) {
-                angular.forEach(dataFields, function (field) {
-                    var col = angular.copy(field);
-                    var fieldKey = (col.dataField || '').toLowerCase();
+            // 2. Branch
+            gridColumns.push({
+                caption: 'Branch',
+                dataField: 'BranchName',
+                minWidth: 120,
+                calculateCellValue: function (data) {
+                    return data.BranchName || '-';
+                },
+                cellTemplate: function (container, options) {
+                    $("<span>")
+                        .css({ "font-weight": "600", "color": "#0f172a" })
+                        .text(options.value || '-')
+                        .appendTo(container);
+                }
+            });
 
-                    // Ensure clean, human-readable caption
-                    if (!col.caption || col.caption === null || col.caption === '') {
-                        if (fieldKey === 'empcode' || fieldKey === 'employeecode' || fieldKey === 'code') {
-                            col.caption = 'Code';
-                        } else if (fieldKey === 'employeename' || fieldKey === 'empname' || fieldKey === 'name') {
-                            col.caption = 'Employee Name';
-                        } else if (fieldKey === 'gender') {
-                            col.caption = 'Gender';
-                        } else if (fieldKey === 'age') {
-                            col.caption = 'Age';
-                        } else if (fieldKey === 'mobileno' || fieldKey === 'mobile' || fieldKey === 'phoneno' || fieldKey === 'phone') {
-                            col.caption = 'Mobile No';
-                        } else if (fieldKey === 'balance') {
-                            col.caption = 'Balance';
-                        } else if (fieldKey === 'designation') {
-                            col.caption = 'Designation';
-                        } else if (fieldKey === 'employeetype' || fieldKey === 'emptype') {
-                            col.caption = 'Employee Type';
-                        //} else if (fieldKey === 'username' || fieldKey === 'user_name') {
-                        //    col.caption = 'User Name';
+            // 3. Department
+            gridColumns.push({
+                caption: 'Department',
+                dataField: 'DepartmentName',
+                minWidth: 120,
+                calculateCellValue: function (data) {
+                    return data.DepartmentName || '-';
+                },
+                cellTemplate: function (container, options) {
+                    $("<span>")
+                        .css({ "color": "#334155", "font-weight": "500" })
+                        .text(options.value || '-')
+                        .appendTo(container);
+                }
+            });
 
-                        } else if (fieldKey === 'company' || fieldKey === 'companyname') {
-                            col.caption = 'Company';
-                        } else if (fieldKey === 'isactive' || fieldKey === 'status') {
-                            col.caption = 'Status';
-                        } else if (fieldKey === 'createdbyuser' || fieldKey === 'createdby' || fieldKey === 'createduser') {
-                            col.caption = 'Created By';
-                        } else if (col.dataField) {
-                            col.caption = col.dataField
-                                .replace(/([a-z])([A-Z])/g, '$1 $2')
-                                .replace(/_/g, ' ')
-                                .trim();
-                        }
-                    }
+            // 4. Code (Emp Code)
+            gridColumns.push({
+                caption: 'Code',
+                dataField: 'EmpCode',
+                width: 85,
+                alignment: 'center',
+                calculateCellValue: function (data) {
+                    return data.EmpCode || data.EmployeeCode || data.Code || '-';
+                },
+                cellTemplate: function (container, options) {
+                    $("<span>")
+                        .text(options.value || '-')
+                        .css({ "font-weight": "700", "color": "#0284c7" })
+                        .appendTo(container);
+                }
+            });
 
-                    // Special styling for Employee Name
-                    if (fieldKey === 'employeename' || fieldKey === 'empname' || fieldKey === 'name') {
-                        col.minWidth = 120;
-                        col.cellTemplate = function (container, options) {
-                            $("<strong>")
-                                .text(options.value || '-')
-                                .css({ "color": "#1e293b", "font-weight": "600" })
-                                .appendTo(container);
-                        };
-                    }
-                    // Special styling for Employee Code
-                    else if (fieldKey === 'empcode' || fieldKey === 'employeecode' || fieldKey === 'code') {
-                        col.minWidth = 70;
-                        col.alignment = 'center';
-                        col.cellTemplate = function (container, options) {
-                            $("<span>")
-                                .text(options.value || '-')
-                                .css({ "font-weight": "600", "color": "#2563eb" })
-                                .appendTo(container);
-                        };
-                    }
-                    //// Special styling for User Name (Decoupled SEC_User)
-                    //else if (fieldKey === 'username' || fieldKey === 'user_name') {
-                    //    col.minWidth = 120;
-                    //    col.cellTemplate = function (container, options) {
-                    //        var uVal = options.value || (options.data ? options.data.UserName : '');
-                    //        if (uVal) {
-                    //            $("<div>")
-                    //                .css({ "display": "flex", "align-items": "center", "gap": "6px" })
-                    //                .html('<i class="fa fa-user-circle" style="color: #0284c7; font-size: 13px;"></i> <strong style="color: #0f172a; font-weight: 600;">' + uVal + '</strong>')
-                    //                .appendTo(container);
-                    //        } else {
-                    //            $("<span>").text("-").appendTo(container);
-                    //        }
-                    //    };
-                    //}
+            // 5. Employee Name
+            gridColumns.push({
+                caption: 'Employee Name',
+                dataField: 'EmployeeName',
+                minWidth: 160,
+                calculateCellValue: function (data) {
+                    return data.EmployeeName || data.EmpName || data.Name || '-';
+                },
+                cellTemplate: function (container, options) {
+                    $("<strong>")
+                        .text(options.value || '-')
+                        .css({ "color": "#0f172a", "font-weight": "600" })
+                        .appendTo(container);
+                }
+            });
 
-                    // Special styling for Status
-                    else if (fieldKey === 'isactive' || fieldKey === 'status') {
-                        col.minWidth = 65;
-                        col.alignment = 'center';
-                        col.cellTemplate = function (container, options) {
-                            var val = options.value;
-                            var isActive = (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
-                            if (isActive) {
-                                $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
-                            } else {
-                                $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
-                            }
-                        };
+            // 6. Designation
+            gridColumns.push({
+                caption: 'Designation',
+                dataField: 'Designation',
+                minWidth: 110,
+                alignment: 'center',
+                cellTemplate: function (container, options) {
+                    var val = options.value || '-';
+                    var isMgr = (val.toString().toUpperCase() === 'MANAGER');
+                    if (isMgr) {
+                        $("<span>").addClass("badge-status-pill badge-pill-info").text(val).appendTo(container);
+                    } else {
+                        $("<span>").css({ "font-weight": "600", "color": "#475569" }).text(val).appendTo(container);
                     }
-                    // Special styling for Gender
-                    else if (fieldKey === 'gender') {
-                        col.minWidth = 65;
-                        col.alignment = 'center';
-                        col.cellTemplate = function (container, options) {
-                            if (options.value) {
-                                var g = options.value.toString().toUpperCase();
-                                var isMale = (g === 'MALE' || g === 'M');
-                                $("<span>")
-                                    .addClass("badge-status-pill " + (isMale ? "badge-pill-info" : "badge-pill-warning"))
-                                    .text(options.value)
-                                    .appendTo(container);
-                            } else {
-                                $("<span>").text("-").appendTo(container);
-                            }
-                        };
-                    }
-                    // Special styling for Designation / Employee Type
-                    else if (fieldKey === 'designation' || fieldKey === 'employeetype') {
-                        col.minWidth = 80;
-                    }
-                    // Special formatting for Dates
-                    else if (fieldKey.indexOf('date') !== -1 || fieldKey === 'dob' || fieldKey === 'created' || fieldKey === 'modified') {
-                        col.minWidth = 90;
-                        col.dataType = 'date';
-                        col.format = 'dd-MMM-yyyy';
-                        col.alignment = 'center';
-                    }
+                }
+            });
 
-                    gridColumns.push(col);
-                });
-            }
+            // 7. Gender (Normal plain text, no badge)
+            gridColumns.push({
+                caption: 'Gender',
+                dataField: 'Gender',
+                width: 85,
+                alignment: 'center',
+                cellTemplate: function (container, options) {
+                    $("<span>")
+                        .css({ "color": "#475569", "font-weight": "500" })
+                        .text(options.value || '-')
+                        .appendTo(container);
+                }
+            });
 
-            // 3. Action Column (Edit & Delete)
+            // 8. Active/Inactive
+            gridColumns.push({
+                caption: 'Active / Inactive',
+                dataField: 'IsActive',
+                width: 115,
+                alignment: 'center',
+                calculateCellValue: function (data) {
+                    var val = data.IsActive !== undefined ? data.IsActive : data.Status;
+                    return (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+                },
+                cellTemplate: function (container, options) {
+                    if (options.value) {
+                        $("<span>").addClass("badge-status-pill badge-pill-success").text("Active").appendTo(container);
+                    } else {
+                        $("<span>").addClass("badge-status-pill badge-pill-danger").text("Inactive").appendTo(container);
+                    }
+                }
+            });
+
+            // 9. Is Head
+            gridColumns.push({
+                caption: 'Is Head',
+                dataField: 'IsHead',
+                width: 90,
+                alignment: 'center',
+                calculateCellValue: function (data) {
+                    var val = data.IsHead;
+                    return (val === true || val === 'True' || val === 'true' || val === 1 || val === '1');
+                },
+                cellTemplate: function (container, options) {
+                    if (options.value) {
+                        $("<span>")
+                            .addClass("badge-status-pill badge-pill-info")
+                            .html('<i class="fa fa-check-circle"></i> Yes')
+                            .appendTo(container);
+                    } else {
+                        $("<span>")
+                            .css({ "color": "#94a3b8", "font-weight": "500", "font-size": "11.5px" })
+                            .text("No")
+                            .appendTo(container);
+                    }
+                }
+            });
+
+            // 10. Action Column (Edit & Delete)
             gridColumns.push({
                 caption: 'Action',
                 width: 95,
@@ -319,7 +329,6 @@
                     group.appendTo(container);
                 }
             });
-
 
             $scope.InitGrid(gridColumns);
         };
@@ -372,13 +381,50 @@
             });
         };
 
+        // Toolbar actions matching UserMaster
+        $scope.SearchText = '';
+        $scope.OnSearchChange = function () {
+            var gridInstance = $("#gridContainer").dxDataGrid("instance");
+            if (gridInstance) {
+                gridInstance.searchByText($scope.SearchText || '');
+            }
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $("#gridContainer").dxDataGrid("instance");
+            if (gridInstance) {
+                gridInstance.showColumnChooser();
+            }
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $("#gridContainer").dxDataGrid("instance");
+            if (!gridInstance) {
+                if (typeof Noty === 'function') Noty("warning", "Grid is not ready for export.");
+                return;
+            }
+            if (typeof ExcelJS !== 'undefined') {
+                var workbook = new ExcelJS.Workbook();
+                var worksheet = workbook.addWorksheet('Employees');
+                DevExpress.excelExporter.exportDataGrid({
+                    component: gridInstance,
+                    worksheet: worksheet,
+                    autoFilterEnabled: true
+                }).then(function () {
+                    workbook.xlsx.writeBuffer().then(function (buffer) {
+                        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'EmployeeList.xlsx');
+                    });
+                });
+            }
+        };
+
         // DevExtreme DataGrid Initialization
         $scope.InitGrid = function (columns) {
             $("#gridContainer").dxDataGrid({
                 dataSource: $scope.List,
                 keyExpr: 'ID',
                 columns: columns,
-                height: 'calc(100vh - 210px)',
+                height: 'calc(100vh - 110px)',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
                 columnResizingMode: 'widget',
@@ -406,9 +452,7 @@
                     visible: false 
                 },
                 searchPanel: {
-                    visible: true,
-                    width: 280,
-                    placeholder: 'Search all employees...'
+                    visible: false
                 },
                 filterRow: { 
                     visible: true,
@@ -419,26 +463,7 @@
                     mode: 'single'
                 },
                 export: {
-                    enabled: true,
-                    formats: ['xlsx', 'xlxs'],
-                    allowExportSelectedData: false
-                },
-                onExporting: function (e) {
-                    if (e.format === 'xlsx' || e.format === 'xlxs') {
-                        if (typeof ExcelJS !== 'undefined') {
-                            var workbook = new ExcelJS.Workbook();
-                            var worksheet = workbook.addWorksheet('Employees');
-                            DevExpress.excelExporter.exportDataGrid({
-                                component: e.component,
-                                worksheet: worksheet,
-                                autoFilterEnabled: true
-                            }).then(function () {
-                                workbook.xlsx.writeBuffer().then(function (buffer) {
-                                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'EmployeeList.xlsx');
-                                });
-                            });
-                        }
-                    }
+                    enabled: false
                 },
                 summary: {
                     totalItems: [

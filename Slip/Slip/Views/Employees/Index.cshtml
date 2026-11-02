@@ -4,6 +4,122 @@
 }
 
 
+<style>
+    .upload-actions-bar {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        margin-top: 8px;
+        margin-bottom: 4px;
+    }
+    .btn-doc-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .btn-doc-view {
+        background-color: #e0f2fe;
+        color: #0284c7;
+    }
+    .btn-doc-view:hover {
+        background-color: #bae6fd;
+        color: #0369a1;
+    }
+    .btn-doc-remove {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+    .btn-doc-remove:hover {
+        background-color: #fecaca;
+        color: #b91c1c;
+    }
+    /* Circular Profile Avatar in Personal Card (No outer square box) */
+    .profile-avatar-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 200px;
+        padding: 10px 5px;
+    }
+    .profile-circle-avatar {
+        width: 105px;
+        height: 105px;
+        border-radius: 50%;
+        border: 3px solid #0284c7;
+        background: #ffffff;
+        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.22);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        margin-bottom: 8px;
+    }
+    .profile-circle-avatar:hover {
+        transform: scale(1.04);
+        box-shadow: 0 6px 18px rgba(2, 132, 199, 0.35);
+        border-color: #0369a1;
+    }
+    .avatar-camera-badge {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 28px;
+        height: 28px;
+        background: #0284c7;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        transition: all 0.2s ease;
+    }
+    .profile-circle-avatar:hover .avatar-camera-badge {
+        background: #0369a1;
+        transform: scale(1.1);
+    }
+    .profile-avatar-wrap .btn-emp-upload {
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35) !important;
+        border-radius: 20px !important;
+        padding: 5px 14px !important;
+        font-size: 11.5px !important;
+        margin-bottom: 4px !important;
+    }
+    .profile-avatar-wrap .btn-emp-upload:hover {
+        background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%) !important;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.45) !important;
+    }
+    .profile-avatar-wrap .upload-filename-tag {
+        background: #ffffff;
+        border: 1px solid #bae6fd;
+        color: #0284c7;
+        font-size: 10.5px;
+        padding: 2px 8px;
+        border-radius: 4px;
+        max-width: 140px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+
+</style>
+
 <div ng-controller="EmployeeMaster" class="emp-entry-page">
     <input type="hidden" ng-model="EmployeeMaster.EmployeeID" />
 
@@ -45,43 +161,102 @@
         </div>
         <div class="emp-card-body">
             <div class="emp-form-row">
-                <!-- Employee Name -->
-                <div class="emp-form-col col-lg-4 col-md-6 col-sm-12 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Full Name <span class="req">*</span></label>
-                        <input type="text" ng-model="EmployeeMaster.EmployeeName" class="emp-form-control" placeholder="Enter Full Name" />
+                <!-- Left 9 cols: Personal details & Address -->
+                <div class="emp-form-col col-lg-9 col-md-8 col-sm-12 col-xs-12" style="margin-bottom: 0;">
+                    <div class="emp-form-row">
+                        <!-- First Name -->
+                        <div class="emp-form-col col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                            <div class="emp-form-group">
+                                <label class="emp-label">First Name <span class="req">*</span></label>
+                                <input type="text" ng-model="EmployeeMaster.FirstName" class="emp-form-control" placeholder="Enter First Name" />
+                            </div>
+                        </div>
+                        <!-- Last Name -->
+                        <div class="emp-form-col col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                            <div class="emp-form-group">
+                                <label class="emp-label">Last Name <span class="req">*</span></label>
+                                <input type="text" ng-model="EmployeeMaster.LastName" class="emp-form-control" placeholder="Enter Last Name" />
+                            </div>
+                        </div>
+                        <!-- Mobile No (Not Required, 10 Digits) -->
+                        <div class="emp-form-col col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                            <div class="emp-form-group">
+                                <label class="emp-label">Mobile Number</label>
+                                <input type="text" ng-model="EmployeeMaster.MobileNo" class="emp-form-control allownumericwithoutdecimal" placeholder="10-digit Mobile" maxlength="10" />
+                            </div>
+                        </div>
+
+                        <!-- DOB -->
+                        <div class="emp-form-col col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                            <div class="emp-form-group">
+                                <label class="emp-label">Date of Birth</label>
+                                <input type="text" id="FromDATE" class="emp-form-control" ng-model="EmployeeMaster.DOB" ng-change="CalculateAge()" placeholder="dd/mm/yyyy" maxlength="10" autocomplete="off" />
+                            </div>
+                        </div>
+                        <!-- Age (Auto Calculated, Readonly) -->
+                        <div class="emp-form-col col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                            <div class="emp-form-group">
+                                <label class="emp-label">Age</label>
+                                <input type="number" ng-model="EmployeeMaster.Age" class="emp-form-control" placeholder="Age" readonly="readonly" style="background-color: #f1f5f9; cursor: not-allowed; font-weight: 600;" />
+                            </div>
+                        </div>
+                        <!-- Gender -->
+                        <div class="emp-form-col col-lg-5 col-md-3 col-sm-6 col-xs-12">
+                            <div class="emp-form-group">
+                                <label class="emp-label">Gender</label>
+                                <select ng-model="EmployeeMaster.Gender" class="emp-form-control">
+                                    <option value="">Select</option>
+                                    <option value="MALE">Male</option>
+                                    <option value="FEMALE">Female</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Address -->
+                        <div class="emp-form-col col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="emp-form-group">
+                                <label class="emp-label">Address</label>
+                                <input type="text" class="emp-form-control" ng-model="EmployeeMaster.Address" placeholder="Enter Residential Address Details" />
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- DOB -->
-                <div class="emp-form-col col-lg-2 col-md-3 col-sm-6 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Date of Birth</label>
-                        <input type="text" id="FromDATE" class="emp-form-control" ng-model="EmployeeMaster.DOB" ng-change="GetDueDays()" placeholder="dd/mm/yyyy" />
-                    </div>
-                </div>
-                <!-- Age -->
-                <div class="emp-form-col col-lg-2 col-md-3 col-sm-6 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Age</label>
-                        <input type="number" ng-model="EmployeeMaster.Age" ng-blur="agemanage(EmployeeMaster.Age);" class="emp-form-control" placeholder="Age" min="1" />
-                    </div>
-                </div>
-                <!-- Gender -->
-                <div class="emp-form-col col-lg-2 col-md-6 col-sm-6 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Gender</label>
-                        <select ng-model="EmployeeMaster.Gender" class="emp-form-control">
-                            <option value="">Please Select</option>
-                            <option value="MALE">Male</option>
-                            <option value="FEMALE">Female</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- Mobile No -->
-                <div class="emp-form-col col-lg-2 col-md-6 col-sm-6 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Mobile Number <span class="req">*</span></label>
-                        <input type="text" ng-model="EmployeeMaster.MobileNo" class="emp-form-control allownumericwithoutdecimal" placeholder="Mobile Number" maxlength="15" />
+
+                <!-- Right 3 cols: Profile Photo (Clean Circular Avatar Only) -->
+                <div class="emp-form-col col-lg-3 col-md-4 col-sm-12 col-xs-12">
+                    <div class="profile-avatar-wrap">
+                        <!-- When photo is NOT uploaded: clicking avatar opens file selection -->
+                        <label for="firlogo" class="profile-circle-avatar" title="Click to Upload Profile Photo" ng-hide="image_source">
+                            <div class="upload-preview-placeholder" style="gap: 3px;">
+                                <i class="fa fa-user" style="font-size: 38px; color: #38bdf8;"></i>
+                                <span style="font-size: 11px; color: #0284c7; font-weight: 600;">Add Photo</span>
+                            </div>
+                            <span class="avatar-camera-badge" title="Upload Photo">
+                                <i class="fa fa-camera"></i>
+                            </span>
+                        </label>
+
+                        <!-- When photo IS uploaded: avatar shows image, not clickable to replace directly -->
+                        <div class="profile-circle-avatar" ng-show="image_source" style="cursor: default;" title="Profile Photo">
+                            <img id="image_source" ng-src="{{image_source}}" class="upload-preview-img" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+                        </div>
+
+                        <!-- View & Remove Action Buttons (Only when photo is uploaded) -->
+                        <div class="upload-actions-bar" ng-show="image_source" style="margin-top: 2px; margin-bottom: 6px;">
+                            <button type="button" class="btn-doc-action btn-doc-view" ng-click="PreviewModalImage(image_source, 'Profile Photo')" title="View Full Image">
+                                <i class="fa fa-eye"></i> View
+                            </button>
+                            <button type="button" class="btn-doc-action btn-doc-remove" ng-click="RemoveProfilePhoto()" title="Remove Photo">
+                                <i class="fa fa-trash"></i> Remove
+                            </button>
+                        </div>
+
+                        <!-- Choose Profile Photo Button (Hidden when photo is uploaded; visible only when no photo) -->
+                        <label for="firlogo" class="btn-emp-upload" tabindex="32" ng-hide="image_source">
+                            <i class="fa fa-camera"></i> Choose Profile Photo
+                        </label>
+                        <input id="firlogo" ng-model="EmployeeMaster.PhotoPath" file-model="EmployeeMaster.PhotoPath" type="file" style="display: none;" accept=".jpeg,.jpg,.png" onchange="angular.element(this).scope().uploadedFile(this)">
+                        <span id="filename" class="upload-filename-tag" ng-hide="image_source">Select File !</span>
                     </div>
                 </div>
             </div>
@@ -97,18 +272,35 @@
         </div>
         <div class="emp-card-body">
             <div class="emp-form-row">
-                <!-- Employee Type -->
+                <!-- 1. Emp Code -->
                 <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
                     <div class="emp-form-group">
-                        <label class="emp-label">Employee Type <span class="req">*</span></label>
-                        <select ng-model="EmployeeMaster.EmployeeType" class="emp-form-control" ng-change="ShowGST(EmployeeMaster.EmployeeType)">
-                            <option value="">Please Select</option>
-                            <option value="EMPLOYEE">Employee</option>
-                            <option value="PARTY">Party</option>
+                        <label class="emp-label">Emp. Code</label>
+                        <input type="text" ng-model="EmployeeMaster.EmpCode" class="emp-form-control" placeholder="Employee Code" />
+                    </div>
+                </div>
+
+                <!-- 2. Branch Selection -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Branch <span class="req">*</span></label>
+                        <select id="CompanyBranchID" chosen="BranchList" class="emp-form-control" ng-options="item.BranchID as item.BranchName for item in BranchList" ng-model="EmployeeMaster.CompanyBranchID" ng-change="OnBranchChange(EmployeeMaster.CompanyBranchID)">
+                            <option value="">Select Branch</option>
                         </select>
                     </div>
                 </div>
-                <!-- Designation -->
+
+                <!-- 3. Department Selection (Cascading from Branch) -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <div class="emp-form-group">
+                        <label class="emp-label">Department</label>
+                        <select id="DepartmentID" chosen="DepartmentList" class="emp-form-control" ng-options="item.ID as item.DepartmentName for item in DepartmentList" ng-model="EmployeeMaster.DepartmentID" ng-disabled="!EmployeeMaster.CompanyBranchID">
+                            <option value="">Select Department</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 4. Designation -->
                 <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
                     <div class="emp-form-group">
                         <label class="emp-label">Designation <span class="req">*</span></label>
@@ -119,43 +311,16 @@
                         </select>
                     </div>
                 </div>
-                <!-- Emp Code -->
+
+                <!-- 5. Reference Name (Not Required) -->
                 <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
                     <div class="emp-form-group">
-                        <label class="emp-label">Emp. Code</label>
-                        <input type="text" ng-model="EmployeeMaster.EmpCode" class="emp-form-control" placeholder="Employee Code" />
+                        <label class="emp-label">Reference Name</label>
+                        <input type="text" ng-model="EmployeeMaster.ReferenceName" class="emp-form-control" placeholder="Reference Person Name (Optional)" />
                     </div>
                 </div>
-                <!-- Table Selection -->
-                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Table <span class="req">*</span></label>
-                        <select id="TableNo" tabindex="1" chosen="GetTableList" class="emp-form-control" ng-options="item.id as item.value for item in GetTableList" ng-model="EmployeeMaster.TableNo">
-                            <option value="">Table Select</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- JobWork -->
-                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">JobWork <span class="req">*</span></label>
-                        <select id="JobWork" tabindex="1" chosen="JobWork" class="emp-form-control" ng-model="EmployeeMaster.JobWork">
-                            <option value="">Please Select</option>
-                            <option value="INSIDE">INSIDE</option>
-                            <option value="OUTSIDE">OUTSIDE</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- Role -->
-                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Role</label>
-                        <select id="RoleID" tabindex="1" chosen="GetRoleList" class="emp-form-control" ng-options="item.id as item.value for item in GetRoleList" ng-model="EmployeeMaster.RoleID">
-                            <option value="">Role Select</option>
-                        </select>
-                    </div>
-                </div>
-                <!-- Is Head Manager -->
+
+                <!-- 6. Is Head Manager Checkbox -->
                 <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
                     <div class="emp-form-group">
                         <label class="emp-label">Head Manager Eligible</label>
@@ -166,13 +331,6 @@
                                 <span ng-if="!EmployeeMaster.IsHead" class="text-muted"><i class="fa fa-times-circle"></i> No</span>
                             </label>
                         </div>
-                    </div>
-                </div>
-                <!-- Reference Name -->
-                <div class="emp-form-col col-lg-6 col-md-12 col-sm-12 col-xs-12">
-                    <div class="emp-form-group">
-                        <label class="emp-label">Reference Name <span class="req">*</span></label>
-                        <input type="text" ng-model="EmployeeMaster.ReferenceName" class="emp-form-control" placeholder="Reference Person Name" />
                     </div>
                 </div>
             </div>
@@ -208,115 +366,201 @@
     </div>
     *@
 
-    <!-- Section 4: Identity & Address Information Card (Soft Periwinkle / Royal Indigo - Same as Employment Details) -->
+    <!-- Section 3: Identity & Proof Documents Card (Soft Periwinkle / Royal Indigo) -->
     <div class="emp-card emp-card-identity">
         <div class="emp-card-header">
             <h3 class="emp-card-title">
-                <i class="fa fa-id-card-o"></i> Identity & Address Information
+                <i class="fa fa-id-card-o"></i> Identity & Proof Documents
             </h3>
         </div>
         <div class="emp-card-body">
             <div class="emp-form-row">
-                <!-- ID Proof Doc Name -->
+                <!-- ID Proof Type Selection (Unlocked, auto-clears photos on change) -->
                 <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
                     <div class="emp-form-group">
-                        <label class="emp-label">ID Proof Doc Name</label>
-                        <input type="text" class="emp-form-control" ng-model="EmployeeMaster.IDProofDocName" placeholder="e.g. Aadhaar, PAN, Voter ID" />
+                        <label class="emp-label">ID Proof Type</label>
+                        <select ng-model="EmployeeMaster.IDProofDocName" class="emp-form-control" ng-change="OnIDProofDocChange()">
+                            <option value="">Select ID Proof</option>
+                            <option value="AADHAR">Aadhar Card</option>
+                            <option value="PAN">PAN Card</option>
+                        </select>
                     </div>
                 </div>
-                <!-- ID Proof Number -->
-                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12">
+
+                <!-- Aadhar Card Number -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12" ng-show="EmployeeMaster.IDProofDocName == 'AADHAR'">
                     <div class="emp-form-group">
-                        <label class="emp-label">ID Proof Number</label>
-                        <input type="text" class="emp-form-control" ng-model="EmployeeMaster.IDProofNumber" placeholder="Document ID Number" />
+                        <label class="emp-label">Aadhar Card Number</label>
+                        <input type="text" class="emp-form-control allownumericwithoutdecimal" ng-model="EmployeeMaster.AadharNo" placeholder="12-digit Aadhar Number" maxlength="12" />
                     </div>
                 </div>
-                <!-- Address -->
-                <div class="emp-form-col col-lg-6 col-md-12 col-sm-12 col-xs-12">
+
+                <!-- Single Upload Button for Aadhar (Select 2 photos at once for Front & Back) -->
+                <div class="emp-form-col col-lg-4 col-md-6 col-sm-6 col-xs-12" ng-show="EmployeeMaster.IDProofDocName == 'AADHAR' && (!Proofimage_source || !Path2image_source2)">
                     <div class="emp-form-group">
-                        <label class="emp-label">Address</label>
-                        <input type="text" class="emp-form-control" ng-model="EmployeeMaster.Address" placeholder="Enter Address Details" />
+                        <label class="emp-label">Aadhar Card Photos</label>
+                        <div>
+                            <label for="Prooffirlogo" class="btn btn-sm btn-primary" style="cursor: pointer; margin-bottom: 0;">
+                                <i class="fa fa-upload"></i> {{(!Proofimage_source && !Path2image_source2) ? 'Select Aadhar Photos (Front & Back)' : (!Proofimage_source ? 'Select Aadhar Front' : 'Select Aadhar Back')}}
+                            </label>
+                            <span class="text-muted" style="font-size: 11px; display: block; margin-top: 3px;" ng-hide="Proofimage_source || Path2image_source2">
+                                <i class="fa fa-info-circle text-info"></i> You can select both Front & Back photos at once
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PAN Card Number -->
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12" ng-show="EmployeeMaster.IDProofDocName == 'PAN'">
+                    <div class="emp-form-group">
+                        <label class="emp-label">PAN Card Number</label>
+                        <input type="text" class="emp-form-control" ng-model="EmployeeMaster.PanNo" placeholder="10-digit PAN Number" maxlength="10" style="text-transform: uppercase;" />
+                    </div>
+                </div>
+
+                <!-- Single Upload Button for PAN Photo -->
+                <div class="emp-form-col col-lg-4 col-md-6 col-sm-6 col-xs-12" ng-show="EmployeeMaster.IDProofDocName == 'PAN' && !Proofimage_source">
+                    <div class="emp-form-group">
+                        <label class="emp-label">PAN Card Photo</label>
+                        <div>
+                            <label for="Prooffirlogo" class="btn btn-sm btn-primary" style="cursor: pointer; margin-bottom: 0;">
+                                <i class="fa fa-upload"></i> Choose PAN Card Photo
+                            </label>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Conditional GST / PAN (For Party) -->
-                <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12" ng-show="GSTShow">
+                <div class="emp-form-col col-lg-3 col-md-6 col-sm-6 col-xs-12" ng-show="GSTShow">
                     <div class="emp-form-group">
                         <label class="emp-label">GST No</label>
                         <input type="text" ng-model="EmployeeMaster.GSTNo" class="emp-form-control" placeholder="GST Number" />
                     </div>
                 </div>
-                <div class="emp-form-col col-lg-6 col-md-6 col-sm-12 col-xs-12" ng-show="GSTShow">
-                    <div class="emp-form-group">
-                        <label class="emp-label">PAN No</label>
-                        <input type="text" ng-model="EmployeeMaster.PanNo" class="emp-form-control" placeholder="PAN Card Number" />
+
+                <!-- Single file input with multiple support (Always in DOM) -->
+                <input id="Prooffirlogo" type="file" multiple accept=".jpeg,.jpg,.png" style="display: none;" onchange="angular.element(this).scope().proofuploadedFile(this)">
+                <input id="Path2logo" type="file" accept=".jpeg,.jpg,.png" style="display: none;" onchange="angular.element(this).scope().path2uploadedFile(this)">
+
+                <!-- Project-Standard Grid for Uploaded ID Documents (Always on New Line Below Inputs) -->
+                <div class="emp-form-col col-lg-12 col-md-12 col-sm-12 col-xs-12" style="clear: both; margin-top: 15px;">
+                    <div style="max-width: 650px; border: 1.5px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #ffffff; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);">
+                        <!-- Header Bar (Matching project card headers) -->
+                        <div style="background: #ffffff; padding: 7px 14px; border-bottom: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fa fa-table" style="color: #0284c7; font-size: 13px;"></i>
+                                <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: #0f172a;">Uploaded ID Proof Documents</h4>
+                            </div>
+                            <div>
+                                <span class="badge-status-pill badge-pill-info" style="font-size: 11px; padding: 2px 8px;">
+                                    <i class="fa fa-database"></i> {{(Proofimage_source && Path2image_source2) ? '2 Documents' : ((Proofimage_source || Path2image_source2) ? '1 Document' : '0 Documents')}}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Data Table (Matching project ERP grid style - Compact) -->
+                        <div class="table-responsive" style="margin-bottom: 0;">
+                            <table class="table table-bordered table-striped table-hover table-condensed" style="margin-bottom: 0; font-size: 12px;">
+                                <thead>
+                                    <tr style="background: #1C5F8F; color: #ffffff;">
+                                        <th style="width: 40px; text-align: center; vertical-align: middle; background: #1C5F8F; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-color: #15496F; padding: 6px 4px;">#</th>
+                                        <th style="min-width: 150px; vertical-align: middle; background: #1C5F8F; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-color: #15496F; padding: 6px 8px;">Document Name</th>
+                                        <th style="width: 75px; text-align: center; vertical-align: middle; background: #1C5F8F; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-color: #15496F; padding: 6px 4px;">Preview</th>
+                                        <th style="min-width: 140px; vertical-align: middle; background: #1C5F8F; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-color: #15496F; padding: 6px 8px;">File Name</th>
+                                        <th style="width: 85px; text-align: center; vertical-align: middle; background: #1C5F8F; color: #ffffff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-color: #15496F; padding: 6px 4px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Empty State Row (When no photo uploaded yet) -->
+                                    <tr ng-show="!Proofimage_source && !Path2image_source2">
+                                        <td colspan="5" style="text-align: center; vertical-align: middle; padding: 18px 12px; color: #64748b; background: #f8fafc;">
+                                            <i class="fa fa-file-image-o" style="font-size: 22px; color: #94a3b8; display: block; margin-bottom: 6px;"></i>
+                                            <strong style="color: #475569; font-size: 12.5px; display: block;">No documents uploaded yet</strong>
+                                            <span style="font-size: 11.5px; color: #94a3b8;" ng-show="EmployeeMaster.IDProofDocName == 'AADHAR' || EmployeeMaster.IDProofDocName == 'PAN'">
+                                                Please click the upload button above to select {{EmployeeMaster.IDProofDocName == 'AADHAR' ? 'Aadhar Card Front & Back photos' : 'PAN Card photo'}}.
+                                            </span>
+                                            <span style="font-size: 11.5px; color: #94a3b8;" ng-show="EmployeeMaster.IDProofDocName != 'AADHAR' && EmployeeMaster.IDProofDocName != 'PAN'">
+                                                Please select an ID Proof Type (Aadhar Card or PAN Card) above to upload document photos.
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Row 1: Front / Primary Document -->
+                                    <tr ng-show="Proofimage_source">
+                                        <td style="text-align: center; vertical-align: middle; font-weight: 600; color: #64748b; padding: 5px 4px;">1</td>
+                                        <td style="vertical-align: middle; padding: 5px 8px;">
+                                            <i class="fa fa-id-card" style="color: #0284c7; margin-right: 5px;"></i>
+                                            <strong style="color: #0f172a; font-size: 12px;">{{EmployeeMaster.IDProofDocName == 'AADHAR' ? 'Aadhar Card (Front)' : 'PAN Card'}}</strong>
+                                        </td>
+                                        <td style="text-align: center; vertical-align: middle; padding: 4px;">
+                                            <img id="Proofimage_source" ng-src="{{Proofimage_source}}" alt="Preview" style="width: 44px; height: 30px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; transition: transform 0.2s;" ng-click="PreviewModalImage(Proofimage_source, (EmployeeMaster.IDProofDocName == 'AADHAR' ? 'Aadhar Card (Front)' : 'PAN Card'))" title="Click to View Full Image" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                                        </td>
+                                        <td style="vertical-align: middle; padding: 5px 8px;">
+                                            <span id="Prooffilename" style="color: #475569; font-size: 11.5px; font-weight: 500; display: inline-block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;" title="{{ProofFileName || EmployeeMaster.IDProofPhotoPath}}">{{ProofFileName || EmployeeMaster.IDProofPhotoPath || 'Uploaded Document'}}</span>
+                                        </td>
+                                        <td style="text-align: center; vertical-align: middle; padding: 4px 6px;">
+                                            <div class="grid-btn-group" style="justify-content: center; display: inline-flex; gap: 4px;">
+                                                <button type="button" class="grid-action-btn-edit" style="width: 26px; height: 26px; font-size: 11px;" ng-click="PreviewModalImage(Proofimage_source, (EmployeeMaster.IDProofDocName == 'AADHAR' ? 'Aadhar Card (Front)' : 'PAN Card'))" title="View Full Image">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                                <button type="button" class="grid-action-btn-del" style="width: 26px; height: 26px; font-size: 11px;" ng-click="RemoveProofPhoto()" title="Remove Document">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Row 2: Back / Secondary Document -->
+                                    <tr ng-show="EmployeeMaster.IDProofDocName == 'AADHAR' && Path2image_source2">
+                                        <td style="text-align: center; vertical-align: middle; font-weight: 600; color: #64748b; padding: 5px 4px;">2</td>
+                                        <td style="vertical-align: middle; padding: 5px 8px;">
+                                            <i class="fa fa-id-card-o" style="color: #0284c7; margin-right: 5px;"></i>
+                                            <strong style="color: #0f172a; font-size: 12px;">Aadhar Card (Back)</strong>
+                                        </td>
+                                        <td style="text-align: center; vertical-align: middle; padding: 4px;">
+                                            <img id="Path2image_source2" ng-src="{{Path2image_source2}}" alt="Preview" style="width: 44px; height: 30px; object-fit: cover; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; transition: transform 0.2s;" ng-click="PreviewModalImage(Path2image_source2, 'Aadhar Card (Back)')" title="Click to View Full Image" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'" />
+                                        </td>
+                                        <td style="vertical-align: middle; padding: 5px 8px;">
+                                            <span id="Path2" style="color: #475569; font-size: 11.5px; font-weight: 500; display: inline-block; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;" title="{{Path2FileName || EmployeeMaster.PhotoPath2}}">{{Path2FileName || EmployeeMaster.PhotoPath2 || 'Uploaded Document'}}</span>
+                                        </td>
+                                        <td style="text-align: center; vertical-align: middle; padding: 4px 6px;">
+                                            <div class="grid-btn-group" style="justify-content: center; display: inline-flex; gap: 4px;">
+                                                <button type="button" class="grid-action-btn-edit" style="width: 26px; height: 26px; font-size: 11px;" ng-click="PreviewModalImage(Path2image_source2, 'Aadhar Card (Back)')" title="View Full Image">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                                <button type="button" class="grid-action-btn-del" style="width: 26px; height: 26px; font-size: 11px;" ng-click="RemoveProofPhoto2()" title="Remove Document">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Section 5: Documents & Photos Upload Card (Soft Ice Blue - Same as Personal Information) -->
-    <div class="emp-card emp-card-documents">
-        <div class="emp-card-header">
-            <h3 class="emp-card-title">
-                <i class="fa fa-cloud-upload"></i> Documents & Photos
-            </h3>
-        </div>
-        <div class="emp-card-body">
-            <div class="emp-form-row">
-                <!-- Card 1: Profile Photo -->
-                <div class="emp-form-col col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="upload-box-card">
-                        <div class="upload-preview-wrapper">
-                            <img id="image_source" ng-src="{{image_source}}" class="upload-preview-img" ng-show="image_source" />
-                            <div class="upload-preview-placeholder" ng-hide="image_source">
-                                <i class="fa fa-user-circle-o"></i>
-                                <span>Profile Photo Preview</span>
-                            </div>
-                        </div>
-                        <label for="firlogo" class="btn-emp-upload" tabindex="32">
-                            <i class="fa fa-camera"></i> Choose Profile Photo
-                        </label>
-                        <input id="firlogo" ng-model="EmployeeMaster.PhotoPath" file-model="EmployeeMaster.PhotoPath" type="file" style="display: none;" accept=".jpeg,.jpg,.png" onchange="angular.element(this).scope().uploadedFile(this)">
-                        <span id="filename" class="upload-filename-tag">Select File !</span>
-                    </div>
+    <!-- Image Preview Modal -->
+    <div class="modal fade" id="ImagePreviewModal" role="dialog">
+        <div class="modal-dialog modal-md" style="margin-top: 50px;">
+            <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                <div class="modal-header" style="background: #0f172a; color: #ffffff; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;">
+                    <h5 class="modal-title" style="margin: 0; font-size: 15px; font-weight: 600;"><i class="fa fa-image"></i> {{PreviewModalTitle || 'Document Preview'}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" style="color: #ffffff; opacity: 0.8; font-size: 22px;">&times;</button>
                 </div>
-
-                <!-- Card 2: ID Proof Document -->
-                <div class="emp-form-col col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="upload-box-card">
-                        <div class="upload-preview-wrapper">
-                            <img id="Proofimage_source" ng-src="{{Proofimage_source}}" class="upload-preview-img" ng-show="Proofimage_source" />
-                            <div class="upload-preview-placeholder" ng-hide="Proofimage_source">
-                                <i class="fa fa-file-image-o"></i>
-                                <span>ID Proof Preview</span>
-                            </div>
-                        </div>
-                        <label for="Prooffirlogo" class="btn-emp-upload" tabindex="33">
-                            <i class="fa fa-id-card"></i> Choose ID Proof Doc
-                        </label>
-                        <input id="Prooffirlogo" ng-model="EmployeeMaster.IDProofPhotoPath" file-model="EmployeeMaster.IDProofPhotoPath" type="file" style="display: none;" accept=".jpeg,.jpg,.png" onchange="angular.element(this).scope().proofuploadedFile(this)">
-                        <span id="Prooffilename" class="upload-filename-tag">Select File !</span>
-                    </div>
+                <div class="modal-body" style="padding: 15px; text-align: center; background: #f8fafc;">
+                    <img ng-src="{{CurrentPreviewUrl}}" style="max-width: 100%; max-height: 70vh; border-radius: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); object-fit: contain;" />
                 </div>
-
-                <!-- Card 3: Additional Photo (Optional) -->
-                <div class="emp-form-col col-lg-4 col-md-4 col-sm-12 col-xs-12">
-                    <div class="upload-box-card">
-                        <div class="upload-preview-wrapper">
-                            <img id="Path2image_source2" ng-src="{{Path2image_source2}}" class="upload-preview-img" ng-show="Path2image_source2" />
-                            <div class="upload-preview-placeholder" ng-hide="Path2image_source2">
-                                <i class="fa fa-picture-o"></i>
-                                <span>Optional Photo Preview</span>
-                            </div>
-                        </div>
-                        <label for="Path2logo" class="btn-emp-upload" tabindex="34">
-                            <i class="fa fa-image"></i> Choose Photo 2 (Optional)
-                        </label>
-                        <input id="Path2logo" ng-model="EmployeeMaster.PhotoPath2" file-model="EmployeeMaster.PhotoPath2" type="file" style="display: none;" accept=".jpeg,.jpg,.png" onchange="angular.element(this).scope().path2uploadedFile(this)">
-                        <span id="Path2" class="upload-filename-tag">Select File !</span>
-                    </div>
+                <div class="modal-footer" style="padding: 10px 18px; background: #ffffff;">
+                    <a ng-href="{{CurrentPreviewUrl}}" target="_blank" class="btn btn-sm btn-info" style="border-radius: 6px;">
+                        <i class="fa fa-external-link"></i> Open in New Tab
+                    </a>
+                    <button type="button" class="btn btn-sm btn-default" data-dismiss="modal" style="border-radius: 6px;">
+                        <i class="fa fa-times"></i> Close
+                    </button>
                 </div>
             </div>
         </div>
@@ -382,14 +626,40 @@
     }]);
 
     module.controller("EmployeeMaster", ['$scope', '$filter', '$http', '$q', '$interval', '$timeout', function ($scope, $filter, $http, $q, $interval, $timeout) {
-        $scope.EmployeeMaster = {};
+        $scope.EmployeeMaster = {
+            FirstName: '',
+            LastName: '',
+            DOB: '',
+            Age: 0,
+            Gender: '',
+            MobileNo: '',
+            EmployeeType: 'EMPLOYEE',
+            Designation: '',
+            EmpCode: '',
+            CompanyBranchID: null,
+            DepartmentID: null,
+            IsHead: false,
+            IsActive: true,
+            ReferenceName: '',
+            IDProofDocName: '',
+            AadharNo: '',
+            PanNo: '',
+            TableNo: '0',
+            JobWork: 'INSIDE',
+            JoiningDate: typeof Cur_Date !== 'undefined' ? Cur_Date : '',
+            EndingDate: typeof Cur_Date !== 'undefined' ? Cur_Date : ''
+        };
         $scope.BtnName = "SAVE";
         $scope.DaytermsDetails = [];
         $scope.Tablemodel = [];
         $scope.GSTShow = false;
-        $scope.EmployeeMaster.JoiningDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
-        $scope.EmployeeMaster.EndingDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
         $scope.dateformte = "dd/mm/yyyy";
+        $scope.BranchList = [];
+        $scope.DepartmentList = [];
+        $scope.image_source = null;
+        $scope.Proofimage_source = null;
+        $scope.Path2image_source2 = null;
+
         $scope.MonthName = [
             { No: 1, Name: "Jan" },
             { No: 2, Name: "Feb" },
@@ -405,120 +675,266 @@
             { No: 12, Name: "Dec" }
         ];
 
+        // Format Date input as dd/mm/yyyy
+        var autocompleteDDMMYYYYDateFormat = function (str) {
+            if (!str) return "";
+            var numbers = str.replace(/\D/g, '').substring(0, 8);
+            if (numbers.length >= 5) {
+                return numbers.substring(0, 2) + "/" + numbers.substring(2, 4) + "/" + numbers.substring(4);
+            } else if (numbers.length >= 3) {
+                return numbers.substring(0, 2) + "/" + numbers.substring(2);
+            } else {
+                return numbers;
+            }
+        };
+
         $(function () {
-            $("#FromDATE").keyup(function (e) {
-                var currentValue = $(e.target).val();
-                var newValue = autocompleteMMDDYYYYDateFormat(currentValue);
-                if (newValue != currentValue) {
-                    $(e.target).val(newValue);
+            $("#FromDATE").on("input keyup blur", function () {
+                var input = $(this);
+                var val = input.val();
+                var formatted = autocompleteDDMMYYYYDateFormat(val);
+                if (formatted !== val) {
+                    input.val(formatted);
                 }
+                $timeout(function () {
+                    if ($scope.EmployeeMaster) {
+                        $scope.EmployeeMaster.DOB = input.val();
+                        $scope.CalculateAge();
+                    }
+                }, 0);
             });
         });
 
-        var autocompleteMMDDYYYYDateFormat = function (str) {
-            str = str.trim();
-            var matches, year,
-                looksLike_MM_slash_DD = /^(\d\d\/)?\d\d$/,
-                looksLike_MM_slash_D_slash = /^(\d\d\/)?(\d\/)$/,
-                looksLike_MM_slash_DD_slash_DD = /^(\d\d\/\d\d\/)(\d\d)$/;
-            if (looksLike_MM_slash_DD.test(str)) {
-                str += "/";
-            } else if (looksLike_MM_slash_D_slash.test(str)) {
-                str = str.replace(looksLike_MM_slash_D_slash, "$10$2");
-            } else if (looksLike_MM_slash_DD_slash_DD.test(str)) {
-                matches = str.match(looksLike_MM_slash_DD_slash_DD);
-                year = "";
-                str = String(matches[1]) + year + String(matches[2]);
+        // Calculate Age from dd/mm/yyyy DOB
+        $scope.CalculateAge = function () {
+            var dobStr = ($scope.EmployeeMaster && $scope.EmployeeMaster.DOB) ? $scope.EmployeeMaster.DOB.toString().trim() : '';
+            if (!dobStr) {
+                if ($scope.EmployeeMaster) $scope.EmployeeMaster.Age = 0;
+                return;
             }
-            return str;
+
+            var day = 0, month = 0, year = 0;
+            if (dobStr.indexOf('/') !== -1) {
+                var parts = dobStr.split('/');
+                if (parts.length === 3) {
+                    day = parseInt(parts[0], 10);
+                    month = parseInt(parts[1], 10) - 1;
+                    year = parseInt(parts[2], 10);
+                }
+            } else if (dobStr.indexOf('-') !== -1) {
+                var p = dobStr.split('-');
+                if (p.length === 3) {
+                    if (p[0].length === 4) { // yyyy-mm-dd
+                        year = parseInt(p[0], 10);
+                        month = parseInt(p[1], 10) - 1;
+                        day = parseInt(p[2], 10);
+                    } else { // dd-mm-yyyy
+                        day = parseInt(p[0], 10);
+                        month = parseInt(p[1], 10) - 1;
+                        year = parseInt(p[2], 10);
+                    }
+                }
+            }
+
+            if (day > 0 && month >= 0 && month <= 11 && year >= 1900) {
+                var birthDate = new Date(year, month, day);
+                var today = new Date();
+                var age = today.getFullYear() - birthDate.getFullYear();
+                var m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                if ($scope.EmployeeMaster) {
+                    $scope.EmployeeMaster.Age = age >= 0 ? age : 0;
+                }
+            }
+        };
+
+        $scope.GetDueDays = function () {
+            $scope.CalculateAge();
         };
 
         $scope.agemanage = function (Age) {
             if (parseInt(Age) < 0) {
                 $scope.EmployeeMaster.Age = 0;
-                if (typeof Noty === 'function') Noty("error", "Please Enter valid age");
             }
         };
 
         $scope.ShowGST = function (EmployeeType) {
-            if (EmployeeType == "PARTY") {
-                $scope.GSTShow = true;
+            $scope.GSTShow = (EmployeeType == "PARTY");
+        };
+
+        // Branch and Cascading Department Loading
+        $scope.LoadBranches = function (callback) {
+            $http.get('@Url.Action("Get_BranchList", "Employees")').then(function (res) {
+                var rawList = (res.data && res.data.list) ? res.data.list : (Array.isArray(res.data) ? res.data : []);
+                $scope.BranchList = [];
+                if (rawList && rawList.length > 0) {
+                    for (var i = 0; i < rawList.length; i++) {
+                        var item = rawList[i];
+                        var bId = item.BranchID || item.CompanyBranchID || item.ID || item.Id || item.id;
+                        var bName = item.BranchName || item.Name || item.Branch || item.name;
+                        if (bId && bName) {
+                            $scope.BranchList.push({ BranchID: parseInt(bId), BranchName: bName });
+                        }
+                    }
+                }
+                $timeout(function () {
+                    $('select[chosen]').trigger('chosen:updated');
+                }, 50);
+                if (callback) callback();
+            }, function () {
+                if (callback) callback();
+            });
+        };
+
+        $scope.LoadDepartments = function (branchId, selectedDeptId) {
+            $scope.DepartmentList = [];
+            if (!branchId) {
+                $scope.EmployeeMaster.DepartmentID = null;
+                $timeout(function () {
+                    $('select[chosen]').trigger('chosen:updated');
+                }, 50);
+                return;
+            }
+            $http.get('@Url.Action("Get_DepartmentList", "Employees")?BranchID=' + branchId).then(function (res) {
+                var rawList = (res.data && res.data.list) ? res.data.list : (Array.isArray(res.data) ? res.data : []);
+                $scope.DepartmentList = [];
+                if (rawList && rawList.length > 0) {
+                    for (var i = 0; i < rawList.length; i++) {
+                        var item = rawList[i];
+                        var dId = item.ID || item.DepartmentID || item.DepartmentId || item.Id || item.id;
+                        var dName = item.DepartmentName || item.Name || item.DeptName || item.name;
+                        if (dId && dName) {
+                            $scope.DepartmentList.push({ ID: dId.toString(), DepartmentName: dName });
+                        }
+                    }
+                }
+                if (selectedDeptId) {
+                    var targetKey = selectedDeptId.toString().toLowerCase().replace(/[{}]/g, '').trim();
+                    var match = $scope.DepartmentList.find(function (x) {
+                        return (x.ID || '').toLowerCase().replace(/[{}]/g, '').trim() === targetKey;
+                    });
+                    $scope.EmployeeMaster.DepartmentID = match ? match.ID : selectedDeptId.toString();
+                }
+                $timeout(function () {
+                    $('select[chosen]').trigger('chosen:updated');
+                }, 50);
+            });
+        };
+
+        $scope.OnBranchChange = function (branchId) {
+            var bId = branchId || ($scope.EmployeeMaster ? $scope.EmployeeMaster.CompanyBranchID : null);
+            $scope.EmployeeMaster.DepartmentID = null;
+            $scope.DepartmentList = [];
+            if (bId) {
+                $scope.LoadDepartments(bId);
             } else {
-                $scope.GSTShow = false;
+                $timeout(function () {
+                    $('select[chosen]').trigger('chosen:updated');
+                }, 50);
             }
         };
 
+        // Modal Image Preview & Photo Removal
+        $scope.PreviewModalImage = function (imgUrl, title) {
+            if (!imgUrl) return;
+            $scope.CurrentPreviewUrl = imgUrl;
+            $scope.PreviewModalTitle = title || "Document Preview";
+            $('#ImagePreviewModal').modal('show');
+        };
+
+        $scope.RemoveProfilePhoto = function () {
+            $scope.EmployeeMaster.PhotoPath = null;
+            $scope.image_source = null;
+            $scope.ProfileFileName = null;
+            $('#firlogo').val('');
+            $('#filename').text("Select File !");
+            $('#image_source').attr('src', '');
+        };
+
+        $scope.RemoveProofPhoto = function () {
+            $scope.EmployeeMaster.IDProofPhotoPath = null;
+            $scope.Proofimage_source = null;
+            $scope.ProofFileName = null;
+            $scope.ProofRawFile1 = null;
+            $('#Prooffirlogo').val('');
+            $('#Prooffilename').text("Select File !");
+            $('#Proofimage_source').attr('src', '');
+        };
+
+        $scope.RemoveProofPhoto2 = function () {
+            $scope.EmployeeMaster.PhotoPath2 = null;
+            $scope.Path2image_source2 = null;
+            $scope.Path2FileName = null;
+            $scope.ProofRawFile2 = null;
+            $('#Path2logo').val('');
+            $('#Path2').text("Select File !");
+            $('#Path2image_source2').attr('src', '');
+        };
+
+        // When switching between Aadhar and PAN, automatically clear old photos and document numbers
+        $scope.OnIDProofDocChange = function () {
+            $scope.RemoveProofPhoto();
+            $scope.RemoveProofPhoto2();
+            $scope.EmployeeMaster.AadharNo = "";
+            $scope.EmployeeMaster.PanNo = "";
+            $scope.EmployeeMaster.IDProofNumber = "";
+        };
+
         $scope.Clear = function () {
-            $scope.EmployeeMaster = {};
+            $scope.EmployeeMaster = {
+                FirstName: '',
+                LastName: '',
+                DOB: '',
+                Age: 0,
+                Gender: '',
+                MobileNo: '',
+                EmployeeType: 'EMPLOYEE',
+                Designation: '',
+                EmpCode: '',
+                CompanyBranchID: null,
+                DepartmentID: null,
+                IsHead: false,
+                IsActive: true,
+                ReferenceName: '',
+                IDProofDocName: '',
+                AadharNo: '',
+                PanNo: '',
+                TableNo: '0',
+                JobWork: 'INSIDE',
+                JoiningDate: typeof Cur_Date !== 'undefined' ? Cur_Date : '',
+                EndingDate: typeof Cur_Date !== 'undefined' ? Cur_Date : ''
+            };
             $scope.BtnName = "SAVE";
-            $scope.EmployeeMaster.JoiningDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
-            $scope.EmployeeMaster.EndingDate = typeof Cur_Date !== 'undefined' ? Cur_Date : '';
+            Action = "INSERT";
+            $scope.DepartmentList = [];
             $scope.dateformte = "dd/mm/yyyy";
             $scope.image_source = null;
             $scope.Proofimage_source = null;
             $scope.Path2image_source2 = null;
+            $scope.ProfileFileName = null;
+            $scope.ProofFileName = null;
+            $scope.Path2FileName = null;
+            $scope.ProofRawFile1 = null;
+            $scope.ProofRawFile2 = null;
 
             $("#filename").text("Select File !");
             $('#image_source').prop('src', '');
+            $('#firlogo').val('');
 
             $("#Prooffilename").text("Select File !");
             $('#Proofimage_source').prop('src', '');
+            $('#Prooffirlogo').val('');
 
             $("#Path2").text("Select File !");
             $('#Path2image_source2').prop('src', '');
-        };
-
-        // GetData Dropdowns with robust key resolution and role fallback
-        var loopPromises = [];
-        var promise = $http.get('@Url.Action("Get_DataList_For_Using_Common", "Employees")').then(function (response) {
-            var data = (typeof response.data === 'string') ? JSON.parse(response.data) : (response.data || {});
-
-            var TableList = [];
-            if (data.TableList && data.TableList.length > 0) {
-                for (var i = 0; i < data.TableList.length; i++) {
-                    var item = data.TableList[i];
-                    var tVal = item["TableName"] || item["TableNo"] || item["TableID"] || item["TABLE_NAME"] || item["name"] || item["value"] || item["Table"] || Object.values(item)[0];
-                    var tId = item["TableNo"] || item["TableName"] || item["TableID"] || item["id"] || tVal;
-                    TableList.push({ id: tId, value: tVal });
-                }
-            }
-            $scope.GetTableList = TableList;
-
-            var RoleList = [];
-            if (data.RoleList && data.RoleList.length > 0) {
-                for (var j = 0; j < data.RoleList.length; j++) {
-                    var rItem = data.RoleList[j];
-                    var rId = rItem["RoleID"] || rItem["RoleId"] || rItem["roleid"] || rItem["ID"] || rItem["id"];
-                    var rName = rItem["RoleName"] || rItem["Rolename"] || rItem["rolename"] || rItem["Name"] || rItem["value"] || rItem["Role"];
-                    RoleList.push({ id: rId, value: rName });
-                }
-                $scope.GetRoleList = RoleList;
-            } else {
-                // Fallback to User/Getdata_Role if RoleList not present in common dataset
-                $http.get('@Url.Action("Getdata_Role", "User")').then(function (userRoleRes) {
-                    var rData = (typeof userRoleRes.data === 'string') ? JSON.parse(userRoleRes.data) : (userRoleRes.data || {});
-                    if (rData.RoleList && rData.RoleList.length > 0) {
-                        var fallbackRoles = [];
-                        for (var k = 0; k < rData.RoleList.length; k++) {
-                            var roleItem = rData.RoleList[k];
-                            var id = roleItem["RoleID"] || roleItem["RoleId"] || roleItem["roleid"] || roleItem["id"];
-                            var name = roleItem["RoleName"] || roleItem["Rolename"] || roleItem["rolename"] || roleItem["name"] || roleItem["value"];
-                            fallbackRoles.push({ id: id, value: name });
-                        }
-                        $scope.GetRoleList = fallbackRoles;
-                        $timeout(function () {
-                            $('select[chosen]').trigger('chosen:updated');
-                        }, 50);
-                    }
-                });
-            }
+            $('#Path2logo').val('');
 
             $timeout(function () {
                 $('select[chosen]').trigger('chosen:updated');
             }, 50);
-        });
-        loopPromises.push(promise);
-        $scope.TableSettings = { enableSearch: true, externalIdProp: '' };
+        };
 
         $scope.SetEditData = function () {
             if (EmployeeID != 0) {
@@ -537,6 +953,45 @@
                     if (ret.data && ret.data.List && ret.data.List.length > 0) {
                         var empData = ret.data.List[0];
                         $scope.EmployeeMaster = empData;
+
+                        // Split EmployeeName into FirstName and LastName
+                        if (empData.EmployeeName) {
+                            var nameParts = empData.EmployeeName.trim().split(/\s+/);
+                            if (nameParts.length > 1) {
+                                $scope.EmployeeMaster.FirstName = nameParts[0];
+                                $scope.EmployeeMaster.LastName = nameParts.slice(1).join(" ");
+                            } else {
+                                $scope.EmployeeMaster.FirstName = nameParts[0] || "";
+                                $scope.EmployeeMaster.LastName = "";
+                            }
+                        }
+
+                        // Format DOB to dd/mm/yyyy
+                        if (empData.DOB) {
+                            var d = new Date(empData.DOB);
+                            if (!isNaN(d.getTime())) {
+                                var dd = ("0" + d.getDate()).slice(-2);
+                                var mm = ("0" + (d.getMonth() + 1)).slice(-2);
+                                var yyyy = d.getFullYear();
+                                $scope.EmployeeMaster.DOB = dd + "/" + mm + "/" + yyyy;
+                            }
+                        }
+                        $scope.CalculateAge();
+
+                        // ID Proof Type & Number
+                        $scope.EmployeeMaster.IDProofDocName = empData.IDProofDocName || "";
+                        if ($scope.EmployeeMaster.IDProofDocName === 'AADHAR') {
+                            $scope.EmployeeMaster.AadharNo = empData.IDProofNumber || empData.AadharNo || "";
+                        } else if ($scope.EmployeeMaster.IDProofDocName === 'PAN') {
+                            $scope.EmployeeMaster.PanNo = empData.IDProofNumber || empData.PanNo || "";
+                        }
+
+                        // Branch & Cascading Department
+                        if (empData.CompanyBranchID) {
+                            $scope.EmployeeMaster.CompanyBranchID = parseInt(empData.CompanyBranchID);
+                            $scope.LoadDepartments($scope.EmployeeMaster.CompanyBranchID, empData.DepartmentID);
+                        }
+
                         $scope.EmployeeMaster.Age = parseInt(empData.Age) || 0;
                         $scope.EmployeeMaster.IsActive = (empData.IsActive == "True" || empData.IsActive === true);
                         $scope.EmployeeMaster.IsHead = (empData.IsHead == "True" || empData.IsHead === true);
@@ -552,16 +1007,19 @@
 
                         if (empData.PhotoPath) {
                             $("#filename").text(empData.PhotoPath);
+                            $scope.ProfileFileName = empData.PhotoPath;
                             $scope.image_source = "..\\Images\\PhotoPath\\" + empData.PhotoPath;
                             $("#image_source").attr('src', $scope.image_source);
                         }
                         if (empData.IDProofPhotoPath) {
                             $("#Prooffilename").text(empData.IDProofPhotoPath);
+                            $scope.ProofFileName = empData.IDProofPhotoPath;
                             $scope.Proofimage_source = "..\\Images\\ProofPhotoPath\\" + empData.IDProofPhotoPath;
                             $("#Proofimage_source").attr('src', $scope.Proofimage_source);
                         }
                         if (empData.PhotoPath2) {
                             $("#Path2").text(empData.PhotoPath2);
+                            $scope.Path2FileName = empData.PhotoPath2;
                             $scope.Path2image_source2 = "..\\Images\\PhotoPath2\\" + empData.PhotoPath2;
                             $("#Path2image_source2").attr('src', $scope.Path2image_source2);
                         }
@@ -574,57 +1032,72 @@
                     if (typeof hide_loader === 'function') hide_loader();
                 });
             }
-        }; 
-        $scope.SetEditData();
+        };
 
-        // Upload Profile Image
+        // Initialize: Load branches and then set edit data if any
+        $scope.LoadBranches(function () {
+            $scope.SetEditData();
+        });
+
+        // Save Employee record
         $scope.Save = function () {
-            if ($scope.EmployeeMaster.EmployeeName == undefined || $scope.EmployeeMaster.EmployeeName == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Enter Employee Name !");
+            if (!$scope.EmployeeMaster.FirstName || $scope.EmployeeMaster.FirstName.trim() == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter First Name !");
                 return;
             }
-
-            if ($scope.EmployeeMaster.MobileNo == undefined || $scope.EmployeeMaster.MobileNo == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Enter Mobile Number !");
+            if (!$scope.EmployeeMaster.LastName || $scope.EmployeeMaster.LastName.trim() == "") {
+                if (typeof Noty === 'function') Noty("error", "Please Enter Last Name !");
                 return;
             }
+            $scope.EmployeeMaster.EmployeeName = ($scope.EmployeeMaster.FirstName.trim() + " " + $scope.EmployeeMaster.LastName.trim()).trim();
 
-            if ($scope.EmployeeMaster.EmployeeType == undefined || $scope.EmployeeMaster.EmployeeType == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Select Employee Type !");
-                return;
+            // Mobile No: Not mandatory, but if entered, must be strictly 10 digits
+            if ($scope.EmployeeMaster.MobileNo && $scope.EmployeeMaster.MobileNo.toString().trim() !== "") {
+                var mob = $scope.EmployeeMaster.MobileNo.toString().trim();
+                if (!/^[0-9]{10}$/.test(mob)) {
+                    if (typeof Noty === 'function') Noty("error", "Mobile Number must be exactly 10 digits !");
+                    return;
+                }
             }
 
-            if ($scope.EmployeeMaster.Designation == undefined || $scope.EmployeeMaster.Designation == "") {
+            $scope.EmployeeMaster.EmployeeType = $scope.EmployeeMaster.EmployeeType || "EMPLOYEE";
+
+            if (!$scope.EmployeeMaster.Designation || $scope.EmployeeMaster.Designation == "") {
                 if (typeof Noty === 'function') Noty("error", "Please Select Designation !");
                 return;
             }
 
-            //if ($scope.EmployeeMaster.UserName == undefined || $scope.EmployeeMaster.UserName == "") {
-            //    if (typeof Noty === 'function') Noty("error", "Please Enter Username !");
-            //    return;
-            //}
-
-            //if ($scope.EmployeeMaster.Password == undefined || $scope.EmployeeMaster.Password == "") {
-            //    if (typeof Noty === 'function') Noty("error", "Please Enter Password !");
-            //    return;
-            //}
-
-            if ($scope.EmployeeMaster.TableNo == undefined || $scope.EmployeeMaster.TableNo == "") {
-                $scope.EmployeeMaster.TableNo = "0";
-            }
-
-            if ($scope.EmployeeMaster.TableNo == undefined || $scope.EmployeeMaster.TableNo == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Select Table !");
+            if (!$scope.EmployeeMaster.CompanyBranchID) {
+                if (typeof Noty === 'function') Noty("error", "Please Select Branch !");
                 return;
             }
 
-            if ($scope.EmployeeMaster.JobWork == undefined || $scope.EmployeeMaster.JobWork == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Select JobWork !");
-                return;
-            }
-            if ($scope.EmployeeMaster.ReferenceName == undefined || $scope.EmployeeMaster.ReferenceName == "") {
-                if (typeof Noty === 'function') Noty("error", "Please Enter Reference Name !");
-                return;
+            // Defaults for removed fields
+            $scope.EmployeeMaster.TableNo = "0";
+            $scope.EmployeeMaster.JobWork = "INSIDE";
+
+            // ID Proof Number mapping & validation
+            if ($scope.EmployeeMaster.IDProofDocName == 'AADHAR') {
+                if ($scope.EmployeeMaster.AadharNo && $scope.EmployeeMaster.AadharNo.toString().trim() !== "") {
+                    var aadhar = $scope.EmployeeMaster.AadharNo.toString().trim();
+                    if (!/^[0-9]{12}$/.test(aadhar)) {
+                        if (typeof Noty === 'function') Noty("error", "Aadhar Number must be exactly 12 digits !");
+                        return;
+                    }
+                }
+                $scope.EmployeeMaster.IDProofNumber = $scope.EmployeeMaster.AadharNo;
+            } else if ($scope.EmployeeMaster.IDProofDocName == 'PAN') {
+                if ($scope.EmployeeMaster.PanNo && $scope.EmployeeMaster.PanNo.toString().trim() !== "") {
+                    var pan = $scope.EmployeeMaster.PanNo.toString().trim().toUpperCase();
+                    if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan)) {
+                        if (typeof Noty === 'function') Noty("error", "Please Enter valid 10-character PAN Number (e.g. ABCDE1234F) !");
+                        return;
+                    }
+                    $scope.EmployeeMaster.PanNo = pan;
+                }
+                $scope.EmployeeMaster.IDProofNumber = ($scope.EmployeeMaster.PanNo || '').toUpperCase();
+            } else {
+                $scope.EmployeeMaster.IDProofNumber = '';
             }
 
             if (typeof show_loader === 'function') show_loader();
@@ -656,10 +1129,11 @@
         };
 
         $scope.ProofUploadImage = function () {
-            if ($('#Prooffirlogo').val() && $('#Prooffirlogo').val().split('.').pop().toLowerCase() != "") {
+            var rawFile = $scope.ProofRawFile1 || (document.getElementById('Prooffirlogo') && document.getElementById('Prooffirlogo').files && document.getElementById('Prooffirlogo').files[0]);
+            if (rawFile) {
                 var formData = new FormData();
-                formData.append("Prooffirlogo", document.getElementById('Prooffirlogo').files[0]);
-                var ext = $('#Prooffirlogo').val().split('.').pop().toLowerCase();
+                formData.append("Prooffirlogo", rawFile);
+                var ext = rawFile.name.split('.').pop().toLowerCase();
                 if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
                     if (typeof hide_loader === 'function') hide_loader();
                     if (typeof Noty === 'function') Noty("error", "Please Select Valid ID Proof Image !");
@@ -683,10 +1157,11 @@
         };
 
         $scope.Path2UploadImage = function () {
-            if ($('#Path2logo').val() && $('#Path2logo').val().split('.').pop().toLowerCase() != "") {
+            var rawFile2 = $scope.ProofRawFile2 || (document.getElementById('Path2logo') && document.getElementById('Path2logo').files && document.getElementById('Path2logo').files[0]);
+            if (rawFile2) {
                 var formData = new FormData();
-                formData.append("Path2logo", document.getElementById('Path2logo').files[0]);
-                var ext = $('#Path2logo').val().split('.').pop().toLowerCase();
+                formData.append("Path2logo", rawFile2);
+                var ext = rawFile2.name.split('.').pop().toLowerCase();
                 if ($.inArray(ext, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
                     if (typeof hide_loader === 'function') hide_loader();
                     if (typeof Noty === 'function') Noty("error", "Please Select Valid Secondary Photo !");
@@ -714,10 +1189,24 @@
             $scope.EmployeeMaster.JoiningDate = $('#JoiningDate').val() || $scope.EmployeeMaster.JoiningDate;
             $scope.EmployeeMaster.EndingDate = $('#EndingDate').val() || $scope.EmployeeMaster.EndingDate;
 
+            // Prepare payload copy so we don't disrupt view model
+            var payload = angular.copy($scope.EmployeeMaster);
+
+            // Convert dd/mm/yyyy DOB to ISO format (yyyy-mm-dd) for reliable ASP.NET MVC DateTime binding
+            if (payload.DOB && typeof payload.DOB === 'string') {
+                var dobStr = payload.DOB.trim();
+                if (dobStr.indexOf('/') !== -1) {
+                    var dParts = dobStr.split('/');
+                    if (dParts.length === 3 && dParts[2].length === 4) {
+                        payload.DOB = dParts[2] + "-" + ("0" + dParts[1]).slice(-2) + "-" + ("0" + dParts[0]).slice(-2);
+                    }
+                }
+            }
+
             $http({
                 method: "post",
                 url: '@Url.Action("InsertUpdateEmployee", "Employees")',
-                data: { model: $scope.EmployeeMaster, Action: Action },
+                data: { model: payload, Action: Action },
                 dataType: "json"
             }).then(function (ret) {
                 if (typeof hide_loader === 'function') hide_loader();
@@ -742,11 +1231,13 @@
         $scope.uploadedFile = function (element) {
             if (element.files && element.files[0]) {
                 $scope.currentFile = element.files[0];
-                $("#filename").text(element.files[0].name);
+                var fname = element.files[0].name;
+                $("#filename").text(fname);
                 var reader = new FileReader();
                 reader.onload = function (event) {
                     $scope.$apply(function () {
                         $scope.image_source = event.target.result;
+                        $scope.ProfileFileName = fname;
                     });
                 };
                 reader.readAsDataURL(element.files[0]);
@@ -754,40 +1245,78 @@
         };
 
         $scope.proofuploadedFile = function (element) {
-            if (element.files && element.files[0]) {
-                $scope.currentFile = element.files[0];
-                $("#Prooffilename").text(element.files[0].name);
-                var reader = new FileReader();
-                reader.onload = function (event) {
-                    $scope.$apply(function () {
-                        $scope.Proofimage_source = event.target.result;
-                    });
-                };
-                reader.readAsDataURL(element.files[0]);
+            if (element.files && element.files.length > 0) {
+                var files = element.files;
+
+                if (files.length >= 2 && $scope.EmployeeMaster.IDProofDocName === 'AADHAR') {
+                    // Both files selected at once: files[0] -> Front, files[1] -> Back
+                    $scope.ProofRawFile1 = files[0];
+                    $scope.ProofFileName = files[0].name;
+                    $("#Prooffilename").text(files[0].name);
+                    var r1 = new FileReader();
+                    r1.onload = function (e1) {
+                        $scope.$apply(function () {
+                            $scope.Proofimage_source = e1.target.result;
+                        });
+                    };
+                    r1.readAsDataURL(files[0]);
+
+                    $scope.ProofRawFile2 = files[1];
+                    $scope.Path2FileName = files[1].name;
+                    $("#Path2").text(files[1].name);
+                    var r2 = new FileReader();
+                    r2.onload = function (e2) {
+                        $scope.$apply(function () {
+                            $scope.Path2image_source2 = e2.target.result;
+                        });
+                    };
+                    r2.readAsDataURL(files[1]);
+                } else if (files.length === 1) {
+                    // Single file selected
+                    if ($scope.EmployeeMaster.IDProofDocName === 'AADHAR' && $scope.Proofimage_source && !$scope.Path2image_source2) {
+                        // Front photo already uploaded, assign this file to Back
+                        $scope.ProofRawFile2 = files[0];
+                        $scope.Path2FileName = files[0].name;
+                        $("#Path2").text(files[0].name);
+                        var rBack = new FileReader();
+                        rBack.onload = function (eB) {
+                            $scope.$apply(function () {
+                                $scope.Path2image_source2 = eB.target.result;
+                            });
+                        };
+                        rBack.readAsDataURL(files[0]);
+                    } else {
+                        // Assign to Front
+                        $scope.ProofRawFile1 = files[0];
+                        $scope.ProofFileName = files[0].name;
+                        $("#Prooffilename").text(files[0].name);
+                        var rFront = new FileReader();
+                        rFront.onload = function (eF) {
+                            $scope.$apply(function () {
+                                $scope.Proofimage_source = eF.target.result;
+                            });
+                        };
+                        rFront.readAsDataURL(files[0]);
+                    }
+                }
+                $(element).val('');
             }
         };
 
         $scope.path2uploadedFile = function (element) {
             if (element.files && element.files[0]) {
-                $scope.currentFile = element.files[0];
-                $("#Path2").text(element.files[0].name);
+                $scope.ProofRawFile2 = element.files[0];
+                var fname = element.files[0].name;
+                $("#Path2").text(fname);
                 var reader = new FileReader();
                 reader.onload = function (event) {
                     $scope.$apply(function () {
                         $scope.Path2image_source2 = event.target.result;
+                        $scope.Path2FileName = fname;
                     });
                 };
                 reader.readAsDataURL(element.files[0]);
-            }
-        };
-
-        $scope.GetDueDays = function () {
-            if (!$scope.EmployeeMaster.DOB) return;
-            var oneDay = 365.25 * 24 * 60 * 60 * 1000;
-            var firstDate = new Date($scope.EmployeeMaster.DOB.replace(/\-/g, "/"));
-            var secondDate = new Date();
-            if (!isNaN(firstDate.getTime())) {
-                $scope.EmployeeMaster.Age = Math.round(Math.abs((firstDate.getTime() - secondDate.getTime()) / (oneDay)));
+                $(element).val('');
             }
         };
     }]);

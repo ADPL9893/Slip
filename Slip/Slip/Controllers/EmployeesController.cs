@@ -56,6 +56,7 @@ namespace Slip.Controllers
                     string CustomerFilePath = Server.MapPath(FolderPath + "\\" + Filename + "." + extension);
 
                     if (System.IO.File.Exists(CustomerFilePath))
+
                     {
                         System.IO.File.Delete(CustomerFilePath);
                     }
@@ -170,8 +171,10 @@ namespace Slip.Controllers
             {
 
                 model.Age = model.Age == null ? 1 : model.Age;
-
                 model.IsActive = model.IsActive == null ? false : model.IsActive;
+                model.JobWork = string.IsNullOrWhiteSpace(model.JobWork) ? "INSIDE" : model.JobWork;
+                model.TableNo = string.IsNullOrWhiteSpace(model.TableNo) ? "0" : model.TableNo;
+                model.EmployeeType = string.IsNullOrWhiteSpace(model.EmployeeType) ? "EMPLOYEE" : model.EmployeeType;
                 model.UserID = SessionFacade.UserSession.UserID;
                 XmlDocument Xmldata = CommonMethods.ConvertToXml(model);
                 string xmlStr = "<DocumentElement><EMP_Employees>" + Xmldata.DocumentElement.InnerXml + "</EMP_Employees></DocumentElement>";
@@ -185,17 +188,16 @@ namespace Slip.Controllers
             catch (Exception ex)
             {
                 ErrorLogger.ErrorLog(ex);
-                return "ERROR : " + ex.InnerException.Message;
+                return "ERROR : " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message);
             }
             return Message;
         }
         public JsonResult EMP_Employee_Getdata()
+
         {
             try
             {
                 List<object> _list__EMP_Employee = new List<object>();
-
-                List<object> EMPEmployeeList = new List<object>();
 
                 DataSet _DropDownList = DbHelper.ExecuteDataSet("EMP_Employee_Getdata");
 
@@ -208,6 +210,7 @@ namespace Slip.Controllers
                         {
                             Values.Add(_DropDownList.Tables[0].Columns[j].ToString(), _DropDownList.Tables[0].Rows[i][j].ToString());
                         }
+
                         _list__EMP_Employee.Add(Values);
                     }
                 }
@@ -345,6 +348,34 @@ namespace Slip.Controllers
                 }, JsonRequestBehavior.AllowGet);
                 jsonResult.MaxJsonLength = Int32.MaxValue;
                 return jsonResult;
+            }
+        }
+
+        public JsonResult Get_BranchList()
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_CompanyBranch_GetList", new SqlParameter("@SearchText", DBNull.Value));
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
+            }
+        }
+
+        public JsonResult Get_DepartmentList(int BranchID)
+        {
+            try
+            {
+                List<Dictionary<string, object>> list = DbHelper.ExecuteReaderAsList("USP_MST_Department_GetList", new SqlParameter("@BranchID", BranchID));
+                return Json(new { success = true, list = list }, JsonRequestBehavior.AllowGet);
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, list = new List<object>(), message = ex.Message }, JsonRequestBehavior.AllowGet);
             }
         }
     }
