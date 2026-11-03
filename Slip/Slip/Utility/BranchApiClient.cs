@@ -162,8 +162,14 @@ namespace Slip.Utility
         // SyncLotToAllBranches.
 
         // Ensures InwardDetailID's Kapan exists in BranchID's own Rough
-        // table, inserting it if not already tracked. Never throws.
-        private static void EnsureRoughSyncedToBranch(int inwardDetailID, int branchID, int createdBy)
+        // table, inserting it if not already tracked. Never throws - returns
+        // false (instead) whenever the Rough is NOT confirmed present on
+        // BranchID by the time this returns, so callers that need the Rough
+        // there first (SyncLotToAllBranches - a Lot can't be meaningfully
+        // pushed to a branch that doesn't have its parent Rough yet) can
+        // skip that branch for now rather than pushing the Lot with a
+        // missing/null roughId.
+        private static bool EnsureRoughSyncedToBranch(int inwardDetailID, int branchID, int createdBy)
         {
             try
             {
@@ -173,13 +179,13 @@ namespace Slip.Utility
 
                 if (trackDs.Tables.Count > 0 && trackDs.Tables[0].Rows.Count > 0)
                 {
-                    return;
+                    return true;
                 }
 
                 string baseUrl = GetBranchApiBaseUrl(branchID);
                 if (string.IsNullOrEmpty(baseUrl))
                 {
-                    return;
+                    return false;
                 }
 
                 DataSet ds = DbHelper.ExecuteDataSet("USP_TRN_RoughInwardDetail_GetForBranchSync",
@@ -187,7 +193,7 @@ namespace Slip.Utility
 
                 if (ds.Tables.Count == 0 || ds.Tables[0].Rows.Count == 0)
                 {
-                    return;
+                    return false;
                 }
 
                 BranchRoughSyncRequest payload = BuildPayload(ds.Tables[0].Rows[0]);
@@ -200,12 +206,16 @@ namespace Slip.Utility
                         new SqlParameter("@BranchID", branchID),
                         new SqlParameter("@ApiRoughID", rid),
                         new SqlParameter("@CreatedBy", createdBy));
+                    return true;
                 }
+
+                return false;
             }
             catch (Exception ex)
             {
                 ErrorLogger.ErrorLog("Rough branch sync failed for InwardDetailID=" + inwardDetailID +
                     ", BranchID=" + branchID + ": " + ex.Message);
+                return false;
             }
         }
 
@@ -324,7 +334,20 @@ namespace Slip.Utility
 
                     try
                     {
-                        EnsureRoughSyncedToBranch(inwardDetailID, branchID, createdBy);
+                        // The Rough must exist on this branch BEFORE its Lot
+                        // does - a Lot pushed with no matching Rough there
+                        // yet is an inconsistent state on the branch side.
+                        // If the Rough isn't confirmed synced (branch down,
+                        // POST /api/Rough failed, etc.), skip this branch's
+                        // Lot push entirely for now; the next SyncLotToAll-
+                        // Branches call (next save/edit) retries both.
+                        if (!EnsureRoughSyncedToBranch(inwardDetailID, branchID, createdBy))
+                        {
+                            ErrorLogger.ErrorLog("Lot branch sync skipped for LotID=" + lotID +
+                                ", BranchID=" + branchID + ": parent Rough (InwardDetailID=" + inwardDetailID +
+                                ") is not yet synced to this branch.");
+                            continue;
+                        }
 
                         DataSet ridDs = DbHelper.ExecuteDataSet("USP_TRN_RoughInwardDetail_BranchRough_Get",
                             new SqlParameter("@InwardDetailID", inwardDetailID),
@@ -430,7 +453,10 @@ namespace Slip.Utility
                 IsReceived = row["IsReceived"] == DBNull.Value ? (int?)null : (Convert.ToBoolean(row["IsReceived"]) ? 1 : 0),
                 InwardDetailId = Convert.ToInt32(row["InwardDetailID"]),
                 RCodeYear = row["RCodeYear"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["RCodeYear"]),
-                RCodeSerial = row["RCodeSerial"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["RCodeSerial"])
+                RCodeSerial = row["RCodeSerial"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["RCodeSerial"]),
+                HoLotId = row["LotID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["LotID"]),
+                LotPriority = ToStr(row["LotPriority"]),
+                LotPurpose = ToStr(row["LotPurpose"])
             };
         }
 
@@ -531,6 +557,7 @@ namespace Slip.Utility
                 InvoiceNo = ToStr(row["InvoiceNo"]),
                 Party = ToStr(row["Party"]),
                 LotCount = ToInt(row["LotCount"])
+                
             };
         }
 

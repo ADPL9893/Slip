@@ -1,876 +1,441 @@
 @{
-    ViewBag.Title = "Login - ADPL";
+    ViewBag.Title = "Login - Anjali Labtech";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
+
+    string rememberedUsername = Convert.ToString(ViewBag.RememberedUsername);
+    string rememberedPassword = Convert.ToString(ViewBag.RememberedPassword);
+    bool rememberMeChecked = ViewBag.RememberMe != null && Convert.ToBoolean(ViewBag.RememberMe);
 }
 
 <style>
-    /* ==========================================================================
-       ADPL - Modern SaaS Login Portal (Self-Contained & Ultra-Reliable)
-       ========================================================================== */
-    @@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap");
+    @@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+    :root {
+        --ho-bg: #050b18;
+        --ho-ice: #7dd3fc;
+        --ho-blue: #3b82f6;
+        --ho-violet: #8b5cf6;
+        --ho-text: #e6edf7;
+        --ho-muted: #8a9bb8;
+        --ho-line: rgba(148, 178, 230, .16);
+    }
 
     html, body.adpl-login-page-body, body {
         margin: 0 !important;
         padding: 0 !important;
-        width: 100% !important;
+        height: auto !important;
         min-height: 100vh !important;
-        font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-        box-sizing: border-box !important;
     }
 
-    *, *::before, *::after {
-        box-sizing: border-box !important;
-    }
-
-    /* Modern Luxury Deep Midnight Gradient Background */
     body.adpl-login-page-body, body {
-        background: radial-gradient(circle at 12% 18%, rgba(2, 132, 199, 0.35) 0%, transparent 42%),
-                    radial-gradient(circle at 88% 82%, rgba(99, 102, 241, 0.28) 0%, transparent 45%),
-                    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.15) 0%, transparent 60%),
-                    linear-gradient(135deg, #070e1b 0%, #0b192e 38%, #0f2b48 72%, #081628 100%) !important;
-        background-color: #0b192e !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        padding: 20px !important;
-        position: relative !important;
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif !important;
+        background: var(--ho-bg) !important;
+        color: var(--ho-text) !important;
         overflow-x: hidden !important;
+        display: block !important;
+        -webkit-font-smoothing: antialiased !important;
     }
 
-    /* Ambient Floating Decorative Glow Orbs */
-    .ambient-glow-orb {
-        position: fixed !important;
-        border-radius: 50% !important;
-        filter: blur(95px) !important;
-        pointer-events: none !important;
-        z-index: 0 !important;
-        animation: orbFloat 14s ease-in-out infinite alternate !important;
-    }
-    .orb-left {
-        width: 440px !important;
-        height: 440px !important;
-        background: rgba(56, 189, 248, 0.28) !important;
-        top: -80px !important;
-        left: -80px !important;
-    }
-    .orb-right {
-        width: 500px !important;
-        height: 500px !important;
-        background: rgba(99, 102, 241, 0.24) !important;
-        bottom: -100px !important;
-        right: -100px !important;
-        animation-delay: -7s !important;
-    }
+    .ho-page * , .ho-page *::before, .ho-page *::after { box-sizing: border-box; }
 
-    /* Fullscreen Background Floating Diamond Canvas */
-    .diamond-particles-canvas {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        z-index: 1 !important;
-        pointer-events: none !important;
+    /* ---------- Background ---------- */
+    .ho-aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+    .ho-aurora span {
+        position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55;
+        animation: hoDrift 22s ease-in-out infinite alternate;
     }
-
-    @@keyframes orbFloat {
-        0% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(45px, 35px) scale(1.08); }
-        100% { transform: translate(-35px, 45px) scale(0.94); }
+    .ho-aurora .ho-a1 { width: 620px; height: 620px; background: #1d4ed8; top: -200px; left: -120px; }
+    .ho-aurora .ho-a2 { width: 520px; height: 520px; background: #7c3aed; bottom: -220px; right: 10%; animation-delay: -6s; opacity: .35; }
+    .ho-aurora .ho-a3 { width: 420px; height: 420px; background: #0ea5e9; top: 30%; left: 35%; animation-delay: -12s; opacity: .25; }
+    @@keyframes hoDrift {
+        0% { transform: translate(0,0) scale(1); }
+        50% { transform: translate(80px,40px) scale(1.12); }
+        100% { transform: translate(-40px,90px) scale(.95); }
     }
-
-    @@keyframes cardEntrance {
-        from {
-            opacity: 0;
-            transform: translateY(28px) scale(0.97);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
+    .ho-grid {
+        position: fixed; inset: 0; z-index: 0;
+        background-image:
+            linear-gradient(rgba(125,211,252,.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(125,211,252,.05) 1px, transparent 1px);
+        background-size: 60px 60px;
+        mask-image: radial-gradient(ellipse 70% 60% at 30% 50%, #000 20%, transparent 80%);
     }
+    #hoStage { position: fixed; inset: 0; z-index: 1; }
 
-    @@keyframes floatLogo {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-7px); }
+    /* ---------- Layout ---------- */
+    .ho-wrap {
+        position: relative; z-index: 2; min-height: 100vh;
+        display: grid; grid-template-columns: 1.15fr 1fr; align-items: center;
+        max-width: 1320px; margin: 0 auto; padding: 40px 56px; gap: 40px;
     }
-
-    @@keyframes sparkleShineBright {
-        0%, 100% {
-            transform: scale(0.35) rotate(0deg);
-            opacity: 0.3;
-        }
-        50% {
-            transform: scale(1.25) rotate(90deg);
-            opacity: 1.0;
-            filter: drop-shadow(0 0 10px #ffffff) drop-shadow(0 0 4px rgba(255, 255, 255, 0.8));
-        }
+    header.ho-top {
+        position: absolute; top: 36px; left: 56px; right: 56px;
+        display: flex; justify-content: space-between; align-items: center;
     }
+    .ho-logo { line-height: 0; display: flex; align-items: center; }
+    .ho-logo img { height: 75px; width: auto; display: block; filter: drop-shadow(0 2px 10px rgba(0,0,0,.35)); }
+    @@media (max-width: 960px) { .ho-logo img { height: 32px; } }
 
-    @@keyframes sparkleShineCyan {
-        0%, 100% {
-            transform: scale(0.35) rotate(0deg);
-            opacity: 0.3;
-        }
-        50% {
-            transform: scale(1.25) rotate(90deg);
-            opacity: 1.0;
-            filter: drop-shadow(0 0 10px #0284c7) drop-shadow(0 0 4px #38bdf8);
-        }
+    .ho-status {
+        display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ho-muted);
+        padding: 7px 14px; border: 1px solid var(--ho-line); border-radius: 999px; background: rgba(10,18,36,.5); backdrop-filter: blur(8px);
     }
+    .ho-status i { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 0 0 rgba(34,197,94,.6); animation: hoPing 2s infinite; }
+    @@keyframes hoPing { 70% { box-shadow: 0 0 0 8px rgba(34,197,94,0); } 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
 
-    @@keyframes shakeError {
+    .ho-hero { padding-top: 40px; }
+    .ho-hero .ho-tag {
+        font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--ho-ice);
+        display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
+    }
+    .ho-hero .ho-tag::before { content: ""; width: 36px; height: 1px; background: var(--ho-ice); }
+    .ho-hero h1 {
+        font-size: clamp(40px, 5vw, 64px); line-height: 1.04; font-weight: 800; letter-spacing: -.035em; max-width: 560px;
+        margin: 0; color: var(--ho-text);
+    }
+    .ho-hero h1 em {
+        font-style: normal;
+        background: linear-gradient(100deg, #7dd3fc 0%, #a5b4fc 45%, #c4b5fd 70%, #7dd3fc 100%);
+        background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent;
+        animation: hoSheen 6s linear infinite;
+    }
+    @@keyframes hoSheen { to { background-position: 200% center; } }
+    .ho-hero p { margin-top: 22px; margin-bottom: 0; max-width: 460px; font-size: 16px; line-height: 1.7; color: var(--ho-muted); }
+
+    /* ---------- Glass card ---------- */
+    .ho-card-shell {
+        position: relative; justify-self: end; width: 100%; max-width: 440px;
+        border-radius: 24px; padding: 1px;
+        background: conic-gradient(from var(--ho-ang, 0deg), rgba(125,211,252,.0), rgba(125,211,252,.7), rgba(139,92,246,.6), rgba(125,211,252,0) 40%);
+        animation: hoSpin 6s linear infinite;
+        box-shadow: 0 40px 120px -30px rgba(29,78,216,.55);
+    }
+    @@property --ho-ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+    @@keyframes hoSpin { to { --ho-ang: 360deg; } }
+    .ho-card {
+        border-radius: 23px; padding: 40px 36px 32px;
+        background: linear-gradient(180deg, rgba(17,28,54,.82), rgba(8,15,32,.88));
+        backdrop-filter: blur(22px) saturate(140%);
+    }
+    .ho-card .ho-hello { font-size: 13px; color: var(--ho-ice); font-weight: 600; }
+    .ho-card h2 { font-size: 28px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 6px; color: var(--ho-text); }
+    .ho-card .ho-lead { font-size: 14px; color: var(--ho-muted); margin-bottom: 30px; }
+
+    /* Floating-label fields */
+    .ho-field { position: relative; margin-bottom: 18px; }
+    .ho-field input {
+        width: 100%; height: 58px; padding: 22px 48px 6px 48px;
+        font: inherit; font-size: 15px; color: var(--ho-text);
+        background: rgba(5,11,24,.6); border: 1px solid var(--ho-line); border-radius: 14px;
+        transition: border-color .2s, box-shadow .2s, background .2s;
+    }
+    .ho-field label {
+        position: absolute; left: 48px; top: 50%; transform: translateY(-50%);
+        font-size: 14px; color: var(--ho-muted); pointer-events: none; transition: all .18s ease;
+    }
+    .ho-field input:focus, .ho-field input:not(:placeholder-shown) { outline: none; }
+    .ho-field input:focus { border-color: rgba(125,211,252,.7); background: rgba(5,11,24,.85); box-shadow: 0 0 0 4px rgba(56,189,248,.12), 0 0 24px -6px rgba(56,189,248,.5); }
+    .ho-field input:focus + label,
+    .ho-field input:not(:placeholder-shown) + label,
+    .ho-field input:-webkit-autofill + label,
+    .ho-field.ho-has-value label {
+        top: 17px; font-size: 11px; letter-spacing: .04em; color: var(--ho-ice);
+    }
+    .ho-field .ho-ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #5f7397; transition: color .2s; }
+    .ho-field input:focus ~ .ho-ico { color: var(--ho-ice); }
+
+    /* Chrome/Edge autofill paints its own background and can leave the floating
+       label stuck in the middle of the field since :placeholder-shown doesn't
+       always flip on autofill - force the label up and re-skin the fill. */
+    .ho-field input:-webkit-autofill,
+    .ho-field input:-webkit-autofill:hover,
+    .ho-field input:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--ho-text);
+        -webkit-box-shadow: 0 0 0 1000px rgba(5,11,24,.85) inset;
+        box-shadow: 0 0 0 1000px rgba(5,11,24,.85) inset;
+        transition: background-color 9999s ease-in-out 0s;
+        caret-color: var(--ho-text);
+    }
+    .ho-eye {
+        position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+        width: 36px; height: 36px; border: 0; border-radius: 10px; background: none; color: #5f7397; cursor: pointer;
+        display: grid; place-items: center;
+    }
+    .ho-eye:hover { background: rgba(125,211,252,.08); color: var(--ho-text); }
+    .ho-eye svg { width: 18px; height: 18px; }
+    .ho-caps { font-size: 12px; color: #fbbf24; margin: -8px 0 14px 4px; }
+
+    .ho-error {
+        display: flex; align-items: center; gap: 10px;
+        background: rgba(239, 68, 68, .12); border: 1px solid rgba(239, 68, 68, .35); border-left: 4px solid #ef4444;
+        border-radius: 9px; padding: 10px 14px; margin-bottom: 18px;
+        font-size: 12.5px; font-weight: 600; color: #fecaca;
+        animation: hoShake .4s ease-in-out both;
+    }
+    .ho-error svg { width: 18px; height: 18px; stroke: #ef4444; flex-shrink: 0; }
+    @@keyframes hoShake {
         0%, 100% { transform: translateX(0); }
         20%, 60% { transform: translateX(-7px); }
         40%, 80% { transform: translateX(7px); }
     }
 
-    /* Master Wrapper - High z-index to stay above background floating diamonds */
-    .adpl-login-container {
-        width: 100% !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        position: relative !important;
-        z-index: 10 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
+    .ho-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin: 6px 0 26px; }
+    .ho-switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; color: #b6c3da; }
+    .ho-switch input { display: none; }
+    .ho-switch .ho-t { width: 34px; height: 20px; border-radius: 999px; background: #1e2a44; position: relative; transition: background .2s; }
+    .ho-switch .ho-t::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #8a9bb8; transition: all .2s; }
+    .ho-switch input:checked + .ho-t { background: var(--ho-blue); }
+    .ho-switch input:checked + .ho-t::after { left: 17px; background: #fff; }
+    .ho-link { color: var(--ho-ice); text-decoration: none; font-weight: 600; }
+    .ho-link:hover { text-decoration: underline; }
 
-    /* Master Two-Column Card Box */
-    .adpl-login-card {
-        width: 100% !important;
-        max-width: 880px !important;
-        min-height: 480px !important;
-        background: #ffffff !important;
-        border-radius: 28px !important;
-        box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.45),
-                    0 0 0 1px rgba(255, 255, 255, 0.18),
-                    0 8px 24px -4px rgba(2, 132, 199, 0.15) !important;
-        display: flex !important;
-        flex-direction: row !important;
-        overflow: hidden !important;
-        position: relative !important;
-        z-index: 10 !important;
-        animation: cardEntrance 0.55s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    .ho-btn {
+        position: relative; overflow: hidden; width: 100%; height: 54px; border: 0; border-radius: 14px; cursor: pointer;
+        font: inherit; font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .01em;
+        background: linear-gradient(100deg, #2563eb, #3b82f6 45%, #7c3aed);
+        box-shadow: 0 14px 34px -12px rgba(59,130,246,.8), inset 0 1px 0 rgba(255,255,255,.25);
+        display: flex; align-items: center; justify-content: center; gap: 10px;
+        transition: transform .15s, box-shadow .2s, filter .2s;
     }
+    .ho-btn::after {
+        content: ""; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+        transform: skewX(-20deg); animation: hoShine 3.6s ease-in-out infinite;
+    }
+    @@keyframes hoShine { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+    .ho-btn:hover:not(:disabled) { filter: brightness(1.08); transform: translateY(-1px); }
+    .ho-btn svg { width: 18px; height: 18px; transition: transform .2s; }
+    .ho-btn:hover svg { transform: translateX(3px); }
+    .ho-btn:disabled { opacity: .6; cursor: not-allowed; }
+    .ho-btn.loading span, .ho-btn.loading svg { opacity: 0; }
+    .ho-spin { display: none; position: absolute; width: 22px; height: 22px; border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: hoRot .7s linear infinite; }
+    .ho-btn.loading .ho-spin { display: block; }
+    @@keyframes hoRot { to { transform: rotate(360deg); } }
 
-    /* Left Brand Logo Panel (Harmonious Richer Mid-Tone Sky-Blue Gradient matching page background with sharp Black logo contrast) */
-    .adpl-brand-panel {
-        width: 48% !important;
-        background: linear-gradient(145deg, #7dd3fc 0%, #38bdf8 45%, #0284c7 100%) !important;
-        background-color: #38bdf8 !important;
-        border-radius: 28px 30% 30% 28px !important;
-        box-shadow: 0 10px 30px rgba(2, 132, 199, 0.25) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 40px 32px !important;
-        position: relative !important;
-        overflow: hidden !important;
-    }
+    .ho-secure { margin-top: 26px; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 12px; color: #6b7d9c; }
+    .ho-secure svg { width: 14px; height: 14px; color: #22c55e; }
 
-    /* High-Visibility Diamond Sparkle Stars in Brand Panel */
-    .brand-sparkle {
-        position: absolute !important;
-        pointer-events: none !important;
-        z-index: 2 !important;
+    footer.ho-bottom {
+        position: absolute; bottom: 28px; left: 56px; right: 56px;
+        display: flex; justify-content: space-between; font-size: 12px; color: #4f6080; z-index: 2;
     }
+    footer.ho-bottom a { color: inherit; text-decoration: none; margin-left: 20px; }
+    footer.ho-bottom a:hover { color: var(--ho-text); }
 
-    /* Sparkle 1: Top-Right Deep Cyan/Blue */
-    .sparkle-1 {
-        top: 18% !important;
-        right: 16% !important;
-        width: 24px !important;
-        height: 24px !important;
-        color: #0369a1 !important;
-        animation: sparkleShineCyan 3.2s ease-in-out infinite !important;
-    }
+    /* Entrance */
+    .ho-rise { opacity: 0; transform: translateY(18px); animation: hoRise .8s cubic-bezier(.2,.7,.2,1) forwards; }
+    .ho-d1 { animation-delay: .1s; } .ho-d2 { animation-delay: .22s; } .ho-d3 { animation-delay: .34s; } .ho-d4 { animation-delay: .46s; }
+    @@keyframes hoRise { to { opacity: 1; transform: none; } }
 
-    /* Sparkle 2: Top-Left Solid Bright White */
-    .sparkle-2 {
-        top: 20% !important;
-        left: 15% !important;
-        width: 24px !important;
-        height: 24px !important;
-        color: #ffffff !important;
-        animation: sparkleShineBright 2.8s ease-in-out infinite 0.4s !important;
+    @@media (max-width: 960px) {
+        .ho-wrap { grid-template-columns: 1fr; padding: 110px 16px 90px; gap: 28px; }
+        header.ho-top { left: 16px; right: 16px; top: 24px; }
+        footer.ho-bottom { left: 16px; right: 16px; flex-direction: column; gap: 8px; align-items: center; }
+        footer.ho-bottom a { margin: 0 10px; }
+        .ho-hero { padding-top: 0; text-align: center; }
+        .ho-hero .ho-tag { justify-content: center; }
+        .ho-hero p { display: none; }
+        .ho-hero h1 { margin: 0 auto; font-size: 36px; }
+        .ho-card-shell { justify-self: center; }
+        .ho-card { padding: 32px 22px 26px; }
+        .ho-status { display: none; }
     }
-
-    /* Sparkle 3: Bottom-Left Solid Bright White (Upper line) */
-    .sparkle-3 {
-        bottom: 25% !important;
-        left: 14% !important;
-        width: 22px !important;
-        height: 22px !important;
-        color: #ffffff !important;
-        animation: sparkleShineBright 3.4s ease-in-out infinite 1.2s !important;
-    }
-
-    /* Sparkle 4: Bottom-Left Deep Cyan/Blue */
-    .sparkle-4 {
-        bottom: 16% !important;
-        left: 22% !important;
-        width: 20px !important;
-        height: 20px !important;
-        color: #0369a1 !important;
-        animation: sparkleShineCyan 3.6s ease-in-out infinite 0.8s !important;
-    }
-
-    /* Sparkle 5: Bottom-Right Solid Bright White */
-    .sparkle-5 {
-        bottom: 20% !important;
-        right: 16% !important;
-        width: 22px !important;
-        height: 22px !important;
-        color: #ffffff !important;
-        animation: sparkleShineBright 3.0s ease-in-out infinite 1.6s !important;
-    }
-
-    .adpl-brand-logo-wrap {
-        text-align: center !important;
-        position: relative !important;
-        z-index: 3 !important;
-        animation: floatLogo 4.5s ease-in-out infinite !important;
-    }
-
-    .adpl-brand-logo-wrap img {
-        max-width: 100% !important;
-        width: 320px !important;
-        height: auto !important;
-        display: block !important;
-        margin: 0 auto !important;
-        filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.12)) !important;
-        transition: transform 0.3s ease !important;
-    }
-    .adpl-brand-logo-wrap img:hover {
-        transform: scale(1.04) !important;
-    }
-
-    /* Right Login Form Panel */
-    .adpl-form-panel {
-        width: 52% !important;
-        padding: 48px 44px !important;
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-        background: #ffffff !important;
-        position: relative !important;
-    }
-
-    .adpl-header-group {
-        text-align: center !important;
-        margin-bottom: 26px !important;
-    }
-
-    .adpl-login-title {
-        font-size: 32px !important;
-        font-weight: 800 !important;
-        color: #0f172a !important;
-        letter-spacing: -0.5px !important;
-        margin: 0 0 6px 0 !important;
-        line-height: 1.2 !important;
-    }
-
-    .adpl-login-subtitle {
-        font-size: 13.5px !important;
-        color: #64748b !important;
-        font-weight: 500 !important;
-        margin: 0 !important;
-    }
-
-    /* Custom Input Field Groups */
-    .adpl-input-group {
-        position: relative !important;
-        width: 100% !important;
-        margin-bottom: 18px !important;
-    }
-
-    .adpl-input-field {
-        width: 100% !important;
-        height: 48px !important;
-        padding: 0 46px 0 16px !important;
-        background-color: #f1f5f9 !important;
-        border: 1.5px solid #cbd5e1 !important;
-        border-radius: 10px !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
-        color: #0f172a !important;
-        outline: none !important;
-        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03) !important;
-        transition: all 0.22s ease !important;
-    }
-
-    .adpl-input-field:focus {
-        background-color: #ffffff !important;
-        border-color: #0284c7 !important;
-        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.16) !important;
-    }
-
-    /* Vector SVG Icons */
-    .adpl-input-icon {
-        position: absolute !important;
-        right: 14px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        pointer-events: none !important;
-    }
-
-    .input-svg-icon {
-        width: 18px !important;
-        height: 18px !important;
-        stroke: #64748b !important;
-        transition: stroke 0.2s ease !important;
-    }
-
-    .adpl-input-field:focus ~ .adpl-input-icon .input-svg-icon {
-        stroke: #0284c7 !important;
-    }
-
-    /* Password Toggle Button */
-    .adpl-pwd-toggle-btn {
-        position: absolute !important;
-        right: 10px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        background: transparent !important;
-        border: none !important;
-        cursor: pointer !important;
-        padding: 6px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        outline: none !important;
-    }
-
-    .toggle-svg-icon {
-        width: 20px !important;
-        height: 20px !important;
-        stroke: #64748b !important;
-        transition: stroke 0.2s ease !important;
-    }
-
-    .adpl-pwd-toggle-btn:hover .toggle-svg-icon {
-        stroke: #0284c7 !important;
-    }
-
-    /* Error Alert Card */
-    .adpl-error-card {
-        background: #fef2f2 !important;
-        border: 1.5px solid #fecaca !important;
-        border-left: 4px solid #ef4444 !important;
-        border-radius: 9px !important;
-        padding: 10px 14px !important;
-        margin-bottom: 18px !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        font-size: 12.5px !important;
-        font-weight: 600 !important;
-        color: #991b1b !important;
-        animation: shakeError 0.4s ease-in-out both !important;
-    }
-
-    .alert-svg-icon {
-        width: 18px !important;
-        height: 18px !important;
-        stroke: #ef4444 !important;
-        flex-shrink: 0 !important;
-    }
-
-    /* High-Impact Submit Button */
-    .adpl-btn-submit {
-        width: 100% !important;
-        height: 48px !important;
-        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-        color: #ffffff !important;
-        border: none !important;
-        border-radius: 10px !important;
-        font-size: 15px !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.2px !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 9px !important;
-        box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
-        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        margin-top: 4px !important;
-    }
-
-    .btn-svg-icon {
-        width: 18px !important;
-        height: 18px !important;
-        stroke: #ffffff !important;
-    }
-
-    .adpl-btn-submit:hover:not(:disabled) {
-        background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
-        transform: translateY(-2px) !important;
-        box-shadow: 0 8px 22px rgba(2, 132, 199, 0.45) !important;
-    }
-
-    .adpl-btn-submit:active:not(:disabled) {
-        transform: translateY(0) scale(0.99) !important;
-    }
-
-    .adpl-btn-submit:disabled {
-        background: #94a3b8 !important;
-        color: #e2e8f0 !important;
-        opacity: 0.7 !important;
-        cursor: not-allowed !important;
-        box-shadow: none !important;
-        transform: none !important;
-    }
-
-    .adpl-form-footer {
-        margin-top: 22px !important;
-        text-align: center !important;
-        font-size: 12px !important;
-        color: #94a3b8 !important;
-        font-weight: 500 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 6px !important;
-    }
-
-    .shield-svg-icon {
-        width: 14px !important;
-        height: 14px !important;
-        stroke: #0284c7 !important;
-        flex-shrink: 0 !important;
-    }
-
-    /* ==========================================================================
-       Responsive Breakpoints for Mobile & Tablet
-       ========================================================================== */
-    @@media (max-width: 991px) {
-        .adpl-login-card {
-            max-width: 740px !important;
-            min-height: auto !important;
-        }
-        .adpl-brand-panel {
-            padding: 30px 24px !important;
-        }
-        .adpl-brand-logo-wrap img {
-            width: 260px !important;
-        }
-        .adpl-form-panel {
-            padding: 40px 32px !important;
-        }
-    }
-
-    @@media (max-width: 768px) {
-        body.adpl-login-page-body, body {
-            padding: 15px !important;
-            align-items: center !important;
-        }
-        .adpl-login-card {
-            flex-direction: column !important;
-            max-width: 440px !important;
-            border-radius: 20px !important;
-        }
-        .adpl-brand-panel {
-            width: 100% !important;
-            height: 180px !important;
-            border-radius: 20px 20px 0 0 !important;
-            box-shadow: none !important;
-            padding: 24px 20px !important;
-        }
-        .adpl-brand-logo-wrap img {
-            width: 220px !important;
-        }
-        .adpl-form-panel {
-            width: 100% !important;
-            padding: 30px 22px 34px !important;
-        }
-        .adpl-login-title {
-            font-size: 26px !important;
-        }
-    }
-
-    @@media (max-width: 480px) {
-        body.adpl-login-page-body, body {
-            padding: 10px !important;
-        }
-        .adpl-login-card {
-            border-radius: 16px !important;
-        }
-        .adpl-brand-panel {
-            height: 150px !important;
-            padding: 18px !important;
-        }
-        .adpl-brand-logo-wrap img {
-            width: 190px !important;
-        }
-        .adpl-form-panel {
-            padding: 24px 18px 28px !important;
-        }
-        .adpl-login-title {
-            font-size: 24px !important;
-        }
-        .adpl-input-field {
-            height: 44px !important;
-            font-size: 13.5px !important;
-        }
-        .adpl-btn-submit {
-            height: 44px !important;
-            font-size: 14px !important;
-        }
+    @@media (prefers-reduced-motion: reduce) {
+        .ho-page *, .ho-page *::before, .ho-page *::after { animation: none !important; }
+        .ho-rise { opacity: 1; transform: none; }
     }
 </style>
 
-<!-- Ambient Glowing Background Orbs -->
-<div class="ambient-glow-orb orb-left"></div>
-<div class="ambient-glow-orb orb-right"></div>
+<div class="ho-page" ng-controller="Login">
+    <div class="ho-aurora"><span class="ho-a1"></span><span class="ho-a2"></span><span class="ho-a3"></span></div>
+    <div class="ho-grid"></div>
+    <canvas id="hoStage"></canvas>
 
-<!-- Fullscreen Floating Transparent Diamonds Canvas (Background Layer) -->
-<canvas id="diamondCanvas" class="diamond-particles-canvas"></canvas>
+    <div class="ho-wrap">
+        <header class="ho-top ho-rise">
+            <div class="ho-logo">
+                <img src="@Url.Content("~/Content/images/anjali-logo-white.png")" alt="Anjali Labtech Limited">
+            </div>
+            <div class="ho-status"><i></i> All systems operational</div>
+        </header>
 
-<!-- Main Login Container (Z-Index: 10, Always Above Background Diamonds) -->
-<div ng-controller="Login" class="adpl-login-container">
-    <div class="adpl-login-card">
-        <!-- Left Brand Logo Panel in full #bae6fd with Diamond Sparkles -->
-        <div class="adpl-brand-panel">
-            <!-- Sparkle 1: Top-Right Cyan/Blue Star -->
-            <div class="brand-sparkle sparkle-1">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
-                </svg>
-            </div>
-            <!-- Sparkle 2: Top-Left Solid Bright White Star -->
-            <div class="brand-sparkle sparkle-2">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
-                </svg>
-            </div>
-            <!-- Sparkle 3: Bottom-Left Solid Bright White Star (Upper line) -->
-            <div class="brand-sparkle sparkle-3">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
-                </svg>
-            </div>
-            <!-- Sparkle 4: Bottom-Left Cyan/Blue Star -->
-            <div class="brand-sparkle sparkle-4">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
-                </svg>
-            </div>
-            <!-- Sparkle 5: Bottom-Right Solid Bright White Star -->
-            <div class="brand-sparkle sparkle-5">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z"/>
-                </svg>
-            </div>
+        <section class="ho-hero">
+            <div class="ho-tag ho-rise ho-d1">HO Management System</div>
+            <h1 class="ho-rise ho-d2">Head Office, <em>in one place.</em></h1>
+            <p class="ho-rise ho-d3">Manage branches, staff, approvals, inventory and reports for Anjali Labtech from a single secure console.</p>
+        </section>
 
-            <!-- Company Logo in Front -->
-            <div class="adpl-brand-logo-wrap">
-                <img src="@Url.Content("~/Content/images/LabTech.png")" alt="Anjali Labtech Limited" />
-            </div>
-        </div>
+        <div class="ho-card-shell ho-rise ho-d3">
+            <div class="ho-card">
+                <div class="ho-hello" id="hoGreet">Good day</div>
+                <h2>HO Management Login</h2>
+                <p class="ho-lead">Authorised head office personnel only.</p>
 
-        <!-- Right Login Form Panel -->
-        <div class="adpl-form-panel">
-            <div class="adpl-header-group">
-                <h1 class="adpl-login-title">Login</h1>
-                <p class="adpl-login-subtitle">Enter your credentials to continue</p>
-            </div>
+                <form name="loginForm" ng-submit="LoginCheck()" novalidate autocomplete="on">
+                    <div class="ho-field" ng-class="{'ho-has-value': username}">
+                        <input type="text"
+                               ng-model="username"
+                               name="Username"
+                               id="username"
+                               placeholder=" "
+                               autocomplete="username"
+                               autocapitalize="none"
+                               required />
+                        <label for="username">Username or employee ID</label>
+                        <svg class="ho-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
 
-            <form ng-submit="LoginCheck()" novalidate>
-                <!-- Username Input -->
-                <div class="adpl-input-group">
-                    <input type="text" 
-                           ng-model="username" 
-                           name="Username" 
-                           id="username" 
-                           class="adpl-input-field" 
-                           placeholder="Username" 
-                           autocomplete="username" 
-                           autocapitalize="none" 
-                           ng-enter="LoginCheck()" 
-                           required />
-                    <span class="adpl-input-icon">
-                        <svg class="input-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </span>
-                </div>
+                    <div class="ho-field" ng-class="{'ho-has-value': password}">
+                        <input type="{{showPassword ? 'text' : 'password'}}"
+                               ng-model="password"
+                               name="Password"
+                               id="password"
+                               placeholder=" "
+                               autocomplete="current-password"
+                               required />
+                        <label for="password">Password</label>
+                        <svg class="ho-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        <button type="button" class="ho-eye" id="hoEye" aria-label="Show password" tabindex="-1"></button>
+                    </div>
+                    <div class="ho-caps" id="hoCaps" style="display:none;">&#9888; Caps Lock is on</div>
 
-                <!-- Password Input -->
-                <div class="adpl-input-group">
-                    <input type="{{showPassword ? 'text' : 'password'}}" 
-                           ng-model="password" 
-                           name="Password" 
-                           id="password" 
-                           class="adpl-input-field" 
-                           placeholder="Password" 
-                           autocomplete="current-password" 
-                           ng-enter="LoginCheck()" 
-                           required />
-                    <button type="button" 
-                            class="adpl-pwd-toggle-btn" 
-                            ng-click="showPassword = !showPassword" 
-                            title="{{showPassword ? 'Hide password' : 'Show password'}}"
-                            tabindex="-1">
-                        <!-- Eye Open SVG when password visible -->
-                        <svg ng-if="showPassword" class="toggle-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                            <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
-                        <!-- Eye Slashed SVG when password hidden -->
-                        <svg ng-if="!showPassword" class="toggle-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                            <line x1="1" y1="1" x2="23" y2="23"></line>
-                        </svg>
+                    <div class="ho-error" ng-if="msg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        <span>{{msg}}</span>
+                    </div>
+
+                    <div class="ho-row">
+                        <label class="ho-switch"><input type="checkbox" ng-model="rememberMe"><span class="ho-t"></span> Keep me signed in</label>
+                        <a href="#" class="ho-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="ho-btn" ng-class="{loading: IsLoading}" ng-disabled="!(username && password) || IsLoading">
+                        <span>Sign in securely</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+                        <i class="ho-spin"></i>
                     </button>
-                </div>
+                </form>
 
-                <!-- Animated Error Alert -->
-                <div class="adpl-error-card" ng-if="msg">
-                    <svg class="alert-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                        <line x1="12" y1="9" x2="12" y2="13"></line>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                    </svg>
-                    <span>{{msg}}</span>
+                <div class="ho-secure">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+                    Protected by ADPL Security
                 </div>
-
-                <!-- Submit Action Button -->
-                <button type="button" 
-                        class="adpl-btn-submit" 
-                        ng-disabled="!(username && password) || IsLoading" 
-                        ng-click="LoginCheck()">
-                    <span ng-if="!IsLoading" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <svg class="btn-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                            <polyline points="10 17 15 12 10 7"></polyline>
-                            <line x1="15" y1="12" x2="3" y2="12"></line>
-                        </svg>
-                        Login
-                    </span>
-                    <span ng-if="IsLoading" style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fa fa-spinner fa-spin"></i> Authenticating...
-                    </span>
-                </button>
-
-                <!-- Footer Note with Clean Shield SVG and Proper Bullet -->
-                <div class="adpl-form-footer">
-                    <svg class="shield-svg-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                    <span>Protected by ADPL Security &bull; All Rights Reserved</span>
-                </div>
-            </form>
+            </div>
         </div>
+
+        <footer class="ho-bottom">
+            <span>&copy; <span id="hoYr"></span> Anjali Labtech Limited. All rights reserved.</span>
+            <span><a href="#">Privacy</a><a href="#">Terms</a><a href="#">IT Support</a></span>
+        </footer>
     </div>
 </div>
 
 <script>
-    /* ==========================================================================
-       Fullscreen Floating Transparent Diamonds Background Simulation
-       - Higher particle density & crisp visibility
-       - 2D Elastic collisions: diamonds bounce away from each other on impact
-       - Viewport boundary bounce: diamonds continuously stay on screen
-       ========================================================================== */
+    /* ---------- Small UI bits ---------- */
+    document.getElementById('hoYr').textContent = new Date().getFullYear();
     (function () {
-        var canvas = document.getElementById('diamondCanvas');
-        if (!canvas) return;
-        var ctx = canvas.getContext('2d');
-        var particles = [];
-        var particleCount = window.innerWidth < 768 ? 26 : 48;
-
-        function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        function createParticle(initial) {
-            var size = Math.random() * 26 + 18; // 18px to 44px
-            var speed = Math.random() * 0.75 + 0.35; // smooth gentle floating speed
-            var angle = Math.random() * Math.PI * 2;
-            return {
-                x: Math.random() * (canvas.width - 80) + 40,
-                y: Math.random() * (canvas.height - 80) + 40,
-                vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                size: size,
-                radius: size * 0.62, // circular collision boundary radius
-                mass: size,
-                rotation: Math.random() * Math.PI * 2,
-                vRot: (Math.random() - 0.5) * 0.015,
-                opacity: Math.random() * 0.28 + 0.24, // High-clarity luxury translucency
-                pulse: Math.random() * Math.PI * 2,
-                pulseSpeed: Math.random() * 0.025 + 0.012,
-                colorHue: Math.random() > 0.4 ? '56, 189, 248' : '125, 211, 252' // Ice Cyan & Sky Blue
-            };
-        }
-
-        for (var i = 0; i < particleCount; i++) {
-            particles.push(createParticle(true));
-        }
-
-        function handleCollisions() {
-            for (var i = 0; i < particles.length; i++) {
-                var p1 = particles[i];
-
-                // 1. Boundary bounce against screen edges (diamonds always remain in screen)
-                var pad = p1.radius;
-                if (p1.x - pad < 0) {
-                    p1.x = pad;
-                    p1.vx = Math.abs(p1.vx);
-                } else if (p1.x + pad > canvas.width) {
-                    p1.x = canvas.width - pad;
-                    p1.vx = -Math.abs(p1.vx);
-                }
-
-                if (p1.y - pad < 0) {
-                    p1.y = pad;
-                    p1.vy = Math.abs(p1.vy);
-                } else if (p1.y + pad > canvas.height) {
-                    p1.y = canvas.height - pad;
-                    p1.vy = -Math.abs(p1.vy);
-                }
-
-                // 2. Diamond-to-Diamond Elastic Collisions (Bounce away on hit)
-                for (var j = i + 1; j < particles.length; j++) {
-                    var p2 = particles[j];
-                    var dx = p2.x - p1.x;
-                    var dy = p2.y - p1.y;
-                    var distSq = dx * dx + dy * dy;
-                    var minDist = p1.radius + p2.radius;
-
-                    if (distSq < minDist * minDist && distSq > 0) {
-                        var dist = Math.sqrt(distSq);
-                        var nx = dx / dist;
-                        var ny = dy / dist;
-
-                        // Positional separation to prevent overlapping/clumping
-                        var overlap = 0.5 * (minDist - dist);
-                        p1.x -= nx * overlap;
-                        p1.y -= ny * overlap;
-                        p2.x += nx * overlap;
-                        p2.y += ny * overlap;
-
-                        // Relative velocity along collision normal
-                        var kx = p1.vx - p2.vx;
-                        var ky = p1.vy - p2.vy;
-                        var impulse = 2 * (nx * kx + ny * ky) / (p1.mass + p2.mass);
-
-                        // Elastic impulse bounce away from each other
-                        p1.vx -= impulse * p2.mass * nx;
-                        p1.vy -= impulse * p2.mass * ny;
-                        p2.vx += impulse * p1.mass * nx;
-                        p2.vy += impulse * p1.mass * ny;
-
-                        // Sparkle flash flare on impact
-                        p1.pulse += 1.2;
-                        p2.pulse += 1.2;
-                        p1.vRot = (Math.random() - 0.5) * 0.035;
-                        p2.vRot = (Math.random() - 0.5) * 0.035;
-                    }
-                }
-            }
-        }
-
-        function drawFacetedDiamond(ctx, p) {
-            ctx.save();
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotation);
-
-            var currentOpacity = p.opacity + Math.sin(p.pulse) * 0.10;
-            if (currentOpacity < 0.14) currentOpacity = 0.14;
-            if (currentOpacity > 0.65) currentOpacity = 0.65;
-            ctx.globalAlpha = currentOpacity;
-
-            var w = p.size;
-            var h = p.size * 0.88;
-            var topH = h * 0.34;
-            var tableW = w * 0.52;
-
-            // Diamond Vertices
-            var topL = { x: -tableW / 2, y: -h / 2 };
-            var topR = { x: tableW / 2, y: -h / 2 };
-            var midL = { x: -w / 2, y: -h / 2 + topH };
-            var midR = { x: w / 2, y: -h / 2 + topH };
-            var bot  = { x: 0, y: h / 2 };
-            var midML = { x: -w * 0.22, y: -h / 2 + topH };
-            var midMR = { x: w * 0.22, y: -h / 2 + topH };
-
-            // Translucent Prismatic Glow
-            ctx.fillStyle = 'rgba(' + p.colorHue + ', 0.09)';
-            ctx.strokeStyle = 'rgba(' + p.colorHue + ', 0.82)';
-            ctx.lineWidth = 1.4;
-            ctx.lineJoin = 'round';
-
-            // Outer contour
-            ctx.beginPath();
-            ctx.moveTo(topL.x, topL.y);
-            ctx.lineTo(topR.x, topR.y);
-            ctx.lineTo(midR.x, midR.y);
-            ctx.lineTo(bot.x, bot.y);
-            ctx.lineTo(midL.x, midL.y);
-            ctx.closePath();
-            ctx.fill();
-            ctx.stroke();
-
-            // Internal Facet Lines (Crown & Pavilion)
-            ctx.beginPath();
-            ctx.moveTo(topL.x, topL.y); ctx.lineTo(midML.x, midML.y);
-            ctx.moveTo(topR.x, topR.y); ctx.lineTo(midMR.x, midMR.y);
-            ctx.moveTo(topL.x, topL.y); ctx.lineTo(midMR.x, midMR.y);
-            ctx.moveTo(topR.x, topR.y); ctx.lineTo(midML.x, midML.y);
-            ctx.moveTo(midL.x, midL.y); ctx.lineTo(midR.x, midR.y);
-            ctx.moveTo(midML.x, midML.y); ctx.lineTo(bot.x, bot.y);
-            ctx.moveTo(midMR.x, midMR.y); ctx.lineTo(bot.x, bot.y);
-            ctx.stroke();
-
-            // Twinkling Glint on Vertex
-            var sparkleVal = Math.sin(p.pulse * 1.6);
-            if (sparkleVal > 0.50) {
-                var spLen = (sparkleVal - 0.50) * 14;
-                ctx.strokeStyle = 'rgba(255, 255, 255, ' + (sparkleVal * 0.95) + ')';
-                ctx.lineWidth = 1.3;
-                ctx.beginPath();
-                ctx.moveTo(topR.x - spLen, topR.y); ctx.lineTo(topR.x + spLen, topR.y);
-                ctx.moveTo(topR.x, topR.y - spLen); ctx.lineTo(topR.x, topR.y + spLen);
-                ctx.stroke();
-            }
-
-            ctx.restore();
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            handleCollisions();
-
-            for (var i = 0; i < particles.length; i++) {
-                var p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.rotation += p.vRot;
-                p.pulse += p.pulseSpeed;
-
-                drawFacetedDiamond(ctx, p);
-            }
-
-            requestAnimationFrame(animate);
-        }
-
-        animate();
+        var h = new Date().getHours();
+        document.getElementById('hoGreet').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
     })();
 
-    /* ==========================================================================
-       AngularJS Login Controller & Directives
-       ========================================================================== */
+    (function () {
+        var EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+        var EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 19c-6.5 0-10-7-10-7a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c6.5 0 10 7 10 7a18.5 18.5 0 0 1-2.16 3.19M1 1l22 22"/></svg>';
+        var pw = document.getElementById('password'), eye = document.getElementById('hoEye');
+        eye.innerHTML = EYE;
+        eye.onclick = function () {
+            var show = pw.type === 'password';
+            pw.type = show ? 'text' : 'password';
+            eye.innerHTML = show ? EYE_OFF : EYE;
+            eye.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        };
+        pw.addEventListener('keyup', function (e) {
+            document.getElementById('hoCaps').style.display = e.getModifierState && e.getModifierState('CapsLock') ? 'block' : 'none';
+        });
+    })();
+
+    /* ---------- 3D rotating diamond + sparkles ---------- */
+    (function () {
+        var cv = document.getElementById('hoStage'), ctx = cv.getContext('2d');
+        var W, H, DPR;
+        function resize() {
+            DPR = Math.min(window.devicePixelRatio || 1, 2);
+            W = cv.width = innerWidth * DPR; H = cv.height = innerHeight * DPR;
+            cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+        }
+        addEventListener('resize', resize); resize();
+
+        var N = 8, V = [], E = [];
+        var ring = function (r, y, off) { var s = V.length; for (var i = 0; i < N; i++) { var a = (i + off) / N * Math.PI * 2; V.push([Math.cos(a) * r, y, Math.sin(a) * r]); } return s; };
+        var T = ring(.52, -.62, 0), C = ring(.82, -.42, .5), G = ring(1, -.22, 0);
+        var CU = V.push([0, 1.15, 0]) - 1;
+        for (var i = 0; i < N; i++) {
+            var n = (i + 1) % N;
+            E.push([T + i, T + n], [T + i, C + i], [T + n, C + i], [C + i, G + i], [C + i, G + n], [G + i, G + n], [G + i, CU]);
+        }
+
+        var sparks = [];
+        for (var k = 0; k < 70; k++) {
+            sparks.push({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + .3, p: Math.random() * 6.28, s: Math.random() * .015 + .004 });
+        }
+
+        var t = 0, mx = 0, my = 0;
+        addEventListener('pointermove', function (e) { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; });
+        var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        function frame() {
+            t += reduce ? 0 : .006;
+            ctx.clearRect(0, 0, W, H);
+
+            for (var si = 0; si < sparks.length; si++) {
+                var s = sparks[si];
+                s.p += s.s;
+                var a = (Math.sin(s.p) + 1) / 2;
+                ctx.fillStyle = 'rgba(186,230,253,' + (a * .7) + ')';
+                ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r * DPR, 0, 7); ctx.fill();
+            }
+
+            var mobile = innerWidth < 960;
+            var cx = (mobile ? .5 : .62) * W, cy = (mobile ? .2 : .5) * H;
+            var S = Math.min(W, H) * (mobile ? .16 : .3);
+            var ry = t + mx * .6, rx = -.38 + my * .3;
+            var cyR = Math.cos(ry), syR = Math.sin(ry), cxR = Math.cos(rx), sxR = Math.sin(rx);
+            var P = V.map(function (v) {
+                var x = v[0], y = v[1], z = v[2];
+                var X = x * cyR - z * syR, Z = x * syR + z * cyR;
+                var Y = y * cxR - Z * sxR; Z = y * sxR + Z * cxR;
+                var f = 3.2 / (3.2 + Z);
+                return [cx + X * S * f, cy + (Y + .1) * S * f, Z];
+            });
+
+            var gl = ctx.createRadialGradient(cx, cy, 0, cx, cy, S * 1.6);
+            gl.addColorStop(0, 'rgba(56,189,248,.16)'); gl.addColorStop(1, 'rgba(56,189,248,0)');
+            ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(cx, cy, S * 1.6, 0, 7); ctx.fill();
+
+            ctx.lineCap = 'round';
+            for (var ei = 0; ei < E.length; ei++) {
+                var a1 = E[ei][0], b1 = E[ei][1];
+                var pa = P[a1], pb = P[b1], depth = (pa[2] + pb[2]) / 2;
+                var alpha = .18 + (1 - (depth + 1) / 2) * .55;
+                var g = ctx.createLinearGradient(pa[0], pa[1], pb[0], pb[1]);
+                g.addColorStop(0, 'rgba(125,211,252,' + alpha + ')');
+                g.addColorStop(1, 'rgba(167,139,250,' + (alpha * .8) + ')');
+                ctx.strokeStyle = g; ctx.lineWidth = 1.3 * DPR;
+                ctx.beginPath(); ctx.moveTo(pa[0], pa[1]); ctx.lineTo(pb[0], pb[1]); ctx.stroke();
+            }
+            P.forEach(function (pt, i) {
+                var tw = (Math.sin(t * 4 + i * 1.7) + 1) / 2;
+                if (pt[2] < 0 && tw > .85) {
+                    ctx.fillStyle = 'rgba(255,255,255,' + ((tw - .85) * 6) + ')';
+                    ctx.beginPath(); ctx.arc(pt[0], pt[1], 2.2 * DPR, 0, 7); ctx.fill();
+                }
+            });
+            requestAnimationFrame(frame);
+        }
+        frame();
+    })();
+
+    /* ---------- AngularJS Login Controller ---------- */
     var app;
     try {
         app = angular.module('app');
@@ -878,10 +443,10 @@
         app = angular.module('app', ['ngTouch']);
     }
 
-    app.controller("Login", function ($scope, $http, $q, $interval) {
-        $scope.Login = {};
-        $scope.username = "";
-        $scope.password = "";
+    app.controller("Login", function ($scope, $http) {
+        $scope.username = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(rememberedUsername));
+        $scope.password = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(rememberedPassword));
+        $scope.rememberMe = @(rememberMeChecked ? "true" : "false");
         $scope.Invalid = false;
         $scope.IsLoading = false;
         $scope.showPassword = false;
@@ -892,8 +457,6 @@
                 $scope.Invalid = true;
                 $scope.msg = "";
             } else {
-                $scope.username = "";
-                $scope.password = "";
                 $scope.Invalid = false;
                 $scope.msg = "Please enter both Username and Password.";
                 return;
@@ -903,20 +466,21 @@
                 $scope.IsLoading = true;
                 var User = {
                     username: $scope.username.trim(),
-                    password: $scope.password.trim()
+                    password: $scope.password.trim(),
+                    rememberMe: !!$scope.rememberMe
                 };
 
                 $http({
-                    url: '@Url.Action("LoginUser","Login")',
+                    url: '@Url.Action("LoginUser", "Login")',
                     method: "GET",
                     params: User
                 }).then(function (response) {
                     $scope.IsLoading = false;
                     if (response.data.Status == 1) {
                         if (response.data.UserID == 12) {
-                            window.location.href = "@Url.Action("ApprovePricing","Pricing")";
+                            window.location.href = "@Url.Action("ApprovePricing", "Pricing")";
                         } else {
-                            window.location.href = "@Url.Action("Index","Home")";
+                            window.location.href = "@Url.Action("Index", "Home")";
                         }
                     } else {
                         $scope.msg = "UserName Or Password Incorrect.!!!";
@@ -926,19 +490,6 @@
                     $scope.msg = "Server communication error. Please try again.";
                 });
             }
-        };
-    });
-
-    app.directive('ngEnter', function () {
-        return function (scope, element, attrs) {
-            element.bind("keydown keypress", function (event) {
-                if (event.which === 13) {
-                    scope.$apply(function () {
-                        scope.$eval(attrs.ngEnter);
-                    });
-                    event.preventDefault();
-                }
-            });
         };
     });
 </script>

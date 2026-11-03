@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Script.Serialization;
 using System.Xml;
 
 namespace Slip.Controllers
@@ -15,6 +16,8 @@ namespace Slip.Controllers
     public class LoginController : Controller
     {
         string conn = ConfigurationManager.ConnectionStrings["StockDetailConnectionString"].ConnectionString;
+        private const string RememberMeCookieName = "ADPL_RememberMe";
+
         // GET: Login
         public ActionResult Index()
         {
@@ -22,9 +25,27 @@ namespace Slip.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+
+            HttpCookie rememberCookie = Request.Cookies[RememberMeCookieName];
+            if (rememberCookie != null && !string.IsNullOrWhiteSpace(rememberCookie.Value))
+            {
+                try
+                {
+                    string decrypted = CommonMethods.Decrypt(rememberCookie.Value, true);
+                    Dictionary<string, string> data = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(decrypted);
+                    ViewBag.RememberMe = true;
+                    ViewBag.RememberedUsername = data.ContainsKey("U") ? data["U"] : "";
+                    ViewBag.RememberedPassword = data.ContainsKey("P") ? data["P"] : "";
+                }
+                catch
+                {
+                    ClearRememberMeCookie();
+                }
+            }
+
             return View();
         }
-        public JsonResult LoginUser(string username, string password)
+        public JsonResult LoginUser(string username, string password, bool rememberMe = false)
         {
             string Message = "";
             try
@@ -107,6 +128,15 @@ namespace Slip.Controllers
                         }).ToList();
 
                         SessionFacade.FormPermissionsGroup = _CheckPermission_UserListGroup;
+
+                        if (rememberMe)
+                        {
+                            SetRememberMeCookie(username, password);
+                        }
+                        else
+                        {
+                            ClearRememberMeCookie();
+                        }
 
                         int No = 1;
                         int UserID = SessionFacade.UserSession.UserID;
@@ -248,6 +278,36 @@ namespace Slip.Controllers
         {
             Session.Abandon();
             return RedirectToAction("Index", "Login");
+        }
+
+        private void SetRememberMeCookie(string username, string password)
+        {
+            string payload = new JavaScriptSerializer().Serialize(new Dictionary<string, string>
+            {
+                { "U", username },
+                { "P", password }
+            });
+            string encrypted = CommonMethods.Encrypt(payload, true);
+
+            HttpCookie cookie = new HttpCookie(RememberMeCookieName, encrypted)
+            {
+                Expires = DateTime.Now.AddDays(30),
+                HttpOnly = true,
+                Secure = Request.IsSecureConnection
+            };
+            Response.Cookies.Add(cookie);
+        }
+
+        private void ClearRememberMeCookie()
+        {
+            if (Request.Cookies[RememberMeCookieName] != null)
+            {
+                HttpCookie cookie = new HttpCookie(RememberMeCookieName, "")
+                {
+                    Expires = DateTime.Now.AddDays(-1)
+                };
+                Response.Cookies.Add(cookie);
+            }
         }
     }
 }

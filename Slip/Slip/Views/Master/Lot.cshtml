@@ -627,6 +627,15 @@
                     { caption: 'Jangad No', dataField: 'JangadNo', minWidth: 70 },
                     { caption: 'Total Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 85, alignment: 'center' },
                     { caption: 'Total Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center' },
+                    { caption: 'Org Pcs', dataField: 'OrgLot_Pcs', dataType: 'number', minWidth: 80, alignment: 'center' },
+                    { caption: 'Org Carat', dataField: 'OrgLot_Carat', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center' },
+                    {
+                        caption: 'Total Loss', dataField: 'TotalLoss', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var loss = parseFloat(options.data.TotalLoss) || 0;
+                            $("<span>").text(loss.toFixed(3)).css({ "color": loss > 0 ? "#b91c1c" : "#94a3b8", "font-weight": loss > 0 ? 700 : 400 }).appendTo(container);
+                        }
+                    },
                     { caption: 'Inward Grade', dataField: 'InwardGrade', minWidth: 100 },
                     { caption: 'Inward Pcs', dataField: 'InwardPcs', dataType: 'number', minWidth: 90, alignment: 'center' },
                     { caption: 'Inward Carat', dataField: 'InwardCarat', dataType: 'number', format: '#0.000', minWidth: 100, alignment: 'center' },

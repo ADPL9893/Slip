@@ -204,7 +204,6 @@
                     { caption: 'Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 80, alignment: 'right', format: '#,##0', allowEditing: false },
                     { caption: 'Carat', dataField: 'Lot_Carat', dataType: 'number', minWidth: 100, alignment: 'right', format: '#,##0.000', allowEditing: false },
                     { caption: 'Grade', dataField: 'Grade', minWidth: 80, allowEditing: false },
-                    { caption: 'Lot Type', dataField: 'LotType', minWidth: 100, allowEditing: false },
                     { caption: 'Priority', dataField: 'LotPriority', minWidth: 100, allowEditing: false }
                 ]
             });
@@ -229,6 +228,12 @@
                     grid.cellValue(rowIndex, 'BranchID', branchId);
                 }
             });
+            // cellValue() only stages the edit in DevExtreme's pending-edit
+            // buffer (that's the highlighted "unsaved" cell border) - it
+            // doesn't touch $scope.SplitLots itself until this is called, so
+            // without it TransferSelected's getSelectedRowsData() still
+            // reads the OLD BranchID straight off the untouched array.
+            grid.saveEditData();
         };
 
         $scope.TransferSelected = function () {

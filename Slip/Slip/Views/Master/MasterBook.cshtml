@@ -21,25 +21,261 @@
         background-color: #ffffff !important;
     }
 
+    /* common.css paints the alternating-row tint directly on the <td>
+       children (.dx-row-alt > td / .dx-data-row:nth-child(even)), which
+       sits visually above the <tr> background set to white above - so
+       the td-level background needs its own override here too. */
+    #masterBookGridContainer .dx-datagrid-rowsview .dx-row > td,
+    #masterBookGridContainer .dx-datagrid-rowsview .dx-row-alt > td,
+    #masterBookGridContainer .dx-datagrid-rowsview .dx-data-row:nth-child(even) > td {
+        background-color: #ffffff !important;
+    }
+
     /* Compact grid: short row height, tight cell padding/font so the extra
        Date/Label/Days columns fit without the grid feeling cramped. */
     #masterBookGridContainer .dx-datagrid-headers .dx-row > td,
     #masterBookGridContainer .dx-datagrid-rowsview .dx-row > td {
-        padding: 2px 6px !important;
+        padding: 0px 6px !important;
         font-size: 10.5px !important;
-        line-height: 16px !important;
+        line-height: 10px !important;
+    }
+
+    /* Darker, unconditional grid lines - applied per-cell via CSS (not the
+       onRowPrepared JS, which only fires on initial row render and can miss
+       rows that virtual scrolling recycles later, leaving them without a
+       bottom border) so every row/column line is guaranteed to show.
+       Selectors include the .rdl-grid-card ancestor class to out-specify
+       common.css's own "#masterBookGridContainer ... > td { border-bottom:
+       1px solid #e2e8f0 }" rule (same !important, but that rule carries an
+       extra .rdl-grid-card class so it otherwise wins specificity and was
+       silently overriding just the horizontal line, leaving it faint while
+       the uncontested border-right stayed dark). */
+    #masterBookGridContainer .dx-datagrid-headers .dx-row > td,
+    #masterBookGridContainer .dx-datagrid-rowsview .dx-row > td,
+    .rdl-grid-card #masterBookGridContainer .dx-datagrid-headers .dx-row > td,
+    .rdl-grid-card #masterBookGridContainer .dx-datagrid-rowsview .dx-row > td,
+    .rdl-grid-card #masterBookGridContainer .dx-datagrid-rowsview .dx-row:not(.dx-freespace-row) > td {
+        border-bottom: 1px solid #94a3b8 !important;
+        border-right: 1px solid #94a3b8 !important;
     }
 
     #masterBookGridContainer .dx-datagrid-headers .dx-row > td {
+        font-weight: 500 !important;
+        font-size: 9.5px !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+        white-space: normal !important;
+    }
+
+    /* Header theme CSS truncates with an ellipsis by default (nowrap +
+       overflow hidden on the inner text span) - allow it to wrap onto a
+       second line instead of cutting off long column names. word-break:
+       normal (not break-word) so it only wraps BETWEEN words ("Growth" /
+       "Rate") - break-word was splitting short single-word captions like
+       "Days" one letter per line in narrow columns. */
+    #masterBookGridContainer .dx-datagrid-headers .dx-datagrid-text-content {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        word-break: normal !important;
+        line-height: 12px !important;
+    }
+
+    /* Sort arrow - was rendered at the theme's default ~11px, oversized next
+       to our 9.5px header text and, combined with word-wrap, pushed narrow
+       captions like "Days" down enough to wrap letter-by-letter. */
+    #masterBookGridContainer .dx-datagrid-headers .dx-sort {
+        font-size: 8px !important;
+    }
+
+    /* Multi-column sort order number badge - sorting.mode is "single" so it
+       should never render, but force it hidden regardless since it was
+       still showing (reading as a second arrow next to the direction one). */
+    #masterBookGridContainer .dx-datagrid-headers .dx-sort-index-icon {
+        display: none !important;
+    }
+
+    /* Header filter funnel icon - kept out of sight (not display:none, so
+       it keeps a real position/size for dxclick + popup anchoring) and
+       opened only via double-click on the header, see onCellDblClick. */
+    #masterBookGridContainer .dx-datagrid-headers .dx-header-filter {
+        opacity: 0 !important;
+        width: 0 !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
+    }
+
+    /* Column indicator slot collapses to nothing when it has no visible
+       sort/filter icon to show, instead of reserving blank space. */
+    #masterBookGridContainer .dx-column-indicators.dx-visibility-hidden {
+        display: none;
+    }
+
+    /* All header captions left-aligned, regardless of the column's own
+       data alignment (center/right for numeric columns etc). */
+    #masterBookGridContainer .dx-datagrid-headers .dx-row > td {
+        text-align: left !important;
+    }
+
+    #masterBookGridContainer .dx-datagrid-headers .dx-datagrid-text-content {
+        text-align: left !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Table No / L Code / W(Ct) data values called out in bold - header
+       weight is intentionally left at its reduced 500 (not re-bolded). */
+    #masterBookGridContainer .dx-datagrid-rowsview .mb-col-bold {
         font-weight: 700 !important;
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
     }
 
     #masterBookGridContainer .badge-status-pill {
-        padding: 1px 6px !important;
-        font-size: 10px !important;
+        padding: 0px 6px !important;
+        font-size: 9.5px !important;
+        line-height: 9px !important;
     }
+
+    /* Stage filter buttons - color-coded instead of icon-shape-coded
+       (common.css's gradients replaced with flat colors here so this page
+       always loads the current version instead of common.css's own
+       cache/bundle). */
+    .btn-onhand {
+        background: #a16207 !important;
+    }
+
+    .btn-clv-running,
+    .btn-clv-complete {
+        background: #15803d !important;
+    }
+
+    .btn-distribution {
+        background: #0369a1 !important;
+    }
+
+    .btn-mfg-running,
+    .btn-mfg-complete {
+        background: #4a0404 !important;
+    }
+
+    .btn-transfer {
+        background: #475569 !important;
+    }
+
+    /* Per-row stage indicator (L Code's neighboring column) - reuses the
+       same btn-onhand/btn-clv-running/etc. background colors as the filter
+       buttons above, just sized down to fit the grid's compact row height
+       instead of the buttons' fixed 28x28. */
+    #masterBookGridContainer .mb-row-stage-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 21px;
+        height: 21px;
+        border-radius: 4px;
+        color: #ffffff;
+    }
+
+    #masterBookGridContainer .mb-row-stage-btn i {
+        font-size: 8px;
+    }
+
+    /* Action button popover - stage-dated rows (ClvPlan/ClvCom/MFGComplete/
+       Mumbai Issue) shown above the Reports & Charts list, each with a
+       small dot in that stage's own color (reusing the same green/maroon/
+       gray used by the filter buttons). Only rendered when the row
+       actually has that date. */
+    .mb-popover-dates {
+        padding: 6px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .mb-popover-dates .mb-date-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 11.5px;
+    }
+
+    .mb-popover-dates .mb-date-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .mb-popover-dates .mb-dot-green {
+        background: #15803d;
+    }
+
+    .mb-popover-dates .mb-dot-maroon {
+        background: #4a0404;
+    }
+
+    .mb-popover-dates .mb-dot-gray {
+        background: #475569;
+    }
+
+    .mb-popover-dates .mb-date-text {
+        font-weight: 600;
+        color: #334155;
+    }
+
+    /* "All" button - concentric rings mixing every stage's color into one
+       bullseye icon instead of a generic list glyph, innermost-to-outermost
+       matching the stage order: Onhand(yellow) -> Cleaving(green) ->
+       Distribution(blue) -> Mfg(maroon) -> Transfer(gray). Each ring is a
+       same-centered circle fully covering the one behind it except for its
+       own outer rim, so only each ring's edge color shows through. */
+    .mb-all-rings {
+        position: relative;
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+    }
+
+    .mb-all-rings .mb-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        border-radius: 50%;
+    }
+
+        .mb-all-rings .mb-ring-gray {
+            width: 28px;
+            height: 28px;
+            background: #94a3b8;
+        }
+
+    .mb-all-rings .mb-ring-maroon {
+        width: 24px;
+        height: 24px;
+        background: #800000;
+    }
+
+        .mb-all-rings .mb-ring-blue {
+            width: 16px;
+            height: 16px;
+            background: #164789;
+        }
+
+        .mb-all-rings .mb-ring-green {
+            width: 11px;
+            height: 11px;
+            background: #3c8f1d;
+        }
+
+        .mb-all-rings .mb-ring-yellow {
+            width: 7px;
+            height: 7px;
+            background: #eab308;
+        }
 
     /* LotCode/RoughWeight/KapanNo cells: value left, search icon pinned to
        the cell's right edge regardless of text length. */
@@ -58,7 +294,7 @@
     }
 
     #masterBookGridContainer .mb-cell-search-icon {
-        color: #94a3b8;
+        color: #2c62ad;
         cursor: pointer;
         flex-shrink: 0;
     }
@@ -336,28 +572,35 @@
                 <!-- 8 Stage Filter Buttons - icon-only, tooltip carries the label -->
                 <div class="mb-btn-group-row">
                     <button type="button" class="mb-stage-square-btn btn-all-data" ng-class="{'active': ActiveFilter === 'All'}" ng-click="SelectFilter('All')" title="All Lots">
-                        <i class="fa fa-th-list"></i>
+                        <span class="mb-all-rings">
+                            <span class="mb-ring mb-ring-gray"></span>
+                            <span class="mb-ring mb-ring-maroon"></span>
+                            <span class="mb-ring mb-ring-blue"></span>
+                            <span class="mb-ring mb-ring-green"></span>
+                            <span class="mb-ring mb-ring-yellow"></span>
+                        </span>
                     </button>
                     <button type="button" class="mb-stage-square-btn btn-onhand" ng-class="{'active': ActiveFilter === 'Onhand'}" ng-click="SelectFilter('Onhand')" title="Onhand (Not yet given to a Branch)">
-                        <i class="fa fa-archive"></i>
+                        <i class="fa fa-pause"></i>
                     </button>
                     <button type="button" class="mb-stage-square-btn btn-clv-running" ng-class="{'active': ActiveFilter === 'Cleaving Running'}" ng-click="SelectFilter('Cleaving Running')" title="Cleaving Running">
-                        <i class="fa fa-cogs"></i>
+                        <i class="fa fa-play"></i>
                     </button>
                     <button type="button" class="mb-stage-square-btn btn-clv-complete" ng-class="{'active': ActiveFilter === 'Cleaving Completed'}" ng-click="SelectFilter('Cleaving Completed')" title="Cleaving Completed">
-                        <i class="fa fa-check-square"></i>
+                        <i class="fa fa-stop"></i>
                     </button>
-                    <button type="button" class="mb-stage-square-btn btn-distribution" ng-class="{'active': ActiveFilter === 'Distribution'}" ng-click="SelectFilter('Distribution')" title="Distribution">
-                        <i class="fa fa-code-fork"></i>
+                    <!-- Hidden for now (same condition as Cleaving Completed) - markup/logic
+                         left in place so it's a one-line revert to bring back. -->
+                    <button type="button" class="mb-stage-square-btn btn-distribution" ng-class="{'active': ActiveFilter === 'Distribution'}" ng-click="SelectFilter('Distribution')" title="Distribution (CLV Complete, MFG not yet running)" ng-show="false">
+                        <i class="fa fa-stop"></i>
                     </button>
                     <button type="button" class="mb-stage-square-btn btn-mfg-running" ng-class="{'active': ActiveFilter === 'Mfg Running'}" ng-click="SelectFilter('Mfg Running')" title="Mfg Running">
-                        <i class="fa fa-wrench"></i>
+                        <i class="fa fa-play"></i>
                     </button>
                     <button type="button" class="mb-stage-square-btn btn-mfg-complete" ng-class="{'active': ActiveFilter === 'Mfg Complete'}" ng-click="SelectFilter('Mfg Complete')" title="Mfg Complete">
-                        <i class="fa fa-flag-checkered"></i>
+                        <i class="fa fa-stop"></i>
                     </button>
                     <button type="button" class="mb-stage-square-btn btn-transfer" ng-class="{'active': ActiveFilter === 'Transfer'}" ng-click="SelectFilter('Transfer')" title="Transfer (Mumbai Submitted)">
-                        <i class="fa fa-send"></i>
                     </button>
                 </div>
 
@@ -381,18 +624,36 @@
             <span>Reports &amp; Charts</span>
             <button type="button" class="popover-close" ng-click="CloseReportMenu()">&times;</button>
         </div>
-        <ul class="mb-popover-list">
+        @*<div class="mb-popover-dates" >
+           
+            
+           
+          
+        </div>*@
+        <ul class="mb-popover-list" ng-if="SelectedRowItem">
             <li ng-click="OpenReport('Pre Rough')">
-                <i class="fa fa-diamond text-purple"></i> Pre Rough
+                <div class="mb-date-row" ng-if="SelectedRowItem.CLVRunningDate">
+                    <span class="mb-date-dot mb-dot-green"></span>
+                    <span class="mb-date-text">ClvPlan-{{fmtPopupDate(SelectedRowItem.CLVRunningDate)}}</span>
+                </div>
             </li>
             <li ng-click="OpenReport('CLV Chart')">
-                <i class="fa fa-cogs text-teal"></i> CLV Chart
+                <div class="mb-date-row" ng-if="SelectedRowItem.CLVCompleteDate">
+                    <span class="mb-date-dot mb-dot-green"></span>
+                    <span class="mb-date-text">ClvCom-{{fmtPopupDate(SelectedRowItem.CLVCompleteDate)}}</span>
+                </div>
             </li>
             <li ng-click="OpenReport('MFG Chart')">
-                <i class="fa fa-wrench text-rose"></i> MFG Chart
+                <div class="mb-date-row" ng-if="SelectedRowItem.MFGCompleteDate">
+                    <span class="mb-date-dot mb-dot-maroon"></span>
+                    <span class="mb-date-text">MFGCom-{{fmtPopupDate(SelectedRowItem.MFGCompleteDate)}}</span>
+                </div> 
             </li>
             <li ng-click="OpenReport('IGI complet')">
-                <i class="fa fa-certificate text-amber"></i> IGI complet
+                <div class="mb-date-row" ng-if="SelectedRowItem.MumbaiSubmitDate">
+                    <span class="mb-date-dot mb-dot-gray"></span>
+                    <span class="mb-date-text">Mumbai-{{fmtPopupDate(SelectedRowItem.MumbaiSubmitDate)}} </span>
+                </div>
             </li>
         </ul>
     </div>
@@ -822,11 +1083,17 @@
             // column's filter-row value to this cell's raw value, so the
             // grid narrows to every row sharing it (column-wise filter,
             // not the main search box).
-            function withSearchIcon(dataField) {
+            // Generic version: renderValue(container, $wrap, options) is
+            // responsible for appending whatever the cell normally shows
+            // (plain text, a badge, colored text, etc.) into $wrap - the
+            // search icon is then appended after it, pinned to the right
+            // edge. Lets any existing custom cellTemplate gain the shared
+            // "click to filter by this value" icon without duplicating the
+            // icon-wiring logic.
+            function withCustomSearchIcon(dataField, renderValue) {
                 return function (container, options) {
-                    var displayVal = (options.text !== undefined && options.text !== null && options.text !== '') ? options.text : '-';
                     var $wrap = $("<div>").addClass("mb-cell-search-wrap");
-                    $("<span>").addClass("mb-cell-search-text").text(displayVal).appendTo($wrap);
+                    renderValue($wrap, options);
                     $("<i>").addClass("fa fa-search mb-cell-search-icon")
                         .attr("title", "Filter grid by this value")
                         .on("click", function (e) {
@@ -837,6 +1104,34 @@
                         .appendTo($wrap);
                     $wrap.appendTo(container);
                 };
+            }
+
+            function withSearchIcon(dataField) {
+                return withCustomSearchIcon(dataField, function ($wrap, options) {
+                    var displayVal = (options.text !== undefined && options.text !== null && options.text !== '') ? options.text : '-';
+                    $("<span>").addClass("mb-cell-search-text").text(displayVal).appendTo($wrap);
+                });
+            }
+
+            // Same color/icon mapping as the stage filter buttons above the
+            // grid (btn-onhand/btn-clv-running/etc.) - keyed off StageStatus,
+            // which holds the exact same stage strings used by SelectFilter.
+            function stageButtonInfo(stage) {
+                switch ((stage || '').trim()) {
+                    case 'Onhand': return { cls: 'btn-onhand', icon: 'fa-pause' };
+                    // Synthetic rows for a Kapan balance not yet split into
+                    // any Lot (pending assign/pending Lot creation) - not a
+                    // real Lot stage, but visually it's still "not yet
+                    // actioned" like Onhand, so it gets the same icon/color.
+                    case 'Pending Split': return { cls: 'btn-onhand', icon: 'fa-pause' };
+                    case 'Cleaving Running': return { cls: 'btn-clv-running', icon: 'fa-play' };
+                    case 'Cleaving Completed': return { cls: 'btn-clv-complete', icon: 'fa-stop' };
+                    case 'Distribution': return { cls: 'btn-distribution', icon: 'fa-stop' };
+                    case 'Mfg Running': return { cls: 'btn-mfg-running', icon: 'fa-play' };
+                    case 'Mfg Complete': return { cls: 'btn-mfg-complete', icon: 'fa-stop' };
+                    case 'Transfer': return { cls: 'btn-transfer', icon: null };
+                    default: return { cls: 'btn-transfer', icon: null };
+                }
             }
 
             // Add index column (#)
@@ -876,15 +1171,15 @@
                     // compact default since values are long composite codes
                     // (e.g. "D-S514-TRIAL03-2309-MIX-2809"). Plain text (no
                     // badge) with the shared search icon.
-                    c.width = 230;
+                    c.width = 200;
                     c.alignment = 'left';
                     c.cellTemplate = withSearchIcon('KapanNo');
                 } else if (dfLower === 'lotcode') {
-                    c.width = 110;
+                    c.width = 80;
                     c.alignment = 'left';
-                    c.cellTemplate = withSearchIcon('LotCode');
+                    c.cssClass = 'mb-col-bold';
                 } else if (dfLower === 'mainlotcarat' || dfLower === 'roughcarat') {
-                    c.width = 110;
+                    c.width = 85;
                     c.alignment = 'left';
                     c.cellTemplate = withSearchIcon(col.dataField);
                 } else if (dfLower === 'isactive') {
@@ -913,7 +1208,7 @@
                         $("<span>").addClass("badge-status-pill " + pillClass).text(stage).appendTo(container);
                     };
                 } else if (dfLower === 'label') {
-                    c.width = 100;
+                    c.width = 80;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var label = options.data.Label || '';
@@ -928,8 +1223,9 @@
                         $("<span>").addClass("badge-status-pill " + pillClass).text(label).appendTo(container);
                     };
                 } else if (dfLower === 'days') {
-                    c.width = 90;
+                    c.width = 60;
                     c.alignment = 'center';
+                    c.cssClass = 'mb-col-bold';
                     c.cellTemplate = function (container, options) {
                         var days = options.data.Days;
                         var color = options.data.DaysColor;
@@ -948,7 +1244,7 @@
                         $wrap.appendTo(container);
                     };
                 } else if (dfLower === 'priority') {
-                    c.width = 80;
+                    c.width = 90;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var priority = (options.data[col.dataField] || options.data.Priority || options.data.priority || 'REGULAR').toUpperCase().trim();
@@ -969,7 +1265,7 @@
                 } else if (dfLower === 'rcode' || dfLower === 'r_code' || dfLower === 'r.code') {
                     c.width = 85;
                     c.alignment = 'center';
-                    c.cellTemplate = function (container, options) {
+                    c.cellTemplate = withCustomSearchIcon(col.dataField, function ($wrap, options) {
                         var val = options.data[col.dataField] || options.data.RCode || options.data.R_Code || '-';
                         var priority = (options.data.Priority || options.data.priority || 'REGULAR').toUpperCase().trim();
                         if (!priority) priority = 'REGULAR';
@@ -984,19 +1280,21 @@
                         $("<span>")
                             .addClass(cls)
                             .text(val)
-                            .appendTo(container);
-                    };
+                            .appendTo($wrap);
+                    });
                 } else if (dfLower === 'jangadno' || dfLower === 'jangad' || dfLower === 'challanno') {
-                    c.width = 80;
+                    // Plain text (no badge-pill "label" look), with the
+                    // shared search icon.
+                    c.width = 90;
                     c.alignment = 'center';
-                    c.cellTemplate = function (container, options) {
+                    c.cellTemplate = withCustomSearchIcon(col.dataField, function ($wrap, options) {
                         var val = options.data[col.dataField] || options.data.ChallanNo || options.data.JangadNo || '-';
-                        $("<span>").addClass("badge-status-pill badge-pill-slate").text(val).appendTo(container);
-                    };
+                        $("<span>").addClass("mb-cell-search-text").text(val).appendTo($wrap);
+                    });
                 } else if (dfLower === 'branchname' || dfLower === 'br' || dfLower === 'branchshortname') {
-                    c.width = 100;
+                    c.width = 65;
                     c.alignment = 'center';
-                    c.cellTemplate = function (container, options) {
+                    c.cellTemplate = withCustomSearchIcon(col.dataField, function ($wrap, options) {
                         var rawVal = options.data.BranchShortName || options.data.ShortName || options.data[col.dataField] || options.data.BranchName || '';
                         var displayVal = rawVal;
 
@@ -1006,13 +1304,13 @@
                         }
 
                         if (displayVal === 'Not Assigned' || !displayVal) {
-                            $("<span>").text(displayVal || '-').css({ "color": "#94a3b8" }).appendTo(container);
+                            $("<span>").text(displayVal || '-').css({ "color": "#94a3b8" }).appendTo($wrap);
                         } else {
-                            $("<strong>").text(displayVal).css({ "color": "#0f172a", "font-weight": "700" }).appendTo(container);
+                            $("<strong>").text(displayVal).css({ "color": "#0f172a", "font-weight": "700" }).appendTo($wrap);
                         }
-                    };
+                    });
                 } else if (dfLower === 'maingrad' || dfLower === 'grade') {
-                    c.width = 70;
+                    c.width = 55;
                     c.alignment = 'center';
                     c.cellTemplate = function (container, options) {
                         var val = options.data[col.dataField];
@@ -1023,24 +1321,104 @@
                             $("<span>").text('-').appendTo(container);
                         }
                     };
-                } else if (dfLower === 'date' || dfLower === 'tableno' || dfLower === 'growthrate') {
-                    c.width = 110;
+                } else if (dfLower === 'date') {
+                    c.width = 95;
+                } else if (dfLower === 'process') {
+                    c.width = 70;
+                } else if (dfLower === 'tableno') {
+                    c.width = 75;
+                    c.alignment = 'center';
+                    c.cellTemplate = withSearchIcon(col.dataField);
+                    c.cssClass = 'mb-col-bold';
+                } else if (dfLower === 'roughweight') {
+                    c.caption = 'L.Carat';
+                    c.width = 85;
+                    c.cssClass = 'mb-col-bold';
+                } else if (dfLower === 'growthrate') {
+                    c.width = 80;
+                } else if (dfLower === 'roughpcs' || dfLower === 'pcs') {
+                    c.width = 50;
+                } else if (dfLower === 'roughsize' || dfLower === 'size') {
+                    c.width = 55;
+                } else if (dfLower === 'factorycode' || dfLower === 'colortype' || dfLower === 'sizecodetype' || dfLower === 'boxno' || dfLower === 'machineno') {
+                    c.width = 55;
+                } else if (dfLower === 'height') {
+                    c.width = 75;
+                } else if (dfLower === 'rate') {
+                    c.width = 75;
                 }
 
                 // Compact default for every column not given a specific
                 // width above (e.g. CLVRunningDate/MFGCompleteDate/Remarks)
                 // so the grid stays narrow instead of auto-sizing to content.
-                if (!c.width && !c.minWidth) {
-                    c.width = 85;
-                }
+                // if (!c.width && !c.minWidth) {
+                //     c.width = 85;
+                // }
 
                 gridCols.push(c);
             });
 
+            // Move L Code (LotCode) to sit right before Table No - the SP's
+            // Table 1 metadata orders it much later (after R. Code), but
+            // the grid should show it earlier in the front columns.
+            var lotCodeIdx = -1, tableNoIdx = -1;
+            for (var gi = 0; gi < gridCols.length; gi++) {
+                if ((gridCols[gi].dataField || '').toLowerCase() === 'lotcode') lotCodeIdx = gi;
+                if ((gridCols[gi].dataField || '').toLowerCase() === 'tableno') tableNoIdx = gi;
+            }
+            if (lotCodeIdx > -1 && tableNoIdx > -1 && lotCodeIdx !== tableNoIdx) {
+                var lotCodeCol = gridCols.splice(lotCodeIdx, 1)[0];
+                if (lotCodeIdx < tableNoIdx) tableNoIdx--;
+                gridCols.splice(tableNoIdx, 0, lotCodeCol);
+            }
+
+            // Move Jangad No (ChallanNo) to be the very first data column,
+            // ahead of Date (it sits right after the fixed "#" index column).
+            var jangadIdx = -1, dateIdx = -1;
+            for (var gj = 0; gj < gridCols.length; gj++) {
+                if ((gridCols[gj].dataField || '').toLowerCase() === 'challanno') jangadIdx = gj;
+                if ((gridCols[gj].dataField || '').toLowerCase() === 'date') dateIdx = gj;
+            }
+            if (jangadIdx > -1 && dateIdx > -1 && jangadIdx !== dateIdx) {
+                var jangadCol = gridCols.splice(jangadIdx, 1)[0];
+                if (jangadIdx < dateIdx) dateIdx--;
+                gridCols.splice(dateIdx, 0, jangadCol);
+            }
+
+            // Stage indicator column - a mini version of the stage filter
+            // buttons above the grid, right after L Code, so each row shows
+            // its own stage at a glance using the same color/icon as the
+            // button you'd click to filter down to that stage.
+            var lCodeIdx = -1;
+            for (var gk = 0; gk < gridCols.length; gk++) {
+                if ((gridCols[gk].dataField || '').toLowerCase() === 'lotcode') lCodeIdx = gk;
+            }
+            if (lCodeIdx > -1) {
+                gridCols.splice(lCodeIdx + 1, 0, {
+                    dataField: 'StageStatus',
+                    name: 'StageIndicator',
+                    caption: 'Stage',
+                    width: 40,
+                    alignment: 'center',
+                    allowSorting: false,
+                    allowFiltering: false,
+                    allowHeaderFiltering: false,
+                    cellTemplate: function (container, options) {
+                        var stage = options.data.StageStatus || '';
+                        var info = stageButtonInfo(stage);
+                        var $btn = $("<span>").addClass("mb-row-stage-btn " + info.cls).attr("title", stage || '-');
+                        if (info.icon) {
+                            $("<i>").addClass("fa " + info.icon).appendTo($btn);
+                        }
+                        $btn.appendTo(container);
+                    }
+                });
+            }
+
             // Add Action Column (Hamburger Menu for Reports & Charts) at the very end
             gridCols.push({
                 caption: 'Action',
-                width: 65,
+                width: 50,
                 alignment: 'center',
                 fixed: true,
                 fixedPosition: 'right',
@@ -1048,11 +1426,9 @@
                 allowReordering: false,
                 allowExporting: false,
                 cellTemplate: function (container, options) {
-                    var $btn = $("<button>")
-                        .addClass("btn-grid-row-menu")
-                        .attr("type", "button")
+                    var $btn = $("<i>")
+                        .addClass("fa fa-bars btn-grid-row-menu")
                         .attr("title", "View Reports")
-                        .html('<i class="fa fa-bars"></i>')
                         .on("click", function (e) {
                             e.preventDefault();
                             e.stopPropagation();
@@ -1085,13 +1461,20 @@
             angular.forEach($scope.DynamicSummary, function (s) {
                 var sumCol = s.column || s.dataField;
                 if (sumCol && sumCol !== countCol) {
-                    summaryItems.push({
+                    var item = {
                         column: sumCol,
                         summaryType: s.summaryType || 'sum',
                         valueFormat: s.valueFormat || '#,##0.000',
                         displayFormat: '{0}',
                         alignByColumn: true
-                    });
+                    };
+                    // L.Carat (RoughWeight) is too narrow (85px) for its own
+                    // total to display without truncating ("871,1...") -
+                    // show it in the wider Table No footer cell instead.
+                    if (sumCol === 'RoughWeight') {
+                        item.showInColumn = 'TableNo';
+                    }
+                    summaryItems.push(item);
                 }
             });
 
@@ -1105,13 +1488,13 @@
                 dataSource: $scope.List,
                 columns: gridCols,
                 keyExpr: 'RowKey',
-                onRowPrepared: function (e) {
-                    if (e.rowType === "data") {
-                        e.rowElement.addClass("ri-row-animate");
-                        e.rowElement.css("--ri-row-i", e.rowIndex);
-                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
-                    }
-                },
+                // No ri-row-animate stagger-fade here (unlike the app's other
+                // grids): it keys its animation-delay off e.rowIndex, which
+                // under virtual scrolling is the row's GLOBAL index into the
+                // ~1200-row dataset, not its on-screen position - a row deep
+                // in the list (e.g. index 900) would get a ~40s delay and
+                // sit at opacity:0 (invisible, borders included) every time
+                // virtual scroll recycles it into view.
                 height: '100%',
                 columnAutoWidth: true,
                 allowColumnResizing: true,
@@ -1129,25 +1512,41 @@
                 showBorders: true,
                 rowAlternationEnabled: true,
                 wordWrapEnabled: false,
-                sorting: { mode: "multiple" },
+                // "single" - "multiple" rendered a sort-order number badge
+                // next to the direction arrow even with only one column
+                // sorted, showing as two stacked arrow-like glyphs in
+                // narrow headers (e.g. Days).
+                sorting: { mode: "single" },
                 scrolling: {
                     mode: 'virtual'
                 },
                 paging: { enabled: false },
                 pager: { visible: false },
-                // Both the column-wise filter row and the filter-expression
-                // panel bar are hidden - filtering now happens via the
-                // per-cell search icons (columnOption filterValue), the
-                // headerFilter dropdowns, and the main search box, with the
-                // "Reset All Filters" button clearing all of it at once.
+                // The column-wise filter row, the filter-expression panel
+                // bar, and the per-column header filter dropdown are all
+                // hidden - filtering now happens via the per-cell search
+                // icons (columnOption filterValue) and the main search box,
+                // with the "Reset All Filters" button clearing all of it
+                // at once.
                 filterRow: {
                     visible: false,
                     applyFilter: 'auto'
                 },
                 filterPanel: { visible: false },
-                headerFilter: { visible: true },
+                // The funnel icon itself stays hidden (see the
+                // .dx-header-filter CSS rule above) - visible:true just
+                // keeps it in the DOM so onCellDblClick below can trigger it
+                // programmatically on a header double-click instead of
+                // showing it as a permanent icon on every column.
+                headerFilter: { visible: true ,allowSearch : true},
                 searchPanel: { visible: false },
                 export: { enabled: false },
+                onCellDblClick: function (e) {
+                    if (e.rowType === 'header') {
+                        var $filterIcon = $(e.cellElement).find('.dx-header-filter');
+                        if ($filterIcon.length) $filterIcon.trigger('dxclick');
+                    }
+                },
                 onToolbarPreparing: function (e) {
                     // Column chooser / export / search are rendered in the
                     // card header above instead of the grid's own toolbar row.
@@ -1376,6 +1775,16 @@
         $scope.fmt = function (val, decimals) {
             if (val === null || val === undefined || val === '' || isNaN(val)) return '';
             return Number(val).toFixed(decimals || 0);
+        };
+
+        // Dates arrive from the server pre-formatted as "31 Oct 2026"
+        // (SQL CONVERT style 106) - reformat to "31 Oct'26" for display in
+        // the Action popover's date rows.
+        $scope.fmtPopupDate = function (val) {
+            if (!val) return '';
+            var parts = (val + '').trim().split(/\s+/);
+            if (parts.length !== 3) return val;
+            return parts[0] + ' ' + parts[1] + '\'' + parts[2].slice(-2);
         };
 
         $scope.ClvSum = function (rows, pascalName) {

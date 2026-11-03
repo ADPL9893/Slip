@@ -73,12 +73,62 @@
                         </label>
                         <input type="text" id="NewSplitPcs" ng-model="NewSplit.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
                     </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                         <label class="rd-label" for="NewSplitCarat">
                             Carat <span class="req">*</span>
                             <a href="javascript:void(0)" ng-if="AdjustWeight > 0" ng-click="NewSplit.Lot_Carat = AdjustWeight" class="pull-right" style="font-weight:normal; font-size:11px; background-color:#d9f7be; padding:1px 5px; border-radius:3px;">All ({{AdjustWeight | number:3}})</a>
                         </label>
                         <input type="text" id="NewSplitCarat" ng-model="NewSplit.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitGradeID">Grade</label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitGradeID" chosen="GradeList" ng-model="NewSplit.GradeID" ng-change="OnNewSplitGradeChange()" ng-disabled="!IsSourceGradeMix()" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitRoughRate">Rough Rate</label>
+                        <input type="text" id="NewSplitRoughRate" ng-model="NewSplit.RoughRate" placeholder="0.00" ng-disabled="!IsSourceGradeMix()" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitReceipe">Receipe <span class="req">*</span></label>
+                        <div class="field-select-wrap">
+                            <select id="NewSplitReceipe" chosen="ReceipeList" ng-model="NewSplit.Receipe" ng-disabled="true" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitRejPcs">Rej. Pcs</label>
+                        <input type="text" id="NewSplitRejPcs" ng-model="NewSplit.RejPcs" placeholder="0" ng-disabled="true" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitRejCarat">Rej. Carat</label>
+                        <input type="text" id="NewSplitRejCarat" ng-model="NewSplit.RejCarat" placeholder="0.000" ng-disabled="true" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitSize">Size</label>
+                        <input type="text" id="NewSplitSize" ng-model="NewSplit.Size" placeholder="Size" ng-disabled="true" class="rd-input" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitGrowthRate">Growth Rate <span class="req">*</span></label>
+                        <input type="text" id="NewSplitGrowthRate" ng-model="NewSplit.GrowthRate" placeholder="Growth Rate" ng-disabled="true" class="rd-input" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitHeight">From Height</label>
+                        <input type="text" id="NewSplitHeight" ng-model="NewSplit.Height" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="NewSplitNewHeight">To Height</label>
+                        <input type="text" id="NewSplitNewHeight" ng-model="NewSplit.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
                     </div>
                     <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
                         <label class="rd-label" for="NewSplitBranchID">Branch</span></label>
@@ -108,15 +158,6 @@
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitGradeID">Grade</label>
-                        <div class="field-select-wrap">
-                            <select id="NewSplitGradeID" chosen="GradeList" ng-model="NewSplit.GradeID" ng-change="OnNewSplitGradeChange()" class="form-control rd-input">
-                                <option value="">-- Select --</option>
-                                <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                         <label class="rd-label" for="NewSplitLotPriority">Priority <span class="req">*</span></label>
                         <div class="field-select-wrap">
                             <select id="NewSplitLotPriority" chosen="PriorityList" class="form-control rd-input" ng-model="NewSplit.LotPriority">
@@ -125,96 +166,11 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitCakePcs">Cake Pcs</label>
-                        <input type="text" id="NewSplitCakePcs" ng-model="NewSplit.CakePcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitCakeWeight">Cake Carat</label>
-                        <input type="text" id="NewSplitCakeWeight" ng-model="NewSplit.CakeWeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+
                     
-                    <div class="clearfix"></div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitOGPcs">OG Pcs</label>
-                        <input type="text" id="NewSplitOGPcs" ng-model="NewSplit.OGPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitOGCarat">OG Carat</label>
-                        <input type="text" id="NewSplitOGCarat" ng-model="NewSplit.OGCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitRejPcs">Rej. Pcs</label>
-                        <input type="text" id="NewSplitRejPcs" ng-model="NewSplit.RejPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitRejCarat">Rej. Carat</label>
-                        <input type="text" id="NewSplitRejCarat" ng-model="NewSplit.RejCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitMachineNo">Machine No</label>
-                        <input type="text" id="NewSplitMachineNo" ng-model="NewSplit.MachineNo" placeholder="Machine No" class="rd-input" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitHours">Hours</label>
-                        <input type="text" id="NewSplitHours" ng-model="NewSplit.Hours" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitHeight">Height</label>
-                        <input type="text" id="NewSplitHeight" ng-model="NewSplit.Height" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitNewHeight">New Height</label>
-                        <input type="text" id="NewSplitNewHeight" ng-model="NewSplit.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitSize">Size</label>
-                        <input type="text" id="NewSplitSize" ng-model="NewSplit.Size" placeholder="Size" class="rd-input" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitGrowthRate">Growth Rate <span class="req">*</span></label>
-                        <input type="text" id="NewSplitGrowthRate" ng-model="NewSplit.GrowthRate" placeholder="Growth Rate" class="rd-input" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitCompareNo">Compare No</label>
-                        <input type="text" id="NewSplitCompareNo" ng-model="NewSplit.CompareNo" placeholder="Compare No" class="rd-input" />
-                    </div>
-                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitValuePerCT">Value/CT</label>
-                        <input type="text" id="NewSplitValuePerCT" ng-model="NewSplit.ValuePerCT" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitReceipe">Receipe <span class="req">*</span></label>
-                        <div class="field-select-wrap">
-                            <select id="NewSplitReceipe" chosen="ReceipeList" ng-model="NewSplit.Receipe" class="form-control rd-input">
-                                <option value="">-- Select --</option>
-                                <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitLotType">Lot Type</label>
-                        <input type="text" id="NewSplitLotType" ng-model="NewSplit.LotType" placeholder="Lot Type" class="rd-input" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitOGName">OG Name</label>
-                        <input type="text" id="NewSplitOGName" ng-model="NewSplit.OGName" placeholder="OG Name" class="rd-input" />
-                    </div>
-
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="NewSplitRoughRate">Rough Rate</label>
-                        <input type="text" id="NewSplitRoughRate" ng-model="NewSplit.RoughRate" placeholder="0.00" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-12 rd-form-group">
-                        <label class="rd-label" for="NewSplitLotPurpose">Lot Purpose <span class="req">*</span></label>
-                        <input type="text" id="NewSplitLotPurpose" ng-model="NewSplit.LotPurpose" placeholder="Lot Purpose" class="rd-input" />
-                    </div>
                     <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
                         <label class="rd-label" for="NewSplitRemarks">Remarks</label>
                         <input type="text" id="NewSplitRemarks" ng-model="NewSplit.Remarks" placeholder="Remarks" class="rd-input" />
@@ -314,16 +270,70 @@
         <div class="rd-card rd-card-entry">
             <div class="rd-card-header">
                 <h5 class="rd-card-title"><i class="fa fa-info-circle text-primary"></i> Lot Details</h5>
+                <span class="text-muted" style="font-size: 11.5px;">
+                    Factory Code <strong>{{FormModel.FactoryCode || '-'}}</strong> &middot;
+                    Color <strong>{{FormModel.ColorType || '-'}}</strong> &middot;
+                    Size Code <strong>{{FormModel.SizeCodeType || '-'}}</strong>
+                </span>
             </div>
             <div class="rd-card-body">
                 <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
                         <label class="rd-label" for="FormLotPcs">Pcs <span class="req">*</span></label>
-                        <input type="text" id="FormLotPcs" ng-model="FormModel.Lot_Pcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
+                        <input type="text" id="FormLotPcs" ng-model="FormModel.Lot_Pcs" placeholder="0" ng-disabled="true" class="rd-input allownumericwithoutdecimal" />
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                         <label class="rd-label" for="FormLotCarat">Carat <span class="req">*</span></label>
-                        <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
+                        <input type="text" id="FormLotCarat" ng-model="FormModel.Lot_Carat" placeholder="0.000" ng-disabled="true" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormGradeID">Grade</label>
+                        <div class="field-select-wrap">
+                            <select id="FormGradeID" chosen="GradeList" ng-model="FormModel.GradeID" ng-change="OnGradeChange()" ng-disabled="!IsSourceGradeMix()" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormRoughRate">Rough Rate</label>
+                        <input type="text" id="FormRoughRate" ng-model="FormModel.RoughRate" placeholder="0.00" ng-disabled="!IsSourceGradeMix()" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormReceipe">Receipe <span class="req">*</span></label>
+                        <div class="field-select-wrap">
+                            <select id="FormReceipe" chosen="ReceipeList" ng-model="FormModel.Receipe" ng-disabled="true" class="form-control rd-input">
+                                <option value="">-- Select --</option>
+                                <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormRejPcs">Rej. Pcs</label>
+                        <input type="text" id="FormRejPcs" ng-model="FormModel.RejPcs" placeholder="0" ng-disabled="true" class="rd-input allownumericwithoutdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormRejCarat">Rej. Carat</label>
+                        <input type="text" id="FormRejCarat" ng-model="FormModel.RejCarat" placeholder="0.000" ng-disabled="true" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormSize">Size</label>
+                        <input type="text" id="FormSize" ng-model="FormModel.Size" placeholder="Size" ng-disabled="true" class="rd-input" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormGrowthRate">Growth Rate <span class="req">*</span></label>
+                        <input type="text" id="FormGrowthRate" ng-model="FormModel.GrowthRate" placeholder="Growth Rate" ng-disabled="true" class="rd-input" />
+                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormHeight">From Height</label>
+                        <input type="text" id="FormHeight" ng-model="FormModel.Height" placeholder="0.000" ng-disabled="true" class="rd-input allownumericwithdecimal" />
+                    </div>
+                    <div class="col-lg-1 col-md-2 col-sm-6 col-xs-6 rd-form-group">
+                        <label class="rd-label" for="FormNewHeight">To Height</label>
+                        <input type="text" id="FormNewHeight" ng-model="FormModel.NewHeight" placeholder="0.000" ng-disabled="true" class="rd-input allownumericwithdecimal" />
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                         <label class="rd-label" for="FormDepartmentID">Department</label>
@@ -344,133 +354,6 @@
                         </div>
                     </div>
                     <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormGradeID">Grade</label>
-                        <div class="field-select-wrap">
-                            <select id="FormGradeID" chosen="GradeList" ng-model="FormModel.GradeID" ng-change="OnGradeChange()" class="form-control rd-input">
-                                <option value="">-- Select --</option>
-                                <option ng-repeat="item in GradeList" value="{{item.GradeID}}">{{item.Grade}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label">Factory Code</label>
-                        <input type="text" ng-model="FormModel.FactoryCode" class="rd-input rd-master-input" readonly />
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label">Color Type</label>
-                        <input type="text" ng-model="FormModel.ColorType" class="rd-input rd-master-input" readonly />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label">Size Code</label>
-                        <input type="text" ng-model="FormModel.SizeCodeType" class="rd-input rd-master-input" readonly />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormLotType">Lot Type</label>
-                        <input type="text" id="FormLotType" ng-model="FormModel.LotType" placeholder="Lot Type" class="rd-input" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormOGName">OG Name</label>
-                        <input type="text" id="FormOGName" ng-model="FormModel.OGName" placeholder="OG Name" class="rd-input" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormValuePerCT">Value/CT</label>
-                        <input type="text" id="FormValuePerCT" ng-model="FormModel.ValuePerCT" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormRoughRate">Rough Rate</label>
-                        <input type="text" id="FormRoughRate" ng-model="FormModel.RoughRate" placeholder="0.00" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormReceipe">Receipe <span class="req">*</span></label>
-                        <div class="field-select-wrap">
-                            <select id="FormReceipe" chosen="ReceipeList" ng-model="FormModel.Receipe" class="form-control rd-input">
-                                <option value="">-- Select --</option>
-                                <option ng-repeat="item in ReceipeList" value="{{item.Receipe}}">{{item.Receipe}}</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormBoxNo">Box No</label>
-                        <input type="text" id="FormBoxNo" ng-model="FormModel.BoxNo" placeholder="Box No" class="rd-input" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormMachineNo">Machine No</label>
-                        <input type="text" id="FormMachineNo" ng-model="FormModel.MachineNo" placeholder="Machine No" class="rd-input" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormHours">Hours</label>
-                        <input type="text" id="FormHours" ng-model="FormModel.Hours" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormHeight">Height</label>
-                        <input type="text" id="FormHeight" ng-model="FormModel.Height" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormNewHeight">New Height</label>
-                        <input type="text" id="FormNewHeight" ng-model="FormModel.NewHeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormSize">Size</label>
-                        <input type="text" id="FormSize" ng-model="FormModel.Size" placeholder="Size" class="rd-input" />
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cake / Rejection / OG -->
-        <div class="rd-card rd-card-entry">
-            <div class="rd-card-header">
-                <h5 class="rd-card-title"><i class="fa fa-cube text-primary"></i> Cake / Rejection / OG</h5>
-            </div>
-            <div class="rd-card-body">
-                <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormCakePcs">Cake Pcs</label>
-                        <input type="text" id="FormCakePcs" ng-model="FormModel.CakePcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormCakeWeight">Cake Carat</label>
-                        <input type="text" id="FormCakeWeight" ng-model="FormModel.CakeWeight" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormRejPcs">Rej. Pcs</label>
-                        <input type="text" id="FormRejPcs" ng-model="FormModel.RejPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormRejCarat">Rej. Carat</label>
-                        <input type="text" id="FormRejCarat" ng-model="FormModel.RejCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormOGPcs">OG Pcs</label>
-                        <input type="text" id="FormOGPcs" ng-model="FormModel.OGPcs" placeholder="0" class="rd-input allownumericwithoutdecimal" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormOGCarat">OG Carat</label>
-                        <input type="text" id="FormOGCarat" ng-model="FormModel.OGCarat" placeholder="0.000" class="rd-input allownumericwithdecimal" />
-                    </div>
-                    <div class="clearfix"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Priority & Notes -->
-        <div class="rd-card rd-card-entry">
-            <div class="rd-card-header">
-                <h5 class="rd-card-title"><i class="fa fa-flag text-primary"></i> Priority &amp; Notes</h5>
-            </div>
-            <div class="rd-card-body">
-                <div class="row">
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
                         <label class="rd-label" for="FormLotPriority">Priority <span class="req">*</span></label>
                         <div class="field-select-wrap">
                             <select id="FormLotPriority" chosen="PriorityList" class="form-control rd-input" ng-model="FormModel.LotPriority">
@@ -479,25 +362,13 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormGrowthRate">Growth Rate <span class="req">*</span></label>
-                        <input type="text" id="FormGrowthRate" ng-model="FormModel.GrowthRate" placeholder="Growth Rate" class="rd-input" />
-                    </div>
-                    <div class="col-lg-2 col-md-3 col-sm-6 col-xs-6 rd-form-group">
-                        <label class="rd-label" for="FormCompareNo">Compare No</label>
-                        <input type="text" id="FormCompareNo" ng-model="FormModel.CompareNo" placeholder="Compare No" class="rd-input" />
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
-                        <label class="rd-label" for="FormLotPurpose">Lot Purpose <span class="req">*</span></label>
-                        <input type="text" id="FormLotPurpose" ng-model="FormModel.LotPurpose" placeholder="Lot Purpose" class="rd-input" />
-                    </div>
+                    <div class="clearfix"></div>
+                </div>
+                <div class="row">
                     <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 rd-form-group">
                         <label class="rd-label" for="FormRemarks">Remarks</label>
                         <input type="text" id="FormRemarks" ng-model="FormModel.Remarks" placeholder="Remarks" class="rd-input" />
                     </div>
-                    <div class="clearfix"></div>
-                </div>
-                <div class="row">
                     <div class="col-lg-2 col-md-3 col-sm-4 col-xs-6 rd-form-group">
                         <label class="rd-label">Status</label>
                         <div class="active-toggle-wrap">
@@ -573,29 +444,17 @@
             SizeCodeID: null,
             SizeCodeType: '',
             BranchID: null,
-            LotType: '',
-            OGName: '',
             Lot_Pcs: null,
             Lot_Carat: null,
-            ValuePerCT: null,
             RoughRate: null,
             Receipe: '',
-            BoxNo: '',
-            MachineNo: '',
-            Hours: null,
             Height: null,
             NewHeight: null,
             Size: '',
-            CakePcs: null,
-            CakeWeight: null,
             RejPcs: null,
             RejCarat: null,
-            OGPcs: null,
-            OGCarat: null,
             LotPriority: '',
             GrowthRate: '',
-            CompareNo: '',
-            LotPurpose: '',
             DepartmentID: '',
             HeadManagerID: '',
             Remarks: '',
@@ -609,29 +468,17 @@
                 HeadManagerID: '',
                 GradeID: null,
                 Grade: '',
-                LotType: '',
-                OGName: '',
                 Lot_Pcs: null,
                 Lot_Carat: null,
-                ValuePerCT: null,
                 RoughRate: null,
                 Receipe: '',
-                BoxNo: '',
-                MachineNo: '',
-                Hours: null,
                 Height: null,
                 NewHeight: null,
                 Size: '',
-                CakePcs: null,
-                CakeWeight: null,
                 RejPcs: null,
                 RejCarat: null,
-                OGPcs: null,
-                OGCarat: null,
                 LotPriority: '',
                 GrowthRate: '',
-                CompareNo: '',
-                LotPurpose: '',
                 Remarks: '',
                 IsActive: true
             };
@@ -644,6 +491,10 @@
         $('.allownumericwithdecimal').on('keypress', function (e) {
             if (e.which !== 8 && e.which !== 0 && (e.which !== 46 || $(this).val().indexOf('.') !== -1) && (e.which < 48 || e.which > 57)) return false;
         });
+
+        // Enter-to-advance keyboard navigation is wired up globally for
+        // every input.rd-input/select.rd-input field - see
+        // ~/Content/js/enter-key-nav.js (included in _MainLayout.cshtml).
 
         $scope.LoadBranches = function () {
             return $http.post('@Url.Action("GetBranchdata_For_DropDown", "Master")').then(function (res) {
@@ -746,12 +597,35 @@
             $scope.NewSplit.GradeID = src.GradeID || null;
             $scope.NewSplit.Grade = src.Grade || '';
             $scope.NewSplit.Receipe = src.Receipe || '';
-            $scope.NewSplit.MachineNo = src.MachineNo || '';
-            $scope.NewSplit.BoxNo = src.BoxNo || '';
-            $scope.NewSplit.Hours = src.Hours;
+            $scope.NewSplit.Height = src.FromHeight;
             $scope.NewSplit.NewHeight = src.ToHeight;
             $scope.NewSplit.GrowthRate = src.GrowthRate || '';
-            $scope.NewSplit.LotPurpose = src.LotPurpose || '';
+            $scope.NewSplit.Size = src.DimensionName || '';
+            $scope.NewSplit.RoughRate = (src.Rate !== undefined && src.Rate !== null) ? src.Rate : null;
+
+            // The chosen-wrapped <select>s don't reliably re-render their
+            // displayed text off a pure Angular ng-model change (same reason
+            // LoadForEdit's SyncChosenValue has to force #FormGradeID
+            // directly) - set the underlying native <select>'s value
+            // explicitly, then redraw from it.
+            $timeout(function () {
+                $('#NewSplitGradeID').val($scope.NewSplit.GradeID != null ? $scope.NewSplit.GradeID.toString() : '').trigger('chosen:updated');
+                $('#NewSplitReceipe').val($scope.NewSplit.Receipe || '').trigger('chosen:updated');
+            }, 50);
+        };
+
+        // Grade/Rough Rate are locked to the source RoughDetails' own values
+        // everywhere EXCEPT a 'Mix' Kapan, which has no single real grade -
+        // the split clerk has to pick the actual grade (and its rate) per
+        // split/per edit in that case. Works for both Create mode (Source =
+        // the raw Kapan row) and Edit mode (Selected.SourceGrade, fetched
+        // separately since FormModel.Grade is the Lot's own copy and can
+        // diverge from the Kapan's once Mix makes it editable).
+        $scope.IsSourceGradeMix = function () {
+            var grade = ($scope.FormModel.LotID > 0)
+                ? ($scope.Selected.SourceGrade || '')
+                : (($scope.Source || {}).Grade || '');
+            return grade.trim().toUpperCase() === 'MIX';
         };
 
         $scope.OnSourceChange = function () {
@@ -830,7 +704,6 @@
             if (!($scope.NewSplit.Receipe || '').trim()) { Noty("error", "Please select Receipe!"); return false; }
             if (!($scope.NewSplit.LotPriority || '').trim()) { Noty("error", "Please select Priority!"); return false; }
             if (!($scope.NewSplit.GrowthRate || '').trim()) { Noty("error", "Please enter Growth Rate!"); return false; }
-            if (!($scope.NewSplit.LotPurpose || '').trim()) { Noty("error", "Please enter Lot Purpose!"); return false; }
             return true;
         };
 
@@ -898,7 +771,6 @@
                     { caption: 'Department', dataField: 'DepartmentName', minWidth: 110 },
                     { caption: 'Priority', dataField: 'LotPriority', minWidth: 100 },
                     { caption: 'Grade', dataField: 'Grade', minWidth: 90 },
-                    { caption: 'Lot Type', dataField: 'LotType', minWidth: 100 },
                     {
                         caption: 'ACTION',
                         width: 70,
@@ -942,6 +814,11 @@
                     return;
                 }
                 var m = res.data.item;
+                // Rough Rate is locked to the source RoughDetails' own Rate
+                // UNLESS that source Grade is 'Mix' (see IsSourceGradeMix) -
+                // in the locked case, show the live source Rate rather than
+                // whatever (possibly stale/blank) value the Lot itself has.
+                var isSourceMix = ((m.SourceGrade || '').trim().toUpperCase() === 'MIX');
                 $scope.FormModel = {
                     LotID: parseInt(m.LotID),
                     InwardDetailID: m.InwardDetailID,
@@ -955,29 +832,17 @@
                     BranchID: m.BranchID || null,
                     GradeID: m.GradeID,
                     Grade: m.Grade,
-                    LotType: m.LotType,
-                    OGName: m.OGName,
                     Lot_Pcs: m.Lot_Pcs,
                     Lot_Carat: m.Lot_Carat,
-                    ValuePerCT: m.ValuePerCT,
-                    RoughRate: m.RoughRate,
+                    RoughRate: isSourceMix ? m.RoughRate : ((m.SourceRate !== undefined && m.SourceRate !== null) ? m.SourceRate : m.RoughRate),
                     Receipe: m.Receipe,
-                    BoxNo: m.BoxNo,
-                    MachineNo: m.MachineNo,
-                    Hours: m.Hours,
-                    Height: m.Height,
-                    NewHeight: m.NewHeight,
-                    Size: m.Size,
-                    CakePcs: m.CakePcs,
-                    CakeWeight: m.CakeWeight,
+                    Height: (m.SourceFromHeight !== undefined && m.SourceFromHeight !== null) ? m.SourceFromHeight : m.Height,
+                    NewHeight: (m.SourceToHeight !== undefined && m.SourceToHeight !== null) ? m.SourceToHeight : m.NewHeight,
+                    Size: m.SourceDimensionName || m.Size,
                     RejPcs: m.RejPcs,
                     RejCarat: m.RejCarat,
-                    OGPcs: m.OGPcs,
-                    OGCarat: m.OGCarat,
                     LotPriority: m.LotPriority || '',
                     GrowthRate: m.GrowthRate,
-                    CompareNo: m.CompareNo,
-                    LotPurpose: m.LotPurpose,
                     DepartmentID: m.DepartmentID || '',
                     HeadManagerID: m.HeadManagerID || '',
                     Remarks: m.Remarks,
@@ -989,7 +854,8 @@
                     RoughPcs: m.RoughPcs,
                     RoughWeight: m.RoughWeight,
                     PendingPcs: m.AvailablePcs,
-                    PendingWeight: m.AvailableWeight
+                    PendingWeight: m.AvailableWeight,
+                    SourceGrade: m.SourceGrade || ''
                 };
                 $scope.LoadDepartments(m.BranchID).then(function () { SyncChosenValue('#FormDepartmentID', m.DepartmentID); });
                 SyncChosenValue('#FormHeadManagerID', m.HeadManagerID);
@@ -1051,7 +917,6 @@
             if (!($scope.FormModel.Receipe || '').trim()) { Noty("error", "Please select Receipe!"); return false; }
             if (!($scope.FormModel.LotPriority || '').trim()) { Noty("error", "Please select Priority!"); return false; }
             if (!($scope.FormModel.GrowthRate || '').trim()) { Noty("error", "Please enter Growth Rate!"); return false; }
-            if (!($scope.FormModel.LotPurpose || '').trim()) { Noty("error", "Please enter Lot Purpose!"); return false; }
             return true;
         };
 

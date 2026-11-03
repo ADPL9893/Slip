@@ -63,8 +63,6 @@ namespace Slip.Models
         [JsonProperty("lotPcs")] public int? LotPcs { get; set; }
         [JsonProperty("lotCarat")] public double? LotCarat { get; set; }
         [JsonProperty("remarks")] public string Remarks { get; set; }
-        [JsonProperty("ogname")] public string Ogname { get; set; }
-        [JsonProperty("lotType")] public string LotType { get; set; }
         [JsonProperty("colorType")] public string ColorType { get; set; }
         [JsonProperty("factoryCode")] public string FactoryCode { get; set; }
         [JsonProperty("machineNo")] public string MachineNo { get; set; }
@@ -91,6 +89,16 @@ namespace Slip.Models
         [JsonProperty("inwardDetailId")] public int? InwardDetailId { get; set; }
         [JsonProperty("rCodeYear")] public int? RCodeYear { get; set; }
         [JsonProperty("rCodeSerial")] public int? RCodeSerial { get; set; }
+
+        // Slip's own MST_Lot.LotID - a stable identifier that exists from
+        // the moment a Lot is created, unlike LotCode (which can stay NULL
+        // until a Branch/Department/Head Manager are all assigned). The
+        // branch stores this as its own HoLotID column, giving it something
+        // unique to key on even before a real LotCode exists, and echoes it
+        // back on the Lot_MarkReceived callback instead of matching by
+        // LotCode (which could be null/ambiguous).
+        [JsonProperty("hoLotID")] public int? HoLotId { get; set; }
+        [JsonProperty("LotPurpose")] public string LotPurpose { get; set; }
     }
 
     public class BranchLoginRequest

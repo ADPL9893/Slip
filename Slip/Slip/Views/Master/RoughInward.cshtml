@@ -180,7 +180,7 @@
                                         <th style="width: 90px;">Dimension <span class="req">*</span></th>
                                         <th style="min-width: 90px;">Height (From - To) <span class="req">*</span></th>
                                         <th style="width: 75px;">Hours</th>
-                                        <th style="width: 85px;">Box No <span class="req">*</span></th>
+                                        <th style="width: 85px;">Box No</th>
                                         <th style="width: 120px;">Recipe <span class="req">*</span></th>
                                         <th style="width: 65px;">Grade <span class="req">*</span></th>
                                         <th style="width: 80px;">Pcs</th>
@@ -988,10 +988,6 @@
                     Noty("error", "Please enter To Height in row #" + rowNum + "!");
                     return;
                 }
-                if (!line.BoxNo || line.BoxNo.trim() === '') {
-                    Noty("error", "Please enter Box No in row #" + rowNum + "!");
-                    return;
-                }
                 if (!line.RecipeID) {
                     Noty("error", "Please select Recipe in row #" + rowNum + "!");
                     return;
@@ -1184,6 +1180,28 @@
                     },
                     {
                         caption: 'Carat', dataField: 'Carat', width: 90, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
+                        caption: 'Org Pcs', dataField: 'OrgPcs', width: 80, dataType: 'number', alignment: 'right', format: '#,##0'
+                    },
+                    {
+                        caption: 'Org Carat', dataField: 'OrgCarat', width: 95, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
+                        // Still-unsplit balance - equal to Pcs while no Lot
+                        // has been created from this Kapan line yet, shrinks
+                        // (down to 0) as Lots get split off it.
+                        caption: 'Pending Pcs', dataField: 'PendingPcs', width: 95, dataType: 'number', alignment: 'right', format: '#,##0'
+                    },
+                    {
+                        caption: 'Pending Carat', dataField: 'PendingWeight', width: 105, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }
+                    },
+                    {
+                        caption: 'Total Loss', dataField: 'TotalLoss', width: 95, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 },
+                        cellTemplate: function (container, options) {
+                            var loss = parseFloat(options.data.TotalLoss) || 0;
+                            $("<span>").text(loss.toFixed(3)).css({ "color": loss > 0 ? "#b91c1c" : "#94a3b8", "font-weight": loss > 0 ? 700 : 400 }).appendTo(container);
+                        }
                     },
                     {
                         caption: 'PerPcs Carat', dataField: 'PerPcsCarat', width: 100, dataType: 'number', alignment: 'right', format: { type: 'fixedPoint', precision: 3 }

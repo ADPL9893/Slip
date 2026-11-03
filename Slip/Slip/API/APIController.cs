@@ -119,22 +119,28 @@ namespace Slip.API
         // AnjaliLabTech.API, and SlipCallback/SlipSyncClient.cs there, which
         // posts here using the same AnjaliTech/Anj@9893 Basic Auth credentials
         // this [BasicAuthentication] attribute already checks for. Resolves
-        // which Slip LotID the (apiLotId, branchId) pair belongs to via
-        // MST_Lot_BranchSync (ApiLotID alone isn't unique across branches -
-        // each branch has its own independent identity sequence), then flips
+            // which Slip LotID a LotCode belongs to (LotCode is unique on its own,
+        // unlike ApiLotID which repeats across branches), then flips
         // MST_Lot.IsReceived - once set, MasterController's Lot_Save/
         // AssignLotBranch/Lot_Delete all refuse further edits to that Lot.
+        // receivedDate is the branch's own timestamp of when it marked the
+        // Lot received - stored as given, not Slip's server time. hoLotID is
+        // Slip's own LotID, which AnjaliLabTech.API now stores on its own
+        // MstLot row (see BranchApiClient.BuildLotPayload) and echoes back
+        // here - matched first since it's unambiguous, unlike lotCode (can
+        // be null/not-yet-generated, see USP_MST_Lot_GetForBranchSync).
         [Route("api/API/Lot_MarkReceived")]
         [BasicAuthentication]
         [HttpPost]
-        public IHttpActionResult Lot_MarkReceived(int apiLotId, int branchId, bool isReceived)
+        public IHttpActionResult Lot_MarkReceived(int hoLotID, bool isReceived, string lotCode = null, DateTime? receivedDate = null)
         {
             try
             {
-                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_MarkReceivedByApiLot",
-                    new SqlParameter("@ApiLotID", apiLotId),
-                    new SqlParameter("@BranchID", branchId),
-                    new SqlParameter("@IsReceived", isReceived));
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_MarkReceivedByLotCode",
+                    new SqlParameter("@HoLotID", (object)hoLotID),
+                    new SqlParameter("@LotCode", (object)lotCode ?? DBNull.Value),
+                    new SqlParameter("@IsReceived", isReceived),
+                    new SqlParameter("@ReceivedDate", receivedDate ?? (object)DBNull.Value));
 
                 var r = rows.FirstOrDefault();
                 bool success = r != null && r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);

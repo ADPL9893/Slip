@@ -564,6 +564,7 @@
     <Content Include="Content\icons\Loader.gif" />
     <Content Include="Content\images\add.png" />
     <Content Include="Content\images\AddNew.png" />
+    <Content Include="Content\images\anjali-logo-white.png" />
     <Content Include="Content\images\Anjali_LabTech.png" />
     <Content Include="Content\images\barcode-scanner.png" />
     <Content Include="Content\images\barcode-scanner1.png" />
@@ -601,6 +602,9 @@
     <Content Include="Content\images\diamonds\w-7.png" />
     <Content Include="Content\images\diamonds\w-8.png" />
     <Content Include="Content\images\diamonds\w-9.png" />
+    <Content Include="Content\images\diamond_logo_bg.gif" />
+    <Content Include="Content\images\diamond_rotating.gif" />
+    <Content Include="Content\images\diamond_sparkle.gif" />
     <Content Include="Content\images\Done.png" />
     <Content Include="Content\images\Edit.png" />
     <Content Include="Content\images\edit2.png" />
@@ -609,6 +613,8 @@
     <Content Include="Content\images\excel2.png" />
     <Content Include="Content\images\folder.png" />
     <Content Include="Content\images\icn_print.png" />
+    <Content Include="Content\images\image-gallery.png" />
+    <Content Include="Content\images\image-upload.png" />
     <Content Include="Content\images\img\1920\blue.jpg" />
     <Content Include="Content\images\img\1920\purple.jpg" />
     <Content Include="Content\images\img\1920\red.jpg" />
@@ -622,6 +628,7 @@
     <Content Include="Content\images\img\home\04.jpg" />
     <Content Include="Content\images\img\loading.gif" />
     <Content Include="Content\images\indian.png" />
+    <Content Include="Content\images\jewelry_sparkle.gif" />
     <Content Include="Content\images\lab-grown-diamonds-1440x576.jpg" />
     <Content Include="Content\images\LabTech.png" />
     <Content Include="Content\images\like.gif" />
@@ -653,6 +660,7 @@
     <Content Include="Content\js\bootstrap.js" />
     <Content Include="Content\js\bootstrap.min.js" />
     <Content Include="Content\js\docs.min.js" />
+    <Content Include="Content\js\enter-key-nav.js" />
     <Content Include="Content\js\ie10-viewport-bug-workaround.js" />
     <Content Include="Content\js\jquery-2.1.4.min.js" />
     <Content Include="Content\js\jquery.auto-complete.min.js" />
@@ -1340,6 +1348,7 @@
     <Content Include="Views\Master\LotQRPrint.cshtml" />
     <Content Include="Views\Master\LotBranchSplit.cshtml" />
     <Content Include="Views\Master\SlipExcelUpload.cshtml" />
+    <Content Include="Views\Master\RoughLoss.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

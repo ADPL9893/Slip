@@ -55,9 +55,11 @@ namespace Slip.Controllers
                         if (permRows.Count > 0)
                         {
                             var row = permRows[0];
+                            canView = row["View"] != null && Convert.ToBoolean(row["View"]);
                             canAdd = row["Add"] != null && Convert.ToBoolean(row["Add"]);
                             canEdit = row["Edit"] != null && Convert.ToBoolean(row["Edit"]);
                             canDelete = row["Delete"] != null && Convert.ToBoolean(row["Delete"]);
+                            
                             canExport = row.ContainsKey("Export") && row["Export"] != null ? Convert.ToBoolean(row["Export"]) : canAdd;
                         }
                     }

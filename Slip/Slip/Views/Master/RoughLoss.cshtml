@@ -1,0 +1,549 @@
+@{
+    ViewBag.Title = "Rough Loss Entry";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+}
+
+@if (ViewBag.CanView != null && (bool)ViewBag.CanView)
+{
+<div ng-controller="RoughLossCtrl" class="rough-dist-list-page">
+    <div class="rdl-grid-card">
+        <div class="rdl-card-header">
+            <div class="rdl-card-title-left">
+                <i class="fa fa-minus-circle"></i>
+                <h3>Rough Loss Entry</h3>
+                <span class="badge-status-pill badge-pill-info">
+                    <i class="fa fa-database"></i> {{LossList.length || 0}} Total Records
+                </span>
+            </div>
+            <div class="rdl-card-actions">
+                <button class="btn-ri-add-main" type="button" ng-show="CanAdd" ng-click="OpenAddModal()">
+                    <i class="fa fa-plus"></i>
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Column Chooser" ng-click="ShowColumnChooser()">
+                    <i class="fa fa-columns"></i>
+                </button>
+                <button type="button" class="grid-action-btn-edit" title="Export to Excel" ng-click="ExportGrid()">
+                    <i class="fa fa-file-excel-o"></i>
+                </button>
+                <div class="field-select-wrap field-select-wrap--search">
+                    <input type="text"
+                           ng-model="SearchText"
+                           ng-change="OnSearchChange()"
+                           placeholder="Search loss entries..."
+                           class="form-control ri-input" />
+                </div>
+            </div>
+        </div>
+
+        <div class="rdl-grid-body">
+            <div id="roughLossGridContainer" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <!-- Add Modal -->
+    <div class="modal fade" id="RoughLossModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-flex">
+                        <div class="modal-header-title-left">
+                            <i class="fa fa-minus-circle modal-title-icon"></i>
+                            <h4 class="modal-title">Add Loss Entry</h4>
+                        </div>
+                        <button type="button" class="btn-close-header" data-dismiss="modal">&times;</button>
+                    </div>
+                </div>
+
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <fieldset class="ri-fieldset">
+                                <legend class="ri-legend">Entry Mode</legend>
+                                <div class="row">
+                                    <div class="col-md-12 ri-form-group">
+                                        <div class="ri-radio-group">
+                                            <label class="ri-radio-option">
+                                                <input type="radio" name="riLossMode" value="ROUGH" ng-model="FormModel.Mode" ng-change="OnModeChange()" />
+                                                <span><i class="fa fa-cube"></i> Rough-wise</span>
+                                            </label>
+                                            <label class="ri-radio-option">
+                                                <input type="radio" name="riLossMode" value="LOT" ng-model="FormModel.Mode" ng-change="OnModeChange()" />
+                                                <span><i class="fa fa-th-large"></i> Lot-wise</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <div class="ri-modal-section" ng-show="FormModel.Mode === 'ROUGH'">
+                        <div class="ri-modal-section-title"><i class="fa fa-cube text-primary"></i> ROUGH DETAILS</div>
+                        <div class="row">
+                            <div class="col-md-12 ri-form-group">
+                                <label class="ri-label" for="ModalInwardDetailID">SELECT ROUGH <span class="req">*</span></label>
+                                <div class="field-select-wrap">
+                                    <select id="ModalInwardDetailID" chosen="PendingDetailList" class="form-control ri-input" ng-model="FormModel.InwardDetailID" ng-change="OnRoughChange()" ng-options="item.InwardDetailID as (item.JangadNo + ' - ' + item.LotNo + ' - Pending ' + (item.PendingWeight | number:3) + ' Cts') for item in PendingDetailList">
+                                        <option value="">-- Select Rough --</option>
+                                    </select>
+                                </div>
+                                <div class="alert alert-warning" style="padding: 8px 12px; font-size: 12px; margin: 6px 0 0 0;" ng-if="!PendingDetailList.length">
+                                    <i class="fa fa-info-circle"></i> No Rough lines with a pending (unsplit) balance were found.
+                                </div>
+                                <div class="rd-mini-stats mt-20" ng-if="SelectedRough.InwardDetailID">
+                                    Org <strong>{{SelectedRough.OrgCarat || 0 | number:3}}</strong> Cts
+                                    &middot; Current <strong>{{SelectedRough.Carat || 0 | number:3}}</strong> Cts
+                                    &middot; Pending <strong>{{SelectedRough.PendingWeight || 0 | number:3}}</strong> Cts
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ri-modal-section" ng-show="FormModel.Mode === 'LOT'">
+                        <div class="ri-modal-section-title"><i class="fa fa-th-large text-primary"></i> LOT DETAILS</div>
+                        <div class="row">
+                            <div class="col-md-12 ri-form-group">
+                                <label class="ri-label" for="ModalLotID">SELECT LOT <span class="req">*</span></label>
+                                <div class="field-select-wrap">
+                                    <select id="ModalLotID" chosen="LotSearchList" class="form-control ri-input" ng-model="FormModel.LotID" ng-change="OnLotChange()" ng-options="item.LotID as (GetLotLabel(item)) disable when (item.IsReceived || item.IsCLVRunning) for item in LotSearchList">
+                                        <option value="">-- Select Lot --</option>
+                                    </select>
+                                </div>
+                                <div class="rd-mini-stats mt-20" ng-if="SelectedLot.LotID">
+                                    Org <strong>{{SelectedLot.OrgLot_Carat || 0 | number:3}}</strong> Cts
+                                    &middot; Current <strong>{{SelectedLot.Lot_Carat || 0 | number:3}}</strong> Cts
+                                    <span ng-if="SelectedLot.IsReceived || SelectedLot.IsCLVRunning" class="text-danger">
+                                        &middot; This Lot has already been received/is in cleaving and can no longer have loss recorded against it.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ri-modal-section">
+                        <div class="ri-modal-section-title"><i class="fa fa-minus-circle text-primary"></i> LOSS DETAILS</div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalLossType">LOSS TYPE <span class="req">*</span></label>
+                                <div class="field-select-wrap">
+                                    <select id="ModalLossType" chosen="LossTypeList" class="form-control ri-input" ng-model="FormModel.LossType">
+                                        <option value="">-- Select --</option>
+                                        <option value="DLC Rejection">DLC Rejection</option>
+                                        <option value="Chapka Loss">Chapka Loss</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12 ri-form-group">
+                                <label class="ri-label" for="ModalCarat">LOSS CARAT <span class="req">*</span></label>
+                                <input type="text" id="ModalCarat" ng-model="FormModel.Carat" placeholder="0.000" class="ri-input allownumericwithdecimal" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 ri-form-group">
+                                <label class="ri-label" for="ModalRemarks">REMARKS</label>
+                                <input type="text" id="ModalRemarks" ng-model="FormModel.Remarks" placeholder="Enter Remarks" class="ri-input" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-ri-reset" type="button" ng-click="ResetForm()">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                    <button class="btn-ri-save" type="button" ng-click="SaveLoss()" ng-disabled="IsSaving">
+                        <i class="fa fa-check" ng-class="{'fa-spin fa-spinner': IsSaving}"></i>
+                        SAVE
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="RoughLossConfirmDeleteModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-exclamation-triangle modal-icon-danger"></i>
+                        <h4 class="modal-header-title">Confirm Reversal</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="delete-dialog-content">
+                        <div class="delete-warning-icon">
+                            <i class="fa fa-trash-o"></i>
+                        </div>
+                        <h4 class="delete-dialog-title">Reverse Loss Entry?</h4>
+                        <p class="delete-dialog-text">
+                            Are you sure you want to reverse this loss entry of <strong>{{SelectedDeleteItem.Carat | number:3}} Cts</strong>?
+                            <br /><br />
+                            <small class="text-muted"><i class="fa fa-info-circle"></i> The Carat will be restored to the Rough/Lot.</small>
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsDeleting">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-modal-delete" ng-click="ExecuteDelete()" type="button" ng-disabled="IsDeleting">
+                        <i class="fa fa-spinner fa-spin" ng-show="IsDeleting"></i>
+                        <i class="fa fa-trash" ng-hide="IsDeleting"></i> Reverse
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var module;
+    try {
+        module = angular.module('app');
+    } catch (e) {
+        module = angular.module('app', ['ngAnimate', 'ngTouch']);
+    }
+
+    module.controller("RoughLossCtrl", ['$scope', '$http', '$timeout', function ($scope, $http, $timeout) {
+        $scope.CanAdd = ('@ViewBag.CanAdd' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.CanDelete = ('@ViewBag.CanDelete' === 'True' || '@ViewBag.IsAdmin' === 'True');
+        $scope.IsAdmin = ('@ViewBag.IsAdmin' === 'True');
+
+        $scope.LossList = [];
+        $scope.PendingDetailList = [];
+        $scope.LotSearchList = [];
+        $scope.SelectedRough = {};
+        $scope.SelectedLot = {};
+        $scope.IsLoading = false;
+        $scope.IsSaving = false;
+        $scope.IsDeleting = false;
+        $scope.SelectedDeleteItem = null;
+        $scope.SearchText = '';
+
+        $('.allownumericwithdecimal').on('keypress', function (e) {
+            if (e.which !== 8 && e.which !== 0 && (e.which !== 46 || $(this).val().indexOf('.') !== -1) && (e.which < 48 || e.which > 57)) return false;
+        });
+
+        $scope.FormModelDefaults = function () {
+            return {
+                Mode: 'ROUGH',
+                InwardDetailID: '',
+                LotID: '',
+                LossType: '',
+                Carat: '',
+                Remarks: ''
+            };
+        };
+        $scope.FormModel = $scope.FormModelDefaults();
+
+        // Lots are branch-less/code-less until a Branch is first assigned
+        // (see Lot_Save/LotSplit_Save) - LotCode/RCode are NULL until then.
+        // The "chosen" dropdown's search box only matches against the
+        // rendered option text, so every label always includes BOTH the
+        // LotCode/RCode (when assigned) AND the parent Rough's
+        // JangadNo/RoughLotNo - otherwise a user searching by the LotCode
+        // they're used to would never find an unassigned Lot (it has none
+        // yet), and vice versa.
+        $scope.GetLotLabel = function (item) {
+            if (!item) return '';
+            var codePart = item.LotCode ? (item.LotCode + ' / ' + (item.RCode || '-')) : '';
+            var roughPart = (item.JangadNo || '-') + ' - ' + (item.RoughLotNo || '-');
+            var lockPart = (item.IsReceived || item.IsCLVRunning) ? ' (locked)' : '';
+            var carat = (parseFloat(item.Lot_Carat) || 0).toFixed(3);
+            return codePart + ' [' + roughPart + '] - ' + carat + ' Cts' + lockPart;
+        };
+
+        $scope.OpenAddModal = function () {
+            $scope.ResetForm();
+            $("#RoughLossModal").modal("show");
+        };
+
+        $scope.ResetForm = function () {
+            $scope.FormModel = $scope.FormModelDefaults();
+            $scope.SelectedRough = {};
+            $scope.SelectedLot = {};
+            $timeout(function () {
+                $('#ModalInwardDetailID, #ModalLotID, #ModalLossType').trigger('chosen:updated');
+            }, 100);
+        };
+
+        $scope.OnModeChange = function () {
+            $scope.FormModel.InwardDetailID = '';
+            $scope.FormModel.LotID = '';
+            $scope.SelectedRough = {};
+            $scope.SelectedLot = {};
+            $timeout(function () {
+                $('#ModalInwardDetailID, #ModalLotID').trigger('chosen:updated');
+            }, 100);
+        };
+
+        $scope.OnRoughChange = function () {
+            var match = ($scope.PendingDetailList || []).find(function (x) { return parseInt(x.InwardDetailID) === parseInt($scope.FormModel.InwardDetailID); });
+            $scope.SelectedRough = match || {};
+        };
+
+        $scope.OnLotChange = function () {
+            var match = ($scope.LotSearchList || []).find(function (x) { return parseInt(x.LotID) === parseInt($scope.FormModel.LotID); });
+            $scope.SelectedLot = match || {};
+        };
+
+        $scope.LoadPendingDetails = function () {
+            return $http.get('@Url.Action("Get_RoughLoss_PendingDetails", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.PendingDetailList = res.data.list || [];
+                    $timeout(function () { $('#ModalInwardDetailID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadLotsForSearch = function () {
+            return $http.get('@Url.Action("Get_RoughLoss_LotsForSearch", "Master")').then(function (res) {
+                if (res.data && res.data.success) {
+                    $scope.LotSearchList = res.data.list || [];
+                    $timeout(function () { $('#ModalLotID').trigger('chosen:updated'); }, 100);
+                }
+            });
+        };
+
+        $scope.LoadLossList = function () {
+            $scope.IsLoading = true;
+            $http.get('@Url.Action("Get_RoughLoss_List", "Master")').then(function (res) {
+                $scope.IsLoading = false;
+                if (res.data && res.data.success) {
+                    $scope.LossList = res.data.list || [];
+                    $scope.InitGrid();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to load loss entries.");
+                }
+            }, function () {
+                $scope.IsLoading = false;
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
+        $scope.SaveLoss = function () {
+            if ($scope.FormModel.Mode === 'ROUGH' && !$scope.FormModel.InwardDetailID) {
+                Noty("error", "Please select a Rough!");
+                return;
+            }
+            if ($scope.FormModel.Mode === 'LOT' && !$scope.FormModel.LotID) {
+                Noty("error", "Please select a Lot!");
+                return;
+            }
+            if ($scope.FormModel.Mode === 'LOT' && $scope.SelectedLot && ($scope.SelectedLot.IsReceived || $scope.SelectedLot.IsCLVRunning)) {
+                Noty("error", "This Lot has already been received/is in cleaving and can no longer have loss recorded against it.");
+                return;
+            }
+            if (!$scope.FormModel.LossType) {
+                Noty("error", "Please select a Loss Type!");
+                return;
+            }
+            if (!$scope.FormModel.Carat || parseFloat($scope.FormModel.Carat) <= 0) {
+                Noty("error", "Please enter a valid Loss Carat!");
+                $('#ModalCarat').focus();
+                return;
+            }
+
+            $scope.IsSaving = true;
+            $http.post('@Url.Action("RoughLoss_Save", "Master")', {
+                InwardDetailID: $scope.FormModel.Mode === 'ROUGH' ? $scope.FormModel.InwardDetailID : null,
+                LotID: $scope.FormModel.Mode === 'LOT' ? $scope.FormModel.LotID : null,
+                LossType: $scope.FormModel.LossType,
+                Carat: $scope.FormModel.Carat,
+                Remarks: $scope.FormModel.Remarks
+            }).then(function (res) {
+                $scope.IsSaving = false;
+                if (res.data && res.data.success) {
+                    $("#RoughLossModal").modal("hide");
+                    Noty("success", res.data.message || "Loss entry recorded successfully!");
+                    $scope.ResetForm();
+                    $scope.LoadLossList();
+                    $scope.LoadPendingDetails();
+                    $scope.LoadLotsForSearch();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to save loss entry.");
+                }
+            }, function () {
+                $scope.IsSaving = false;
+                Noty("error", "Error saving loss entry to server.");
+            });
+        };
+
+        $scope.PromptDelete = function (item) {
+            if (!item || !item.LossID) return;
+            $scope.SelectedDeleteItem = item;
+            $("#RoughLossConfirmDeleteModal").modal("show");
+        };
+
+        $scope.ExecuteDelete = function () {
+            if (!$scope.SelectedDeleteItem) return;
+            $scope.IsDeleting = true;
+            $http.post('@Url.Action("RoughLoss_Delete", "Master")', { LossID: $scope.SelectedDeleteItem.LossID })
+                .then(function (res) {
+                    $scope.IsDeleting = false;
+                    $("#RoughLossConfirmDeleteModal").modal("hide");
+                    if (res.data && res.data.success) {
+                        Noty("success", res.data.message || "Loss entry reversed successfully!");
+                        $scope.LoadLossList();
+                        $scope.LoadPendingDetails();
+                        $scope.LoadLotsForSearch();
+                    } else {
+                        Noty("error", (res.data && res.data.message) || "Failed to reverse loss entry.");
+                    }
+                }, function () {
+                    $scope.IsDeleting = false;
+                    $("#RoughLossConfirmDeleteModal").modal("hide");
+                    Noty("error", "Error connecting to server.");
+                });
+        };
+
+        $scope.GetGridInstance = function () {
+            var $el = $("#roughLossGridContainer");
+            if (!$el.data("dxDataGrid")) {
+                return null;
+            }
+            return $el.dxDataGrid("instance");
+        };
+
+        $scope.OnSearchChange = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.searchByText($scope.SearchText || '');
+        };
+
+        $scope.ShowColumnChooser = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) gridInstance.showColumnChooser();
+        };
+
+        $scope.ExportGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (!gridInstance || typeof ExcelJS === 'undefined') return;
+            var workbook = new ExcelJS.Workbook();
+            var worksheet = workbook.addWorksheet('RoughLoss');
+            DevExpress.excelExporter.exportDataGrid({
+                component: gridInstance,
+                worksheet: worksheet,
+                autoFilterEnabled: true
+            }).then(function () {
+                workbook.xlsx.writeBuffer().then(function (buffer) {
+                    saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'RoughLoss.xlsx');
+                });
+            });
+        };
+
+        $scope.InitGrid = function () {
+            var gridInstance = $scope.GetGridInstance();
+            if (gridInstance) {
+                gridInstance.option("dataSource", $scope.LossList);
+                return;
+            }
+            $("#roughLossGridContainer").dxDataGrid({
+                dataSource: $scope.LossList,
+                keyExpr: 'LossID',
+                onRowPrepared: function (e) {
+                    if (e.rowType === "data") {
+                        e.rowElement.addClass("ri-row-animate");
+                        e.rowElement.css("--ri-row-i", e.rowIndex);
+                        e.rowElement.find("> td").css({ "border-bottom": "1px solid #e2e8f0", "border-right": "1px solid #e2e8f0" });
+                    }
+                },
+                height: '100%',
+                columnAutoWidth: true,
+                allowColumnResizing: true,
+                columnResizingMode: 'widget',
+                allowColumnReordering: true,
+                columnChooser: { enabled: true, mode: 'select' },
+                columnFixing: { enabled: true },
+                showColumnLines: true,
+                showRowLines: true,
+                showBorders: true,
+                rowAlternationEnabled: true,
+                wordWrapEnabled: false,
+                sorting: { mode: "single" },
+                scrolling: { mode: 'virtual' },
+                paging: { enabled: false },
+                pager: { visible: false },
+                searchPanel: { visible: false },
+                filterRow: { visible: true, applyFilter: 'auto' },
+                headerFilter: { visible: true },
+                export: { enabled: false },
+                onToolbarPreparing: function (e) {
+                    e.toolbarOptions.items = [];
+                },
+                columns: [
+                    {
+                        caption: '#',
+                        width: 45,
+                        alignment: 'center',
+                        allowReordering: false,
+                        fixed: true,
+                        fixedPosition: 'left',
+                        cellTemplate: function (container, options) {
+                            $("<span>").text(options.rowIndex + 1).css({ "font-weight": "600", "color": "#64748b" }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Jangad No', dataField: 'JangadNo', minWidth: 100 },
+                    { caption: 'Lot No', dataField: 'LotNo', minWidth: 110 },
+                    {
+                        caption: 'Lot', dataField: 'LotCode', minWidth: 140,
+                        cellTemplate: function (container, options) {
+                            if (options.data.LotID) {
+                                $("<span>").text((options.data.LotCode || '') + ' / ' + (options.data.RCode || '')).appendTo(container);
+                            } else {
+                                $("<span>").addClass("text-muted").text("Rough-wise").appendTo(container);
+                            }
+                        }
+                    },
+                    {
+                        caption: 'Loss Type', dataField: 'LossType', minWidth: 120, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var isDlc = options.data.LossType === 'DLC Rejection';
+                            $("<span>").addClass("badge-status-pill " + (isDlc ? "badge-pill-danger" : "badge-pill-warning")).text(options.data.LossType).appendTo(container);
+                        }
+                    },
+                    { caption: 'Carat', dataField: 'Carat', dataType: 'number', format: '#0.000', minWidth: 90, alignment: 'center' },
+                    { caption: 'Remarks', dataField: 'Remarks', minWidth: 150 },
+                    { caption: 'Created By', dataField: 'CreatedByName', minWidth: 110 },
+                    { caption: 'Created On', dataField: 'CreatedOn', minWidth: 120, alignment: 'center' },
+                    {
+                        caption: 'Action',
+                        width: 90,
+                        alignment: 'center',
+                        fixed: true,
+                        fixedPosition: 'right',
+                        allowReordering: false,
+                        visible: $scope.CanDelete,
+                        cellTemplate: function (container, options) {
+                            var group = $("<div>").addClass("grid-btn-group");
+                            $("<button>")
+                                .addClass("grid-action-btn-del")
+                                .attr("title", "Reverse Loss Entry")
+                                .html('<i class="fa fa-trash"></i>')
+                                .on("click", function () {
+                                    $scope.$apply(function () { $scope.PromptDelete(options.data); });
+                                })
+                                .appendTo(group);
+                            group.appendTo(container);
+                        }
+                    }
+                ]
+            });
+        };
+
+        $scope.LoadLossList();
+        $scope.LoadPendingDetails();
+        $scope.LoadLotsForSearch();
+    }]);
+</script>
+}
+else
+{
+    <div class="container-fluid" style="margin-top: 25px;">
+        <div class="alert alert-danger text-center" style="border-radius: 8px; font-size: 14px; padding: 20px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);">
+            <h4 style="margin-top: 0; font-weight: 700;"><i class="fa fa-ban"></i> Access Denied</h4>
+            <p style="margin-bottom: 0;">You do not have permission to view the <strong>Rough Loss Entry</strong> module. Please contact your administrator to request access.</p>
+        </div>
+    </div>
+}
