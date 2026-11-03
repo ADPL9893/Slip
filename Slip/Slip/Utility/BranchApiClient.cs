@@ -630,9 +630,60 @@ namespace Slip.Utility
                 token = GetToken(baseUrl, forceRefresh: true);
                 responseJson = SendJson("POST", baseUrl + "/api/Rough", body, token);
             }
+            catch (WebException wex) when (wex.Response is HttpWebResponse resp && resp.StatusCode == HttpStatusCode.BadRequest)
+            {
+                // The branch's own MST_Rough_Insert_Update_Delete rejects a
+                // duplicate RCode outright (no rid in the error body) - this
+                // almost always means an earlier sync attempt created the
+                // Rough there but this app's TRN_RoughInwardDetail_BranchRough
+                // tracking row for it never got written (e.g. a crash/timeout
+                // between the remote insert and the local INSERT below), so
+                // every retry since has been rejected as a duplicate. There's
+                // no GET-by-RCode endpoint on the branch API to recover the
+                // existing RID automatically, so surface this distinctly
+                // instead of logging it as just another generic sync failure
+                // - it needs a one-time manual fix (look up MST_Rough.RID for
+                // this RCode on the branch's own DB, then insert it via
+                // USP_TRN_RoughInwardDetail_BranchRough_Insert).
+                if (ReadErrorBody(wex).IndexOf("already Exists", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    ErrorLogger.ErrorLog("Rough branch sync STUCK (duplicate RCode, not tracked locally): RCode=" +
+                        payload.RCode + " at " + baseUrl + " already exists on the branch, but Slip has no " +
+                        "TRN_RoughInwardDetail_BranchRough row for it. Find MST_Rough.RID for this RCode on the " +
+                        "branch's own database and insert it via USP_TRN_RoughInwardDetail_BranchRough_Insert to unblock Lot sync.");
+                    return 0;
+                }
+                throw;
+            }
 
             var result = JsonConvert.DeserializeAnonymousType(responseJson, new { rid = 0 });
             return result?.rid ?? 0;
+        }
+
+        // WebException.Response's stream can only be read once - callers that
+        // need the body (to distinguish error cases, e.g. "already Exists")
+        // must go through here rather than peeking manually, and must do so
+        // before anything else touches the response.
+        private static string ReadErrorBody(WebException wex)
+        {
+            try
+            {
+                using (Stream stream = wex.Response?.GetResponseStream())
+                {
+                    if (stream == null)
+                    {
+                        return "";
+                    }
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            }
+            catch
+            {
+                return "";
+            }
         }
 
         private static void PutRough(string baseUrl, BranchRoughSyncRequest payload)
