@@ -578,7 +578,7 @@
 
         $scope.GetSourceLabel = function (item) {
             if (!item) return '';
-            return (item.LotNo || '-') + ' / Grade ' + (item.Grade || '-') + ' / ' + (item.Receipe || '-') + ' / ' + (item.ColorType || '-') + ' / ' + (item.FactoryCode || '-')
+            return (item.JangadNo || '-') + ' / ' + (item.LotNo || '-') + ' / Grade ' + (item.Grade || '-') + ' / ' + (item.Receipe || '-') + ' / ' + (item.ColorType || '-') + ' / ' + (item.FactoryCode || '-')
                 + ' - Pending ' + (item.PendingPcs || 0) + ' Pcs / ' + (item.PendingWeight || 0) + ' Cts';
         };
 

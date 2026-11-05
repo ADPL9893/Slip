@@ -363,6 +363,7 @@
     <Compile Include="Models\QRList.cs" />
     <Compile Include="Models\RoughDistributionQRList.cs" />
     <Compile Include="Models\LotQRList.cs" />
+    <Compile Include="Models\RoughInwardQRList.cs" />
     <Compile Include="Models\RoughTo4POk_Loss.cs" />
     <Compile Include="Models\Rp_Prd_Summary.cs" />
     <Compile Include="Models\RP_Slip_Entry.cs" />
@@ -1346,6 +1347,7 @@
     <Content Include="Views\Master\QRGenerator.cshtml" />
     <Content Include="Views\Master\RoughDistributionQRPrint.cshtml" />
     <Content Include="Views\Master\LotQRPrint.cshtml" />
+    <Content Include="Views\Master\RoughInwardQRPrint.cshtml" />
     <Content Include="Views\Master\LotBranchSplit.cshtml" />
     <Content Include="Views\Master\SlipExcelUpload.cshtml" />
     <Content Include="Views\Master\RoughLoss.cshtml" />

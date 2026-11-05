@@ -180,6 +180,52 @@
         </div>
     </div>
 
+    <!-- Assign Department Modal -->
+    <div class="modal fade" id="AssignDepartmentModal" role="dialog" data-backdrop="static">
+        <div class="modal-dialog modal-md">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-header-brand">
+                        <i class="fa fa-sitemap modal-icon-info"></i>
+                        <h4 class="modal-header-title">Assign Department</h4>
+                    </div>
+                    <button type="button" class="close modal-close-btn" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-12 rdl-modal-form-group">
+                            <label class="rdl-modal-label">Lot Code</label>
+                            <input type="text" class="rdl-modal-input img-info-readonly-strong" ng-model="DepartmentModel.LotCode" readonly />
+                        </div>
+                        <div class="col-xs-12 rdl-modal-form-group">
+                            <label class="rdl-modal-label">Department <span class="text-danger">*</span></label>
+                            <select class="form-control rd-input" ng-model="DepartmentModel.DepartmentID"
+                                    ng-options="item.ID as item.ShortName for item in DepartmentOptions">
+                                <option value="">-- Select Department --</option>
+                            </select>
+                        </div>
+                        <div class="col-xs-12 rdl-modal-form-group">
+                            <label class="rdl-modal-label">Head Manager</label>
+                            <select class="form-control rd-input" ng-model="DepartmentModel.HeadManagerID"
+                                    ng-options="item.EmployeeID as item.EmployeeName for item in HeadManagerOptions">
+                                <option value="">-- Select Head Manager --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-modal-action btn-modal-reset" data-dismiss="modal" type="button" ng-disabled="IsSavingDepartment">
+                        <i class="fa fa-times"></i> Cancel
+                    </button>
+                    <button class="btn-modal-action btn-rdl-add" ng-click="SaveAssignDepartment()" type="button" ng-disabled="IsSavingDepartment || !DepartmentModel.DepartmentID">
+                        <span ng-if="!IsSavingDepartment"><i class="fa fa-check"></i> Save</span>
+                        <span ng-if="IsSavingDepartment"><i class="fa fa-spinner fa-spin"></i> Saving...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- View Lot Images Modal -->
     <div class="modal fade" id="ViewLotImageModal" role="dialog">
         <div class="modal-dialog modal-lg">
@@ -295,6 +341,64 @@
         $scope.ImageList = [];
         $scope.ActiveImageIndex = 0;
         $scope.IsLoadingImages = false;
+
+        // Assign Department - separate from the main Lot Entry/Branch
+        // Assignment flows, works even after a Branch has marked a Lot
+        // received (see AssignLotDepartment in MasterController). Department
+        // options are scoped to the Lot's own Branch (departments are
+        // per-Branch), loaded fresh each time the modal opens.
+        $scope.DepartmentModel = { LotID: null, LotCode: '', DepartmentID: '', HeadManagerID: '' };
+        $scope.DepartmentOptions = [];
+        $scope.HeadManagerOptions = [];
+        $scope.IsSavingDepartment = false;
+
+        $scope.OpenAssignDepartment = function (row) {
+            if (!row || !row.BranchID) {
+                Noty("error", "This Lot has no Branch assigned yet - assign a Branch first.");
+                return;
+            }
+            $scope.DepartmentModel = {
+                LotID: row.LotID,
+                LotCode: row.LotCode,
+                DepartmentID: row.DepartmentID || '',
+                HeadManagerID: row.HeadManagerID || ''
+            };
+            $scope.DepartmentOptions = [];
+            $http.get('@Url.Action("Get_MST_DepartmentList", "Master")?BranchID=' + row.BranchID).then(function (res) {
+                $scope.DepartmentOptions = (res.data && res.data.success) ? (res.data.list || []) : [];
+            });
+            if (!$scope.HeadManagerOptions.length) {
+                $http.get('@Url.Action("Get_MST_HeadManagerList", "Master")').then(function (res) {
+                    $scope.HeadManagerOptions = (res.data && res.data.success) ? (res.data.list || []) : [];
+                });
+            }
+            $('#AssignDepartmentModal').modal('show');
+        };
+
+        $scope.SaveAssignDepartment = function () {
+            if (!$scope.DepartmentModel.DepartmentID) {
+                Noty("error", "Please select a Department.");
+                return;
+            }
+            $scope.IsSavingDepartment = true;
+            $http.post('@Url.Action("AssignLotDepartment", "Master")', {
+                LotID: $scope.DepartmentModel.LotID,
+                DepartmentID: $scope.DepartmentModel.DepartmentID,
+                HeadManagerID: $scope.DepartmentModel.HeadManagerID || null
+            }).then(function (res) {
+                $scope.IsSavingDepartment = false;
+                if (res.data && res.data.success) {
+                    Noty("success", res.data.message || "Department assigned successfully.");
+                    $('#AssignDepartmentModal').modal('hide');
+                    $scope.FetchData();
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to assign Department.");
+                }
+            }, function () {
+                $scope.IsSavingDepartment = false;
+                Noty("error", "Error connecting to server.");
+            });
+        };
 
         $scope.OpenAddNew = function () {
             var url = '@Url.Action("LotEntry", "Master")';
@@ -604,8 +708,8 @@
                 paging: { enabled: false },
                 pager: { visible: false },
                 searchPanel: { visible: false },
-                filterRow: { visible: true, applyFilter: 'auto' },
-                headerFilter: { visible: true },
+                filterRow: { visible: false, applyFilter: 'auto' },
+                headerFilter: { visible: true, allowSearch: true },
                 export: { enabled: false },
                 onToolbarPreparing: function (e) {
                     // Column chooser / export / search are rendered in the card
@@ -625,18 +729,6 @@
                         }
                     },
                     { caption: 'Jangad No', dataField: 'JangadNo', minWidth: 70 },
-                    { caption: 'Total Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 85, alignment: 'center' },
-                    { caption: 'Total Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center' },
-                    { caption: 'Org Pcs', dataField: 'OrgLot_Pcs', dataType: 'number', minWidth: 80, alignment: 'center' },
-                    { caption: 'Org Carat', dataField: 'OrgLot_Carat', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center' },
-                    {
-                        caption: 'Total Loss', dataField: 'TotalLoss', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center',
-                        cellTemplate: function (container, options) {
-                            var loss = parseFloat(options.data.TotalLoss) || 0;
-                            $("<span>").text(loss.toFixed(3)).css({ "color": loss > 0 ? "#b91c1c" : "#94a3b8", "font-weight": loss > 0 ? 700 : 400 }).appendTo(container);
-                        }
-                    },
-                    { caption: 'Inward Grade', dataField: 'InwardGrade', minWidth: 100 },
                     { caption: 'Inward Pcs', dataField: 'InwardPcs', dataType: 'number', minWidth: 90, alignment: 'center' },
                     { caption: 'Inward Carat', dataField: 'InwardCarat', dataType: 'number', format: '#0.000', minWidth: 100, alignment: 'center' },
                     {
@@ -661,18 +753,8 @@
                             $span.appendTo(container);
                         }
                     },
-                    {
-                        caption: 'Branch',
-                        dataField: 'BranchName',
-                        minWidth: 110,
-                        cellTemplate: function (container, options) {
-                            $("<strong>")
-                                .text(options.data.BranchName || '-')
-                                .appendTo(container);
-                        }
-                    },
-                    { caption: 'Department', dataField: 'DepartmentShortName', minWidth: 100 },
-                    { caption: 'Head Manager', dataField: 'HeadManagerName', minWidth: 120 },
+                    { caption: 'Total Pcs', dataField: 'Lot_Pcs', dataType: 'number', minWidth: 85, alignment: 'center' },
+                    { caption: 'Total Carat', dataField: 'Lot_Carat', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center' },
                     { caption: 'Lot Code', dataField: 'LotCode', minWidth: 120 },
                     {
                         caption: 'LotNo',
@@ -685,6 +767,7 @@
                             else
                                 return (data.LotCode || '') + '-' + (data.DepartmentShortName || '');
                         },
+
                         cellTemplate: function (container, options) {
                             var data = options.data;
                             var text = (data.DepartmentShortName == null)
@@ -697,6 +780,30 @@
                         }
                     },
                     {
+                        caption: 'Branch',
+                        dataField: 'BranchName',
+                        minWidth: 110,
+                        cellTemplate: function (container, options) {
+                            $("<strong>")
+                                .text(options.data.BranchName || '-')
+                                .appendTo(container);
+                        }
+                    },
+                    { caption: 'Department', dataField: 'DepartmentShortName', minWidth: 100 },
+                    { caption: 'Head Manager', dataField: 'HeadManagerName', minWidth: 120 },
+
+                    {
+                        caption: 'Total Loss', dataField: 'TotalLoss', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center',
+                        cellTemplate: function (container, options) {
+                            var loss = parseFloat(options.data.TotalLoss) || 0;
+                            $("<span>").text(loss.toFixed(3)).css({ "color": loss > 0 ? "#b91c1c" : "#94a3b8", "font-weight": loss > 0 ? 700 : 400 }).appendTo(container);
+                        }
+                    },
+                    { caption: 'Inward Grade', dataField: 'InwardGrade', minWidth: 100 },
+                    { caption: 'Org Pcs', dataField: 'OrgLot_Pcs', dataType: 'number', minWidth: 80, alignment: 'center' },
+                    { caption: 'Org Carat', dataField: 'OrgLot_Carat', dataType: 'number', format: '#0.000', minWidth: 95, alignment: 'center' },
+                   
+                    {
                         caption: 'Priority', dataField: 'LotPriority', minWidth: 90, alignment: 'center',
                         cellTemplate: function (container, options) {
                             var $span = $("<span>").text(options.data.LotPriority || '-');
@@ -706,7 +813,7 @@
                             $span.appendTo(container);
                         }
                     },
-                    { caption: 'Created Date', dataField: 'CreatedDate', minWidth: 110, alignment: 'center' },
+                    { caption: 'Created Date', dataField: 'CreatedDate', dataType: 'date', format: 'dd MMM yyyy', minWidth: 110, alignment: 'center' },
                     { caption: 'Factory Code', dataField: 'FactoryCode', minWidth: 100 },
                     { caption: 'Color Type', dataField: 'ColorType', minWidth: 100 },
                     { caption: 'Size Code', dataField: 'SizeCodeType', minWidth: 100 },
@@ -714,7 +821,7 @@
                     { caption: 'Remarks', dataField: 'Remarks', minWidth: 140 },
                     {
                         caption: 'Action',
-                        width: 200,
+                        width: 230,
                         alignment: 'center',
                         fixed: true,
                         fixedPosition: 'right',
@@ -738,6 +845,16 @@
                                 .on("click", function (e) {
                                     e.stopPropagation();
                                     $scope.$apply(function () { $scope.OpenBranchSplit(options.data); });
+                                })
+                                .appendTo(group);
+
+                            $("<button>")
+                                .addClass("grid-action-btn-edit")
+                                .attr("title", "Assign Department (works even after the Branch has received this Lot)")
+                                .html('<i class="fa fa-sitemap"></i>')
+                                .on("click", function (e) {
+                                    e.stopPropagation();
+                                    $scope.$apply(function () { $scope.OpenAssignDepartment(options.data); });
                                 })
                                 .appendTo(group);
 
@@ -783,7 +900,31 @@
                             group.appendTo(container);
                         }
                     }
-                ]
+                ],
+                summary: {
+                    totalItems: [
+                        {
+                            column: 'LotID',
+                            summaryType: 'count',
+                            displayFormat: '{0}',
+                            alignByColumn: true
+                        },
+                        {
+                            column: 'Lot_Pcs',
+                            summaryType: 'sum',
+                            valueFormat: '#,##0',
+                            displayFormat: '{0}',
+                            alignByColumn: true
+                        },
+                        {
+                            column: 'Lot_Carat',
+                            summaryType: 'sum',
+                            valueFormat: '#,##0.000',
+                            displayFormat: '{0}',
+                            alignByColumn: true
+                        }
+                    ]
+                }
             });
         };
 

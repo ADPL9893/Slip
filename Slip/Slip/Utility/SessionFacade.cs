@@ -18,6 +18,7 @@ namespace Slip.Utility
         private const string _QRGenerateNew = "QRGenerateNew";
         private const string _RoughDistributionQRNew = "RoughDistributionQRNew";
         private const string _LotQRNew = "LotQRNew";
+        private const string _RoughInwardQRNew = "RoughInwardQRNew";
         #endregion
 
         #region::Public Property::
@@ -153,6 +154,18 @@ namespace Slip.Utility
             set
             {
                 HttpContext.Current.Session[_LotQRNew] = value;
+            }
+        }
+
+        public static List<RoughInwardQRList> RoughInwardQRList
+        {
+            get
+            {
+                return (List<RoughInwardQRList>)HttpContext.Current.Session[_RoughInwardQRNew];
+            }
+            set
+            {
+                HttpContext.Current.Session[_RoughInwardQRNew] = value;
             }
         }
     }

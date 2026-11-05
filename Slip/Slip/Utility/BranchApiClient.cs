@@ -294,8 +294,12 @@ namespace Slip.Utility
         // tracked. No-ops entirely once the Lot's local IsReceived is set -
         // callers should already be blocking the edit itself in that case
         // (see MasterController's IsReceived gate), this is a second line of
-        // defense.
-        public static void SyncLotToAllBranches(int lotID, int createdBy = 1)
+        // defense. Pass allowAfterReceived=true for the one deliberate
+        // exception to that rule - MasterController.AssignLotDepartment,
+        // which is intentionally allowed to change a received Lot's
+        // Department/Head Manager and needs that change to actually reach
+        // the branch, not get silently swallowed here.
+        public static void SyncLotToAllBranches(int lotID, int createdBy = 1, bool allowAfterReceived = false)
         {
             try
             {
@@ -306,7 +310,7 @@ namespace Slip.Utility
                 }
 
                 DataRow lotRow = lotDs.Tables[0].Rows[0];
-                if (lotRow["IsReceived"] != DBNull.Value && Convert.ToBoolean(lotRow["IsReceived"]))
+                if (!allowAfterReceived && lotRow["IsReceived"] != DBNull.Value && Convert.ToBoolean(lotRow["IsReceived"]))
                 {
                     return;
                 }
@@ -341,7 +345,7 @@ namespace Slip.Utility
                         // POST /api/Rough failed, etc.), skip this branch's
                         // Lot push entirely for now; the next SyncLotToAll-
                         // Branches call (next save/edit) retries both.
-                        if (!EnsureRoughSyncedToBranch(inwardDetailID, branchID, createdBy))
+                            if (!EnsureRoughSyncedToBranch(inwardDetailID, branchID, createdBy))
                         {
                             ErrorLogger.ErrorLog("Lot branch sync skipped for LotID=" + lotID +
                                 ", BranchID=" + branchID + ": parent Rough (InwardDetailID=" + inwardDetailID +
@@ -456,7 +460,10 @@ namespace Slip.Utility
                 RCodeSerial = row["RCodeSerial"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["RCodeSerial"]),
                 HoLotId = row["LotID"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["LotID"]),
                 LotPriority = ToStr(row["LotPriority"]),
-                LotPurpose = ToStr(row["LotPurpose"])
+                LotPurpose = ToStr(row["LotPurpose"]),
+                PlanningDate = row["PlanningDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(row["PlanningDate"]),
+                IsClvRunning = row["IsCLVRunning"] == DBNull.Value ? (bool?)null : Convert.ToBoolean(row["IsCLVRunning"]),
+                ClvRunningEntryBy = row["CLVRunningEntryBy"] == DBNull.Value ? (int?)null : Convert.ToInt32(row["CLVRunningEntryBy"])
             };
         }
 

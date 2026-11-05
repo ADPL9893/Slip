@@ -706,6 +706,22 @@
             });
         };
 
+        $scope.ShowQRCode = function (item) {
+            if (!item || !item.InwardDetailID) return;
+            if (typeof show_loader === 'function') show_loader();
+            $http.post('@Url.Action("GenerateRoughInwardQRs", "Master")', { inwardDetailIDs: [item.InwardDetailID] }).then(function (res) {
+                if (typeof hide_loader === 'function') hide_loader();
+                if (res.data && res.data.success) {
+                    window.open('@Url.Action("RoughInwardQRPrint", "Master")', '_blank');
+                } else {
+                    Noty("error", (res.data && res.data.message) || "Failed to generate QR code.");
+                }
+            }, function () {
+                if (typeof hide_loader === 'function') hide_loader();
+                Noty("error", "Error connecting to server.");
+            });
+        };
+
         $scope.PromptDelete = function (item) {
             if (!item) return;
             var inwardId = item.InwardID || item.inwardID || (typeof item === 'number' ? item : 0);
@@ -1265,7 +1281,7 @@
                         caption: 'Remarks', dataField: 'Remarks', minWidth: 130
                     },
                     {
-                        caption: 'Action', width: 90, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
+                        caption: 'Action', width: 125, alignment: 'center', fixed: true, fixedPosition: 'right', allowReordering: false,
                         visible: ($scope.CanEdit || $scope.CanDelete),
                         cellTemplate: function (container, options) {
                             var div = $("<div>").addClass("grid-btn-group");
@@ -1288,6 +1304,10 @@
                                     .on("click", function () { $scope.$apply(function () { $scope.EditItem(options.data); }); })
                                     .appendTo(div);
                             }
+
+                            $("<button>").addClass("grid-btn-edit").attr("title", "Print QR Sticker").html('<i class="fa fa-qrcode"></i>')
+                                .on("click", function (e) { e.stopPropagation(); $scope.$apply(function () { $scope.ShowQRCode(options.data); }); })
+                                .appendTo(div);
 
                             if (isLocked) {
                                 $("<span>")

@@ -834,6 +834,48 @@ namespace Slip.Controllers
             }
         }
 
+        // Dedicated path to set a Lot's Department/Head Manager only.
+        // IsLotReceived is deliberately NOT checked here (see
+        // USP_MST_Lot_AssignDepartment): once a Branch marks a Lot received,
+        // Lot_Save/AssignLotBranch refuse any further edit, but HO still
+        // needs to assign/correct that Lot's Department afterwards. Nothing
+        // else on the Lot is touched by this action.
+        [HttpPost]
+        public JsonResult AssignLotDepartment(int LotID, Guid DepartmentID, int? HeadManagerID = null)
+        {
+            try
+            {
+                int currentUserId = SessionFacade.UserSession != null ? SessionFacade.UserSession.UserID : 0;
+
+                List<Dictionary<string, object>> rows = DbHelper.ExecuteReaderAsList("USP_MST_Lot_AssignDepartment",
+                    new SqlParameter("@LotID", LotID),
+                    new SqlParameter("@DepartmentID", DepartmentID),
+                    new SqlParameter("@HeadManagerID", (object)HeadManagerID ?? DBNull.Value),
+                    new SqlParameter("@ModifiedBy", currentUserId));
+
+                var r = rows.FirstOrDefault();
+                bool isSuccess = r != null && r.ContainsKey("Success") && Convert.ToBoolean(r["Success"]);
+                string message = r != null && r.ContainsKey("Message") ? Convert.ToString(r["Message"]) : "ERROR";
+
+                if (isSuccess)
+                {
+                    // allowAfterReceived=true - this action exists
+                    // specifically to change Department/Head Manager on
+                    // already-received Lots, so the sync must not be
+                    // silently skipped by SyncLotToAllBranches' own
+                    // IsReceived no-op.
+                    BranchApiClient.SyncLotToAllBranches(LotID, currentUserId, allowAfterReceived: true);
+                }
+
+                return Json(new { success = isSuccess, message = message });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = "ERROR: " + (ex.InnerException != null ? ex.InnerException.Message : ex.Message) });
+            }
+        }
+
         [HttpPost]
         public JsonResult Lot_Delete(int LotID)
         {
@@ -4766,6 +4808,88 @@ namespace Slip.Controllers
                 }
 
                 SessionFacade.LotQRList = qrList;
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.ErrorLog(ex);
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        public ActionResult RoughInwardQRPrint()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public JsonResult GenerateRoughInwardQRs(List<int> inwardDetailIDs)
+        {
+            try
+            {
+                if (inwardDetailIDs == null || inwardDetailIDs.Count == 0)
+                    return Json(new { success = false, message = "No Rough Inward rows selected." });
+
+                string folder = Server.MapPath("~/Upload/RoughInwardQR/");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+
+                List<RoughInwardQRList> qrList = new List<RoughInwardQRList>();
+
+                foreach (var id in inwardDetailIDs.Distinct())
+                {
+                    var rows = DbHelper.ExecuteReaderAsList("USP_TRN_RoughInwardDetail_GetQRData",
+                        new SqlParameter("@InwardDetailID", id));
+
+                    if (rows == null || rows.Count == 0) continue;
+                    var row = rows[0];
+
+                    string Val(string key) => row.ContainsKey(key) && row[key] != null && row[key] != DBNull.Value ? row[key].ToString() : "";
+
+                    string Text =
+                        Val("LotNo") + "," +
+                        Val("JangadNo") + "," +
+                        Val("Carat") + "," +
+                        Val("Pcs");
+
+                    string label =
+                         Val("LotNo") + "\n" +
+                         Val("JangadNo") + "\n" +
+                        Val("Carat") + " (" + Val("Pcs") + " Pcs)";
+
+                    string qrFileName = "RID" + id + ".png";
+                    string QRPath = Path.Combine(folder, qrFileName);
+
+                    if (System.IO.File.Exists(QRPath))
+                    {
+                        System.IO.File.Delete(QRPath);
+                    }
+
+                    BarcodeWriter writer = new BarcodeWriter
+                    {
+                        Format = BarcodeFormat.QR_CODE,
+                        Options = new EncodingOptions
+                        {
+                            Width = 100,
+                            Height = 100,
+                            Margin = 0
+                        }
+                    };
+
+                    Bitmap qrCodeBitmap = writer.Write(Text);
+                    qrCodeBitmap.Save(QRPath, System.Drawing.Imaging.ImageFormat.Png);
+
+                    qrList.Add(new RoughInwardQRList
+                    {
+                        QRUrl = "/Upload/RoughInwardQR/" + qrFileName,
+                        LabelText = label
+                    });
+                }
+
+                SessionFacade.RoughInwardQRList = qrList;
 
                 return Json(new { success = true });
             }

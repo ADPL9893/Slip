@@ -86,6 +86,18 @@ namespace Slip.Models
         [JsonProperty("headManagerId")] public int? HeadManagerId { get; set; }
         [JsonProperty("isReceived")] public int? IsReceived { get; set; }
 
+        // Set the moment HO assigns this Lot's Department (see
+        // MasterController.AssignLotDepartment/USP_MST_Lot_AssignDepartment) -
+        // the branch's own copy needs these same stage fields. All 3 must be
+        // sent together: AnjaliLabTech.API's MST_Lot_Insert_Update_Delete
+        // MERGE overwrites IsCLVRunning/CLVRunningEntryBy unconditionally on
+        // every update (no ISNULL-merge, same as everything else in this
+        // payload) - sending PlanningDate alone would get it nulled back out
+        // by the very next unrelated sync of this Lot.
+        [JsonProperty("planningDate")] public DateTime? PlanningDate { get; set; }
+        [JsonProperty("isClvRunning")] public bool? IsClvRunning { get; set; }
+        [JsonProperty("clvRunningEntryBy")] public int? ClvRunningEntryBy { get; set; }
+
         [JsonProperty("inwardDetailId")] public int? InwardDetailId { get; set; }
         [JsonProperty("rCodeYear")] public int? RCodeYear { get; set; }
         [JsonProperty("rCodeSerial")] public int? RCodeSerial { get; set; }

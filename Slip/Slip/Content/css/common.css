@@ -2282,7 +2282,29 @@ header.main-header {
         .dx-datagrid-scrollable-simulated .dx-scrollbar-horizontal {
             border: none !important;
             background: transparent !important;
-            height: 6px !important;
+            height: 15px !important;
+        }
+
+        .dx-scrollable-scrollbar.dx-scrollbar-vertical,
+        .dx-datagrid-scrollable-simulated .dx-scrollbar-vertical {
+            border: none !important;
+            background: transparent !important;
+            width: 15px !important;
+        }
+
+        /* Keep the actual scroll thumb permanently thick instead of only expanding on hover/active */
+        .dx-scrollbar-horizontal .dx-scrollable-scroll,
+        .dx-scrollbar-horizontal.dx-scrollbar-hoverable.dx-state-hover .dx-scrollable-scroll,
+        .dx-scrollbar-horizontal.dx-scrollbar-hoverable.dx-scrollable-scrollbar-active .dx-scrollable-scroll {
+            height: 15px !important;
+            padding-bottom: 0 !important;
+        }
+
+        .dx-scrollbar-vertical .dx-scrollable-scroll,
+        .dx-scrollbar-vertical.dx-scrollbar-hoverable.dx-state-hover .dx-scrollable-scroll,
+        .dx-scrollbar-vertical.dx-scrollbar-hoverable.dx-scrollable-scrollbar-active .dx-scrollable-scroll {
+            width: 15px !important;
+            padding-inline-end: 0 !important;
         }
 
         /* DevExtreme Total Summary Footer - matches the header's navy so header/footer read as one theme */
